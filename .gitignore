@@ -5,10 +5,7 @@
 .agents/results/
 .agents/state/
 .agents/backup/
-docs/plans/
+reference/source-material/
 .agentic-workflow/runs/
 .migration-backup/
 .qwen/tmp/
-
-# oma docs generated artifacts
-docs/generated/

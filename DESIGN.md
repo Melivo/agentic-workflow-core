@@ -7,7 +7,7 @@
 
 ## 1. Zweck und Autorität
 
-Dieses Dokument konsolidiert die Entwürfe unter `docs/` zu einer einzigen Architektur. Es ist für die Paketimplementierung die Source of Truth. Frühere Entwürfe und Zwischenprotokolle bleiben als Herkunftsnachweis erhalten, sind bei Widersprüchen aber nachrangig.
+Dieses Dokument konsolidiert die Entwürfe unter `reference/source-material/design-drafts/` zu einer einzigen Architektur. Es ist für die Paketimplementierung die Source of Truth. Frühere Entwürfe und Zwischenprotokolle bleiben als Herkunftsnachweis erhalten, sind bei Widersprüchen aber nachrangig.
 
 In diesem Repository bezeichnet `DESIGN.md` das Systemdesign der Workflow-Werkbank. Die frühere Aussage, `DESIGN.md` sei ausschließlich für visuelles Design reserviert, gilt nur für Anwendungsprojekte mit einem visuellen Designsystem und wird für dieses Meta-Repository ausdrücklich nicht angewendet.
 
@@ -800,17 +800,17 @@ Das Design gilt als umgesetzt, wenn:
 
 Konsolidierte interne Quellen:
 
-- `docs/Brainstormvorhaben.md`
-- `docs/Planvorhaben.md`
-- `docs/Executevorhaben.md`
-- `docs/Informationsuebertragung-vorhaben.md`
-- `docs/Regelnvorhaben.md`
-- `docs/toolskills-vorhaben.md`
-- `docs/Uebernahmekandidaten-vorhaben.md`
-- `docs/Shared-Workflow-Kernel-vorhaben.md`
-- `docs/Projekt-Init-AGENTS-vorhaben.md`
-- `docs/merkzettel-workflow.md`
-- `docs/user2agent.md`
+- `reference/source-material/design-drafts/Brainstormvorhaben.md`
+- `reference/source-material/design-drafts/Planvorhaben.md`
+- `reference/source-material/design-drafts/Executevorhaben.md`
+- `reference/source-material/design-drafts/Informationsuebertragung-vorhaben.md`
+- `reference/source-material/design-drafts/Regelnvorhaben.md`
+- `reference/source-material/design-drafts/toolskills-vorhaben.md`
+- `reference/source-material/design-drafts/Uebernahmekandidaten-vorhaben.md`
+- `reference/source-material/design-drafts/Shared-Workflow-Kernel-vorhaben.md`
+- `reference/source-material/design-drafts/Projekt-Init-AGENTS-vorhaben.md`
+- `reference/source-material/design-drafts/merkzettel-workflow.md`
+- `reference/source-material/design-drafts/user2agent.md`
 - die drei Zwischenprotokolle vom 27. September 2026
 
 Aktuelle offizielle Produktquellen:

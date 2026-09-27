@@ -1,0 +1,5 @@
+# Intentional non-secret fixtures; each entry is an exact Gitleaks fingerprint.
+.agents/hooks/core/scm-guard.ts:generic-api-key:52
+.opencode/plugins/oma/scm-guard.ts:generic-api-key:52
+reference/source-material/evaluieren/maintain-repository/tests/test_audit_repository.py:github-pat:697
+reference/source-material/evaluieren/maintain-repository/tests/test_audit_repository.py:github-pat:1074
