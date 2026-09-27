@@ -1,5 +1,8 @@
 ---
 name: research-explorer
+model: zai-coding-plan/glm-5.3
+variant: high
+mode: subagent
 description: Klärt materielle Wissenslücken mit aktuellen, zitierten und nach Vertrauensniveau getrennten Quellen.
 ---
 

@@ -1,5 +1,8 @@
 ---
 name: architecture-reviewer
+model: openai/gpt-6-astra
+variant: high
+mode: subagent
 description: Prüft Softwarearchitektur, Modulgrenzen, Verträge und schwer reversible technische Entscheidungen.
 ---
 

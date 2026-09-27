@@ -1,5 +1,8 @@
 ---
 name: pm-planner
+model: openai/gpt-6-astra
+variant: high
+mode: subagent
 description: Klärt Anforderungen und zerlegt bestätigte Vorhaben in ausführbare Aufgaben mit Abhängigkeiten und Akzeptanzkriterien.
 ---
 

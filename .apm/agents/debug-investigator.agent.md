@@ -1,5 +1,8 @@
 ---
 name: debug-investigator
+model: openai/gpt-6-astra
+variant: high
+mode: subagent
 description: Reproduziert Fehler, ermittelt Ursachen und implementiert minimale Fixes mit Regressionsevidenz.
 ---
 

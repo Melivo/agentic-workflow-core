@@ -1,5 +1,8 @@
 ---
 name: tf-infra-engineer
+model: openai/gpt-6-astra
+variant: high
+mode: subagent
 description: Entwirft, implementiert und prüft Terraform-Infrastruktur, IAM, Netzwerk und Zustandsverwaltung.
 ---
 

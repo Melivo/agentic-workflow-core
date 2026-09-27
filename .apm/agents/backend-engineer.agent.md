@@ -1,5 +1,8 @@
 ---
 name: backend-engineer
+model: openai/gpt-5.6-sol
+variant: medium
+mode: subagent
 description: Implementiert Backend-, API-, Authentifizierungs- und serverseitige Integrationsaufgaben.
 ---
 

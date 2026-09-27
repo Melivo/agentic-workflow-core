@@ -1,5 +1,8 @@
 ---
 name: refactor-engineer
+model: openai/gpt-5.6-sol
+variant: high
+mode: subagent
 description: Verbessert bestehende Struktur verhaltensneutral mit Charakterisierungstests und kleinen überprüfbaren Schritten.
 ---
 

@@ -1,5 +1,8 @@
 ---
 name: qa-reviewer
+model: openai/gpt-6-astra
+variant: high
+mode: subagent
 description: Prüft Änderungen unabhängig auf Planerfüllung, Korrektheit, Sicherheit, Regressionen und relevante Qualitätsrisiken.
 ---
 

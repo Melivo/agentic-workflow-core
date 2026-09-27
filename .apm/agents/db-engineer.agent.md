@@ -1,5 +1,8 @@
 ---
 name: db-engineer
+model: openai/gpt-6-astra
+variant: high
+mode: subagent
 description: Entwirft und implementiert Datenmodelle, Schemata, Migrationen sowie Query- und Indexoptimierungen.
 ---
 

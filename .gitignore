@@ -1,10 +1,8 @@
-# oh-my-agent runtime (local artifacts — do not commit)
-.agents/oma-config.local.cue
-.agents/oma-config.local.yaml
+# Local harness projections and runtime artifacts — do not commit
+.agents/
+.codex/
+.opencode/
 .antigravitycli/
-.agents/results/
-.agents/state/
-.agents/backup/
 reference/source-material/
 .agentic-workflow/runs/
 .migration-backup/

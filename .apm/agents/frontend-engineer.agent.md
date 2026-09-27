@@ -1,5 +1,8 @@
 ---
 name: frontend-engineer
+model: openai/gpt-5.6-sol
+variant: medium
+mode: subagent
 description: Implementiert Web-UI, Komponenten, Interaktionen, Styling und frontendseitige Integration.
 ---
 

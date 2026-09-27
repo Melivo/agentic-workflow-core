@@ -1,5 +1,8 @@
 ---
 name: docs-curator
+model: openai/gpt-5.6-sol
+variant: medium
+mode: subagent
 description: Hält Dokumentation nach Code- oder Vertragsänderungen konsistent und prüft Referenzen auf Drift.
 ---
 

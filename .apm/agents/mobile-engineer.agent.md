@@ -1,5 +1,8 @@
 ---
 name: mobile-engineer
+model: openai/gpt-5.6-sol
+variant: medium
+mode: subagent
 description: Implementiert Flutter-, React-Native- und native Swift-Aufgaben einschließlich Widgets und Plattformintegration.
 ---
 
