@@ -1,0 +1,75 @@
+catalog_version: 1
+max_automatic_review_repair_rounds: 2
+
+workflows:
+  - id: core-brainstorm
+    predecessors: []
+    successors: [core-plan]
+    input_schemas: [text]
+    output_schemas: [text]
+    mutation_class: no-product-write
+    fresh_context_on_entry: false
+  - id: core-plan
+    predecessors: [core-brainstorm, core-review]
+    successors: [core-execute]
+    input_schemas: [text]
+    output_schemas: [plan/v1]
+    mutation_class: plan-artifact-write
+    fresh_context_on_entry: false
+  - id: core-execute
+    predecessors: [core-plan, core-review]
+    successors: [core-review]
+    input_schemas: [plan/v1, review/v1]
+    output_schemas: [task-result/v1]
+    mutation_class: repository-and-run-artifact-write
+    fresh_context_on_entry: true
+    max_automatic_review_repair_rounds: 2
+  - id: core-review
+    predecessors: [core-execute]
+    successors: [core-execute, core-plan, completed]
+    input_schemas: [plan/v1, task-result/v1]
+    output_schemas: [review/v1]
+    mutation_class: review-artifact-write
+    fresh_context_on_entry: true
+
+transitions:
+  - from: core-brainstorm
+    outcome: completed
+    to: core-plan
+  - from: core-plan
+    outcome: confirmed
+    to: core-execute
+  - from: core-execute
+    outcome: review_ready
+    to: core-review
+  - from: core-review
+    outcome: pass
+    to: completed
+  - from: core-review
+    outcome: changes_requested
+    to: core-execute
+  - from: core-review
+    outcome: material_scope_change
+    to: core-plan
+
+known_agent_ids:
+  - architecture-reviewer
+  - backend-engineer
+  - db-engineer
+  - debug-investigator
+  - docs-curator
+  - frontend-engineer
+  - mobile-engineer
+  - pm-planner
+  - qa-reviewer
+  - refactor-engineer
+  - research-explorer
+  - tf-infra-engineer
+
+known_tool_ids:
+  - gortex
+  - context7
+  - youtube-transcript
+  - serena
+  - native
+  - honcho

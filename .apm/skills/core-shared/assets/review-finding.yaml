@@ -1,0 +1,18 @@
+schema: review/v1
+run_id: "<run-id>"
+verdict: changes_requested # pass | changes_requested | blocked
+findings:
+  - id: RV01
+    severity: high # blocking | high | medium | low
+    task_id: T01 # weglassen, wenn keine eindeutige Taskzuordnung möglich ist
+    owner: backend-engineer
+    location: src/example.ts:42
+    criterion: AC01
+    evidence: "Reproduzierbare Beobachtung mit Ausführungsschritten oder Artefaktpfad"
+    impact: "Konkrete Auswirkung auf Verhalten, Sicherheit oder Akzeptanz"
+    expected_resolution: "Erforderliche Korrekturrichtung ohne Implementierung durch core-review"
+    verification: "Erneute beobachtbare Prüfung auf dem korrigierten Stand"
+
+# Für verdict: pass gilt findings: [].
+# Materielle Änderungen an Ziel, Scope, Architektur oder Akzeptanz werden an
+# core-plan zurückgegeben; review/v1 erhält dafür kein konkurrierendes Statusfeld.
