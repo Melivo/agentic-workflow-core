@@ -2,7 +2,7 @@ name: agentic-workflow-core
 version: "0.1.0"
 description: Leaner Workflow-Kern für planbasierte Multi-Agenten-Arbeit mit OpenCode und Codex.
 author: Melivo
-targets: [opencode, codex]
+targets: [agent-skills, opencode, codex]
 includes: auto
 dependencies:
   apm:

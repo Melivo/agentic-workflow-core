@@ -5,7 +5,7 @@ Agentic Workflow Core ist ein portables Microsoft-APM-Paket für OpenCode und Co
 ## Voraussetzungen
 
 - Microsoft Agent Package Manager (APM)
-- ein unterstütztes Zielharness (OpenCode oder Codex)
+- ein unterstütztes Zielharness (OpenCode oder Codex) oder gemeinsame Agent-Skills
 - Gortex als primäre Repository-Code-Intelligence
 - projektbezogen konfiguriertes Serena nur als erlaubter Fallback
 
@@ -13,7 +13,16 @@ Das Manifest deklariert ausschließlich die externe APM-Abhängigkeit `Melivo/ap
 
 ## Installation
 
-Projektbezogen für OpenCode und Codex:
+Global ausschließlich im gemeinsamen Skill-Verzeichnis `~/.agents/skills/`:
+
+```bash
+apm install Melivo/agentic-workflow-core --global --target agent-skills
+apm update Melivo/agentic-workflow-core --global --target agent-skills
+```
+
+Dieser Modus installiert Skills, keine harnessspezifischen Agentendefinitionen oder MCP-Konfiguration. OpenCode kann die gemeinsamen Skills nutzen; zusätzliche Kopien unter `~/.config/opencode/skills/` sind nicht erforderlich. Setze im globalen Verbrauchsmanifest `targets: [agent-skills]`, damit spätere Updates bei diesem Ziel bleiben. MCPs und native Fachagenten bleiben getrennt konfigurierte Voraussetzungen.
+
+Optional projektbezogen für ausdrücklich ausgewählte OpenCode-/Codex-Ziele:
 
 ```bash
 apm install Melivo/agentic-workflow-core --target opencode,codex
