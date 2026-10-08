@@ -16,9 +16,11 @@ Das Manifest deklariert ausschließlich die externe APM-Abhängigkeit `Melivo/ap
 Global ausschließlich im gemeinsamen Skill-Verzeichnis `~/.agents/skills/`:
 
 ```bash
-apm install Melivo/agentic-workflow-core --global --target agent-skills
-apm update Melivo/agentic-workflow-core --global --target agent-skills
+apm install Melivo/agentic-workflow-core --global --target agent-skills --only apm
+apm install Melivo/agentic-workflow-core --global --target agent-skills --only apm --update
 ```
+
+`--only apm` trennt die Skill-Installation von MCP-Konfiguration; `agent-skills` unterstützt selbst keine MCPs. Unter APM 0.31 hat `apm update` keinen entsprechenden Filter, daher verwendet das Update-Beispiel den unterstützten Installationsschalter `--update`.
 
 Dieser Modus installiert Skills, keine harnessspezifischen Agentendefinitionen oder MCP-Konfiguration. OpenCode kann die gemeinsamen Skills nutzen; zusätzliche Kopien unter `~/.config/opencode/skills/` sind nicht erforderlich. Setze im globalen Verbrauchsmanifest `targets: [agent-skills]`, damit spätere Updates bei diesem Ziel bleiben. MCPs und native Fachagenten bleiben getrennt konfigurierte Voraussetzungen.
 
