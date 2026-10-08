@@ -7,6 +7,14 @@ description: Prüft die integrierte Gesamtänderung unabhängig in frischem Kont
 
 `core-review` ist der unabhängige, read-only Prüfworkflow nach `core-execute`. Die QA-Methode gehört intern dem `qa-reviewer`; sie bildet keinen zweiten öffentlichen QA-Lebenszyklus. `core-review` implementiert **keine Fixes**, erweitert keinen Scope, steuert keine Reparaturschleife und startet keine Subagenten.
 
+## Situative Designmethoden
+
+Nutze [S00 – SWE-Basis und Auswahl](../core-architecture/references/design-baseline.md) für tatsächlich betroffene Struktur- und Vertragsfragen im bestätigten Prüfumfang. Detailmethoden werden nur bei konkretem Signal geladen, nicht als Vollscan. Die Referenzen aktivieren keinen Architekturworkflow und erlauben keine ungeplanten Refactorings.
+
+Prüfe nur belegte Signale im Gesamtdiff: Boundary-/Abstraktionsfolgen mit [M01–M04](../core-architecture/references/boundaries-and-abstractions.md), Aufrufer-/Fehlerrisiken mit [M05–M06](../core-architecture/references/interface-and-errors.md), Designentwicklung und Vertragsklarheit mit [M07–M09](../core-architecture/references/evolution-and-clarity.md). Fehlende Alternativen prüfe mit [M10](../core-architecture/references/alternatives.md) nur bei materiellen Entscheidungen. Gemeinsame Ursachen ergeben einen Befund; Review bleibt read-only.
+
+Wenn Tools benötigt werden, prüfe relevante aktuell verfügbare MCP-Fähigkeiten gemäß [Toolrouting](../core-shared/references/tool-routing.md); Verfügbarkeit erweitert weder Scope noch Autorisierung.
+
 ## Aktivierung und Eingaben
 
 Aktiviere den Skill nur für einen konkreten Run, dessen integrierter Stand durch `core-execute` zur Prüfung übergeben wurde. Beginne in einem frischen Kontext und lade ausschließlich:

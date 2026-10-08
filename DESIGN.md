@@ -837,3 +837,15 @@ review urteilt unabhängig
 Gortex liefert die primäre strukturelle Sicht auf den Code. Context7 liefert aktuelle offizielle Technologiedokumentation. YouTube Transcript erschließt gezielt bekannte Videoquellen. Serena ergänzt projektbezogene Recherche und dient als konfigurierter Code-Intelligence-Fallback. Fachagenten bearbeiten eng begrenzte Rollen. Honcho erinnert, entscheidet aber nicht.
 
 Diese Trennung hält das System lean, clean, nachvollziehbar und nach einem Kontextwechsel reproduzierbar.
+
+## Interne Designmethoden und capability-basiertes MCP-Routing
+
+Die kanonische Fachbasis liegt in [core-architecture/references/design-baseline.md](.apm/skills/core-architecture/references/design-baseline.md), die Vertiefungen in den dort direkt ausgewählten paketinternen Referenzen. Die SWE-Grundsätze gelten für tatsächlich betroffene Coding-Bereiche und die Abschlussprüfung; Clairvoyance-Diagnosen werden ausschließlich durch belegte Struktur- oder Vertragssignale ausgelöst. Ein Referenzladen aktiviert keinen Architekturworkflow. Agentendefinitionen bleiben kurze Eigentümer-Skill-Verweise; core-shared enthält keine Designfachmethodik.
+
+Boundary-/Abstraktionsdiagnose, Schnittstellen-/Fehlerprüfung, Designentwicklung/Vertragsklarheit und Alternativenvergleich teilen kanonische Methoden, keine kopierten Komplettworkflows. Warnzeichen werden erst mit Quelle, Ursache und Wirkung zum Finding. Legitime Adapter, öffentliche Datenverträge und notwendige fachliche Kopplung bleiben möglich. Fehlende Evidenz bleibt eine Lücke; neue Refactorings benötigen den bestätigten Task und sein Safety Net.
+
+[Provenienz und vollständiges Quellenmapping](.apm/skills/core-architecture/PROVENANCE.md) sowie [MIT-Hinweise](.apm/skills/core-architecture/THIRD_PARTY_NOTICES.md) sichern die Clairvoyance-Adaptionen. Die Umsetzung erzeugt keine externen Skill-Laufzeitabhängigkeiten und übernimmt den privaten UNLICENSED-SWE-Skill nicht.
+
+[Toolrouting](.apm/skills/core-shared/references/tool-routing.md) bestimmt benötigte Operationen aus dem Task und prüft relevante aktuelle Fähigkeiten über Laufzeitdeklarationen und gezielte Discovery. Weitere passende Provider dürfen innerhalb bestehender Prioritäts-, Projekt-, Freshness- und Autorisierungsgrenzen genutzt werden. Keine pauschale MCP-Inventarisierung, kein automatisches Provisionieren und kein blinder Retry möglicherweise ausgeführter Mutationen. Erlaubte Fallbacks und fehlende Pflichtfähigkeiten werden sichtbar berichtet.
+
+Skill-Creator und Context-Debloater sind lokale Authoring-Werkzeuge, keine neuen Paketabhängigkeiten. Statische Struktur-/Routingprüfungen belegen kein beobachtetes Laufzeitverhalten und keine Token-, Kosten- oder Latenzersparnis.

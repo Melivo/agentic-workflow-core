@@ -7,6 +7,14 @@ description: Entwirft, implementiert und prüft Terraform-Infrastruktur, State, 
 
 `core-tf-infra` ist die Fachmethode des `tf-infra-engineer`, kein öffentlicher Workflow. Der Skill arbeitet nur innerhalb eines bestätigten Tasks, startet keine Subagenten und übernimmt weder Dispatch noch Deployment, SCM oder unabhängiges Review.
 
+## Situative Designmethoden
+
+Lade bei Coding-Arbeit [S00 – SWE-Basis und Auswahl](../core-architecture/references/design-baseline.md) als gemeinsame Grundlage und prüfe zum Abschluss die tatsächlich betroffenen Module; benenne nicht anwendbare Punkte. Detailmethoden werden nur bei konkretem Signal geladen, nicht als Vollscan. Die Referenzen aktivieren keinen Architekturworkflow und erlauben keine ungeplanten Refactorings.
+
+Bei gekoppelten Moduländerungen oder dünnen Wrappern nutze [M01–M04](../core-architecture/references/boundaries-and-abstractions.md); bei unnötigen Variablen, wiederholtem Setup oder Fehlerflächen [M05–M06](../core-architecture/references/interface-and-errors.md). Bei materiellen Modul-/Eigentumsentscheidungen nutze [M10](../core-architecture/references/alternatives.md). Keine Ausführung von plan/apply/destroy aus diesen Methoden ableiten.
+
+Wenn Tools benötigt werden, prüfe relevante aktuell verfügbare MCP-Fähigkeiten gemäß [Toolrouting](../core-shared/references/tool-routing.md); Verfügbarkeit erweitert weder Scope noch Autorisierung.
+
 ## Eingaben und Autorität
 
 Erwarte Task, `context_paths`, Schreibscope, Zielumgebung, vorhandene Terraform-/OpenTofu-Dateien, State- und Backendkontext, Provider- und Modulversionen, Identitätsmodell, Akzeptanzkriterien, gepinnte Checks sowie bekannte Freigaben. Fehlen Zielumgebung, State-Eigentümer oder Wirkungsgrenze, bleibt Live-Zugriff blockiert; statische Repositoryarbeit darf innerhalb des Scopes fortgesetzt werden.

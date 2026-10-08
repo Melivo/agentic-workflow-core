@@ -7,6 +7,14 @@ description: Auditiert Repositoryhygiene, Wartbarkeit und Public-Readiness evide
 
 `core-repo-audit` untersucht ein konkret benanntes Repository, ohne seinen Zustand zu verändern. Der Standard und jeder unklare Auftrag sind **read-only**. Der Skill verändert keine Dateien, Dateimodi, den Index, Refs, Branches, Worktrees, Hooks, Konfiguration, Abhängigkeiten oder Remotezustände und startet keine Subagenten.
 
+## Situative Designmethoden
+
+Nutze [S00 – SWE-Basis und Auswahl](../core-architecture/references/design-baseline.md) für tatsächlich betroffene Struktur- und Vertragsfragen im bestätigten Prüfumfang. Detailmethoden werden nur bei konkretem Signal geladen, nicht als Vollscan. Die Referenzen aktivieren keinen Architekturworkflow und erlauben keine ungeplanten Refactorings.
+
+Nur bei bestätigtem strukturellem Auditumfang oder konkretem Wartbarkeitssignal nutze [M01–M04](../core-architecture/references/boundaries-and-abstractions.md), [M05–M06](../core-architecture/references/interface-and-errors.md) oder [M07–M09](../core-architecture/references/evolution-and-clarity.md). Repositoryhygiene allein löst keine vollständige Designanalyse aus; Scope und Read-only-Vertrag bleiben erhalten.
+
+Wenn Tools benötigt werden, prüfe relevante aktuell verfügbare MCP-Fähigkeiten gemäß [Toolrouting](../core-shared/references/tool-routing.md); Verfügbarkeit erweitert weder Scope noch Autorisierung.
+
 ## Eingaben und verbindliche Verträge
 
 Benötigt werden die absolute Repositorywurzel, der Auditumfang, ein optionales Ziel wie Wartung oder Public-Readiness und bekannte Ausschlüsse. Lade:

@@ -7,6 +7,14 @@ description: Fachmethode für unklare Ursachen, Regressionen und intermittierend
 
 `core-debug` ist eine Fachmethode, kein öffentlicher Workflow. Sie wird innerhalb von `core-execute` einem `debug-investigator` zugewiesen und besitzt weder Dispatch, Scheduling, Integration noch Reviewsteuerung. Nur `core-execute` darf weitere Fachagenten beauftragen.
 
+## Situative Designmethoden
+
+Lade bei Coding-Arbeit [S00 – SWE-Basis und Auswahl](../core-architecture/references/design-baseline.md) als gemeinsame Grundlage und prüfe zum Abschluss die tatsächlich betroffenen Module; benenne nicht anwendbare Punkte. Detailmethoden werden nur bei konkretem Signal geladen, nicht als Vollscan. Die Referenzen aktivieren keinen Architekturworkflow und erlauben keine ungeplanten Refactorings.
+
+Nur wenn die Diagnose versteckte Änderungsabhängigkeiten oder unklare Wissensgrenzen belegt, nutze [M01–M04](../core-architecture/references/boundaries-and-abstractions.md). Bei ignorierten Fehlern oder unklarer Recovery nutze [M05–M06](../core-architecture/references/interface-and-errors.md). Regressionsevidenz und minimaler Fix bleiben vorrangig; kein Refactoring als Nebenwirkung.
+
+Wenn Tools benötigt werden, prüfe relevante aktuell verfügbare MCP-Fähigkeiten gemäß [Toolrouting](../core-shared/references/tool-routing.md); Verfügbarkeit erweitert weder Scope noch Autorisierung.
+
 ## Aktivierung und Grenzen
 
 Verwende die Methode bei:

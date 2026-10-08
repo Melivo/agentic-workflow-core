@@ -7,6 +7,14 @@ description: Implementiert Flutter-, React-Native- und native Swift-iOS-Aufgaben
 
 `core-mobile` ist die Fachmethode des `mobile-engineer`, kein öffentlicher Workflow. Der Skill arbeitet ausschließlich im bestätigten Taskscope, startet keine Subagenten und lädt nur die zum belegten Zielstack passende Plattformreferenz.
 
+## Situative Designmethoden
+
+Lade bei Coding-Arbeit [S00 – SWE-Basis und Auswahl](../core-architecture/references/design-baseline.md) als gemeinsame Grundlage und prüfe zum Abschluss die tatsächlich betroffenen Module; benenne nicht anwendbare Punkte. Detailmethoden werden nur bei konkretem Signal geladen, nicht als Vollscan. Die Referenzen aktivieren keinen Architekturworkflow und erlauben keine ungeplanten Refactorings.
+
+Bei verteilter Lifecycle-/Zustandsverantwortung oder dünnen Plattformwrappern nutze [M01–M04](../core-architecture/references/boundaries-and-abstractions.md); bei wiederholtem Setup oder unklarer Fehlerbehandlung [M05–M06](../core-architecture/references/interface-and-errors.md). Bei neuen Sonderfällen und verschleierten Verträgen nutze [M07–M09](../core-architecture/references/evolution-and-clarity.md).
+
+Wenn Tools benötigt werden, prüfe relevante aktuell verfügbare MCP-Fähigkeiten gemäß [Toolrouting](../core-shared/references/tool-routing.md); Verfügbarkeit erweitert weder Scope noch Autorisierung.
+
 ## Eingaben und Autorität
 
 Erwarte Task, `context_paths`, Schreibscope, Zielplattformen, Akzeptanzkriterien, gepinnte Checks sowie vorhandene Design-, API-, Persistenz- und Lokalisierungsverträge. Ermittle vor Änderungen Framework und Version, unterstützte Betriebssysteme, Projektarchitektur, State-, Navigation-, Networking-, Storage-, Test- und Generierungsstrategie.

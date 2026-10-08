@@ -55,6 +55,14 @@ Die Fachmethoden [`core-architecture`](.apm/skills/core-architecture/SKILL.md), 
 
 Das interne Bundle [`core-shared`](.apm/skills/core-shared/SKILL.md) bündelt die kanonischen [Workflow-](.apm/skills/core-shared/references/workflow-contract.md), [Artefakt-](.apm/skills/core-shared/references/artifact-contract.md), [Toolrouting-](.apm/skills/core-shared/references/tool-routing.md) und [Verifikationsverträge](.apm/skills/core-shared/references/verification.md). Diese Verweise zeigen ausschließlich auf versionierte Paketartefakte unter `.apm/`.
 
+## Interne Designmethoden und aktuelle MCP-Fähigkeiten
+
+Die [SWE-Basis und situative Auswahl](.apm/skills/core-architecture/references/design-baseline.md) bündelt klare Verantwortlichkeiten, stabile Schnittstellen, Information Hiding, begründete Abhängigkeiten und Testbarkeit. Coding-Skills berücksichtigen diese Basis und prüfen zum Abschluss die betroffenen Module. Clairvoyance-Methoden sind intern konsolidiert und werden nur bei konkreten Signalen vertieft, nicht als obligatorischer Komplettscan. Ihr Laden startet keinen Architekturworkflow und erlaubt keine ungeplanten Refactorings.
+
+Die [Provenienz](.apm/skills/core-architecture/PROVENANCE.md) dokumentiert alle 16 Quellskills; der [MIT-Hinweis](.apm/skills/core-architecture/THIRD_PARTY_NOTICES.md) begleitet die Adaptionen. Separat installierte Clairvoyance- oder SWE-Skills sind nicht erforderlich. Der private UNLICENSED-SWE-Skill wurde nicht übernommen.
+
+Das [Toolrouting](.apm/skills/core-shared/references/tool-routing.md) nutzt geeignete aktuell verfügbare MCP-Fähigkeiten anhand konkreten Bedarfs und gezielter Discovery. Providerpriorität, Projektscope, Freshness, Autorisierung und erlaubte Fallbacks bleiben maßgeblich; Verfügbarkeit autorisiert keine Nebenwirkungen.
+
 ## Lizenz
 
 Dieses Projekt steht unter der [MIT-Lizenz](LICENSE).

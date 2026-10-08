@@ -9,6 +9,14 @@ Nutze diesen optionalen Workflow, wenn Ziel, Nutzerproblem, Geltungsbereich oder
 
 `core-brainstorm` plant und implementiert nicht. Ist das Vorhaben bereits ausreichend bestimmt, übergib den unveränderten Auftrag direkt an `core-plan`. Für die Ausführung eines bestätigten `plan/v1` ist ausschließlich `core-execute` zuständig; unabhängige Prüfung gehört zu `core-review`.
 
+## Situative Designmethoden
+
+Nutze [S00 – SWE-Basis und Auswahl](../core-architecture/references/design-baseline.md) für tatsächlich betroffene Struktur- und Vertragsfragen im bestätigten Prüfumfang. Detailmethoden werden nur bei konkretem Signal geladen, nicht als Vollscan. Die Referenzen aktivieren keinen Architekturworkflow und erlauben keine ungeplanten Refactorings.
+
+Nutze bei unklaren Strukturproblemen [M01–M04](../core-architecture/references/boundaries-and-abstractions.md) zur Eingrenzung. Bei einer materiellen technischen Richtungsentscheidung mit plausiblen Alternativen nutze [M10](../core-architecture/references/alternatives.md), einschließlich des begrenzten Pre-Mortems bei Bedarf. Keine Implementierung, eigene Agentensteuerung oder zusätzlichen Pflichtartefakte ableiten.
+
+Wenn Tools benötigt werden, prüfe relevante aktuell verfügbare MCP-Fähigkeiten gemäß [Toolrouting](../core-shared/references/tool-routing.md); Verfügbarkeit erweitert weder Scope noch Autorisierung.
+
 ## Eingaben und Ergebnis
 
 Erforderlich sind der aktuelle Auftrag, ausdrückliche Rahmenbedingungen und die für die offene Entscheidung relevante Repositoryevidenz. Ein vorhandener Plan-, Run- oder Reviewstatus ist keine Brainstorm-Source-of-Truth.

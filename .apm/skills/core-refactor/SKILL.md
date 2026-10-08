@@ -7,6 +7,14 @@ description: Fachmethode für verhaltensbewahrende Strukturverbesserungen mit Sa
 
 `core-refactor` ist eine Fachmethode für den `refactor-engineer`, kein öffentlicher Workflow. Ziel ist bessere Lesbarkeit und Änderbarkeit bei unverändertem beobachtbarem Verhalten. Der Agent erweitert den bestätigten Scope nicht und startet keine Subagenten.
 
+## Situative Designmethoden
+
+Lade bei Coding-Arbeit [S00 – SWE-Basis und Auswahl](../core-architecture/references/design-baseline.md) als gemeinsame Grundlage und prüfe zum Abschluss die tatsächlich betroffenen Module; benenne nicht anwendbare Punkte. Detailmethoden werden nur bei konkretem Signal geladen, nicht als Vollscan. Die Referenzen aktivieren keinen Architekturworkflow und erlauben keine ungeplanten Refactorings.
+
+Wähle bei unklarer Komplexität, gekoppelten Änderungen oder redundanten Schichten [M01–M04](../core-architecture/references/boundaries-and-abstractions.md); bei Interface-/Fehlerlast [M05–M06](../core-architecture/references/interface-and-errors.md); bei Sonderfällen, Wiederholung oder Verständlichkeitsproblemen [M07–M09](../core-architecture/references/evolution-and-clarity.md). Safety Net, getrennte Charakterisierung und unverändertes Verhalten haben Vorrang.
+
+Wenn Tools benötigt werden, prüfe relevante aktuell verfügbare MCP-Fähigkeiten gemäß [Toolrouting](../core-shared/references/tool-routing.md); Verfügbarkeit erweitert weder Scope noch Autorisierung.
+
 ## Unverhandelbare Trennung
 
 Ordne jede beabsichtigte Änderung vor der Mutation genau einer Arbeitsart zu:

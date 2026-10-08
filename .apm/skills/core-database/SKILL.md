@@ -7,6 +7,14 @@ description: Entwirft und implementiert Datenmodelle, Schemata, Migrationen, Tra
 
 `core-database` ist die Fachmethode des `db-engineer`, kein öffentlicher Workflow. Der Skill arbeitet innerhalb eines bestätigten Tasks, startet keine Subagenten und führt keine produktive oder destruktive Datenbankaktion ohne passende ausdrückliche Autorisierung aus.
 
+## Situative Designmethoden
+
+Lade bei Coding-Arbeit [S00 – SWE-Basis und Auswahl](../core-architecture/references/design-baseline.md) als gemeinsame Grundlage und prüfe zum Abschluss die tatsächlich betroffenen Module; benenne nicht anwendbare Punkte. Detailmethoden werden nur bei konkretem Signal geladen, nicht als Vollscan. Die Referenzen aktivieren keinen Architekturworkflow und erlauben keine ungeplanten Refactorings.
+
+Bei verteilter Format-/Schemaentscheidung oder unklaren Aggregategrenzen nutze [M01–M04](../core-architecture/references/boundaries-and-abstractions.md); bei Aufrufer-Sonderwissen oder Recoveryfragen [M05–M06](../core-architecture/references/interface-and-errors.md). Bewusst öffentliche Schemaverträge sind keine Leckage; Integrität und bestehende DB-Autorisierungsgrenzen bleiben verbindlich.
+
+Wenn Tools benötigt werden, prüfe relevante aktuell verfügbare MCP-Fähigkeiten gemäß [Toolrouting](../core-shared/references/tool-routing.md); Verfügbarkeit erweitert weder Scope noch Autorisierung.
+
 ## Eingaben und Autorität
 
 Erwarte Task, `context_paths`, Schreibscope, vorhandenes Schema und Migrationen, relevante Queries oder Zugriffspfade, Akzeptanzkriterien, gepinnte Checks sowie bekannte Betriebs- und Freigabegrenzen. Erfasse bei Modellarbeit außerdem Volumen, Wachstum, Latenz, Aufbewahrung, Konsistenz, RPO/RTO und kritische Geschäftsregeln, soweit sie entscheidungsrelevant sind.

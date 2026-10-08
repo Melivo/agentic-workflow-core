@@ -7,6 +7,14 @@ description: Fachmethode für proportionale Architekturentscheidungen zu Modulgr
 
 `core-architecture` ist eine Fachmethode für den `architecture-reviewer`, kein öffentlicher Workflow. Sie besitzt weder Produktplanung noch Dispatch, Scheduling oder Integration. Der Agent erweitert den bestätigten Scope nicht und startet keine Subagenten.
 
+## Situative Designmethoden
+
+Nutze [S00 – SWE-Basis und Auswahl](references/design-baseline.md) für tatsächlich betroffene Struktur- und Vertragsfragen im bestätigten Prüfumfang. Detailmethoden werden nur bei konkretem Signal geladen, nicht als Vollscan. Die Referenzen aktivieren keinen Architekturworkflow und erlauben keine ungeplanten Refactorings.
+
+Prüfe Wissenseigentum, versteckte Kopplung oder redundante Schichten mit [M01–M04](references/boundaries-and-abstractions.md); unnötige Aufruferentscheidungen oder Fehlerflächen mit [M05–M06](references/interface-and-errors.md). Bei materiellen Richtungsentscheidungen nutze [M10](references/alternatives.md).
+
+Wenn Tools benötigt werden, prüfe relevante aktuell verfügbare MCP-Fähigkeiten gemäß [Toolrouting](../core-shared/references/tool-routing.md); Verfügbarkeit erweitert weder Scope noch Autorisierung.
+
 ## Aktivierung und Grenzen
 
 Aktiviere die Methode nur, wenn eine technische Entscheidung mindestens eines dieser Merkmale hat:
@@ -44,12 +52,9 @@ Erzeuge keine ADR-Pflicht für triviale oder vollständig reversible Entscheidun
 
 ## Boundary- und Information-Hiding-Prüfung
 
-1. Benenne das Wissen, das sich unabhängig ändern kann: Regeln, Datenrepräsentation, Protokoll, Infrastrukturdetail oder Eigentümerschaft.
-2. Ziehe Boundaries um dieses Wissen statt entlang der zeitlichen Ausführungsreihenfolge.
-3. Prüfe **Information Hiding**: Die Schnittstelle offenbart Fähigkeiten und stabile Verträge, nicht Speicherform, Ablaufdetails oder fremde Konfiguration.
-4. Prüfe Abhängigkeitsrichtung, Änderungsverstärkung, zyklische Kopplung, gemeinsame Änderungsgründe und Verantwortungsüberschneidung.
-5. Bevorzuge tiefe Module mit kleiner stabiler Schnittstelle; lehne zusätzliche Schichten ab, wenn sie nur weiterleiten oder dieselbe Abstraktion wiederholen.
-6. Bewahre bestehende öffentliche Verträge oder beschreibe eine explizite Evolution. Eine gewünschte Verhaltensänderung ist keine verdeckte Architekturkorrektur.
+Nutze die kanonischen [M01–M04](references/boundaries-and-abstractions.md) anhand des belegten Signals: unabhängig veränderliches Wissen und dessen Owner, interne versus öffentliche Verträge, sichtbare und versteckte Kopplung sowie Interfacekosten und unterschiedliche Abstraktionsebenen. Wähle nur die benötigte Methode; Dateigröße und Delegation allein sind kein Defekt.
+
+Bewahre öffentliche Verträge oder beschreibe ihre explizite Evolution. Gewünschte Verhaltensänderungen sind keine verdeckten Architekturkorrekturen; materielle Folgen werden weiterhin an core-plan zurückgegeben.
 
 ## Workflow: Repositoryanalyse und Entscheidung
 
