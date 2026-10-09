@@ -1,6 +1,6 @@
 ---
 name: core-execute
-description: Führt einen ausdrücklich benannten, bestätigten plan/v1 aus, koordiniert Fachagenten, integriert Ergebnisse serialisiert und steuert höchstens zwei Review-Reparaturrunden. Verwenden für Implementierung, Ausführung oder Resume eines bestätigten Plans; nicht für Planung, unabhängiges Review oder SCM.
+description: Führt einen eindeutig identifizierten, bestätigten plan/v1 aus, koordiniert Fachagenten, integriert Ergebnisse serialisiert und steuert höchstens zwei Review-Reparaturrunden. Verwenden für Implementierung, Ausführung oder Resume eines bestätigten Plans; nicht für Planung, unabhängiges Review oder SCM.
 ---
 
 # Core Execute
@@ -9,11 +9,15 @@ description: Führt einen ausdrücklich benannten, bestätigten plan/v1 aus, koo
 
 ## Aktivierung und Eingaben
 
-Aktiviere diesen Skill nur, wenn der Benutzer einen **expliziten Pfad** zu genau einem bestätigten `plan/v1` nennt und dessen Ausführung oder Resume verlangt. Suche niemals nach dem vermeintlich neuesten Plan. Fehlt der Pfad oder ist `status: Confirmed` nicht validierbar, stoppe vor jeder Produktmutation und fordere das fehlende Eingabeartefakt beziehungsweise `core-plan` an.
+Aktiviere diesen Skill, wenn der Benutzer die Ausführung oder Wiederaufnahme genau eines eindeutig identifizierten, bestätigten `plan/v1` verlangt. Der Planpfad dient der Identifikation, nicht einer zusätzlichen Bestätigung.
+
+Verwende einen aktuell vom Benutzer genannten Pfad oder den im verfügbaren Kontext der laufenden Sitzung eindeutig zugeordneten aktiven Planpfad, auch wenn du ihn selbst erstellt hast. Bei bekanntem Run darf dessen frisch gelesenes `state.yaml` den `plan_path` liefern. „Fortsetzen“ oder „umsetzen“ genügt dann als Ausführungsauftrag; verlange weder die erneute Nennung des Pfads noch eine Bestätigungsformel. Entscheidend ist die belastbare Zuordnung, nicht das Alter der Sitzung. Suche niemals nach dem vermeintlich neuesten Plan und wähle nicht anhand von Dateidatum, Versionsnummer oder Provider-Memory.
+
+Fehlt diese Zuordnung, etwa nach Kontextverlust oder in einer neuen Sitzung ohne exakte Übergabe, oder kommen mehrere Pläne beziehungsweise Runs infrage, frage gezielt nach dem gemeinten Plan oder Run. Fehlt das identifizierte Artefakt oder ist `status: Confirmed` nicht validierbar, stoppe vor jeder Produktmutation und fordere das fehlende Eingabeartefakt beziehungsweise `core-plan` an. „Plan erweitern und umsetzen“ identifiziert bei eindeutiger Zuordnung denselben Plan, erlaubt aber keine direkte Planmutation: Route die Erweiterung zu `core-plan`; führe nur den bestätigten Ersatzplan aus.
 
 Lade aus frischem Kontext:
 
-- den exakt benannten Plan,
+- den exakt identifizierten Plan,
 - aktuelle Projektanweisungen und den Repositorystand,
 - bei Resume `.agentic-workflow/runs/<run-id>/state.yaml`, `handoff.md`, vorhandene `task-result/v1`-Dateien und `review.yaml`.
 

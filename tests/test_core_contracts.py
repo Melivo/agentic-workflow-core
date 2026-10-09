@@ -278,6 +278,38 @@ class ContractTests(unittest.TestCase):
         with self.assertRaisesRegex(checker.ContractError, 'fehlendes/falsches Ziel'):
             checker.validate_artifacts([d for d in documents if d['schema'] != 'goal/v1'])
 
+    def test_execute_identifies_session_plan_without_reconfirmation(self):
+        text = (ROOT / ".apm/skills/core-execute/SKILL.md").read_text(encoding="utf-8")
+        activation = text.split("## Aktivierung und Eingaben", 1)[1].split("## Verbindliche Verträge", 1)[0]
+        # Static instruction regression, not evidence of live model behavior.
+        for requirement in (
+            "Planpfad dient der Identifikation, nicht einer zusätzlichen Bestätigung",
+            "aktuell vom Benutzer genannten Pfad",
+            "Kontext der laufenden Sitzung eindeutig zugeordneten aktiven Planpfad",
+            "auch wenn du ihn selbst erstellt hast",
+            "frisch gelesenes `state.yaml` den `plan_path`",
+            "verlange weder die erneute Nennung des Pfads noch eine Bestätigungsformel",
+            "nicht das Alter der Sitzung",
+            "nach Kontextverlust",
+            "neuen Sitzung ohne exakte Übergabe",
+            "mehrere Pläne beziehungsweise Runs",
+            "frage gezielt nach dem gemeinten Plan oder Run",
+            "Suche niemals nach dem vermeintlich neuesten Plan",
+            "nicht anhand von Dateidatum, Versionsnummer oder Provider-Memory",
+            "`status: Confirmed` nicht validierbar, stoppe vor jeder Produktmutation",
+            "Route die Erweiterung zu `core-plan`",
+            "nur den bestätigten Ersatzplan",
+            "den exakt identifizierten Plan",
+        ):
+            with self.subTest(requirement=requirement):
+                self.assertIn(requirement, activation)
+        self.assertNotIn("expliziten Pfad", activation)
+        self.assertIn("eindeutig identifizierten, bestätigten plan/v1", text.split("---", 2)[1])
+        self.assertIn("Ein Chatverlauf oder Provider-Memory ersetzt kein Run-Artefakt.", text)
+        shared = (ROOT / ".apm/skills/core-shared/references/workflow-contract.md").read_text(encoding="utf-8")
+        self.assertIn("../../core-execute/SKILL.md#aktivierung-und-eingaben", shared)
+        self.assertIn("ersetzt aber weder das frisch gelesene Artefakt noch dessen Freigabe, Laufzustand oder Evidenz", shared)
+
     def test_rv01_execute_writes_immutable_attempts_not_legacy(self):
         source = ROOT / '.apm/skills/core-execute/SKILL.md'
         text = source.read_text(encoding='utf-8')

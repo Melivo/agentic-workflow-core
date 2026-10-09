@@ -14,7 +14,7 @@ Es gilt folgende Rangfolge:
 6. zuständiger `core-*`-Skill und passende Referenzen,
 7. generische Paketdefaults.
 
-Ein Workflow lädt sein explizites Eingabeartefakt und den aktuellen Repositorystand. Er sucht nicht nach einem vermeintlich neuesten Plan und ersetzt fehlende Eingaben nicht durch Gesprächshistorie, Honcho oder Provider-Memories.
+Ein Workflow lädt sein exakt identifiziertes Eingabeartefakt und den aktuellen Repositorystand. Für die Planidentifikation gilt [Aktivierung und Eingaben von core-execute](../../core-execute/SKILL.md#aktivierung-und-eingaben): Ein eindeutig zugeordneter Pfad aus der laufenden Sitzung muss nicht erneut genannt oder bestätigt werden. Gesprächskontext darf den Pfad identifizieren, ersetzt aber weder das frisch gelesene Artefakt noch dessen Freigabe, Laufzustand oder Evidenz. Ein Workflow sucht nicht nach einem vermeintlich neuesten Plan und ersetzt fehlende Eingaben nicht durch Honcho oder Provider-Memories.
 
 ## Autorisierung und Rückfragen
 
