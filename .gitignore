@@ -8,3 +8,6 @@ reference/source-material/
 .agentic-workflow/
 .migration-backup/
 .qwen/tmp/
+
+# Generated Python bytecode caches
+__pycache__/
