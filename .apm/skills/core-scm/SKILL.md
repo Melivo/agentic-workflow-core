@@ -1,6 +1,6 @@
 ---
 name: core-scm
-description: Führt klar benannte Git- und Releaseoperationen nach getrennten ausdrücklichen Autorisierungen aus. Verwenden für inspect, commit, branch, worktree, merge, rebase, push, tag oder release; nicht für Produktimplementierung, Deployment oder implizite Veröffentlichung.
+description: Führt klar benannte Git-, Veröffentlichungs- und Releaseoperationen nach getrennten ausdrücklichen Autorisierungen aus. Verwenden für inspect, commit, branch, worktree, merge, rebase, push, tag oder release sowie das sichere Erkennen und Verifizieren von Releaseautomation; nicht für Produktimplementierung, Deployment oder implizite Veröffentlichung.
 ---
 
 # Core SCM
@@ -9,17 +9,17 @@ description: Führt klar benannte Git- und Releaseoperationen nach getrennten au
 
 ## Eingaben und verbindliche Verträge
 
-Benötigt werden Repositorywurzel, gewünschte Operation, betroffene Pfade oder Refs, Ziel-Remote beziehungsweise Releaseziel sowie bekannte Checks und Einschränkungen. Lade:
+Benötigt werden Repositorywurzel, gewünschte Operation, betroffene Pfade oder Refs, Ziel-Remote beziehungsweise Releaseziel sowie bekannte Checks und Einschränkungen. Für Tag oder Release benötigst du zusätzlich die ausdrücklich gewählte Version, das Tagmuster und gegebenenfalls die zu synchronisierenden Versionsdateien. Lade:
 
 - den [Workflowvertrag](../core-shared/references/workflow-contract.md) für Scope, Autorisierung und Blockade,
 - den [Verifikationsvertrag](../core-shared/references/verification.md) für aktuelle Evidenz und verbotene implizite Wirkungen,
 - das [Toolrouting](../core-shared/references/tool-routing.md) für Repositoryanalyse und sichtbare Fallbacks.
 
-Prüfe den aktuellen Repository-, Branch-, Upstream-, Index- und Worktree-Zustand read-only, bevor eine autorisierte Mutation beginnt. Schütze fremde Änderungen, unversionierte Dateien und Secrets; Toolverfügbarkeit oder ein früherer erfolgreicher Review erweitert keine Autorisierung.
+Prüfe den aktuellen Repository-, Branch-, Upstream-, Index- und Worktree-Zustand read-only, bevor eine autorisierte Mutation beginnt. Schütze fremde Änderungen, unversionierte Dateien und Secrets. Toolverfügbarkeit oder ein früherer erfolgreicher Review erweitert keine Autorisierung.
 
 ## Getrennte Autorisierungen
 
-Erstelle vor jeder Mutation eine Operationsliste und ordne jede Wirkung genau einer aktuellen ausdrücklichen Benutzerautorisierung zu. Eine kombinierte Anweisung darf mehrere Wirkungen nur dann freigeben, wenn sie diese eindeutig benennt.
+Erstelle vor jeder Mutation eine Operationsliste und ordne jede Wirkung genau einer aktuellen ausdrücklichen Benutzerautorisierung zu. Eine kombinierte Anweisung darf mehrere Wirkungen nur dann freigeben, wenn sie diese eindeutig benennt. Kläre den Ausdruck „veröffentlichen“ zu `push`, `tag` und/oder `release`, sofern der Auftrag das Ziel nicht eindeutig benennt.
 
 | Operation | Ohne eigene Autorisierung | Eng erlaubte Wirkung | Autorisiert niemals implizit |
 |---|---|---|---|
@@ -48,27 +48,40 @@ Force-Push, History-Rewrite außerhalb des benannten Rebase, Branch- oder Worktr
 
 ### 2. Zustand und Risiken prüfen
 
-1. Prüfe Status, Index, Diffs, Branch, Upstream, Divergenz, Konflikte und relevante Historie read-only.
-2. Prüfe bei Commit jeden aufzunehmenden Pfad und stage nur explizite Pfade; verwende kein pauschales Staging.
-3. Prüfe vor Push Ziel-Remote, Quell- und Ziel-Ref, Ahead/Behind und Branchschutz. Ein normaler Push darf nicht stillschweigend zu einem Force-Push werden.
-4. Prüfe vor Tag oder Release Version, vorhandene Tags, Releaseautomation, Artefaktanforderungen und asynchrone Checks. Wähle bei fehlender Versionsentscheidung keine Version als Default.
-5. Führe Builds, Compile, Bundle, Package, Installation, Deployment oder destruktive Vorbereitung nur aus, wenn sie separat autorisiert sind; sonst kennzeichne sie als `blocked`.
+1. Ermittle mindestens Branch, Upstream, Ahead/Behind, unversionierte und gestagte Änderungen, Konfliktmarker und die relevante Historie. Bei Git CLI sind `git status --short --branch`, `git diff --stat`, `git diff --cached --stat` und `git log --oneline -10` die minimale Beobachtung.
+2. Aktualisiere Tags und Remote-Refs nur, wenn Netzwerk und Berechtigung verfügbar sind, zum Beispiel mit `git fetch --tags --prune`; ein Fehlschlag bleibt als Evidenzlücke sichtbar.
+3. Prüfe bei Commit jeden aufzunehmenden Pfad und stage nur explizite Pathspecs. Nimm alle nicht ignorierten Änderungen nur bei einer ausdrücklichen Anweisung dazu auf; stoppe bei Secrets, unerwarteten generierten Dateien oder Konflikten. Bilde logisch getrennte Änderungen getrennt ab und verwende ansonsten die vorhandene Commit-Konvention.
+4. Prüfe vor Push Ziel-Remote, Quell- und Ziel-Ref, Ahead/Behind und Branchschutz. Ein normaler Push darf nicht stillschweigend zu einem Force-Push werden.
+5. Prüfe vor Tag oder Release Version, vorhandene Tags, Releaseautomation, Artefaktanforderungen und asynchrone Checks. Wähle bei fehlender Versionsentscheidung keine Version als Default.
+6. Führe Builds, Compile, Bundle, Package, Installation, Deployment oder destruktive Vorbereitung nur aus, wenn sie separat autorisiert sind; sonst kennzeichne sie als `blocked`.
 
-### 3. Genau die autorisierte Operation ausführen
+### 3. Commit und Push ausführen
 
-Führe die kleinste Operation mit expliziten Pfaden, Refs und Zielen aus. Umgehe keine Hooks oder Schutzregeln. Verändere bei Konflikten nicht eigenmächtig die fachliche Lösung. Ein Fehlschlag erweitert weder Scope noch Autorisierung; sichere Wiederherstellung darf keine fremden Änderungen überschreiben.
+1. Führe vor einem Commit die kleinste praktische, aktuell autorisierte Prüfung aus. Bevorzuge den dokumentierten schnellen Projektcheck oder vorhandene Sammelgates wie `release-check`, `ci`, `check` oder `test`. Teure oder zugriffspflichtige Checks bleiben mit Grund offen.
+2. Lies den gestagten Diff unmittelbar vor jedem Commit. Verwende weder `git add .` noch `git add -A`, umgehe keine Hooks und füge keine Agenten- oder Tool-`Co-Authored-By`-Trailer hinzu.
+3. Prüfe nach dem Commit Status und die letzten Commits. Neue oder veränderte Dateien während der Verifikation werden erneut geprüft, niemals stillschweigend aufgenommen.
+4. Push nur zum explizit autorisierten Remote und Ref. Bei Authentifizierungsfehler bleibt der lokale Commit erhalten; berichte den Fehler und stoppe. Verifiziere anschließend den synchronen Branchstatus und die noch nicht übertragenen Commits.
 
-### 4. Wirkung verifizieren
+### 4. Releaseautomation und Tag behandeln
 
-Lies Zustand, Diff, Refs und Remote- beziehungsweise Releaseergebnis erneut. Prüfe, dass nur autorisierte Pfade und Refs betroffen sind. Melde asynchrone Veröffentlichung als ausstehend, solange der Provider keinen terminalen Erfolg bestätigt. Ein lokaler Exitcode allein beweist keinen erfolgreichen Push, Tag oder Release.
+1. Suche vor einer Releaseentscheidung nach taggetriebener Automation in `.github/workflows`, `.gitea/workflows`, `.forgejo/workflows`, `.gitlab-ci.yml`, Release-Skripten, Paket-Skripten und Release-Dokumentation. Ermittle daraus Tagmuster und erforderliche Versionsdateien.
+2. Wenn keine Releaseautomation existiert, erfinde weder Tag noch Release. Ein autorisierter Branch-Push kann dennoch abgeschlossen sein.
+3. Wenn Version und Tag übereinstimmen müssen, ändere die notwendigen Versionsdateien, aktualisiere erforderliche Lockfiles, prüfe die Änderung, committe und pushe sie **vor** dem Tag. Jeder dieser Schritte benötigt seine eigene passende Autorisierung.
+4. Erzeuge nur einen ausdrücklich autorisierten annotierten Tag im ermittelten Muster und pushe nur diesen Tag zum autorisierten Remote. Ein Tag ersetzt weder Branch-Push noch Provider-Release.
+
+### 5. Wirkung verifizieren
+
+1. Lies Status, Diff, Refs und Remote- beziehungsweise Releaseergebnis erneut. Prüfe, dass nur autorisierte Pfade und Refs betroffen sind.
+2. Bestätige einen übertragenen Tag über den Remote, zum Beispiel mit `git ls-remote --tags <remote> <tag>`, oder über die Plattform-API.
+3. Prüfe, soweit verfügbar, den ausgelösten Workflow oder Release-Status. Asynchrone Automation ist nur „ausgelöst“, bis der Provider den terminalen Erfolg bestätigt; behaupte ohne diesen Nachweis keine veröffentlichten Artefakte.
 
 ## Ergebnisse
 
-Berichte gewählte Operationen, zugeordnete Autorisierungen, betroffene Pfade und Refs, ausgeführte Checks, tatsächliche Wirkungen, Konflikte und Restrisiken.
+Berichte gewählte Operationen, zugeordnete Autorisierungen, betroffene Pfade und Refs, ausgeführte Checks, erkannte Releaseautomation, tatsächliche Wirkungen, Konflikte und Restrisiken.
 
 - **completed:** Jede ausgeführte Wirkung war separat autorisiert und aktuell verifiziert.
 - **partial:** Autorisierte Teilwirkungen sind belegt, weitere benannte Wirkungen fehlen oder sind ausstehend.
 - **blocked:** Autorisierung, Ziel, Schutzregel, Check oder sichere Umgebung fehlt.
 - **failed:** Eine autorisierte Operation schlug fehl; nenne Teilwirkung und sicheren nächsten Schritt.
 
-Behaupte keinen Commit, Push, Tag oder Release, der nicht am aktuellen Repository- beziehungsweise Providerzustand beobachtet wurde.
+Behaupte keinen Commit, Push, Tag, Release oder veröffentlichtes Artefakt, das nicht am aktuellen Repository- beziehungsweise Providerzustand beobachtet wurde.
