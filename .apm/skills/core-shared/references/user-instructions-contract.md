@@ -35,7 +35,7 @@ Eine Bestätigung gilt nur für die gezeigte Fassung. Ändert sich Quelle oder Z
 
 ## Marker und Idempotenz
 
-Ein verwalteter Projektabschnitt verwendet stabile, eindeutig gepaarte Marker. Aktualisierungen ersetzen nur den Inhalt zwischen diesen Markern. Fehlende, doppelte, verschachtelte oder beschädigte Marker blockieren die Mutation; sie werden nicht heuristisch repariert. Dieselbe bestätigte Eingabe muss ohne weitere Änderungen denselben Zielinhalt erzeugen.
+Ein verwalteter Projektabschnitt verwendet stabile, eindeutig gepaarte Marker. Aktualisierungen ersetzen nur den Inhalt zwischen diesen Markern. Fehlen beide Marker vollständig, darf der Eigentümer des Zielblocks nach ausdrücklicher Bestätigung des exakten Diffs ein neues, eindeutig gepaartes Markersegment anlegen; dies autorisiert weder Scheduler-/Workflowänderungen noch Folgefreigaben. Fehlt nur ein Marker oder sind Marker doppelt, verschachtelt oder beschädigt, blockiert die Mutation; sie werden nicht heuristisch repariert. Prüfe Zielbereich und unveränderte Außenbereiche nach der Neuanlage erneut. Dieselbe bestätigte Eingabe muss ohne weitere Änderungen denselben Zielinhalt erzeugen.
 
 `core-init-project` bleibt alleiniger Eigentümer seines Projektblocks. Inline verwendete Konfiguratoren oder Provider dürfen keinen konkurrierenden `AGENTS.md`-Schreibmodus aktivieren.
 

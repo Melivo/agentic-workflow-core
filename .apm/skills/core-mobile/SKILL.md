@@ -23,6 +23,14 @@ Bestehende Projektkonventionen, ein vorhandenes `DESIGN.md`, Design Tokens, Komp
 
 Für mutierende Aufgaben gelten der [Workflowvertrag](../core-shared/references/workflow-contract.md) für Scope und Autorisierung sowie der [Verifikationsvertrag](../core-shared/references/verification.md) für Impact, Post-edit-Prüfung und aktuelle Evidenz. Lade das [Toolrouting](../core-shared/references/tool-routing.md) nur für benötigte Code-Intelligence oder eine konkrete aktuelle Dokumentationsfrage.
 
+### Cross-Domain-Übergaben und Zielschutz
+
+Fachagenten wählen keine Ziel-/Milestone-Version und ändern weder Ziel, Definition, Index noch Freigaben.
+
+- Melde erforderliche Backend-API- oder Vertragsarbeit an `core-execute`; dispatcht wird ausschließlich dort. Vorhandene bestätigte Tasks verwenden `dependencies` und nennen in `context_paths` die exakten benötigten API-, Design-, Plattform- und gegebenenfalls Zielquellen. Erhalte getrennte Plattform- und Lifecycle-Grenzen.
+- Fehlt ein passender Task oder erfordert die Arbeit eine materielle API-, Ziel- oder Scopeänderung, geht sie über Execute an `core-plan`; starte keinen Agenten direkt und erweitere den mobilen Task nicht.
+- Wähle oder ändere keine Ziel-/Milestone-Version und ändere weder Ziel, unveränderliche Definition, Index noch Freigabe. Bei Etappenarbeit gelten ausschließlich ausdrücklich gepinnte Ziel-, Index- und Definitionspfade; eine neuere Datei ist keine Auswahl.
+
 ## Genau eine passende Plattformreferenz laden
 
 | Belegter Zielstack | Referenz |

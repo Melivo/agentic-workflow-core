@@ -35,7 +35,7 @@ Verwende die [Handoffvorlage](../core-shared/assets/handoff.md), wenn `core-revi
 
 ### 1. Plan und Drift validieren
 
-1. Prüfe `schema: plan/v1`, `status: Confirmed` und genau einen eingebetteten Taskgraphen.
+1. Prüfe `schema: plan/v1`, `status: Confirmed` und genau einen eingebetteten Taskgraphen. Bei gepinnter Etappenarbeit lade Ziel, Index und exakte Definitionsversion erneut; verifiziere enthaltene IDs/Pfade, Indexauswahl/-freigabe, Planbindung und deren aktuelle Gültigkeit vor Start. Ein Versions-/Auswahlwechsel oder abgelöster Plan blockiert Start und Resume; route zu `core-milestone` für Auswahlklärung und zu `core-plan` für nötigen Ersatzplan. Setze weder automatisch fort noch überschreibe den laufenden Plan. Resume und Review-Reparaturen behalten dieselbe Run-ID; legacy `milestone/v1` wird nur über den ausdrücklich benannten Pfad gelesen.
 2. Validiere für jeden Task einen registrierten Fachagenten, getrennte `context_paths` und `scope`, bekannte erforderliche MCPs, einen azyklischen Abhängigkeitsgraphen sowie die vollständige Abdeckung aller Akzeptanzkriterien durch eindeutige Checks.
 3. Behandle einen leeren `scope` als read-only. Ein Check mit Build-, Compile-, Bundle-, Package- oder Installationswirkung ist ohne passende ausdrückliche Autorisierung blockiert.
 4. Vergleiche Planannahmen, referenzierte Pfade, vorhandenen Diff und wiederverwendete Evidenz mit dem aktuellen Repositorystand. Drift macht betroffene Evidenz ungültig.
@@ -65,7 +65,7 @@ Ein Chatverlauf oder Provider-Memory ersetzt kein Run-Artefakt.
 
 ### 4. Taskresultat prüfen
 
-Verlange pro Versuch `.agentic-workflow/runs/<run-id>/tasks/<task-id>.yaml` mit `schema: task-result/v1`. Prüfe:
+Verlange pro neuem Versuch die eigene, unveränderliche Datei `.agentic-workflow/runs/<run-id>/tasks/<task-id>/attempt-<nn>.yaml` mit `schema: task-result/v1`; `nn` ist mindestens zweistellig, fortlaufend und innerhalb dieses Runs/Tasks eindeutig. Ein Retry erhält die nächste Kennung und überschreibt oder deutet keinen früheren Versuch um. Bestehende `.agentic-workflow/runs/<run-id>/tasks/<task-id>.yaml` werden ausschließlich als Legacy-Ergebnis gelesen; sie werden weder neu beschrieben noch automatisch umbenannt oder migriert. Execute persistiert Rückgaben read-only Agenten in der jeweiligen neuen Taskresultatdatei; diese Agenten erhalten dadurch keine Schreibrechte an Produkt- oder Runartefakten. Ist der Taskagent ausdrücklich für Änderungen vorgesehen, darf er als eng begrenzte Ausnahme ausschließlich seine eigene Ergebnisdatei schreiben, nicht Plan, Runstatus, Handoff oder Review. Prüfe:
 
 - Task-ID, Versuch und Status,
 - `changed_paths` gegen die tatsächlichen Änderungen und den bestätigten `scope`,
@@ -99,4 +99,4 @@ Ein erwartbarer Implementierungsfehler bleibt beim zuständigen Domainagenten. B
 
 Beginne nach einem Benutzerabbruch keine neue Mutation oder keinen neuen Dispatch. Halte beobachtete Evidenz, verbleibende Nebenwirkungen und den aktuellen Resume-Punkt fest.
 
-Ein erfolgreicher Abschluss erfordert einen aktuellen `core-review`-Verdict `pass`, eingehaltenen Scope und aktuelle Pflichtcheckevidenz. Liefere andernfalls ehrlich `partial`, `blocked` oder `failed` mit exakten Artefaktpfaden, Ursache und nächstem zulässigem Übergang.
+Ein erfolgreicher Run-Abschluss erfordert einen aktuellen `core-review`-Verdict `pass`, eingehaltenen Scope und aktuelle Pflichtcheckevidenz. Bei gepinnter Etappe folgt danach die zusätzliche Prüfung durch `core-milestone` gegen genau die gebundene Definitionsversion; nur `core-milestone` verknüpft den Etappenabschluss und Originalnachweise im Index. Run-pass ist weder Etappenabschluss noch Gesamtzielerfolg. `core-milestone` prüft Kriterien auch außerhalb des Taskgraphen; Gesamtzielerfolg erfordert separat alle Gesamtzielkriterien und Nachweise. Kein Execute-Dispatch plant oder genehmigt automatisch eine Folgeetappe. Liefere andernfalls ehrlich `partial`, `blocked` oder `failed` mit exakten Artefaktpfaden, Ursache und nächstem zulässigem Übergang.

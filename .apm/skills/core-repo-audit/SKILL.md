@@ -39,7 +39,7 @@ Ohne **neue ausdrückliche Autorisierung für eine konkret benannte Mutation** b
 
 Ein Dry-run, Preview, Linter, Scanner oder Auditwerkzeug ist nur zulässig, wenn seine konkrete Betriebsart nachweislich keine Dateien, Caches, Lockfiles, Indexdaten oder Repositoryzustände schreibt. Ist das nicht sicher belegbar, lasse die Prüfung aus und dokumentiere sie als `blocked`.
 
-Eine gewünschte Behebung ist ein neuer Auftrag: Zeige Befund, vorgeschlagenen Scope und erwartete Wirkung und verlange eine neue ausdrückliche Autorisierung. Route die Umsetzung anschließend an `core-execute`, den zuständigen Fachskill oder für klar benannte SCM-Wirkungen an `core-scm`. `core-repo-audit` deutet den Auditauftrag niemals selbst als Reparaturfreigabe.
+Eine gewünschte Behebung ist ein neuer Auftrag: Zeige Befund, vorgeschlagenen Scope und erwartete Wirkung und verlange eine neue ausdrückliche Autorisierung. Route eine klar umrissene Behebung an `core-plan`; ist die gewünschte Richtung materiell unklar, zunächst an `core-brainstorm`. Erst bestätigte Arbeit geht in `core-execute` und an den zuständigen Fachskill. Für klar benannte SCM-Wirkungen bleibt `core-scm` zuständig. Auditbefunde ändern keine Ziel-/Etappenentscheidung oder Indexauswahl. `core-repo-audit` deutet den Auditauftrag niemals selbst als Reparaturfreigabe.
 
 ## Auditablauf
 

@@ -22,7 +22,7 @@ Löse beide Pfade absolut auf und zeige sie in jeder Vorschau. Lehne Benutzer-Ho
 
 Standardmäßig werden nur eindeutig manuelle Benutzeranweisungen als Kandidaten angeboten. Schließe aus:
 
-- generierte oder anderweitig verwaltete Blöcke einschließlich `CORE-INIT-PROJECT`, OMA-, Harness- und Providerbereiche,
+- generierte oder anderweitig verwaltete Blöcke einschließlich `CORE-INIT-PROJECT`, Harness- und Providerbereiche,
 - globale Spezialkonfiguration eines Harnesses oder Providers,
 - Secrets, Zugangsdaten und vertrauliche Werte,
 - flüchtige Health-, Session- oder Workflowstatuswerte,
@@ -46,9 +46,9 @@ Verwende für selektiv übernommene Anweisungen genau ein eigenes Markerpaar im 
 5. Erzeuge den **vollständigen exakten Diff** für das Projektziel und zeige beide absoluten Pfade.
 6. Fordere eine separate ausdrückliche **Bestätigung genau dieses Diffs** an. Schweigen, eine frühere allgemeine Zustimmung, eine Bestätigung nur der Absicht oder eine Auswahl ohne finalen Diff autorisiert keinen Schreibzugriff.
 7. Lies Quelle und Ziel unmittelbar vor der Mutation erneut. Bei jeder Abweichung ist die Bestätigung verbraucht: Verwirf die Vorschau, erzeuge einen neuen exakten Diff und fordere eine neue Bestätigung an.
-8. Schreibe ausschließlich den bestätigten Zielbereich. Wenn das Markerpaar fehlt, füge genau einen vollständigen Block hinzu; andernfalls ersetze nur den Inhalt dazwischen.
+8. Schreibe ausschließlich den bestätigten Zielbereich. Fehlen beide Marker vollständig, darf nach der Bestätigung des exakten Diffs genau ein vollständiger Block angelegt werden; sind Marker einzeln vorhanden oder doppelt, verschachtelt oder beschädigt, blockiere ohne Reparatur. Bei einem gültigen Paar ersetze nur den Inhalt dazwischen.
 9. Lies das Ergebnis erneut und verifiziere Marker, bestätigten Zielinhalt sowie bytegenau unveränderte Außenbereiche.
-10. Prüfe die Idempotenz read-only: Dieselbe Quelle und Auswahl müssen gegen das Ergebnis einen leeren Diff erzeugen.
+10. Prüfe die Idempotenz read-only: Dieselbe Quelle und Auswahl müssen gegen das Ergebnis einen leeren Diff erzeugen; eine Wiederholung erzeugt keine weitere Änderung.
 
 Eine Bestätigung ist an Inhalt und beide Pfade der Vorschau gebunden. Sie darf nicht auf weitere Kandidaten, spätere Änderungen oder einen anderen Zielpfad übertragen werden.
 

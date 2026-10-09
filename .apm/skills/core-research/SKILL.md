@@ -9,7 +9,7 @@ description: Fachmethode für fokussierte Read-only-Evidenzsynthese bei materiel
 
 ## Aktivierung und Grenzen
 
-Recherchiere nur, wenn eine materielle Wissenslücke eine konkrete Entscheidung blockiert. Die Recherche endet, sobald die Frage so beantwortet ist, dass die Entscheidung belastbar getroffen werden kann.
+Recherchiere nur, wenn eine materielle Wissenslücke eine konkrete Entscheidung blockiert. Brainstorm und Plan können die Methode bei diesem Signal inline nutzen; sie löst keinen eigenen Dispatch aus. Die Recherche endet, sobald die Frage so beantwortet ist, dass die Entscheidung belastbar getroffen werden kann. Read-only Befunde gehen an den aufrufenden Workflow und bei ausführungsrelevantem Wissen über dessen Execute-Taskkontext bzw. `task-result/v1`; Research schreibt keine Run-/Entscheidungsartefakte und wählt oder ändert nie Ziel-, Index- oder Definitionsversionen.
 
 Nicht aktivieren für:
 

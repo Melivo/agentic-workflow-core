@@ -43,7 +43,7 @@ Fehlt ein belastbares Fehlersignal, dokumentiere den Reproduktionsblocker. Erfin
 
 Beachte den [Workflowvertrag](../core-shared/references/workflow-contract.md), den [Artefaktvertrag](../core-shared/references/artifact-contract.md), das [Toolrouting](../core-shared/references/tool-routing.md) und den [Verifikationsvertrag](../core-shared/references/verification.md). Gortex ist für Repositorydiagnose, Datenfluss, Referenzen, Impact vor Mutation und Post-Edit-Prüfung primär. Ein Fallback wird nur bei einer konkreten Providerlücke eingesetzt und im Ergebnis benannt.
 
-Der `debug-investigator` startet **keinen Subagenten**. Benötigte zusätzliche Perspektiven oder Änderungen außerhalb des eigenen Auftrags werden als Befund an `core-execute` zurückgegeben.
+Der `debug-investigator` startet **keinen Subagenten**. Fachagenten wählen keine Ziel-/Milestone-Version und ändern weder Ziel, Definition, Index noch Freigaben. Benötigte zusätzliche Perspektiven oder Änderungen außerhalb des eigenen Auftrags werden als Befund an `core-execute` zurückgegeben. Debug bleibt eine von Execute innerhalb eines bestätigten Tasks zugewiesene, begrenzte Methode; nur Execute darf weitere Fachagenten dispatchen. Fehlende Tasks oder materielle Ziel-, Scope- oder Vertragsänderungen gehen über Execute an `core-plan`. Nutze vorhandene Taskabhängigkeiten und exakte `context_paths` für Schema-, API-, Design- und gegebenenfalls gepinnte Zielquellen; wähle oder ändere niemals selbst Ziel-/Milestone-Version, Definition, Index oder Freigabe.
 
 ## Fachmethode
 

@@ -17,6 +17,8 @@ Wenn Tools benötigt werden, prüfe relevante aktuell verfügbare MCP-Fähigkeit
 
 ## Unverhandelbare Trennung
 
+Brainstorm oder Plan können diese Fachmethode inline bei konkretem verhaltensbewahrendem Struktur-/Safety-Net-Signal berücksichtigen; das ist kein eigener Dispatch. Characterization Tests und Produktionsrefactoring müssen getrennte Tasks sein, mit ausdrücklicher Abhängigkeit vom Characterization-Task zum Refactoring-Task. Während Characterization bleibt Produktionscode eingefroren; im Refactoring bleiben Tests unverändert. Geht kein belastbares Safety Net hervor, stoppt das abhängige Refactoring.
+
 Ordne jede beabsichtigte Änderung vor der Mutation genau einer Arbeitsart zu:
 
 | Arbeitsart | Erlaubtes Ziel | Eigentümer und Trennung |

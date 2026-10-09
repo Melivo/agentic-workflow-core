@@ -1,0 +1,6 @@
+interface:
+  display_name: "Core Milestone"
+  short_description: "Etappen planen und artefaktbasiert wieder einsteigen"
+  default_prompt: "Nutze $core-milestone, um mein Gesamtziel in überprüfbare Etappen zu zerlegen oder aus meinem ausdrücklich benannten Milestone-Artefakt wieder einzusteigen."
+policy:
+  allow_implicit_invocation: false

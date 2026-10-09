@@ -1,0 +1,6 @@
+interface:
+  display_name: "Core Handoff"
+  short_description: "Artefaktbasierte Übergabe für eine neue Sitzung"
+  default_prompt: "Nutze $core-handoff, um aus meinen ausdrücklich benannten Workflow-Artefakten einen Startprompt für eine neue Sitzung zu erstellen."
+policy:
+  allow_implicit_invocation: false

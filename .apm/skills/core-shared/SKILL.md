@@ -17,7 +17,7 @@ Dieses Bundle ist ein interner Index. Es führt keinen Workflow aus, dispatcht k
 ## Verträge
 
 - [Workflowvertrag](references/workflow-contract.md) — Autorisierung, Abbruch, Wiederaufnahme und Fresh-Context-Übergaben.
-- [Artefaktvertrag](references/artifact-contract.md) — Eigentümer und Formate von Plan, Run, Handoff, Taskresultat und Review.
+- [Artefaktvertrag](references/artifact-contract.md) — Eigentümer, Namens-/ID-Integrität, Aufbewahrung und Formate von Ziel, Definition, Index, Plan, Run, Handoff, Taskversuch, Taskresultat und Review.
 - [Toolrouting](references/tool-routing.md) — Capability-basierte Providerauswahl und Fallbackgrenzen.
 - [Verifikation](references/verification.md) — Evidenz, Pflichtchecks, blockierte Prüfungen und Reviewurteile.
 - [Benutzeranweisungen](references/user-instructions-contract.md) — sichere Synchronisierung manueller `AGENTS.md`-Inhalte.

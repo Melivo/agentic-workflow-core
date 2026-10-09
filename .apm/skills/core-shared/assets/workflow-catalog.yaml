@@ -4,13 +4,27 @@ max_automatic_review_repair_rounds: 2
 workflows:
   - id: core-brainstorm
     predecessors: []
-    successors: [core-plan]
+    successors: [core-plan, core-milestone]
     input_schemas: [text]
     output_schemas: [text]
     mutation_class: no-product-write
     fresh_context_on_entry: false
+  - id: core-milestone
+    predecessors: [core-brainstorm, core-execute]
+    successors: [core-plan, core-handoff]
+    input_schemas: [text, goal/v1, milestone-definition/v1, milestone-index/v1, milestone/v1, task-result/v1, review/v1]
+    output_schemas: [goal/v1, milestone-definition/v1, milestone-index/v1, text]
+    mutation_class: milestone-artifact-write
+    fresh_context_on_entry: false
+  - id: core-handoff
+    predecessors: [core-milestone]
+    successors: []
+    input_schemas: [text, goal/v1, milestone-definition/v1, milestone-index/v1, plan/v1, task-result/v1, review/v1]
+    output_schemas: [text]
+    mutation_class: handoff-artifact-write
+    fresh_context_on_entry: true
   - id: core-plan
-    predecessors: [core-brainstorm, core-review]
+    predecessors: [core-brainstorm, core-milestone, core-review]
     successors: [core-execute]
     input_schemas: [text]
     output_schemas: [plan/v1]
@@ -18,7 +32,7 @@ workflows:
     fresh_context_on_entry: false
   - id: core-execute
     predecessors: [core-plan, core-review]
-    successors: [core-review]
+    successors: [core-review, core-milestone]
     input_schemas: [plan/v1, review/v1]
     output_schemas: [task-result/v1]
     mutation_class: repository-and-run-artifact-write
@@ -36,12 +50,24 @@ transitions:
   - from: core-brainstorm
     outcome: completed
     to: core-plan
+  - from: core-brainstorm
+    outcome: milestone_selected
+    to: core-milestone
+  - from: core-milestone
+    outcome: current_milestone_confirmed
+    to: core-plan
+  - from: core-milestone
+    outcome: completion_handoff_ready
+    to: core-handoff
   - from: core-plan
     outcome: confirmed
     to: core-execute
   - from: core-execute
     outcome: review_ready
     to: core-review
+  - from: core-execute
+    outcome: milestone_review_required
+    to: core-milestone
   - from: core-review
     outcome: pass
     to: completed

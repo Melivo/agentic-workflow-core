@@ -31,6 +31,14 @@ Für mutierende Aufgaben gelten der [Workflowvertrag](../core-shared/references/
 4. Behandle Vector Stores als Retrieval-Infrastruktur, nicht als Source of Truth. Verwende bei Exact-Match- oder Erklärbarkeitsbedarf standardmäßig Hybrid Retrieval und versioniere Embeddingmodell, Dimension, Chunking und Vorverarbeitung.
 5. Übergib applicationseitige API-, Service- und ORM-Integration ohne Schemaentscheidung an `core-backend`.
 
+### Cross-Domain-Übergaben und Zielschutz
+
+Fachagenten wählen keine Ziel-/Milestone-Version und ändern weder Ziel, Definition, Index noch Freigaben.
+
+- Melde Backend- oder sonstigen Cross-Domain-Bedarf an `core-execute`; dispatcht wird ausschließlich dort. Vorhandene bestätigte Tasks verwenden ihre `dependencies` und die exakten, jeweils benötigten Schema-, API-, Design- und gegebenenfalls Zielquellen in `context_paths`.
+- Fehlt ein passender Task oder erfordert die Arbeit eine materielle Vertrags-, Ziel- oder Scopeänderung, geht sie über Execute an `core-plan`; ändere den bestätigten Plan oder Taskscope nicht selbst.
+- Wähle oder ändere keine Ziel-/Milestone-Version und ändere weder Ziel, unveränderliche Definition, Auswahlindex noch Freigabe. Bei Etappenarbeit verwende nur explizit gepinnte Pfade, niemals eine vermeintlich neueste Version. Bestehende DB-, Live- und destruktive Aktionsfreigaben bleiben unverändert und gelten nur für den jeweils ausdrücklich benannten Umfang.
+
 ## Bedingte Referenzen
 
 Lade nur die für den konkreten Task erforderlichen Details; mehrere Referenzen dürfen bei überlappenden Risiken gemeinsam geladen werden.

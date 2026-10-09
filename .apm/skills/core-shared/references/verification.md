@@ -33,12 +33,12 @@ Ein Task ist `completed`, wenn alle Kriterien und Pflichtchecks aktuell belegt s
 
 ## Reihenfolge bei Änderungen
 
-1. Vor einer Mutation Impact, Verträge und Scope prüfen.
+1. Vor einer Mutation Impact, Verträge und Scope prüfen. Bei Etappenarbeit die exakt bestätigten Ziel-, Index- und Definitionspfade sowie ihre Referenzen einbeziehen.
 2. Die kleinste autorisierte Änderung ausführen.
 3. Post-edit Change Detection durchführen und tatsächliche Pfade gegen `scope` prüfen.
 4. Betroffene Guards, Tests und Contracts auf dem neuen Stand ausführen.
 5. Nach jeder Korrektur alle betroffenen Checks und die Reviewprüfung wiederholen.
-6. Evidenz nur wiederverwenden, wenn Eingaben, Abhängigkeiten und Repositorystand unverändert sind.
+6. Evidenz nur wiederverwenden, wenn Eingaben, Abhängigkeiten und Repositorystand unverändert sind. Ein Task-Retry erzeugt einen neuen unveränderlichen Versuchspfad; Resume oder Review-Reparatur erzeugt dagegen keinen neuen Run und übernimmt keine ältere Taskevidenz ungeprüft. Bei Etappenabschluss deckt aktuelles Review-pass nur Plan/Run ab; `core-milestone` prüft zusätzlich die gepinnte Definition, bevor es deren Abschluss im Index verknüpft. Folgeetappen benötigen ausdrückliche Freigabe, Gesamtabschluss eigene Zielkriterien und Nachweise.
 
 Tests, Hooks oder Validierungen dürfen nicht deaktiviert, übersprungen oder abgeschwächt werden, um einen Lauf grün erscheinen zu lassen.
 

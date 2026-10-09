@@ -45,7 +45,7 @@ Schreibe das kanonische Ergebnis nach `.agentic-workflow/runs/<run-id>/review.ya
 
 ### 1. Prüfgrundlage validieren
 
-1. Prüfe, dass der Plan bestätigt ist und Run-ID, Planpfad, Handoff, Gesamtdiff und Taskresultate zusammengehören.
+1. Prüfe, dass der Plan bestätigt ist und Run-ID, Planpfad, Handoff, Gesamtdiff und Taskresultate zusammengehören. Bei Etappenarbeit lade die exakt gepinnten Ziel-, Index- und Definitionspfade neu und prüfe enthaltene IDs, Version sowie Planbindung gegen die ausdrückliche Indexauswahl; keine neueste Datei ableiten. Review urteilt gegen diese gepinnte Fassung, ändert weder Auswahl noch Index und erklärt Run-pass nicht zum Etappenabschluss. Bei veralteter Auswahl/Definition oder altem Prompt keine Fortsetzung autorisieren; route zur Klärung an `core-milestone` und bei Planabweichung an `core-plan`. `milestone/v1` bleibt ausschließlich lesbar.
 2. Vergleiche tatsächliche Änderungen mit den bestätigten Scopes. Berücksichtige auch unversionierte, gelöschte und generierte relevante Dateien.
 3. Prüfe Freshness und Vollständigkeit der Checkevidenz. Ein Exitcode 0, eine Agentenbehauptung oder ein Bericht allein beweist keine fachliche Erfüllung.
 4. Validiere, dass der verwendete Gortex-View zum aktuellen Checkout oder Worktree gehört. Ein Fallback- oder inaktiver Ref-View bleibt read-only und wird als Evidenzgrenze sichtbar.
@@ -95,7 +95,7 @@ Bilde einen bestätigten CRITICAL-Befund als `blocking` ab; HIGH bleibt `high`. 
 
 ### 5. Urteil und Routing festlegen
 
-- `pass`: Scope, Akzeptanzkriterien und relevante Risiken sind auf dem aktuellen Stand belegt; `findings: []`.
+- `pass`: Scope, Akzeptanzkriterien und relevante Risiken des Plans sind auf dem aktuellen Stand belegt; `findings: []`. Bei Etappenplanung bedeutet das nur Run-/Plan-pass. Der nächste Übergang ist die separate Milestone-Prüfung der gepinnten Definition; ausschließlich `core-milestone` aktualisiert danach Abschlussreferenzen im Index.
 - `changes_requested`: Mindestens ein bestätigtes Finding ist innerhalb des bestätigten Ziels und Scopes durch `core-execute` behebbar.
 - `blocked`: Eine materielle Eingabe, Autorisierung, Fähigkeit oder Evidenzlücke verhindert ein belastbares Urteil oder eine zulässige Behebung.
 

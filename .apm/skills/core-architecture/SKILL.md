@@ -65,7 +65,7 @@ Bewahre öffentliche Verträge oder beschreibe ihre explizite Evolution. Gewüns
 5. Empfiehl eine Richtung mit Trade-offs, Risiken, Migrations- beziehungsweise Rückfallgrenze und überprüfbaren Validierungsschritten.
 6. Prüfe, ob die Empfehlung Ziel, Scope, Architektur oder Akzeptanz des bestätigten `plan/v1` materiell ändert. Falls ja, gib sie an `core-plan` zurück; implementiere sie nicht stillschweigend.
 
-Eine ausdrücklich autorisierte Implementierung bleibt ein separater Task des zuständigen Domainagenten. `core-architecture` selbst plant kein Produkt, zerlegt keine Features und steuert keine Ausführung.
+Brainstorm oder Plan können diese Fachmethode inline bei konkretem Boundary-, langlebigem Vertrags- oder schwer reversiblen Entscheidungssignal einsetzen; sie erzeugt keinen eigenen Dispatch. Bei Etappenplanung bleiben bestätigte Ziel-/Definitionsversionen unverändert; nötige Ziel-/Scopeänderungen gehen zur Bestätigung an `core-milestone` und in einen Plan. Eine ausdrücklich autorisierte Implementierung bleibt ein separater Task des zuständigen Domainagenten. `core-architecture` selbst plant kein Produkt, zerlegt keine Features und steuert keine Ausführung.
 
 ## Routing entdeckter Arbeit
 

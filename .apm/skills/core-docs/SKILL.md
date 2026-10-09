@@ -34,6 +34,9 @@ Eine Dokumentationsänderung ist nur zulässig, wenn alle folgenden Punkte beleg
 - Regeneriere Dokumentation nur, wenn der Task den Generator und dessen Ausgabepfade ausdrücklich umfasst; editiere generierte Dateien nicht als Ersatz für ihre Source of Truth.
 - Erfinde bei widersprüchlicher oder mehrdeutiger Evidenz keine Auflösung. Melde Pfade, Konflikt und benötigte Entscheidung als `blocked` oder `partial`.
 - Führe keine Builds, Compiles, Installationen, SCM-, Deployment- oder destruktiven Aktionen als Nebenwirkung aus.
+- Berücksichtige Dokumentationsbedarf früh im Task und melde ihn an `core-execute`; vorhandene bestätigte Tasks nutzen explizite `dependencies` und exakte, notwendige Vertrags-, API-, Design- und gegebenenfalls Zielquellen in `context_paths`. Nur Execute dispatcht oder erteilt Folgearbeit; fehlende Tasks und materielle Änderungen gehen über Execute an `core-plan`.
+- Fachskills wählen keine Ziel-/Milestone-Version und ändern weder Ziel, Definition, Index noch Freigaben.
+- Dokumentiere ausschließlich belegte Drift innerhalb des bestätigten Docs-Scopes. Ein bestätigtes Ziel, eine unveränderliche Definitionsversion, Indexauswahl oder Freigabe ist keine normale Dokumentation: ändere sie nicht. Verwende nur exakt gepinnte Quellen; melde Konflikte an Execute zur Klärung, nicht durch Umschreiben oder Versionsauswahl.
 
 ## Workflow
 

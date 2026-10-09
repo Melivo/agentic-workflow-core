@@ -31,6 +31,14 @@ Für mutierende Aufgaben gelten der [Workflowvertrag](../core-shared/references/
 - Neue Architektur-, Ziel- oder Scopeentscheidungen gehen an `core-plan`; unklare Ursachen oder Regressionen an die Debug-Fachstrategie.
 - Führe keine Build-, Compile-, Installations-, SCM- oder Deploymentaktion als Nebenwirkung aus.
 
+### Cross-Domain-Übergaben und Zielschutz
+
+Fachagenten wählen keine Ziel-/Milestone-Version und ändern weder Ziel, Definition, Index noch Freigaben.
+
+- Übergib Anwendungseinbindung an den zuständigen Fachskill und Schema-/Datenmigrationsbedarf an `core-database`; melde Cross-Domain-Bedarf an `core-execute`. Nur Execute dispatcht. Vorhandene bestätigte Tasks folgen ihren `dependencies` und führen die exakten nötigen Infrastruktur-, API-, Design- und gegebenenfalls Zielquellen in `context_paths`.
+- Fehlt ein passender Task oder ist eine materielle Vertrags-, Ziel- oder Scopeänderung nötig, geht sie über Execute an `core-plan`; erweitere Scope nicht und starte keine Fachagenten direkt.
+- Wähle oder ändere keine Ziel-/Milestone-Version und ändere weder Ziel, unveränderliche Definition, Index noch Freigabe. Bei Etappenarbeit gelten nur die ausdrücklich gepinnten Pfade, nie eine vermeintlich neueste Version. Alle vorhandenen Live-, State- und Ausführungsgrenzen bleiben bestehen.
+
 ## Bedingte Referenzen
 
 Lade nur die durch den konkreten Task ausgelösten Details:

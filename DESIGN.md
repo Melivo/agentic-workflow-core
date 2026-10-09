@@ -57,7 +57,7 @@ Nicht Teil des Kerns sind:
 
 ```text
 Einmal pro Umgebung:
-  APM-Paket installieren → core-init-mcps? → MCPs und Memory-Adapter prüfen
+  APM-Paket installieren → core-init-mcps? → vorhandene MCP-Provider read-only prüfen
 
 Einmal pro Repository:
   core-init-project → core-repo-audit?
@@ -83,7 +83,9 @@ Nach bestandenem Review:
 ### Unterstützende Skills
 
 - `core-init-project`: Repository-Harness, Projektinvarianten und `AGENTS.md`-Preflight
-- `core-init-mcps`: explizite Einrichtung und Health-Checks der Toolprovider
+- `core-init-mcps`: read-only Bereitschaftsprüfung bereits vorhandener Toolprovider; keine Installation oder Konfiguration
+- `core-milestone`: Ziel, unveränderliche Etappendefinitionen und aktualisierbarer Auswahl-/Nachweisindex ausschließlich für ausdrücklich mehrstufige Vorhaben
+- `core-handoff`: autorisierte Sitzungs- und Etappenübergabe anhand exakter Artefaktpfade, ohne Statusverwaltung
 - `gortex-serena-configurator`: externe, inline verwendete Readiness- und Konfigurationsmethode für Gortex und den projektspezifischen Serena-Fallback
 - `core-user2agent-instructions`: kontrollierte Pflege globaler und lokaler Benutzeranweisungen
 - `core-repo-audit`: read-only Repositoryhygiene und Public-Readiness
@@ -130,6 +132,8 @@ apm.yml
     ├── core-init-project/
     ├── core-init-mcps/
     ├── core-user2agent-instructions/
+    ├── core-handoff/
+    ├── core-milestone/
     ├── core-repo-audit/
     ├── core-scm/
     ├── core-architecture/
@@ -145,6 +149,8 @@ apm.yml
 ```
 
 Jedes neu erstellte paketeigene Skillverzeichnis verwendet das Präfix `core-` und ist ein gültiges APM-Skillbundle mit `SKILL.md`; Verzeichnisname und Frontmatter-`name` sind identisch. `core-shared` ist ein intern referenziertes Bundle und kein fünfter Workflow. Seine `SKILL.md` ist ein kurzer Index; Verträge und Vorlagen liegen in `references/` beziehungsweise `assets/`.
+
+Die Paketquelle enthält aktuell 22 paketeigene `core-*`-Skillbundles einschließlich des internen `core-shared`; die externe APM-Abhängigkeit `gortex-serena-configurator` zählt nicht dazu.
 
 APM projiziert `.apm/` in die Zielharnesses. Generierte `.agents/`, `.opencode/` oder `.codex/`-Kopien sind keine kanonischen Quellen und werden nicht manuell gepflegt.
 
@@ -416,7 +422,7 @@ checks:
 limitations: []
 ```
 
-Exitcode 0 allein beweist keine fachliche Erfüllung. Pflichtchecks ohne aktuelle Evidenz führen zu `partial` oder `blocked`.
+Exitcode 0 allein beweist keine fachliche Erfüllung. Pflichtchecks ohne aktuelle Evidenz führen zu `partial` oder `blocked`. `core-execute` persistiert Rückgaben read-only eingesetzter Agenten in deren Taskresultat; diese Agenten erhalten dadurch keine Schreibrechte auf Produkt- oder andere Runartefakte. Ein ausdrücklich schreibender Task-Agent darf ausschließlich die eigene Ergebnisdatei als eng begrenzte Ausnahme ändern. Neue Taskversuche liegen in eindeutigen, unveränderlichen `tasks/<task-id>/attempt-<nn>.yaml`-Dateien; bestehende `tasks/<task-id>.yaml` werden nur lesend als Legacy-Ergebnis unterstützt und nicht migriert oder überschrieben.
 
 ## 12. Workflow: `core-review`
 
@@ -492,7 +498,7 @@ Workflows besitzen den Lebenszyklus; Fachagenten besitzen Rollen. **Während der
 | `research-explorer` | fokussierte read-only Evidenzsynthese | keine Repositorymutation |
 | `tf-infra-engineer` | Terraform, IAM, Netzwerk und State | kein Apply oder Destroy ohne Autorisierung |
 
-Fachmethodik liegt in Skills und bedingt geladenen Referenzen. Agentendefinitionen bleiben kurz und verweisen auf ihren Eigentümer-Skill. Die QA-Methode liegt im `core-review`-Skill; ein paralleler öffentlicher `qa`-Workflow oder zweiter QA-Lebenszyklus entfällt.
+Fachmethodik liegt in Skills und bedingt geladenen Referenzen und wird bei Bedarf inline verwendet; sie ist kein Agenten-Dispatch. Während eines Plans startet ausschließlich `core-execute` Fachagenten, je einen registrierten Agenten pro Task; kein Agent startet weitere Agenten. Agentendefinitionen bleiben kurz und verweisen auf ihren Eigentümer-Skill. Die QA-Methode liegt im `core-review`-Skill; ein paralleler öffentlicher `qa`-Workflow oder zweiter QA-Lebenszyklus entfällt.
 
 ## 14. Tool- und MCP-Architektur
 
@@ -627,15 +633,26 @@ Geschrieben werden nur knappe, langlebige und bestätigte Informationen mit erke
 | Produktcode und Konfiguration | Repository und Git-Diff |
 | Systemdesign dieses Pakets | `DESIGN.md` |
 | Projektinvarianten | projektspezifische `AGENTS.md` und dokumentierte Verträge |
-| Ziel, Scope und Taskgraph | bestätigter Plan unter `.agentic-workflow/plans/` |
-| aktueller Ausführungszustand | `.agentic-workflow/runs/<run-id>/state.yaml` |
-| Task- und Checkevidenz | `.agentic-workflow/runs/<run-id>/tasks/` |
+| Gesamtziel und gemeinsame bestätigte Entscheidungen | `.agentic-workflow/goals/<goal-id>/goal.md` (`goal/v1`), nur bei ausdrücklich mehrstufigem Vorhaben; Eigentümer: `core-milestone` |
+| unveränderliche Etappendefinition und Version | `.agentic-workflow/goals/<goal-id>/milestones/<milestone-id>-v<version>.yaml` (`milestone-definition/v1`); Eigentümer: `core-milestone` |
+| Versionsauswahl, aktuelle Etappe und Nachweisverweise | `.agentic-workflow/goals/<goal-id>/index.yaml` (`milestone-index/v1`); Eigentümer: `core-milestone` |
+| Ziel, Scope und Taskgraph | bestätigter Plan unter `.agentic-workflow/plans/` (`plan/v1`); Eigentümer: `core-plan` |
+| aktueller Ausführungszustand | `.agentic-workflow/runs/<run-id>/state.yaml`; Eigentümer: `core-execute` |
+| Task- und Checkevidenz | neue Versuche: `.agentic-workflow/runs/<run-id>/tasks/<task-id>/attempt-<nn>.yaml`; Legacy-Leseform: `tasks/<task-id>.yaml`; `core-execute` persistiert read-only Agentenergebnisse |
 | Kontextübergabe zu Review oder Resume | `.agentic-workflow/runs/<run-id>/handoff.md` |
 | Reviewurteil und Findings | `.agentic-workflow/runs/<run-id>/review.yaml` |
 | tatsächliche Änderungshistorie | Git |
 | semantische Erinnerung | Honcho, nicht autoritativ |
 
-Der Plan bleibt während der Ausführung unverändert. `state.yaml` enthält nur den aktuellen Resume-Zustand, keine Eventhistorie. `handoff.md` wird ersetzt statt endlos erweitert. Run-Artefakte sind normalerweise gitignoriert und nach Abschluss entbehrlich; bestätigte Pläne dürfen versioniert werden.
+Der Plan bleibt während der Ausführung unverändert. `state.yaml` enthält nur den aktuellen Resume-Zustand, keine Eventhistorie. `handoff.md` wird ersetzt statt endlos erweitert. Run-Artefakte sind normalerweise gitignoriert; bestätigte Pläne dürfen versioniert werden. Ziel, referenzierte Definitionsversionen, Index, Plan-, Run-, Review-, Taskversuchs- und Originalprüfnachweise bleiben erhalten, solange Ziele oder spätere Übergaben darauf angewiesen sind. Referenzabhängige Aufbewahrung ersetzt pauschale Löschung nach Runabschluss.
+
+### Mehrstufige Ziele und Versionsübergaben
+
+Einfache Vorhaben ohne Milestones benötigen keine Zielstruktur; ein bestätigter `plan/v1` genügt. Nur für ausdrücklich gewählte mehrstufige Vorhaben kommen drei getrennte Formate hinzu: `goal/v1` in `.agentic-workflow/goals/G01/goal.md`, unveränderliche `milestone-definition/v1`-Dateien unter `milestones/` und ein aktualisierbarer `milestone-index/v1` in `index.yaml`. `core-milestone` besitzt Ziel, Definitionen und Index. Bestätigte Definitionen bleiben unveränderlich. Das Ziel hält Gesamtziel, Nicht-Ziele, Leitplanken, bestätigte gemeinsame Entscheidungen und Gesamtzielkriterien fest; Definitionen halten Outcome, Scope, Kriterien und exakte versionierte Abhängigkeiten fest; der Index ist die Auswahl- und Nachweisquelle, kein Scheduler und keine Kopie von Task-/Runstatus.
+
+Beispiel: `.agentic-workflow/goals/G01/milestones/M02-v1.yaml` bleibt nach Bestätigung unverändert. Eine inhaltliche Änderung erzeugt nach Prüfung eine neue `M02-v2.yaml`; ihre Auswahl im Index benötigt ausdrückliche Bestätigung. Ein bloß vorhandenes oder höher nummeriertes Artefakt ist nicht ausgewählt. Ein Plan wie `plan-G01-M02-v1-p01.md` pinnt Ziel, Index, ID, Version und Definitionspfad. Für v2 wird ein neuer Plan bestätigt, zum Beispiel `plan-G01-M02-v2-p01.md`; ein Ersatzplan derselben Version erhöht `p`, etwa auf `p02`. Ein eigenständiger neuer Ausführungslauf erhöht `r` (z. B. `run-G01-M02-v2-p01-r01/`); Resume und Review-Reparaturen behalten exakt dieselbe Run-ID. Taskversuche bleiben getrennte, unveränderliche Kennungen, zum Beispiel `tasks/T01/attempt-01.yaml`. Nummern, Dateinamen und Änderungsdatum ersetzen keine exakten Referenzen oder Freigaben.
+
+Der Versionswechsel überträgt weder Planbindung noch historischen Erfolg: v1-Abschlussbelege verbleiben bei v1. Wiederverwendung für v2 setzt ausdrückliche Prüfung gegen die neuen Kriterien und Abhängigkeiten voraus; bis dahin ist v2 nicht abgeschlossen. Abhängige Etappen bleiben mit alten Versionsbezügen gebunden und für aktive Folgearbeit blockiert, bis passende Ersatzdefinitionen bestätigt sind. Eine neue Version gibt keine Folgeetappe frei. Ein laufender Run wird nicht automatisch umgebunden; nötigenfalls braucht es einen bestätigten Ersatzplan. Das frühere `milestone/v1` bleibt unter dem ausdrücklich benannten Pfad lesbar, wird aber weder automatisch migriert noch mit den getrennten Formaten vermischt. `core-handoff` überträgt exakte Ziel-, Index-, Definitions-, Plan- und einschlägige Runpfade; ein Startprompt oder Handoff ist keine Freigabe.
 
 ## 17. `core-init-project` und `AGENTS.md`
 
@@ -707,15 +724,16 @@ Eine vollständige Dateiübernahme ist eine gewarnte Ausnahme und verlangt die a
 6. importierte globale Präferenz
 7. generischer Paketdefault
 
-## 18. MCP-Einrichtung und APM
+## 18. MCP-Prüfung und APM
 
 Aktuelle APM-Versionen können MCP-Abhängigkeiten in `apm.yml` deklarieren und pro Zielharness materialisieren. Das frühere pauschale Verbot, MCP-Konfiguration über das Paketmanifest zu verwalten, ist daher überholt.
 
 Verbindliche Aufteilung:
 
-- `apm.yml` darf portable, überprüfte MCP-Abhängigkeiten und Tool-Allowlisten deklarieren.
-- `core-init-mcps` zeigt die konkrete Zielkonfiguration vorab, richtet umgebungsabhängige Provider kontrolliert ein und führt Health-Checks aus.
-- Provider-spezifische Projektinitialisierung, etwa Gortex-Tracking oder Serena-Sprachen, bleibt ein expliziter Schritt und erfolgt nie stillschweigend.
+- `apm.yml` kann portable, ausdrücklich geprüfte MCP-Abhängigkeiten und Tool-Allowlisten deklarieren; diese Deklaration ist keine Voraussetzung für die Providerbestandsprüfung.
+- `core-init-mcps` prüft ausschließlich read-only bereits vorhandene Provider des benannten Harnesses und berichtet beobachtete Bereitschaft sowie Lücken. Es installiert, aktiviert oder konfiguriert nichts und ändert weder Harness- noch Paketdateien.
+- Fehlende Provider oder Credentials werden gemeldet, nicht gesucht oder eingerichtet. Ein passender Installationsskill kann benannt werden, wird aber nicht automatisch ausgeführt.
+- Provider-spezifische Projektinitialisierung, etwa Gortex-Tracking oder Serena-Sprachen, bleibt ein eigener, ausdrücklich autorisierter Schritt und erfolgt nie stillschweigend.
 - Credentials und lokale Secrets bleiben außerhalb des Pakets und der Repositoryartefakte.
 - Es gibt keine zweite, konkurrierende MCP-Konfigurationsdatei der Workflow-Werkbank.
 
@@ -768,7 +786,7 @@ Jede Regel hat genau einen Eigentümer. Paketdefaults autorisieren keine Migrati
 | Gortex/Serena als Memory | nein; Code- und Informationsprovider |
 | Serena als allgemeine Recherche | projektbezogene Informationssuche und Code-Fallback, kein Webresearch |
 | Honcho als Zustandsspeicher | nur optionale semantische Erinnerung |
-| MCPs nicht über APM deklarieren | portable Deklarationen sind erlaubt; `core-init-mcps` ergänzt Preview, Setup und Health-Check |
+| MCP-Prüfung und APM-Deklaration vermischen | APM-Deklarationen sind separat; `core-init-mcps` prüft vorhandene Provider read-only und ändert keine Konfiguration |
 | separate Rule-Dateien als Parallelarchitektur | Projektfakten in `AGENTS.md`, Methoden in Skills und Referenzen |
 | globales `AGENTS.md` vollständig kopieren | standardmäßig nur manuelle Benutzeranweisungen nach Diff-Bestätigung |
 | zentraler Katalog als vollständige Prozessquelle | kleiner Routing- und Validierungskatalog; Methoden bleiben in Skills |

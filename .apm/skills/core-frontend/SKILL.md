@@ -23,6 +23,14 @@ Ein vorhandenes `DESIGN.md`, Design Tokens, Komponentenbibliotheken und belegte 
 
 Für mutierende Aufgaben gelten der [Workflowvertrag](../core-shared/references/workflow-contract.md) für Autorisierung und Scope sowie der [Verifikationsvertrag](../core-shared/references/verification.md) für Impact, Post-edit-Prüfung und aktuelle Evidenz. Lade das [Toolrouting](../core-shared/references/tool-routing.md) nur, wenn Code-Intelligence oder aktuelle externe Dokumentation benötigt wird.
 
+### Cross-Domain-Übergaben und Zielschutz
+
+Fachagenten wählen keine Ziel-/Milestone-Version und ändern weder Ziel, Definition, Index noch Freigaben.
+
+- Melde benötigte Backend-API- oder Vertragsarbeit an `core-execute`; dispatcht wird ausschließlich dort. Vorhandene bestätigte Tasks verwenden `dependencies` und verweisen in `context_paths` auf die exakten benötigten API-, Design- und gegebenenfalls Zielquellen. Halte UI-Arbeit an den bestätigten Verträgen.
+- Fehlt ein passender Task oder erfordert die Arbeit eine materielle API-, Ziel- oder Scopeänderung, geht sie über Execute an `core-plan`; starte keinen Agenten direkt und erweitere den UI-Task nicht.
+- Wähle oder ändere keine Ziel-/Milestone-Version und ändere weder Ziel, unveränderliche Definition, Index noch Freigabe. Bei Etappenarbeit gelten ausschließlich ausdrücklich gepinnte Ziel-, Index- und Definitionspfade; Dateineuheit begründet keine Auswahl.
+
 ## Bedingte Frameworkreferenzen
 
 Lade genau die Referenz, deren Stack im aktuellen Projekt belegt ist:

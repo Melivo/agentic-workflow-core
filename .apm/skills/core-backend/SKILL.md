@@ -31,6 +31,14 @@ Für mutierende Aufgaben gelten der [Workflowvertrag](../core-shared/references/
 - Route unklare Ursachen und Regressionen an die Debug-Fachstrategie; verhaltensneutrale Strukturarbeit an `core-refactor`.
 - Führe keine Build-, Installations-, SCM-, Deployment- oder produktive Datenbankaktion ohne die dafür erforderliche ausdrückliche Autorisierung aus.
 
+### Cross-Domain-Übergaben und Zielschutz
+
+Fachagenten wählen keine Ziel-/Milestone-Version und ändern weder Ziel, Definition, Index noch Freigaben.
+
+- Übergib Backendbedarf an `core-database`, wenn die bestätigte Arbeit Schema, Migration, Integrität, Transaktionen oder Datenbank-Queries/-Indizes entscheidet; reine Anwendungseinbindung bleibt hier. Nutze nur den bestätigten Plantaskgraphen: Die zuständigen Tasks müssen durch `dependencies` geordnet sein und ihre `context_paths` die exakten benötigten Schema-, API-, Design- und gegebenenfalls Zielquellen nennen.
+- Melde fehlende Tasks oder materielle Vertragsänderungen an `core-execute`; nur Execute dispatcht. Execute gibt ungeplante oder materiell scope-/vertragsändernde Arbeit an `core-plan` zurück. Starte keine Fachagenten direkt und erweitere keinen Taskscope.
+- Wähle oder ändere keine Ziel-/Milestone-Version und ändere weder bestätigtes Ziel noch Definition, Index oder Freigabe. Bei Etappenarbeit gelten nur die ausdrücklich gepinnten Ziel-, Index- und Definitionspfade; „neueste“ Dateien sind keine Auswahl.
+
 ## Bedingte Referenzen
 
 Lade Detailregeln nur bei passendem Risiko:
