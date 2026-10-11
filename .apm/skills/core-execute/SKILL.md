@@ -40,7 +40,7 @@ Verwende die [Handoffvorlage](../core-shared/assets/handoff.md), wenn `core-revi
 ### 1. Plan und Drift validieren
 
 1. Prüfe `schema: plan/v1`, `status: Confirmed` und genau einen eingebetteten Taskgraphen. Bei gepinnter Etappenarbeit lade Ziel, Index und exakte Definitionsversion erneut; verifiziere enthaltene IDs/Pfade, Indexauswahl/-freigabe, Planbindung und deren aktuelle Gültigkeit vor Start. Ein Versions-/Auswahlwechsel oder abgelöster Plan blockiert Start und Resume; route zu `core-milestone` für Auswahlklärung und zu `core-plan` für nötigen Ersatzplan. Setze weder automatisch fort noch überschreibe den laufenden Plan. Resume und Review-Reparaturen behalten dieselbe Run-ID; legacy `milestone/v1` wird nur über den ausdrücklich benannten Pfad gelesen.
-2. Validiere für jeden Task einen registrierten Fachagenten, getrennte `context_paths` und `scope`, bekannte erforderliche MCPs, einen azyklischen Abhängigkeitsgraphen sowie die vollständige Abdeckung aller Akzeptanzkriterien durch eindeutige Checks.
+2. Validiere für jeden Task einen registrierten Fachagenten, getrennte `context_paths` und `scope`, bekannte erforderliche MCPs, einen azyklischen Abhängigkeitsgraphen sowie die vollständige Abdeckung aller Akzeptanzkriterien durch eindeutige Checks. Bei Coding-Tasks prüfe zusätzlich direkt die [S00-Basis](../core-architecture/references/design-baseline.md) für die tatsächlich betroffenen Strukturen und Verträge, ohne unbetroffene Bereiche zu inventarisieren; stelle sicher, dass der Task diese kanonische Referenz in `context_paths` als Lesequelle enthält und die Akzeptanz-/Checkfelder ihre anwendbaren Ergebnisse überprüfbar abdecken.
 3. Behandle einen leeren `scope` als read-only. Ein Check mit Build-, Compile-, Bundle-, Package- oder Installationswirkung ist ohne passende ausdrückliche Autorisierung blockiert.
 4. Vergleiche Planannahmen, referenzierte Pfade, vorhandenen Diff und wiederverwendete Evidenz mit dem aktuellen Repositorystand. Drift macht betroffene Evidenz ungültig.
 5. Prüfe bei Start, Resume und jedem Taskresultat die Auslöser der [evidenzbasierten Ersatzplanung](../core-shared/references/workflow-contract.md#evidenzbasierte-ersatzplanung). Bei einem Auslöser stoppe die Produktarbeit, sichere Zustand und Evidenz und übergib automatisch an `core-plan`; die Bestätigung des Ersatzplans bleibt erforderlich. Bei kompatibler Drift aktualisiere nur Runzustand und neu zu erhebende Evidenz, niemals den Plan.
@@ -61,7 +61,7 @@ Ein Chatverlauf oder Provider-Memory ersetzt kein Run-Artefakt.
 ### 3. Tasks schedulen und dispatchen
 
 - Reihenfolge und Parallelität folgen nur `dependencies`, nicht Prioritäten oder Dateireihenfolge.
-- Übergib jeden Task genau einem registrierten Fachagenten mit Auftrag, `context_paths`, `scope`, Akzeptanzkriterien, Checks und relevanten Constraints.
+- Übergib jeden Task genau einem registrierten Fachagenten mit Auftrag, `context_paths`, `scope`, Akzeptanzkriterien, Checks und relevanten Constraints. Bei Coding-Tasks ergänze zusätzlich die kanonische [S00-Referenz](../core-architecture/references/design-baseline.md) und stelle die Zuständigkeit des Fachskills klar; der Fachagent wendet S00 vor der ersten Codeänderung an. Das ist kein zusätzlicher Architektur-Dispatch; read-only Tasks bleiben ohne diesen Zusatz an ihren einen Fachagenten gebunden.
 - Der Fachagent darf den Scope nicht erweitern und **keinen Subagenten** starten. Jeder weitere Dispatch bleibt allein bei `core-execute`.
 - Read-only-Tasks dürfen ohne Ressourcenkollision parallel laufen.
 - Schreibende Tasks dürfen nur mit disjunkten Scopes, gemeinsamer Ausgangsbasis und sicherer Isolation parallel laufen; höchstens zwei gleichzeitig. Serialisiere bei Unsicherheit.
@@ -73,9 +73,9 @@ Verlange pro neuem Versuch die eigene, unveränderliche Datei `.agentic-workflow
 
 - Task-ID, Versuch und Status,
 - `changed_paths` gegen die tatsächlichen Änderungen und den bestätigten `scope`,
-- jede Akzeptanz-ID samt beobachtbarer Evidenz,
-- jeden gepinnten Check mit unverändertem Kommando, `cwd`, Exitcode und fachlicher Beobachtung,
-- Einschränkungen und Blockierungsgründe.
+- jede Akzeptanz-ID samt beobachtbarer Evidenz, einschließlich des S00-Befunds für die betroffenen Strukturen und Verträge bei Coding-Tasks,
+- jeden gepinnten Check mit unverändertem Kommando, `cwd`, Exitcode und fachlicher Beobachtung, einschließlich der vorhandenen S00-relevanten `acceptance`-/`checks`-Evidenz,
+- Einschränkungen und Blockierungsgründe in den vorhandenen Ergebnisfeldern; kein neues Schema und keine unabhängige Selbstreview.
 
 Ein Exitcode 0 oder eine Agentenbehauptung genügt nicht. Änderungen außerhalb des Scopes oder Mutationen durch read-only-Tasks werden nicht integriert. Fehlende aktuelle Pflichtcheckevidenz ergibt `partial` oder `blocked`, nicht `completed`.
 

@@ -9,7 +9,7 @@ description: Entwirft, implementiert und prüft Terraform-Infrastruktur, State, 
 
 ## Situative Designmethoden
 
-Lade bei Coding-Arbeit [S00 – SWE-Basis und Auswahl](../core-architecture/references/design-baseline.md) als gemeinsame Grundlage und prüfe zum Abschluss die tatsächlich betroffenen Module; benenne nicht anwendbare Punkte. Detailmethoden werden nur bei konkretem Signal geladen, nicht als Vollscan. Die Referenzen aktivieren keinen Architekturworkflow und erlauben keine ungeplanten Refactorings.
+Vor der ersten Codeänderung bei jeder Coding-Arbeit lade [S00 – SWE-Basis und Auswahl](../core-architecture/references/design-baseline.md) und wende sie proportional auf den bestätigten Task, die betroffenen Module, Verträge und relevanten Tests an – auch bei kleinen Änderungen ohne Architektur-Trigger. Prüfe zum Abschluss dieselben tatsächlich betroffenen Bereiche und benenne nicht anwendbare Punkte. Detailmethoden werden nur bei konkretem Signal geladen, nicht als Vollscan. Die Referenzen aktivieren keinen Architekturworkflow und erlauben keine ungeplanten Refactorings.
 
 Bei gekoppelten Moduländerungen oder dünnen Wrappern nutze [M01–M04](../core-architecture/references/boundaries-and-abstractions.md); bei unnötigen Variablen, wiederholtem Setup oder Fehlerflächen [M05–M06](../core-architecture/references/interface-and-errors.md). Bei materiellen Modul-/Eigentumsentscheidungen nutze [M10](../core-architecture/references/alternatives.md). Keine Ausführung von plan/apply/destroy aus diesen Methoden ableiten.
 

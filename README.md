@@ -43,7 +43,7 @@ apm install --only apm
 apm audit --ci
 apm pack --offline --target agent-skills --output ./dist
 # In einem separaten Verbrauchsverzeichnis:
-apm install /path/to/dist/agentic-workflow-core-0.1.0 --target agent-skills
+apm install /path/to/dist/agentic-workflow-core-0.1.1 --target agent-skills
 ```
 
 Für eine ZIP-Datei ergänze beim Packen `--archive`. Bei der Installation eines lokalen Bundles ist `--only apm` nicht erlaubt; das Bundle wird ohne Dependency-Auflösung direkt installiert.
@@ -96,7 +96,7 @@ Versionswechsel übertragen weder Planbindung noch Erfolg: historische Abschluss
 
 ## Interne Designmethoden und aktuelle MCP-Fähigkeiten
 
-Die [SWE-Basis und situative Auswahl](.apm/skills/core-architecture/references/design-baseline.md) bündelt klare Verantwortlichkeiten, stabile Schnittstellen, Information Hiding, begründete Abhängigkeiten und Testbarkeit. Coding-Skills berücksichtigen diese Basis und prüfen zum Abschluss die betroffenen Module. Clairvoyance-Methoden sind intern konsolidiert und werden nur bei konkreten Signalen vertieft, nicht als obligatorischer Komplettscan. Ihr Laden startet keinen Architekturworkflow und erlaubt keine ungeplanten Refactorings.
+Die [SWE-Basis und situative Auswahl](.apm/skills/core-architecture/references/design-baseline.md) bündelt klare Verantwortlichkeiten, stabile Schnittstellen, Information Hiding, begründete Abhängigkeiten und Testbarkeit. `core-plan` wendet S00 bei Coding-Vorhaben bereits auf Lösungswahl, Taskgrenzen und überprüfbare Akzeptanz-/Checkabdeckung an; `core-execute` übergibt die Referenz an den zuständigen Fachskill. Coding-Skills wenden sie vor der ersten Codeänderung auf den bestätigten, betroffenen Bereich an und belegen die Abschlussprüfung in den vorhandenen Ergebnisfeldern. Clairvoyance-Methoden sind intern konsolidiert und werden nur bei konkreten Signalen vertieft, nicht als obligatorischer Komplettscan. Ihr Laden startet keinen Architekturworkflow und erlaubt keine ungeplanten Refactorings.
 
 Die [Provenienz](.apm/skills/core-architecture/PROVENANCE.md) dokumentiert alle 16 Quellskills; der [MIT-Hinweis](.apm/skills/core-architecture/THIRD_PARTY_NOTICES.md) begleitet die Adaptionen. Separat installierte Clairvoyance- oder SWE-Skills sind nicht erforderlich. Der private UNLICENSED-SWE-Skill wurde nicht übernommen.
 

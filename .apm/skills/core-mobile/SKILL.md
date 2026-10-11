@@ -9,7 +9,7 @@ description: Implementiert Flutter-, React-Native- und native Swift-iOS-Aufgaben
 
 ## Situative Designmethoden
 
-Lade bei Coding-Arbeit [S00 – SWE-Basis und Auswahl](../core-architecture/references/design-baseline.md) als gemeinsame Grundlage und prüfe zum Abschluss die tatsächlich betroffenen Module; benenne nicht anwendbare Punkte. Detailmethoden werden nur bei konkretem Signal geladen, nicht als Vollscan. Die Referenzen aktivieren keinen Architekturworkflow und erlauben keine ungeplanten Refactorings.
+Vor der ersten Codeänderung bei jeder Coding-Arbeit lade [S00 – SWE-Basis und Auswahl](../core-architecture/references/design-baseline.md) und wende sie proportional auf den bestätigten Task, die betroffenen Module, Verträge und relevanten Tests an – auch bei kleinen Änderungen ohne Architektur-Trigger. Prüfe zum Abschluss dieselben tatsächlich betroffenen Bereiche und benenne nicht anwendbare Punkte. Detailmethoden werden nur bei konkretem Signal geladen, nicht als Vollscan. Die Referenzen aktivieren keinen Architekturworkflow und erlauben keine ungeplanten Refactorings.
 
 Bei verteilter Lifecycle-/Zustandsverantwortung oder dünnen Plattformwrappern nutze [M01–M04](../core-architecture/references/boundaries-and-abstractions.md); bei wiederholtem Setup oder unklarer Fehlerbehandlung [M05–M06](../core-architecture/references/interface-and-errors.md). Bei neuen Sonderfällen und verschleierten Verträgen nutze [M07–M09](../core-architecture/references/evolution-and-clarity.md).
 

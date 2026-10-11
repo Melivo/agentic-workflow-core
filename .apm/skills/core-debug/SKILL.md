@@ -9,7 +9,7 @@ description: Fachmethode für unklare Ursachen, Regressionen und intermittierend
 
 ## Situative Designmethoden
 
-Lade bei Coding-Arbeit [S00 – SWE-Basis und Auswahl](../core-architecture/references/design-baseline.md) als gemeinsame Grundlage und prüfe zum Abschluss die tatsächlich betroffenen Module; benenne nicht anwendbare Punkte. Detailmethoden werden nur bei konkretem Signal geladen, nicht als Vollscan. Die Referenzen aktivieren keinen Architekturworkflow und erlauben keine ungeplanten Refactorings.
+Vor der ersten Codeänderung bei jeder Coding-Arbeit lade [S00 – SWE-Basis und Auswahl](../core-architecture/references/design-baseline.md) und wende sie proportional auf den bestätigten Task, die betroffenen Module, Verträge und relevanten Tests an – auch bei kleinen Änderungen ohne Architektur-Trigger. Prüfe zum Abschluss dieselben tatsächlich betroffenen Bereiche und benenne nicht anwendbare Punkte. Detailmethoden werden nur bei konkretem Signal geladen, nicht als Vollscan. Die Referenzen aktivieren keinen Architekturworkflow und erlauben keine ungeplanten Refactorings.
 
 Nur wenn die Diagnose versteckte Änderungsabhängigkeiten oder unklare Wissensgrenzen belegt, nutze [M01–M04](../core-architecture/references/boundaries-and-abstractions.md). Bei ignorierten Fehlern oder unklarer Recovery nutze [M05–M06](../core-architecture/references/interface-and-errors.md). Regressionsevidenz und minimaler Fix bleiben vorrangig; kein Refactoring als Nebenwirkung.
 

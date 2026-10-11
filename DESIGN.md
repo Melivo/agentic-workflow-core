@@ -337,8 +337,10 @@ tasks:
 
 Regeln:
 
+- Bei Coding-Tasks wendet `core-plan` S00 bereits auf Lösungswahl und Taskgrenzen an, auch wenn kein Architektur-Trigger vorliegt.
+- `context_paths` enthalten für Coding-Tasks die kanonische S00-Referenz und alle weiteren exakt benötigten Lesequellen; `scope` ist der erlaubte Änderungsscope.
+- Akzeptanzkriterien und Checks decken anwendbare S00-relevante Ergebnisse konkret und überprüfbar ab, ohne ein neues Planfeld oder einen pauschalen Architektur-Vollscan.
 - genau ein registrierter Fachagent pro Task,
-- `context_paths` sind Lesequellen, `scope` ist der erlaubte Änderungsscope,
 - leeres `scope` bedeutet read-only,
 - Abhängigkeiten sind der einzige Ordnungsmechanismus,
 - jedes Akzeptanzkriterium wird durch mindestens einen Check gedeckt,
@@ -368,12 +370,12 @@ Er plant nicht neu, urteilt nicht unabhängig über seine eigene Gesamtänderung
 ### Ablauf
 
 1. bestätigten Plan und Projektpreflight laden,
-2. Schema, Agenten, MCPs, Scopes, Abhängigkeiten und Checks validieren,
+2. Schema, Agenten, MCPs, Scopes, Abhängigkeiten und Checks validieren; bei Coding-Tasks S00 direkt auf die betroffenen Strukturen und Verträge anwenden,
 3. Repositorydrift prüfen,
 4. Run anlegen oder fortsetzen,
 5. Ready Set aus integrierten Abhängigkeiten ableiten,
-6. Tasks an genau einen Fachagenten dispatchen,
-7. Ergebnis und tatsächlichen Diff gegen Scope prüfen,
+6. jeden Task an genau einen Fachagenten dispatchen; Coding-Tasks zusätzlich mit S00-Referenz und zuständigem Fachskill übergeben,
+7. Ergebnis, S00-Befund in vorhandenen Ergebnisfeldern und tatsächlichen Diff gegen Scope prüfen; keine unabhängige Selbstreview,
 8. akzeptierte Ergebnisse serialisiert integrieren,
 9. betroffene Checks auf dem integrierten Stand erneut ausführen,
 10. Gesamtänderung mit frischem Kontext an `core-review` übergeben,
@@ -858,7 +860,7 @@ Diese Trennung hält das System lean, clean, nachvollziehbar und nach einem Kont
 
 ## Interne Designmethoden und capability-basiertes MCP-Routing
 
-Die kanonische Fachbasis liegt in [core-architecture/references/design-baseline.md](.apm/skills/core-architecture/references/design-baseline.md), die Vertiefungen in den dort direkt ausgewählten paketinternen Referenzen. Die SWE-Grundsätze gelten für tatsächlich betroffene Coding-Bereiche und die Abschlussprüfung; Clairvoyance-Diagnosen werden ausschließlich durch belegte Struktur- oder Vertragssignale ausgelöst. Ein Referenzladen aktiviert keinen Architekturworkflow. Agentendefinitionen bleiben kurze Eigentümer-Skill-Verweise; core-shared enthält keine Designfachmethodik.
+Die kanonische Fachbasis liegt in [core-architecture/references/design-baseline.md](.apm/skills/core-architecture/references/design-baseline.md), die Vertiefungen in den dort direkt ausgewählten paketinternen Referenzen. `core-plan` wendet S00 bei Coding-Vorhaben bereits an Lösungswahl, Taskgrenzen, `context_paths` und überprüfbarer Akzeptanz-/Checkabdeckung an. `core-execute` prüft S00 direkt an den tatsächlich betroffenen Strukturen und Verträgen, übergibt Referenz und zuständigen Fachskill und verlangt den Nachweis in vorhandenen Ergebnisfeldern. Der zuständige Coding-Skill wendet die SWE-Grundsätze vor der ersten Codeänderung auf den betroffenen Bereich an und prüft ihn zum Abschluss; Clairvoyance-Diagnosen werden ausschließlich durch belegte Struktur- oder Vertragssignale ausgelöst. Ein Referenzladen aktiviert keinen Architekturworkflow. Agentendefinitionen bleiben kurze Eigentümer-Skill-Verweise; core-shared enthält keine Designfachmethodik.
 
 Boundary-/Abstraktionsdiagnose, Schnittstellen-/Fehlerprüfung, Designentwicklung/Vertragsklarheit und Alternativenvergleich teilen kanonische Methoden, keine kopierten Komplettworkflows. Warnzeichen werden erst mit Quelle, Ursache und Wirkung zum Finding. Legitime Adapter, öffentliche Datenverträge und notwendige fachliche Kopplung bleiben möglich. Fehlende Evidenz bleibt eine Lücke; neue Refactorings benötigen den bestätigten Task und sein Safety Net.
 

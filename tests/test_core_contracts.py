@@ -266,9 +266,23 @@ class ContractTests(unittest.TestCase):
                 checker.check_group(ROOT, 'milestones')
             with patch.object(Path, 'read_text', injected('README.md')):
                 checker.check_group(ROOT, 'milestones')
-        # Illustrative plan/run paths in index examples are no file obligation.
+        # Illustrative plan/run paths in index examples are no file obligation:
+        # the index check must pass whether those files are absent or present, independent of ROOT.
         index = next(d for d in canonical_examples() if d['schema'] == 'milestone-index/v1')
-        self.assertFalse((ROOT / index['milestones'][0]['plan_paths'][0]).exists())
+        illustrative = {p for m in index['milestones'] for p in m['plan_paths'] + m['run_paths']}
+        self.assertTrue(illustrative)
+        real_exists = Path.exists
+        for present in (False, True):
+            seen = []
+            def exists(path, *args, **kwargs):
+                if any(str(path).endswith(p) for p in illustrative):
+                    seen.append(str(path))
+                    return present
+                return real_exists(path, *args, **kwargs)
+            with self.subTest(present=present), patch.object(Path, 'exists', exists):
+                self.assertEqual({p for p in illustrative if (ROOT / p).exists()}, illustrative if present else set())
+                checker.check_format('milestone-index/v1', copy.deepcopy(index))
+                self.assertTrue(seen)
 
     def test_rv04_complete_artifact_set_without_definitions_fails(self):
         documents = canonical_examples()

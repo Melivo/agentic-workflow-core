@@ -47,6 +47,8 @@ Kann Gortex eine konkrete read-only Informationsoperation nicht bedienen, nutze 
 
 Nutze `core-research` inline bei konkreter materieller Wissenslücke und `core-architecture` inline bei einer Boundary-, langlebigen Vertrags- oder schwer reversiblen Richtungsentscheidung. Nutze `core-refactor` nur bei konkretem verhaltensbewahrendem Struktur-/Safety-Net-Signal; Characterization und Refactoring sind getrennte, abhängige Tasks. Diese Methoden lösen keinen Fachagenten-Dispatch aus. Read-only Research-Befunde gehen in den aufrufenden Kontext und, wenn ausführungsrelevant, in Execute als Taskkontext/-ergebnis, nicht als eigene Status- oder Entscheidungsquelle.
 
+Bei jeder Planung, die Coding-Arbeit umfasst, wende die kanonische [S00-Basis](../core-architecture/references/design-baseline.md) bereits bei der Lösungswahl proportional auf den bestätigten Task an – auch bei kleinen Änderungen ohne Architektur-Trigger. Prüfe konkrete Modulverantwortung, Verträge, Abhängigkeiten und Testbarkeit, ohne nicht betroffene Bereiche zu inventarisieren oder daraus ungeplantes Refactoring abzuleiten. Löse den relativen Link vom tatsächlich geladenen Verzeichnis dieses `SKILL.md` auf, prüfe mit einem Lesezugriff, dass die Datei existiert und lesbar ist, und verwende den so ermittelten exakten Pfad als S00-Lesequelle (Schritt 4). Ist die Quelle fehlend oder nicht lesbar, trage keine Referenz ein, bestätige keinen Coding-Plan und stoppe mit `blocked` unter Nennung der fehlenden Quelle.
+
 Nutze diese Hierarchie und stoppe, sobald die Planfrage belastbar beantwortet ist:
 
 1. Repositorycode, Tests und lokale Verträge über Gortex.
@@ -64,9 +66,9 @@ Serena bleibt auf ausdrücklich konfigurierte Projekte begrenzt und ist weder al
 
 ### 4. Einen Taskgraphen zerlegen
 
-Forme Aufgaben, die je ein registrierter Fachagent in frischem Kontext selbstständig abschließen kann. Für jeden Task gelten folgende Grenzen:
+Forme Aufgaben, die je ein registrierter Fachagent in frischem Kontext selbstständig abschließen kann. Bei Coding-Tasks nutze die S00-Prüfung zur Abgrenzung der betroffenen Module und zur Entscheidung, welche exakten Quellen der Fachagent benötigt; verankere konkrete, überprüfbare S00-relevante Ergebnisse in den vorhandenen `acceptance`-/`checks`-Feldern. Für jeden Task gelten folgende Grenzen:
 
-- `context_paths` nennt ausschließlich benötigte Lesequellen.
+- `context_paths` nennt ausschließlich benötigte Lesequellen; bei Coding-Tasks gehört der in Schritt 3 aufgelöste exakte S00-Lesepfad immer dazu, nie ein fest codierter Producer- oder Harness-Pfad.
 - `scope` nennt ausschließlich erlaubte Mutationspfade; `scope: []` bedeutet read-only.
 - `dependencies` ist der einzige Ordnungsmechanismus. Verwende kein `priority`-Feld und keine versteckten Ausführungsstufen.
 - `required_mcps` enthält nur Provider, deren Fehlen den Task blockiert; ersetzbare Provider stehen in `optional_mcps`.
@@ -88,7 +90,7 @@ Prüfe vor der Bestätigung:
 4. Jeder Task hat genau einen im Workflowkatalog registrierten Fachagenten.
 5. `context_paths`, `scope`, `dependencies`, `acceptance` und `checks` sind getrennte Felder.
 6. Jedes Akzeptanzkriterium ist vollständig durch aktuelle, ausführbare oder ehrlich als blockiert ausgewiesene Checks spezifiziert.
-7. Pfade sind projektrelativ, Scopes minimal und geplante parallele Schreibscopes disjunkt.
+7. Pfade sind projektrelativ, Scopes minimal und geplante parallele Schreibscopes disjunkt; einzige Ausnahme ist der in Schritt 3 aufgelöste S00-Lesepfad, der exakt übernommen wird, auch wenn er außerhalb des Projekts liegt.
 8. Toolbedarf, Risiken, Autorisierungsgrenzen und verbleibende Evidenzlücken sind sichtbar.
 9. Die Übergabe nennt den exakten Planpfad und `core-execute`.
 
