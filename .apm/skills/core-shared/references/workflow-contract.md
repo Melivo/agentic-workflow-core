@@ -36,9 +36,17 @@ Ein Workflow lädt sein exakt identifiziertes Eingabeartefakt und den aktuellen 
 
 ## Plan- und Scopeintegrität
 
-Der bestätigte Plan bleibt während der Ausführung unverändert. Status, Retryzähler, Findings oder Checkresultate werden nie in ihn zurückgeschrieben. Eine materielle Änderung von Ziel, Scope, Architektur oder Akzeptanzkriterien führt zurück zu `core-plan`; sie wird nicht als Implementierungsdetail behandelt.
+Der bestätigte Plan bleibt während der Ausführung unverändert. Status, Retryzähler, Findings oder Checkresultate werden nie in ihn zurückgeschrieben. Für materielle Abweichungen gilt die folgende Ersatzplanung; sie werden nicht als Implementierungsdetail behandelt.
 
 `context_paths` erlauben Lesen, `scope` erlaubt Mutation. Ein leerer `scope` ist read-only. Tatsächliche Änderungen außerhalb des Scopes blockieren die Integration, bis sie entfernt oder durch einen neu bestätigten Plan autorisiert sind.
+
+## Evidenzbasierte Ersatzplanung
+
+- **Auslöser:** Neue Informationen, Fehler oder Bugs widerlegen tragende Planannahmen, machen den Taskgraphen nachweislich undurchführbar oder erfordern eine materielle Änderung von Ziel, Scope, Architektur, Akzeptanz oder Nebenwirkungen. Ein normaler Implementierungsfehler mit einer Reparatur innerhalb des bestätigten Tasks löst keine Neuplanung aus; eine bloße Vermutung rechtfertigt keine Auftragserweiterung.
+- **Stopp und Übergabe:** `core-execute` stoppt neue Produktmutationen und Implementierungsdispatches im betroffenen Run. Es sichert den aktuellen Zustand und übergibt exakte Plan-/Runpfade, widerlegte Annahmen, Originalevidenz, vorhandene Änderungen, verbleibende Nebenwirkungen und offene Entscheidungen über die bestehenden Run-Artefakte. Vor Runanlage genügt der exakt identifizierte Plan samt aktueller Repositoryevidenz.
+- **Automatisch planen, nicht genehmigen:** Der bestehende Ausführungsauftrag erlaubt diese read-only Analyse und die Erstellung eines Ersatzplanentwurfs durch `core-plan`, ohne eine zusätzliche Aufforderung zum Planen. Fehlende materielle Entscheidungen werden gezielt erfragt. Der Entwurf nennt die Änderungen gegenüber dem alten Plan und einen neuen exakten Planpfad; der alte Plan bleibt erhalten. Erst nach ausdrücklicher Bestätigung wird der Ersatzplan geschrieben und bei passendem Ausführungsauftrag an `core-execute` übergeben. Die bisherige Planfreigabe bestätigt keinen unbekannten Ersatzplan und autorisiert keine neuen Wirkungen. Benutzerabbruch beendet auch diesen automatischen Übergang.
+- **Fortsetzung:** Ein bestätigter Ersatzplan erhält einen neuen Run mit Verweis auf Vorgängerplan und -run im Plantext beziehungsweise Handoff. Vorhandene Änderungen und Nachweise werden gegen die neuen Tasks und den aktuellen Stand geprüft, nicht blind übernommen oder verworfen. Bei geänderter Etappendefinition bleibt die erneute Bestätigung und Auswahl durch `core-milestone` erforderlich.
+- **Keine Endlosschleife:** Ohne neue Evidenz oder bestätigte Entscheidung wird derselbe Blocker nicht wiederholt automatisch neu geplant. Fehlende Fähigkeit oder Autorisierung wird nicht durch einen Ersatzplan erzeugt. Das Zwei-Runden-Limit für automatische Review-Reparaturen bleibt bestehen; Neuplanung allein setzt es für dieselben offenen Findings nicht zurück.
 
 ## Abbruch, Blockade und Wiederaufnahme
 

@@ -43,7 +43,7 @@ Verwende die [Handoffvorlage](../core-shared/assets/handoff.md), wenn `core-revi
 2. Validiere für jeden Task einen registrierten Fachagenten, getrennte `context_paths` und `scope`, bekannte erforderliche MCPs, einen azyklischen Abhängigkeitsgraphen sowie die vollständige Abdeckung aller Akzeptanzkriterien durch eindeutige Checks.
 3. Behandle einen leeren `scope` als read-only. Ein Check mit Build-, Compile-, Bundle-, Package- oder Installationswirkung ist ohne passende ausdrückliche Autorisierung blockiert.
 4. Vergleiche Planannahmen, referenzierte Pfade, vorhandenen Diff und wiederverwendete Evidenz mit dem aktuellen Repositorystand. Drift macht betroffene Evidenz ungültig.
-5. Stoppe bei Drift, die Ziel, Scope, Architektur oder Akzeptanz materiell verändert, und route zu `core-plan`. Bei kompatibler Drift aktualisiere nur Runzustand und neu zu erhebende Evidenz, niemals den Plan.
+5. Prüfe bei Start, Resume und jedem Taskresultat die Auslöser der [evidenzbasierten Ersatzplanung](../core-shared/references/workflow-contract.md#evidenzbasierte-ersatzplanung). Bei einem Auslöser stoppe die Produktarbeit, sichere Zustand und Evidenz und übergib automatisch an `core-plan`; die Bestätigung des Ersatzplans bleibt erforderlich. Bei kompatibler Drift aktualisiere nur Runzustand und neu zu erhebende Evidenz, niemals den Plan.
 
 ### 2. Run anlegen oder Resume durchführen
 
@@ -91,7 +91,7 @@ Ersetze `.agentic-workflow/runs/<run-id>/handoff.md` anhand der Shared-Vorlage. 
 
 - Bei `pass` schließe den Run ab.
 - Bei `changes_requested` ordne jedes innerhalb des bestätigten Scopes liegende Finding dem passenden Fachagenten zu, repariere es unter derselben `run_id`, integriere serialisiert und wiederhole betroffene Checks sowie das frische Review.
-- Bei einer materiellen Änderung von Ziel, Scope, Architektur oder Akzeptanz route zu `core-plan` statt zu reparieren.
+- Bei einem Auslöser der Ersatzplanung nutze denselben oben verlinkten Übergang statt weiter zu reparieren. Übernimm bei Fortsetzung derselben offenen Findings die bereits verbrauchten Review-Reparaturrunden in den neuen Run; ein Ersatzplan setzt das Limit nicht zurück.
 - Bei `blocked` dokumentiere den fehlenden Eingang, die Fähigkeit oder Autorisierung und stoppe die abhängige Arbeit.
 - Erlaube insgesamt höchstens **zwei** automatische `execute ↔ review`-Reparaturrunden. Nach der zweiten Runde stoppt der Lauf mit den verbleibenden Findings; eine dritte automatische Runde ist verboten.
 

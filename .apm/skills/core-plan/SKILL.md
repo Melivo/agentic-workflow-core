@@ -7,7 +7,7 @@ description: "Analysiert bestätigte Vorhaben und aktuellen Repositorykontext, e
 
 Nutze diesen Workflow, um einen klaren Auftrag oder die bestätigte Entscheidungsübergabe aus `core-brainstorm` beziehungsweise genau eine freigegebene Etappe aus `core-milestone` in einen ausführbaren Taskgraphen zu überführen. `core-plan` besitzt Anforderungsrahmen, Repositoryanalyse, bedingte Recherche, materielle Planentscheidungen, Taskzerlegung, Akzeptanzkriterien, Checks und Nutzerbestätigung.
 
-`core-plan` implementiert nicht, dispatcht keine Implementierungsagenten und verwaltet keinen Runstatus. Ausführung gehört ausschließlich zu `core-execute`; eine materielle Änderung von Ziel, Scope, Architektur oder Akzeptanz nach Review beginnt einen neuen Planlauf.
+`core-plan` implementiert nicht, dispatcht keine Implementierungsagenten und verwaltet keinen Runstatus. Ausführung gehört ausschließlich zu `core-execute`; eine [evidenzbasierte Ersatzplanung](../core-shared/references/workflow-contract.md#evidenzbasierte-ersatzplanung) beginnt einen neuen Planlauf, auch während der Ausführung.
 
 ## Eingaben und Ausgabe
 
@@ -34,6 +34,8 @@ Sie ist ein deutsches Markdown-Dokument mit genau einem eingebetteten, validierb
 ### 1. Auftrag rahmen
 
 Halte Ziel, Nutzer beziehungsweise Betroffene, beobachtbares Outcome, Scope, Nicht-Ziele, Rahmenbedingungen und bereits bestätigte Entscheidungen fest. Bei Etappenplanung pinne im Plan die Ziel-ID/-Datei, den exakten Indexpfad, Milestone-ID, Definitionsversion und Definitionspfad gemäß [goal/v1](../core-milestone/references/goal-format.md), [milestone-index/v1](../core-milestone/references/milestone-index-format.md) und [milestone-definition/v1](../core-milestone/references/milestone-format.md). Bleibe innerhalb der gepinnten Scopegrenze und decke deren Abschlusskriterien ab. Übernimm bestätigte Entscheidungen ohne erneute Grundsatzklärung; nenne genau die für jeden Task benötigten Quellen in `context_paths`, ohne Formate oder Entscheidungslisten zu duplizieren. Ein Widerspruch durch aktuelle Evidenz erfordert gezielte Klärung und bei Design-/Etappenänderung erneute Milestone-Bestätigung, keinen stillschweigenden Ersatz. Kläre nur materielle Lücken. Eine offene Unsicherheit, die Ziel, Sicherheit, Architektur, Scope oder Akzeptanz verändert, verhindert `Confirmed`.
+
+Bei Ersatzplanung lade zusätzlich den exakt übergebenen Vorgängerplan und, falls vorhanden, Runzustand, Handoff, Taskversuche und Review. Prüfe die widerlegten Annahmen und Originalevidenz am aktuellen Stand. Plane vom vorhandenen Arbeitsstand aus; kennzeichne im Plantext Vorgängerpfade, notwendige Änderungen am Taskgraphen, weiter nutzbare Ergebnisse und erneut erforderliche Checks. Wähle einen neuen, kollisionsfreien Planpfad gemäß Artefaktvertrag. Grenze neue Entscheidungen und Wirkungen sichtbar von bereits bestätigten ab; nutze anschließend denselben Validierungs- und Bestätigungsschritt wie bei Erstplanung.
 
 ### 2. Repository mit Gortex analysieren
 
