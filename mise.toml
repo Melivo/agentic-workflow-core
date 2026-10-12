@@ -1,0 +1,34 @@
+# Shared local and CI entry points. Setup installs only into the isolated
+# workspace (AWC_CI_WORKSPACE); every other task verifies and never installs.
+min_version = "2026.10.6"
+
+[tasks."tools:setup"]
+description = "Install pinned, hash-verified tools into the isolated workspace"
+run = "python3 -B scripts/bootstrap_ci.py setup"
+
+[tasks.check]
+description = "Run all contract and portability tests with the isolated tools"
+run = "python3 -B scripts/bootstrap_ci.py check"
+
+[tasks."version:check"]
+description = "Run scripts/release_guard.py version-check (T02 source; fails while missing)"
+run = "python3 -B scripts/bootstrap_ci.py run version:check"
+
+[tasks."release:test"]
+description = "Run release and package tests (T02 sources; fails while missing or empty)"
+run = "python3 -B scripts/bootstrap_ci.py run release:test"
+
+[tasks."workflows:check"]
+description = "Pinned actionlint plus workflow tests (T03 sources; fails while missing or empty)"
+run = "python3 -B scripts/bootstrap_ci.py run workflows:check"
+
+[tasks."docs:check"]
+description = "Documentation contract group"
+run = "python3 -B scripts/bootstrap_ci.py run docs:check"
+
+[tasks.acceptance]
+description = "All checks, then package-effective scratch build and test install"
+run = "python3 -B scripts/bootstrap_ci.py run acceptance"
+
+[settings]
+auto_install = false

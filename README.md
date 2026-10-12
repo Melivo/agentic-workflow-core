@@ -32,6 +32,33 @@ apm install Melivo/agentic-workflow-core --target opencode,codex
 
 APM schreibt die aufgelösten Versionen nach `apm.lock.yaml` und projiziert Skills und Agenten in die Zielharness-Verzeichnisse. Prüfe Änderungen vor einer dauerhaften Installation mit demselben Befehl plus `--dry-run`.
 
+## Lokale Prüfungen und Paketabnahme
+
+Die wiederholbaren lokalen und CI-Einstiegspunkte verwenden `mise` 2026.10.6. `mise run tools:setup` lädt und installiert die geprüften Werkzeuge — Python 3.13.14, Node.js 22.23.3, PyYAML 6.0.3, APM 0.31.0, Release Please 17.11.2, actionlint 1.7.12 und ShellCheck 0.11.0 — ausschließlich in den isolierten Projektarbeitsbereich. Der Setup-Schritt verändert weder globale Werkzeuge noch die Quellen. Er muss vor den Prüfungen ausdrücklich gestartet werden; die Prüftasks installieren nichts automatisch.
+
+```bash
+mise run tools:setup
+mise run check
+mise run version:check
+mise run release:test
+mise run workflows:check
+mise run docs:check
+```
+
+`check`, `version:check`, `release:test`, `workflows:check` und `docs:check` sind Prüfungen ohne Paketinstallation. `mise run acceptance` führt diese Abnahmen zusammen und schließt mit `scripts/build_core_package.py verify` ab: Der Producer baut das ZIP isoliert, anschließend wird es in einem frischen Scratch-Verbraucher installiert und verifiziert. Diese Abnahme hat daher ausdrücklich Paket- und Installationswirkung innerhalb der temporären Arbeitsbereiche. Reports und Archive dort sind temporär. Bei einer bestätigten Ausführung hält `core-execute` die vollständigen Originalausgaben sowie die benötigten Paket-/Archivnachweise dauerhaft im Runverzeichnis fest; ein `/tmp`-Pfad allein ist kein dauerhafter Beleg. Die geprüfte Laufzeit ist Linux x64 und belegt keine universelle plattformübergreifende Laufzeit.
+
+## GitHub-CI und Releasefreigabe
+
+Die normale CI läuft für Pull Requests und Pushes auf `main` mit nur lesendem `GITHUB_TOKEN`; sie erhält weder den App-Schlüssel noch Veröffentlichungsrechte. Die Releasekette ist getrennt und standardmäßig aus: Die Repositoryvariablen `RELEASE_PR_AUTOMATION_ENABLED` und `RELEASE_PUBLICATION_ENABLED` müssen jeweils exakt `true` sein. Fehlend oder anders geschrieben bleiben sie aus. Eine Einrichtung oder ein gesetztes Gate allein startet keine Freigabe durch diesen Leitfaden.
+
+Vor einer späteren Aktivierung richtet ein Administrator die gemeinsame GitHub App einmal ein und installiert sie nur für dieses Repository. Die Workflowdatei verlangt die Repositoryvariablen `APP_CLIENT_ID`, `RELEASE_BOT_LOGIN`, `RELEASE_MAINTAINERS` und `RELEASE_REQUIRED_CHECKS`; der private App-Schlüssel wird vom Benutzer als Repositorysecret `APP_PRIVATE_KEY` hinterlegt. Die App benötigt nur die verwendeten Repositoryrechte: `contents` zum Lesen/Schreiben von Releaseinhalten, `pull requests` zum Erstellen/Lesen des Release-PR und `issues` für Release-Please-Labels; `checks: read` wird für die Veröffentlichungsprüfung benötigt. Normale CI bekommt diese App-Rechte nicht. Erforderliche Statusprüfungen und Branchschutzregeln werden repositoryseitig eingerichtet; Bot-Bypass ist nicht vorgesehen. Der Releasebot darf nicht zugleich ein freigegebener Maintainer sein. Schlüsselrotation ist eine manuelle App-/GitHub-Secretpflege; sie ist getrennt von den kurzlebigen App-Tokens, die erst unmittelbar vor den jeweiligen Providerzugriffen repo-begrenzt angefordert und am Jobende widerrufen werden.
+
+Die Kette reagiert nur auf erfolgreiche CI-Pushes dieses Repositories auf `main`. Release Please darf einen Release-PR öffnen oder aktualisieren, aber erzeugt dabei keine Tags oder Releases. Veröffentlichung wartet auf einen bewusst von einem konfigurierten Maintainer gemergten Release-PR, passende Pflichtchecks auf den exakten Commits und die erfolgreiche Paketabnahme des Merge-Commits. Es gibt kein automatisches Merge. Versionsentscheidungen folgen im 0.x-Bereich: Fix → Patch, neue Funktion oder inkompatible Änderung → Minor; bei gemischten Änderungen gilt der höchste Sprung. Der Wechsel zu `1.0.0` benötigt eine gesonderte Entscheidung.
+
+Bei Fehlern, fehlenden oder laufenden Prüfungen, Versions-/Commitkonflikten oder einem unvollständigen Paket wird gestoppt. Bereits vorhandene Tags oder Assets werden nicht gelöscht oder überschrieben; identische, vollständig geprüfte Ergebnisse sind idempotent, abweichende Teilzustände erfordern manuelle Klärung. Das Paketarchiv des Workflows wird nur einen Tag aufbewahrt; für einen Retry daher nicht auf ein altes Archiv vertrauen. Wenn der ursprüngliche Release-Workflowlauf vorhanden ist, innerhalb von 30 Tagen liegt und sein Quell-SHA weiterhin der beabsichtigte Commit ist, den vollständigen Lauf erneut ausführen — in der GitHub-Oberfläche **Re-run all jobs** oder mit der exakten Run-ID `gh run rerun <run-id>` (ohne `--failed`). GitHub verwendet dabei denselben ursprünglichen `GITHUB_SHA`/`GITHUB_REF`; Jobs bauen das Paket neu, prüfen die aktuellen Freigabegates erneut und minten benötigte Tokens frisch. GitHub erlaubt höchstens 50 Wiederholungen pro Workflowlauf und verwendet die Berechtigungen des ursprünglichen Auslösers. Ein Retry von Release prüft nicht rückwirkend einen anderen Commit: Der `release-pr`-Job überspringt die Wirkung, wenn der Quell-Commit nicht mehr der aktuelle `main`-Tip ist. In diesem Fall den passenden aktuellen erfolgreichen CI-Push-/Release-Lauf verwenden, nicht einen manuellen `workflow_dispatch` oder einen Teiljobretry als Ersatz.
+
+GitHub garantiert in einer Concurrency-Gruppe mit `cancel-in-progress: false` nicht, dass mehrere wartende Läufe erhalten bleiben: ein neuer wartender Lauf kann den älteren wartenden verdrängen. Existiert für die gewünschte Quelle kein verwendbarer Original-Release-Lauf, ist das ein Blocker; erst eine separat freigegebene Codeänderung oder ein neuer regulärer CI-Push kann einen neuen Lauf erzeugen. Der vollständige Retry ist ein externer GitHub-Aktionseffekt und muss ausdrücklich autorisiert werden. Diese Konfiguration wurde lokal/offline geprüft; Live-CI, App-Authentifizierung, Repositoryvariablen/-secrets, Branchschutz und Veröffentlichung sind damit nicht live bestätigt. Sie müssen später repositoryseitig durch den Benutzer beziehungsweise Administrator eingerichtet und geprüft werden.
+
 ## Installierbares Bundle erzeugen
 
 Packe aus einem sauberen **Producer-Checkout dieses Repositories**, nicht aus einem Verbrauchsprojekt, das Core als Abhängigkeit installiert hat. APM 0.31 kann in einem Verbraucher-Bundle auf dessen nicht mitgelieferten `apm_modules`-Cache verweisende Links behalten.
@@ -43,7 +70,7 @@ apm install --only apm
 apm audit --ci
 apm pack --offline --target agent-skills --output ./dist
 # In einem separaten Verbrauchsverzeichnis:
-apm install /path/to/dist/agentic-workflow-core-0.2.0 --target agent-skills
+apm install /path/to/dist/agentic-workflow-core-X.Y.Z --target agent-skills
 ```
 
 Für eine ZIP-Datei ergänze beim Packen `--archive`. Bei der Installation eines lokalen Bundles ist `--only apm` nicht erlaubt; das Bundle wird ohne Dependency-Auflösung direkt installiert.

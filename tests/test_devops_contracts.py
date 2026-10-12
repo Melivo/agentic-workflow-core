@@ -9,11 +9,15 @@ the text, that a package installs, or any token saving.
 """
 import sys
 sys.dont_write_bytecode = True
+import importlib.util
+import os
 from pathlib import Path
 import re
 import shutil
+import subprocess
 import tempfile
 import unittest
+import yaml
 
 ROOT = Path(__file__).resolve().parents[1]
 SKILLS = ROOT / '.apm/skills'
@@ -21,6 +25,8 @@ DEVOPS = SKILLS / 'core-devops'
 REFS = ('git-operations', 'development-automation', 'tooling-profiles',
         'checks-and-hooks', 'ci-and-releases', 'failure-recovery')
 LINK = re.compile(r'(?<!!)\[[^\]]*\]\(([^)\s]+)\)')
+# Exactly one top-level SemVer core without leading zeros; YAML decides quoting, the value is semantic.
+SEMVER = re.compile(r'(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)')
 
 # rule id -> (file relative to the skill dir, required patterns, forbidden patterns)
 RULES = {
@@ -110,6 +116,42 @@ def rule_violations(skill_dir):
     return found
 
 
+def package_version(manifest):
+    try:
+        data = yaml.safe_load(manifest)
+    except yaml.YAMLError as exc:
+        raise ValueError('apm.yml ist kein gültiges YAML') from exc
+    # PyYAML keeps the last duplicate key silently, so top-level occurrences are counted on the text.
+    version = data.get('version') if isinstance(data, dict) else None
+    if len(re.findall(r'(?m)^version:', manifest)) != 1 or not isinstance(version, str) or not SEMVER.fullmatch(version):
+        raise ValueError('apm.yml braucht genau eine gültige Paketversion')
+    return version
+
+
+# Unmodified release-please YAML updater, as configured for apm.yml ($.version).
+UPDATER = """
+const root = process.argv[1];
+const {GenericYaml} = require(root + '/build/src/updaters/generic-yaml.js');
+const {Version} = require(root + '/build/src/version.js');
+let text = '';
+process.stdin.on('data', chunk => text += chunk).on('end', () =>
+  process.stdout.write(new GenericYaml('$.version', Version.parse(process.argv[2])).updateContent(text)));
+"""
+
+
+def release_please_update(manifest, version):
+    """Run the pinned isolated release-please updater; a missing toolchain fails instead of skipping."""
+    spec = importlib.util.spec_from_file_location('bootstrap_ci_devops', ROOT / 'scripts/bootstrap_ci.py')
+    bootstrap = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(bootstrap)
+    _, ws, env, _ = bootstrap.verify(Path(os.environ.get('AWC_CI_WORKSPACE') or Path(sys.prefix).parent))
+    result = subprocess.run([str(ws / 'node/bin/node'), '-e', UPDATER, str(ws / 'npm/node_modules/release-please'), version],
+                            input=manifest, env=env, capture_output=True, text=True, timeout=120)
+    if result.returncode:
+        raise AssertionError('release-please updater: ' + result.stderr[-2000:])
+    return result.stdout
+
+
 def broken_links(skill_dir):
     broken = []
     for path in sorted(skill_dir.rglob('*.md')):
@@ -163,8 +205,7 @@ class CurrentText(unittest.TestCase):
         self.assertEqual(rule_violations(DEVOPS), set())
 
     def test_package_inventory_and_version(self):
-        manifest = read(ROOT / 'apm.yml')
-        self.assertRegex(manifest, r'(?m)^version: "0\.2\.1"$')
+        package_version(read(ROOT / 'apm.yml'))
         bundles = sorted(p.parent.name for p in SKILLS.glob('core-*/SKILL.md'))
         self.assertEqual(len(bundles), 22)
         self.assertIn('core-devops', bundles)
@@ -231,6 +272,34 @@ MUTATIONS = {
     'context_paths_not_scope': ('SKILL.md', '`context_paths` sind Lesequellen und erweitern keinen dieser Scopes.',
                                 '`context_paths` sind ebenfalls Schreibscope.'),
 }
+
+
+class PackageVersion(unittest.TestCase):
+    def test_valid_versions_accepted(self):
+        for version in ('0.2.1', '0.10.0', '1.0.0', '12.34.56'):
+            for scalar in (version, f'"{version}"', f"'{version}'"):
+                with self.subTest(scalar=scalar):
+                    self.assertEqual(package_version(f'name: x\nversion: {scalar}\n'), version)
+
+    def test_invalid_versions_rejected(self):
+        for manifest in ('name: x\n', 'version: "v0.2.1"\n', 'version: "0.2"\n', 'version: 0.2\n', 'version: 1\n', 'version: "01.2.3"\n',
+                         'version: "0.2.1-rc.1"\n', 'version: [0.2.1]\n', 'version:\n', 'version: "0.2.1\'\n', "version: '0.2.1\"\n",
+                         'version: "0.2.1"\nversion: "0.2.2"\n', 'version: "0.2.1"\nversion: 0.2.2\n', '  version: "0.2.1"\n',
+                         'version: "0.2.1"\n  bad: [\n', '- version: 0.2.1\n'):
+            with self.subTest(manifest=manifest), self.assertRaises(ValueError):
+                package_version(manifest)
+
+    def test_real_release_please_updater_output_is_accepted(self):
+        manifest = read(ROOT / 'apm.yml')
+        current = package_version(manifest)
+        major, minor, patch = map(int, current.split('.'))
+        bumped = '%d.%d.%d' % (major, minor, patch + 1)
+        updated = release_please_update(manifest, bumped)
+        self.assertEqual(package_version(updated), bumped)
+        before, after = yaml.safe_load(manifest), yaml.safe_load(updated)
+        self.assertEqual(after.pop('version'), bumped)
+        before.pop('version')
+        self.assertEqual(after, before)
 
 
 class Mutations(unittest.TestCase):

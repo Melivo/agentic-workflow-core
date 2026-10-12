@@ -7,10 +7,11 @@ the runtime behaviour of an agent following the text.
 import sys
 sys.dont_write_bytecode = True
 from pathlib import Path
+import contextlib
+import io
 import re
-import shutil
-import subprocess
 import tempfile
+import types
 import unicodedata
 import unittest
 
@@ -19,7 +20,9 @@ SKILLS = ROOT / '.apm/skills'
 BASELINE = SKILLS / 'core-architecture/references/design-baseline.md'
 BASELINE_PATH = '.apm/skills/core-architecture/references/design-baseline.md'
 CODING_SKILLS = ('core-backend', 'core-frontend', 'core-mobile', 'core-database', 'core-tf-infra', 'core-debug', 'core-refactor')
-BASE_COMMIT = 'd7b4985375cab8ee7e0c1ff79cf8838f37a9cfe7'
+CHECKER = ROOT / 'scripts/check_core_contracts.py'
+CLI_GROUPS = ('selftest', 'milestones', 'shared', 'workflows', 'domains', 'setup', 'docs', 'all')
+CLI_DOMAIN_GROUPS = CLI_GROUPS[1:-1]
 LINK = re.compile(r'(?<!!)\[[^\]]*\]\(([^)\s]+)\)')
 
 
@@ -174,6 +177,95 @@ def mutate(test, text, old, new=''):
     return text.replace(old, new, 1)
 
 
+def load_checker(source):
+    """Execute checker source as an isolated module; its ROOT still resolves to this workspace."""
+    module = types.ModuleType('checker_cli_under_test')
+    module.__file__ = str(CHECKER)
+    exec(compile(source, str(CHECKER), 'exec'), module.__dict__)
+    return module
+
+
+def cli_problems(source):
+    """Offline CLI and read-only regression: lost groups/options, swallowed errors and unnoticed source changes."""
+    try:
+        checker = load_checker(source)
+    except Exception as exc:
+        return ['load: ' + type(exc).__name__]
+    problems = []
+
+    class Guarded(Exception):
+        pass
+
+    # Real group and selftest entry points must route their sources through the read-only guard.
+    real_guard, guarded = checker.guarded_run, []
+    def spy(paths, action):
+        guarded.append([Path(p).resolve() for p in paths])
+        raise Guarded()
+    checker.guarded_run, checker.unittest = spy, types.SimpleNamespace()
+    for name, call, expected in (('group', lambda: checker.check_group(ROOT, 'docs'), lambda: checker.targets(ROOT, 'docs')),
+                                 ('selftest', lambda: checker.selftest(ROOT), lambda: [CHECKER])):
+        guarded.clear()
+        try:
+            call()
+        except Exception:
+            pass
+        try:
+            wanted = {Path(p).resolve() for p in expected()}
+        except Exception:
+            wanted = None
+        if not guarded or wanted is None or not wanted <= set(guarded[0]):
+            problems.append('unguarded sources: ' + name)
+    checker.guarded_run = real_guard
+    with tempfile.TemporaryDirectory(prefix='cli-guard-') as directory:
+        source_file, other = Path(directory) / 'source.md', Path(directory) / 'other.md'
+        source_file.write_text('stable-1', encoding='utf-8')
+        try:
+            checker.guarded_run([source_file], lambda: other.write_text('irrelevant', encoding='utf-8'))
+        except checker.ContractError:
+            problems.append('guard: irrelevant change rejected')
+        try:
+            checker.guarded_run([source_file], lambda: source_file.write_text('stable-2', encoding='utf-8'))
+            problems.append('guard: source change unnoticed')
+        except checker.ContractError:
+            pass
+
+    calls, failing = [], set()
+    def record(group, authoring):
+        calls.append((group, authoring))
+        if group in failing:
+            raise checker.ContractError('injected violation')
+    checker.check_group = lambda root, group, with_authoring=False, tool_root=None: record(group, with_authoring)
+    checker.selftest = lambda root: record('selftest', False)
+    def run(argv, fail=()):
+        calls.clear()
+        failing.clear()
+        failing.update(fail)
+        with contextlib.redirect_stdout(io.StringIO()), contextlib.redirect_stderr(io.StringIO()):
+            try:
+                return checker.main(argv)
+            except SystemExit as exc:
+                return exc.code
+            except Exception as exc:
+                return type(exc).__name__
+    def expected(group, authoring):
+        return [('selftest', False)] if group == 'selftest' else [(g, authoring) for g in (CLI_DOMAIN_GROUPS if group == 'all' else (group,))]
+    for group in CLI_GROUPS:
+        for authoring in ((False,) if group == 'selftest' else (False, True)):
+            if run(['--group', group] + ['--authoring'] * authoring) != 0 or calls != expected(group, authoring):
+                problems.append('group/option lost: ' + group + ' --authoring' * authoring)
+    if run(['--group', 'selftest', '--authoring']) != 1:
+        problems.append('selftest --authoring accepted')
+    for argv in ([], ['--group'], ['--group', 'unknown'], ['--group', 'docs', '--unknown']):
+        if run(argv) != 2:
+            problems.append('argument error not rejected: ' + ' '.join(argv))
+    for group, fail in (('docs', 'docs'), ('selftest', 'selftest'), ('all', 'shared')):
+        if run(['--group', group], {fail}) != 1:
+            problems.append('violation swallowed: ' + group)
+        elif calls != expected(group, False):
+            problems.append('groups skipped after violation: ' + group)
+    return problems
+
+
 class DesignPrincipleTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
@@ -288,13 +380,31 @@ class DesignPrincipleTests(unittest.TestCase):
         self.assertNotIn('priority:', block.group(1))
         self.assertNotIn('s00', block.group(1).lower())
 
-    @unittest.skipUnless(shutil.which('git') and (ROOT / '.git').exists(), 'git checkout unavailable')
-    def test_legacy_cli_unchanged_since_baseline(self):
-        result = subprocess.run(['git', 'cat-file', '-e', BASE_COMMIT], cwd=ROOT, capture_output=True)
-        if result.returncode:
-            self.skipTest('baseline commit unavailable')
-        diff = subprocess.run(['git', 'diff', '--quiet', BASE_COMMIT, '--', 'scripts/check_core_contracts.py'], cwd=ROOT)
-        self.assertEqual(diff.returncode, 0)
+    def test_cli_and_read_only_guard_positive(self):
+        self.assertEqual(cli_problems(read(CHECKER)), [])
+
+    def test_cli_irrelevant_change_passes(self):
+        source = mutate(self, read(CHECKER), '"""Offline report-only contract checks;', '"""Offline report-only contract checks (reworded);')
+        self.assertEqual(cli_problems(source + '\n# irrelevant trailing comment\n'), [])
+
+    def test_cli_and_read_only_guard_negative_mutations(self):
+        source = read(CHECKER)
+        cases = {
+            'lost_group': ("'setup', 'docs')", "'setup')"),
+            'lost_all': ("*TARGET_GROUPS, 'all')", '*TARGET_GROUPS)'),
+            'lost_authoring': ("    parser.add_argument('--authoring', action='store_true')\n", ''),
+            'optional_group': ('choices=GROUPS, required=True', "choices=GROUPS, default='selftest'"),
+            'authoring_dropped': ('check_group(ROOT, group, args.authoring)', 'check_group(ROOT, group)'),
+            'selftest_authoring': ("raise ContractError('selftest besitzt", "print('selftest besitzt"),
+            'swallowed_error': ("        print('FAIL:', exc, file=sys.stderr)\n        return 1\n", "        print('FAIL:', exc, file=sys.stderr)\n        return 0\n"),
+            'swallowed_all': ("            require(not failures, '\\n'.join(failures))\n", ''),
+            'blind_guard': ('require(snapshot(paths) == before,', 'require(True or snapshot(paths) == before,'),
+            'unguarded_group': ('    return guarded_run(paths, action)\n\ndef selftest', '    return action()\n\ndef selftest'),
+            'unguarded_selftest': ("    return guarded_run([root / 'scripts/check_core_contracts.py', test_path, fixture_path], action)", '    return action()'),
+        }
+        for name, (old, new) in cases.items():
+            with self.subTest(mutation=name):
+                self.assertNotEqual(cli_problems(mutate(self, source, old, new)), [])
 
 
 if __name__ == '__main__':

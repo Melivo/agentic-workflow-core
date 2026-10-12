@@ -1,0 +1,24 @@
+{
+  "$schema": "https://raw.githubusercontent.com/googleapis/release-please/v17.11.2/schemas/config.json",
+  "release-type": "simple",
+  "bootstrap-sha": "a541a41a8a100f8a72d680356dd3b08e335ef068",
+  "bump-minor-pre-major": true,
+  "bump-patch-for-minor-pre-major": false,
+  "include-component-in-tag": false,
+  "include-v-in-tag": true,
+  "skip-github-release": true,
+  "packages": {
+    ".": {
+      "package-name": "agentic-workflow-core",
+      "version-file": "scripts/release-version.txt",
+      "changelog-path": "CHANGELOG.md",
+      "extra-files": [
+        {
+          "type": "yaml",
+          "path": "apm.yml",
+          "jsonpath": "$.version"
+        }
+      ]
+    }
+  }
+}

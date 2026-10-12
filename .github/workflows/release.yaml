@@ -1,0 +1,317 @@
+# Privileged release automation, separate from the untrusted PR checks in ci.yaml.
+# Runs only after CI succeeded for a push to main of this repository, never for pull requests.
+# Two independent gates (repository variables, missing or not 'true' = off):
+#   RELEASE_PR_AUTOMATION_ENABLED -> release-pr: Release Please opens/updates the release PR only.
+#   RELEASE_PUBLICATION_ENABLED   -> release-build (read-only package acceptance and decision of the
+#                                    exact merge commit) -> release-publish (ordered effects).
+# App tokens are minted per job right before provider access, scoped to this repository and the
+# listed permissions, and revoked by the token action when the job ends. Decisions stay in
+# scripts/release_guard.py and scripts/publish_release.py; this file only orchestrates.
+name: Release
+
+on:
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
+    branches: [main]
+
+permissions: {}
+
+concurrency:
+  group: release-${{ github.repository }}
+  cancel-in-progress: false
+
+env:
+  HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
+
+jobs:
+  release-pr:
+    name: release-pr
+    if: >-
+      vars.RELEASE_PR_AUTOMATION_ENABLED == 'true'
+      && github.event.workflow_run.conclusion == 'success'
+      && github.event.workflow_run.event == 'push'
+      && github.event.workflow_run.head_branch == 'main'
+      && github.event.workflow_run.head_repository.full_name == github.repository
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    permissions:
+      contents: read
+    steps:
+      - name: Require release identities
+        env:
+          APP_CLIENT_ID: ${{ vars.APP_CLIENT_ID }}
+          RELEASE_BOT_LOGIN: ${{ vars.RELEASE_BOT_LOGIN }}
+        run: |
+          for name in APP_CLIENT_ID RELEASE_BOT_LOGIN; do
+            if [ -z "${!name}" ]; then
+              echo "::error::Repository-Variable $name fehlt; keine Releasewirkung"
+              exit 1
+            fi
+          done
+      - name: Commit is still the tip of main
+        id: tip
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          tip="$(gh api "repos/$GITHUB_REPOSITORY/commits/main" --jq .sha)"
+          if [ "$tip" = "$HEAD_SHA" ]; then
+            echo "current=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "main steht auf $tip statt $HEAD_SHA; der Lauf des neueren Commits entscheidet."
+            echo "current=false" >> "$GITHUB_OUTPUT"
+          fi
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+          persist-credentials: false
+      - name: Exact commit
+        run: test "$(git rev-parse HEAD)" = "$HEAD_SHA"
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: '3.13.14'
+          check-latest: false
+      - uses: jdx/mise-action@2d8d4cafcbd33be2ea37d2b6f5ad595363d1f1ca # v5.1.1
+        with:
+          version: '2026.10.6'
+          sha256: '3f44343eebc7e0d6623bcea46e304864f02dff648edd75c82871b53cc697b366'
+          mise_dir: ${{ runner.temp }}/mise
+          install: false
+          cache: false
+      - name: Isolated tool workspace
+        run: echo "AWC_CI_WORKSPACE=$RUNNER_TEMP/awc-ci" >> "$GITHUB_ENV"
+      - name: tools:setup
+        run: mise run tools:setup
+      - name: Fresh app token for this repository
+        id: app-token
+        if: steps.tip.outputs.current == 'true'
+        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
+        with:
+          client-id: ${{ vars.APP_CLIENT_ID }}
+          private-key: ${{ secrets.APP_PRIVATE_KEY }}
+          owner: ${{ github.repository_owner }}
+          repositories: ${{ github.event.repository.name }}
+          permission-contents: write
+          permission-pull-requests: write
+          permission-issues: write
+      - name: Release PR (Release Please; no tags or releases)
+        if: steps.tip.outputs.current == 'true'
+        timeout-minutes: 15
+        env:
+          RELEASE_TOKEN: ${{ steps.app-token.outputs.token }}
+          APP_SLUG: ${{ steps.app-token.outputs.app-slug }}
+          RELEASE_BOT_LOGIN: ${{ vars.RELEASE_BOT_LOGIN }}
+        run: |
+          if [ "${APP_SLUG}[bot]" != "$RELEASE_BOT_LOGIN" ]; then
+            echo "::error::App-Identität ${APP_SLUG}[bot] ist nicht der konfigurierte Release-Bot"
+            exit 1
+          fi
+          "$AWC_CI_WORKSPACE/node/bin/node" "$AWC_CI_WORKSPACE/npm/node_modules/release-please/build/src/bin/release-please.js" \
+            release-pr --token="$RELEASE_TOKEN" --repo-url="$GITHUB_REPOSITORY" --target-branch=main \
+            --config-file=.release-please-config.json --manifest-file=.release-please-manifest.json
+
+  build:
+    name: release-build
+    if: >-
+      vars.RELEASE_PUBLICATION_ENABLED == 'true'
+      && github.event.workflow_run.conclusion == 'success'
+      && github.event.workflow_run.event == 'push'
+      && github.event.workflow_run.head_branch == 'main'
+      && github.event.workflow_run.head_repository.full_name == github.repository
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    permissions:
+      contents: read
+      pull-requests: read
+      checks: read
+    outputs:
+      pr: ${{ steps.release-pr.outputs.pr }}
+      version: ${{ steps.package.outputs.version }}
+      archive: ${{ steps.package.outputs.archive }}
+      archive_sha256: ${{ steps.package.outputs.archive_sha256 }}
+    steps:
+      - name: Require release identities
+        env:
+          APP_CLIENT_ID: ${{ vars.APP_CLIENT_ID }}
+          RELEASE_BOT_LOGIN: ${{ vars.RELEASE_BOT_LOGIN }}
+          RELEASE_MAINTAINERS: ${{ vars.RELEASE_MAINTAINERS }}
+          RELEASE_REQUIRED_CHECKS: ${{ vars.RELEASE_REQUIRED_CHECKS }}
+        run: |
+          for name in APP_CLIENT_ID RELEASE_BOT_LOGIN RELEASE_MAINTAINERS RELEASE_REQUIRED_CHECKS; do
+            if [ -z "${!name}" ]; then
+              echo "::error::Repository-Variable $name fehlt; keine Releasewirkung"
+              exit 1
+            fi
+          done
+      - name: Merged release PR of this exact commit
+        id: release-pr
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          matches="$(gh api "repos/$GITHUB_REPOSITORY/commits/$HEAD_SHA/pulls" \
+            --jq '.[] | select(.merged_at != null and (.head.ref | startswith("release-please--branches--main"))) | "\(.number) \(.merge_commit_sha)"')"
+          pr=""
+          while read -r number merge_sha; do
+            if [ -n "$number" ] && [ "$merge_sha" = "$HEAD_SHA" ]; then
+              if [ -n "$pr" ]; then
+                echo "::error::Mehrere Release-PRs für $HEAD_SHA"
+                exit 1
+              fi
+              pr="$number"
+            fi
+          done <<< "$matches"
+          if [ -z "$pr" ]; then
+            echo "Kein gemergter Release-PR mit Merge-Commit $HEAD_SHA; nichts zu veröffentlichen."
+          fi
+          echo "pr=$pr" >> "$GITHUB_OUTPUT"
+      - if: steps.release-pr.outputs.pr != ''
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+          persist-credentials: false
+      - if: steps.release-pr.outputs.pr != ''
+        name: Exact commit
+        run: test "$(git rev-parse HEAD)" = "$HEAD_SHA"
+      - if: steps.release-pr.outputs.pr != ''
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: '3.13.14'
+          check-latest: false
+      - if: steps.release-pr.outputs.pr != ''
+        uses: jdx/mise-action@2d8d4cafcbd33be2ea37d2b6f5ad595363d1f1ca # v5.1.1
+        with:
+          version: '2026.10.6'
+          sha256: '3f44343eebc7e0d6623bcea46e304864f02dff648edd75c82871b53cc697b366'
+          mise_dir: ${{ runner.temp }}/mise
+          install: false
+          cache: false
+      - if: steps.release-pr.outputs.pr != ''
+        name: Isolated tool workspace
+        run: echo "AWC_CI_WORKSPACE=$RUNNER_TEMP/awc-ci" >> "$GITHUB_ENV"
+      - if: steps.release-pr.outputs.pr != ''
+        name: tools:setup
+        run: mise run tools:setup
+      - name: Package acceptance of the exact merge commit
+        id: package
+        if: steps.release-pr.outputs.pr != ''
+        run: |
+          out="$RUNNER_TEMP/release-package"
+          PATH="$AWC_CI_WORKSPACE/apm:$PATH" "$AWC_CI_WORKSPACE/venv/bin/python" -B scripts/build_core_package.py verify --output "$out"
+          "$AWC_CI_WORKSPACE/venv/bin/python" -B -c 'import json, sys
+          r = json.load(open(sys.argv[1], encoding="utf-8"))
+          print("version=" + r["version"])
+          print("archive=" + r["archive"]["name"])
+          print("archive_sha256=" + r["archive"]["sha256"])' "$out/package-report.json" >> "$GITHUB_OUTPUT"
+      - name: Publication decision (read-only token, no effects)
+        if: steps.release-pr.outputs.pr != ''
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          RELEASE_BOT_LOGIN: ${{ vars.RELEASE_BOT_LOGIN }}
+          RELEASE_MAINTAINERS: ${{ vars.RELEASE_MAINTAINERS }}
+          RELEASE_REQUIRED_CHECKS: ${{ vars.RELEASE_REQUIRED_CHECKS }}
+          PR: ${{ steps.release-pr.outputs.pr }}
+          ARCHIVE: ${{ steps.package.outputs.archive }}
+        run: |
+          "$AWC_CI_WORKSPACE/venv/bin/python" -B scripts/publish_release.py --pr "$PR" --commit "$HEAD_SHA" \
+            --archive "$RUNNER_TEMP/release-package/$ARCHIVE" --report "$RUNNER_TEMP/release-package/package-report.json" --dry-run
+      - if: steps.release-pr.outputs.pr != ''
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: release-package-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/release-package/
+          retention-days: 1
+          if-no-files-found: error
+
+  publish:
+    name: release-publish
+    needs: build
+    if: >-
+      needs.build.outputs.pr != ''
+      && vars.RELEASE_PUBLICATION_ENABLED == 'true'
+      && github.event.workflow_run.conclusion == 'success'
+      && github.event.workflow_run.event == 'push'
+      && github.event.workflow_run.head_branch == 'main'
+      && github.event.workflow_run.head_repository.full_name == github.repository
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    permissions:
+      contents: read
+    env:
+      PR: ${{ needs.build.outputs.pr }}
+      VERSION: ${{ needs.build.outputs.version }}
+      ARCHIVE: ${{ needs.build.outputs.archive }}
+      ARCHIVE_SHA256: ${{ needs.build.outputs.archive_sha256 }}
+    steps:
+      - name: Require release identities
+        env:
+          APP_CLIENT_ID: ${{ vars.APP_CLIENT_ID }}
+          RELEASE_BOT_LOGIN: ${{ vars.RELEASE_BOT_LOGIN }}
+          RELEASE_MAINTAINERS: ${{ vars.RELEASE_MAINTAINERS }}
+          RELEASE_REQUIRED_CHECKS: ${{ vars.RELEASE_REQUIRED_CHECKS }}
+        run: |
+          for name in APP_CLIENT_ID RELEASE_BOT_LOGIN RELEASE_MAINTAINERS RELEASE_REQUIRED_CHECKS; do
+            if [ -z "${!name}" ]; then
+              echo "::error::Repository-Variable $name fehlt; keine Releasewirkung"
+              exit 1
+            fi
+          done
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+          persist-credentials: false
+      - name: Exact commit
+        run: test "$(git rev-parse HEAD)" = "$HEAD_SHA"
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: '3.13.14'
+          check-latest: false
+      - uses: jdx/mise-action@2d8d4cafcbd33be2ea37d2b6f5ad595363d1f1ca # v5.1.1
+        with:
+          version: '2026.10.6'
+          sha256: '3f44343eebc7e0d6623bcea46e304864f02dff648edd75c82871b53cc697b366'
+          mise_dir: ${{ runner.temp }}/mise
+          install: false
+          cache: false
+      - name: Isolated tool workspace
+        run: echo "AWC_CI_WORKSPACE=$RUNNER_TEMP/awc-ci" >> "$GITHUB_ENV"
+      - name: tools:setup
+        run: mise run tools:setup
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: release-package-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/release-package
+      - name: Pin accepted package to commit, version and hash
+        run: |
+          dir="$RUNNER_TEMP/release-package"
+          if ! [[ "$ARCHIVE" =~ ^agentic-workflow-core-[0-9]+\.[0-9]+\.[0-9]+\.zip$ ]]; then
+            echo "::error::unerwarteter Archivname: $ARCHIVE"
+            exit 1
+          fi
+          echo "$ARCHIVE_SHA256  $dir/$ARCHIVE" | sha256sum --check --strict
+          "$AWC_CI_WORKSPACE/venv/bin/python" -B -c 'import json, os, sys
+          r = json.load(open(sys.argv[1], encoding="utf-8"))
+          seen = (r["verified"], r["source_clean"], r["source_commit"], r["version"], r["archive"]["name"], r["archive"]["sha256"])
+          want = (True, True, os.environ["HEAD_SHA"], os.environ["VERSION"], os.environ["ARCHIVE"], os.environ["ARCHIVE_SHA256"])
+          sys.exit(0 if seen == want else "Paketbericht passt nicht zur Übergabe: %r" % (seen,))' "$dir/package-report.json"
+      - name: Fresh app token for this repository
+        id: app-token
+        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
+        with:
+          client-id: ${{ vars.APP_CLIENT_ID }}
+          private-key: ${{ secrets.APP_PRIVATE_KEY }}
+          owner: ${{ github.repository_owner }}
+          repositories: ${{ github.event.repository.name }}
+          permission-contents: write
+          permission-issues: write
+          permission-pull-requests: read
+          permission-checks: read
+      - name: Publish (re-decides; ordered effects; never overwrites)
+        timeout-minutes: 20
+        env:
+          GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
+          RELEASE_BOT_LOGIN: ${{ vars.RELEASE_BOT_LOGIN }}
+          RELEASE_MAINTAINERS: ${{ vars.RELEASE_MAINTAINERS }}
+          RELEASE_REQUIRED_CHECKS: ${{ vars.RELEASE_REQUIRED_CHECKS }}
+        run: |
+          "$AWC_CI_WORKSPACE/venv/bin/python" -B scripts/publish_release.py --pr "$PR" --commit "$HEAD_SHA" \
+            --archive "$RUNNER_TEMP/release-package/$ARCHIVE" --report "$RUNNER_TEMP/release-package/package-report.json"

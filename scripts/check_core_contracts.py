@@ -16,9 +16,10 @@ except ImportError:
     yaml = None
 
 ROOT = Path(__file__).resolve().parents[1]
-PLAN = '.agentic-workflow/plans/004-core-goals-milestones-and-synergies.md'
-GROUP_TASK = dict(milestones='T02', shared='T03', workflows='T04', domains='T05', setup='T06', docs='T07')
-GROUPS = ('selftest', *GROUP_TASK, 'all')
+# Versioned explicit targetsets; characterized from the former plan-004 task scopes.
+TARGETS = 'scripts/ci_contract_targets.json'
+TARGET_GROUPS = ('milestones', 'shared', 'workflows', 'domains', 'setup', 'docs')
+GROUPS = ('selftest', *TARGET_GROUPS, 'all')
 
 class ContractError(ValueError):
     pass
@@ -585,17 +586,22 @@ def check_index_relations(data, goals, definitions):
         require(all(complete.get((e['id'], e['version'])) for e in selected.values()), 'Gesamterfolg ohne alle ausgewählten Etappenabschlüsse')
 
 
+def validate_targetsets(data):
+    require(isinstance(data, dict) and data.get('schema') == 'ci-contract-targets/v1', 'Targetsetschema ci-contract-targets/v1 erforderlich')
+    groups = data.get('groups')
+    require(isinstance(groups, dict) and tuple(groups) == TARGET_GROUPS, 'Targetsets müssen exakt die Gruppen ' + ', '.join(TARGET_GROUPS) + ' nennen')
+    for group, paths in groups.items():
+        require(isinstance(paths, list) and paths, 'leeres Targetset: ' + group)
+        unique(paths, 'Targetset ' + group)
+        require(all(safe_relative(p) for p in paths), 'Targetset ' + group + ': kein sicherer projektrelativer Pfad')
+    return groups
+
 def targets(root, group):
-    plan_blocks = [b for b in blocks((root / PLAN).read_text()) if isinstance(b, dict) and b.get('schema') == 'plan/v1']
-    require(len(plan_blocks) == 1, 'exakter Implementierungsplan benötigt einen Taskgraphen')
-    plan = plan_blocks[0]
-    catalog = load_yaml((root / '.apm/skills/core-shared/assets/workflow-catalog.yaml').read_text())
-    validate_plan(plan, catalog['known_agent_ids'], catalog['known_tool_ids'])
-    task = next(t for t in plan['tasks'] if t['id'] == GROUP_TASK[group])
-    paths = [local_path(root, p) for p in task['scope']]
-    if group == 'shared':
-        paths.append(local_path(root, '.apm/skills/core-shared/assets/review-finding.yaml'))
-    return paths
+    try:
+        data = json.loads((root / TARGETS).read_text(encoding='utf-8'))
+    except json.JSONDecodeError as exc:
+        raise ContractError('ungültige Targetsets: ' + str(exc)) from exc
+    return [local_path(root, p) for p in validate_targetsets(data)[group]]
 
 def authoring(root, paths, tool_root=None):
     home = Path(tool_root) if tool_root else Path.home() / '.agents/skills'
@@ -746,7 +752,7 @@ def main(argv=None):
                 raise ContractError('selftest besitzt keine Markdown-Authoringziele; konkrete Fachgruppe wählen')
         else:
             failures = []
-            for group in GROUP_TASK if args.group == 'all' else [args.group]:
+            for group in TARGET_GROUPS if args.group == 'all' else [args.group]:
                 try:
                     check_group(ROOT, group, args.authoring)
                 except (ContractError, OSError, KeyError, TypeError, StopIteration, subprocess.SubprocessError) as exc:

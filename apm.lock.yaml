@@ -1,0 +1,15 @@
+lockfile_version: '1'
+apm_version: 0.31.0
+dependencies:
+- repo_url: melivo/apm-package
+  materialization_repo_url: Melivo/apm-package
+  name: gortex-serena-configurator
+  host: github.com
+  resolved_commit: 0c7838d8072dfd70c702cf2d04734a7241550c3e
+  resolved_ref: 0c7838d8072dfd70c702cf2d04734a7241550c3e
+  version: unknown
+  virtual_path: skills/gortex-serena-configurator
+  is_virtual: true
+  package_type: claude_skill
+  content_hash: sha256:b99f15e22f4b2c5b8176d18b4d73cbd9a714dc6de70ff3fe4aa1c8a519be7f97
+deployments: []

@@ -1,0 +1,44 @@
+# Untrusted pull requests and pushes to main run the same shared mise tasks as locally.
+# Read-only token, no secrets, no app key; tools install only into the runner's temp area.
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+permissions: {}
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  checks:
+    name: checks
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: '3.13.14'
+          check-latest: false
+      - uses: jdx/mise-action@2d8d4cafcbd33be2ea37d2b6f5ad595363d1f1ca # v5.1.1
+        with:
+          version: '2026.10.6'
+          sha256: '3f44343eebc7e0d6623bcea46e304864f02dff648edd75c82871b53cc697b366'
+          mise_dir: ${{ runner.temp }}/mise
+          install: false
+          cache: false
+      - name: Isolated tool workspace
+        run: echo "AWC_CI_WORKSPACE=$RUNNER_TEMP/awc-ci" >> "$GITHUB_ENV"
+      - name: tools:setup
+        run: mise run tools:setup
+      - name: acceptance
+        run: mise run acceptance

@@ -1,0 +1,52 @@
+{
+  "schema": "ci-contract-targets/v1",
+  "groups": {
+    "milestones": [
+      ".apm/skills/core-milestone/references/milestone-format.md",
+      ".apm/skills/core-milestone/references/goal-format.md",
+      ".apm/skills/core-milestone/references/milestone-index-format.md"
+    ],
+    "shared": [
+      ".apm/skills/core-shared/SKILL.md",
+      ".apm/skills/core-shared/references/workflow-contract.md",
+      ".apm/skills/core-shared/references/artifact-contract.md",
+      ".apm/skills/core-shared/references/verification.md",
+      ".apm/skills/core-shared/references/user-instructions-contract.md",
+      ".apm/skills/core-shared/assets/workflow-catalog.yaml",
+      ".apm/skills/core-shared/assets/handoff.md",
+      ".apm/skills/core-shared/assets/review-finding.yaml"
+    ],
+    "workflows": [
+      ".apm/skills/core-brainstorm/SKILL.md",
+      ".apm/skills/core-plan/SKILL.md",
+      ".apm/skills/core-execute/SKILL.md",
+      ".apm/skills/core-review/SKILL.md",
+      ".apm/skills/core-research/SKILL.md",
+      ".apm/skills/core-architecture/SKILL.md",
+      ".apm/skills/core-refactor/SKILL.md",
+      ".apm/skills/core-repo-audit/SKILL.md",
+      ".apm/skills/core-milestone/SKILL.md",
+      ".apm/skills/core-milestone/assets/goal-prompt.md",
+      ".apm/skills/core-handoff/SKILL.md",
+      ".apm/skills/core-handoff/assets/start-prompt.md"
+    ],
+    "domains": [
+      ".apm/skills/core-backend/SKILL.md",
+      ".apm/skills/core-database/SKILL.md",
+      ".apm/skills/core-frontend/SKILL.md",
+      ".apm/skills/core-mobile/SKILL.md",
+      ".apm/skills/core-tf-infra/SKILL.md",
+      ".apm/skills/core-debug/SKILL.md",
+      ".apm/skills/core-docs/SKILL.md"
+    ],
+    "setup": [
+      ".apm/skills/core-init-mcps/SKILL.md",
+      ".apm/skills/core-init-project/SKILL.md",
+      ".apm/skills/core-user2agent-instructions/SKILL.md"
+    ],
+    "docs": [
+      "README.md",
+      "DESIGN.md"
+    ]
+  }
+}

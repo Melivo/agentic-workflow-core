@@ -7,4 +7,4 @@ targets: [agent-skills, opencode, codex]
 includes: auto
 dependencies:
   apm:
-    - Melivo/apm-package/skills/gortex-serena-configurator
+    - Melivo/apm-package/skills/gortex-serena-configurator#0c7838d8072dfd70c702cf2d04734a7241550c3e

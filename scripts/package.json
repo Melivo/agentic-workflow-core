@@ -1,0 +1,11 @@
+{
+  "name": "agentic-workflow-core-ci",
+  "private": true,
+  "description": "Pinned offline release tooling for local and CI checks; never published.",
+  "engines": {
+    "node": "22.23.3"
+  },
+  "dependencies": {
+    "release-please": "17.11.2"
+  }
+}

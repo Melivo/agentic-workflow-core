@@ -404,7 +404,7 @@ class ContractTests(unittest.TestCase):
             checker.check_owners(' '.join(schemas + owners))
 
     def test_read_only_guard(self):
-        with tempfile.TemporaryDirectory(prefix='core-contract-', dir='/tmp/opencode') as directory:
+        with tempfile.TemporaryDirectory(prefix='core-contract-') as directory:
             path = Path(directory) / 'source.md'
             path.write_text('original')
             checker.guarded_run([path], lambda: path.read_text())
@@ -415,7 +415,7 @@ class ContractTests(unittest.TestCase):
                 checker.guarded_run([missing], lambda: missing.write_text('created'))
 
     def test_references_fail_closed(self):
-        with tempfile.TemporaryDirectory(prefix='core-contract-', dir='/tmp/opencode') as directory:
+        with tempfile.TemporaryDirectory(prefix='core-contract-') as directory:
             root = Path(directory)
             source = root / 'source.md'
             target = root / 'target.md'
@@ -453,7 +453,7 @@ class ContractTests(unittest.TestCase):
             checker.validate_catalog(bad)
 
     def test_staged_targetsets(self):
-        for group, task in checker.GROUP_TASK.items():
+        for group in checker.TARGET_GROUPS:
             paths = checker.targets(ROOT, group)
             self.assertTrue(paths)
             self.assertTrue(all(path.is_relative_to(ROOT) for path in paths))
@@ -462,14 +462,14 @@ class ContractTests(unittest.TestCase):
                 self.assertFalse(any('core-shared' in str(path) for path in paths))
             if group == 'setup':
                 self.assertFalse(any('README' in str(path) for path in paths))
-        print('STAGING: sechs getrennte explizite Targetsets aus bestätigtem Plan')
+        print('STAGING: sechs getrennte explizite versionierte Targetsets')
 
     def test_all_cli_groups_and_authoring_switch(self):
         for group in checker.GROUPS:
             with self.subTest(group=group), patch.object(checker, 'check_group') as checked, patch.object(checker, 'selftest') as tested:
                 self.assertEqual(checker.main(['--group', group]), 0)
                 if group == 'all':
-                    self.assertEqual([c.args[1] for c in checked.call_args_list], list(checker.GROUP_TASK))
+                    self.assertEqual([c.args[1] for c in checked.call_args_list], list(checker.TARGET_GROUPS))
                 elif group == 'selftest':
                     tested.assert_called_once()
                 else:
@@ -482,7 +482,7 @@ class ContractTests(unittest.TestCase):
             self.assertIn('docs: missing prerequisite', output.getvalue())
 
     def test_missing_authoring_tools_fail(self):
-        with tempfile.TemporaryDirectory(prefix='core-contract-', dir='/tmp/opencode') as directory:
+        with tempfile.TemporaryDirectory(prefix='core-contract-') as directory:
             root = Path(directory)
             path = root / 'target.md'
             path.write_text('read-only')
@@ -492,7 +492,7 @@ class ContractTests(unittest.TestCase):
             self.assertEqual(path.read_text(), 'read-only')
 
     def test_authoring_exact_paths_read_only_and_observation(self):
-        with tempfile.TemporaryDirectory(prefix='core-contract-', dir='/tmp/opencode') as directory:
+        with tempfile.TemporaryDirectory(prefix='core-contract-') as directory:
             root = Path(directory)
             skill = root / 'core-example'
             skill.mkdir()
@@ -527,10 +527,10 @@ class ContractTests(unittest.TestCase):
                 checker.authoring(root, [path], tools)
 
     def test_real_cli_repository_groups_report_evidence(self):
-        paths = list(dict.fromkeys(p for g in checker.GROUP_TASK for p in checker.targets(ROOT, g)))
+        paths = list(dict.fromkeys(p for g in checker.TARGET_GROUPS for p in checker.targets(ROOT, g)))
         before = checker.snapshot(paths)
         observations = []
-        for group in (*checker.GROUP_TASK, 'all'):
+        for group in (*checker.TARGET_GROUPS, 'all'):
             command = [sys.executable, '-B', str(ROOT / 'scripts/check_core_contracts.py'), '--group', group]
             result = subprocess.run(command, cwd=ROOT, text=True, capture_output=True, timeout=90)
             with self.subTest(group=group):
