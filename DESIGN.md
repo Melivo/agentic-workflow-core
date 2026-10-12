@@ -68,7 +68,7 @@ Pro Änderung:
                                            └──── strukturierte Findings┘
 
 Nach bestandenem Review:
-  Abschluss → optionaler, ausdrücklich autorisierter core-scm-Schritt
+  Abschluss → optionaler, ausdrücklich autorisierter core-devops-Schritt (bei Codeänderungen Release erst jetzt)
 ```
 
 ### Öffentliche Kernworkflows
@@ -89,7 +89,7 @@ Nach bestandenem Review:
 - `gortex-serena-configurator`: externe, inline verwendete Readiness- und Konfigurationsmethode für Gortex und den projektspezifischen Serena-Fallback
 - `core-user2agent-instructions`: kontrollierte Pflege globaler und lokaler Benutzeranweisungen
 - `core-repo-audit`: read-only Repositoryhygiene und Public-Readiness
-- `core-scm`: Commit, Branch, Worktree, Merge, Push und Release nach expliziter Autorisierung
+- `core-devops`: eigenständige, klar benannte Git-/Releaseaufträge nach ausdrücklicher Freigabe (ohne Implementierungsplan); geplante Automationseinrichtung dagegen über bestätigte Tasks mit `core-plan`/`core-execute`; Releases nach Codeänderungen erst nach bestandenem Review
 - Fachskills wie `core-architecture`, `core-backend`, `core-database`, `core-debug`, `core-docs`, `core-frontend`, `core-mobile`, `core-refactor`, `core-research` und `core-tf-infra`
 
 Unterstützende Skills sind keine alternativen Lebenszyklen.
@@ -135,7 +135,7 @@ apm.yml
     ├── core-handoff/
     ├── core-milestone/
     ├── core-repo-audit/
-    ├── core-scm/
+    ├── core-devops/
     ├── core-architecture/
     ├── core-backend/
     ├── core-database/

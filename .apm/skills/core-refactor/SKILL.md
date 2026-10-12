@@ -29,7 +29,7 @@ Ordne jede beabsichtigte Änderung vor der Mutation genau einer Arbeitsart zu:
 | Bugfix | Istverhalten in erwartetes Verhalten ändern | an `core-debug` beziehungsweise `debug-investigator` routen; Regressionstest und Fix nicht einmischen |
 | Architekturentscheidung | Boundary, Vertrag, Eigentümerschaft oder Konvention materiell ändern | an `core-architecture` beziehungsweise `architecture-reviewer` routen |
 
-Characterization Tests sind ein Safety Net, kein Beweis dafür, dass das aktuelle Verhalten fachlich richtig ist. Sie pinnen den beobachteten Istzustand vor einer Strukturänderung. Auch ohne Commitautorisierung bleiben Testvorbereitung, Produktionsrefactoring, Feature und Bugfix als getrennte Tasks und Ergebnisabschnitte nachvollziehbar; SCM-Schritte gehören ausschließlich zu `core-scm` nach ausdrücklicher Autorisierung.
+Characterization Tests sind ein Safety Net, kein Beweis dafür, dass das aktuelle Verhalten fachlich richtig ist. Sie pinnen den beobachteten Istzustand vor einer Strukturänderung. Auch ohne Commitautorisierung bleiben Testvorbereitung, Produktionsrefactoring, Feature und Bugfix als getrennte Tasks und Ergebnisabschnitte nachvollziehbar. SCM-Schritte gehören zu `core-devops`: Eigenständige, klar benannte Git-/Releaseaufträge benötigen ausdrückliche Freigabe, aber keinen Implementierungsplan. Geplante Automationseinrichtung gehört in einen bestätigten Task über `core-plan`/`core-execute`. Bei Codeänderungen folgt ein Release erst nach bestandenem Review.
 
 ## Verhaltenserhaltung
 
