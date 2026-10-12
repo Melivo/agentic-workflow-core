@@ -41,8 +41,25 @@ RULES = {
                           [r'(?i)push --force(?!-with-lease)\b.*(verwenden|ausführen)']),
     'no_hook_bypass': ('SKILL.md', [r'Keine Hook-Umgehung'], [r'(?i)--no-verify (verwenden|nutzen)']),
     'version_not_chosen': ('references/ci-and-releases.md',
-                           [r'Wähle nicht eigenmächtig eine Version oder Policy',
+                           [r'wähle außerhalb einer freigegebenen Policy keine Version eigenmächtig',
                             r'Versionskollision.*stoppen'], []),
+    'zero_x_default': ('references/ci-and-releases.md',
+                       [r'Empfiehl bei der Einrichtung einer Releaseautomation standardmäßig',
+                        r'Fehlerkorrekturen erhöhen Patch',
+                        r'Neue Funktionen und inkompatible Änderungen erhöhen Minor',
+                        r'Patch wird dabei auf null gesetzt',
+                        r'Bei gemischten Änderungen gilt der höchste erforderliche Sprung',
+                        r'Frage ohne solchen Gegenbeleg nicht erneut offen nach einer 0.x-Policy'], []),
+    'zero_x_exception': ('references/ci-and-releases.md',
+                         [r'sofern keine verbindliche Projektregel oder ein konkreter fachlicher/technischer Grund dagegensteht',
+                          r'Benenne und begründe eine Abweichung',
+                          r'bewahre bestehende verbindliche Regeln'], []),
+    'one_x_explicit': ('references/ci-and-releases.md',
+                       [r'Der Wechsel auf `1\.0\.0` benötigt eine gesonderte ausdrückliche Entscheidung',
+                        r'leite ihn nicht automatisch aus einer inkompatiblen Änderung ab'], []),
+    'recommendation_no_authorization': ('references/ci-and-releases.md',
+                                      [r'Die Empfehlung ersetzt keine Einrichtungs- oder Veröffentlichungsfreigabe',
+                                       r'Tooldefaults allein belegen die Umsetzung nicht'], []),
     'release_separately_authorized': ('references/ci-and-releases.md',
                                       [r'Paketbau, Installation, Merge, Tag, Upload und Release sind getrennte Wirkungen',
                                        r'Tag oder Push genügt nicht'], []),
@@ -147,7 +164,7 @@ class CurrentText(unittest.TestCase):
 
     def test_package_inventory_and_version(self):
         manifest = read(ROOT / 'apm.yml')
-        self.assertRegex(manifest, r'(?m)^version: "0\.2\.0"$')
+        self.assertRegex(manifest, r'(?m)^version: "0\.2\.1"$')
         bundles = sorted(p.parent.name for p in SKILLS.glob('core-*/SKILL.md'))
         self.assertEqual(len(bundles), 22)
         self.assertIn('core-devops', bundles)
@@ -179,8 +196,18 @@ MUTATIONS = {
                                 'Eine Freigabe deckt alle Folgeschritte ab.'),
     'unclear_authorization_no_mutation': ('SKILL.md', 'Bei unklarer Freigabe bleibt jede Mutation aus.', ''),
     'no_hook_bypass': ('SKILL.md', 'Keine Hook-Umgehung,', 'Bei Hookfehlern --no-verify verwenden,'),
-    'version_not_chosen': ('references/ci-and-releases.md', 'Wähle nicht eigenmächtig eine Version oder Policy.',
+    'version_not_chosen': ('references/ci-and-releases.md', 'wähle außerhalb einer freigegebenen Policy keine Version eigenmächtig.',
                            'Wähle eine passende Version.'),
+    'zero_x_default': ('references/ci-and-releases.md', 'Neue Funktionen und inkompatible Änderungen erhöhen Minor',
+                       'Inkompatible Änderungen erhöhen Major'),
+    'zero_x_exception': ('references/ci-and-releases.md', 'bewahre bestehende verbindliche Regeln',
+                         'ersetze bestehende Regeln durch den Default'),
+    'one_x_explicit': ('references/ci-and-releases.md',
+                       'Der Wechsel auf `1.0.0` benötigt eine gesonderte ausdrückliche Entscheidung',
+                       'Inkompatible Änderungen wechseln automatisch auf `1.0.0`'),
+    'recommendation_no_authorization': ('references/ci-and-releases.md',
+                                      'Die Empfehlung ersetzt keine Einrichtungs- oder Veröffentlichungsfreigabe',
+                                      'Die Empfehlung autorisiert Einrichtung und Veröffentlichung'),
     'release_separately_authorized': ('references/ci-and-releases.md', 'Tag oder Push genügt nicht', 'Tag genügt'),
     'failed_check_blocks_release': ('references/ci-and-releases.md', 'Fehlerhafte oder ausstehende Pflichtchecks blockieren',
                                     'Fehlerhafte Pflichtchecks verzögern'),
