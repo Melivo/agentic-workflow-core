@@ -164,13 +164,17 @@ def broken_links(skill_dir):
 
 
 class Fixture:
-    """Isolated copy of core-devops plus its shared targets, for mutation."""
+    """Isolated copy of core-devops plus its shared and S00 link targets, for mutation."""
 
     def __enter__(self):
         self.tmp = tempfile.TemporaryDirectory(prefix='devops-contract-')
         skills = Path(self.tmp.name) / 'skills'
         shutil.copytree(DEVOPS, skills / 'core-devops')
         shutil.copytree(SKILLS / 'core-shared', skills / 'core-shared')
+        # core-devops links S00 directly; copy only that file, not the whole architecture skill.
+        baseline = 'core-architecture/references/design-baseline.md'
+        (skills / baseline).parent.mkdir(parents=True)
+        shutil.copy2(SKILLS / baseline, skills / baseline)
         self.dir = skills / 'core-devops'
         return self
 

@@ -9,7 +9,7 @@ description: Prüft die integrierte Gesamtänderung unabhängig in frischem Kont
 
 ## Situative Designmethoden
 
-Nutze [S00 – SWE-Basis und Auswahl](../core-architecture/references/design-baseline.md) für tatsächlich betroffene Struktur- und Vertragsfragen im bestätigten Prüfumfang. Detailmethoden werden nur bei konkretem Signal geladen, nicht als Vollscan. Die Referenzen aktivieren keinen Architekturworkflow und erlauben keine ungeplanten Refactorings.
+Nutze [S00 – SWE-Basis und Auswahl](../core-architecture/references/design-baseline.md) für tatsächlich betroffene Struktur- und Vertragsfragen im bestätigten Prüfumfang, einschließlich Tool-, Paket-, Einrichtungs- und Automationsänderungen. S00-Befunde erscheinen nur als bestätigte Findings im bestehenden Format. Detailmethoden werden nur bei konkretem Signal geladen, nicht als Vollscan. Die Referenzen aktivieren keinen Architekturworkflow und erlauben keine ungeplanten Refactorings.
 
 Prüfe nur belegte Signale im Gesamtdiff: Boundary-/Abstraktionsfolgen mit [M01–M04](../core-architecture/references/boundaries-and-abstractions.md), Aufrufer-/Fehlerrisiken mit [M05–M06](../core-architecture/references/interface-and-errors.md), Designentwicklung und Vertragsklarheit mit [M07–M09](../core-architecture/references/evolution-and-clarity.md). Fehlende Alternativen prüfe mit [M10](../core-architecture/references/alternatives.md) nur bei materiellen Entscheidungen. Gemeinsame Ursachen ergeben einen Befund; Review bleibt read-only.
 
@@ -63,6 +63,7 @@ Erstelle vor der Toolwahl eine knappe Risikohypothese aus Akzeptanzkriterien, Di
 | Hot Path, Schleifen über wachsende Daten, I/O, Abfragen, Rendering oder Bundlegrenzen | Performance und Ressourcenverbrauch |
 | Benutzeroberfläche, Interaktion, Fokus, Semantik, Kontrast oder responsive Zustände | Accessibility nach der geltenden Projektanforderung |
 | Öffentliche Schnittstellen, Modulgrenzen oder gemeinsam geänderte Komponenten | Architektur und Information Hiding |
+| Tool-, Paket-, Einrichtungs- oder Automationsänderung | S00-Verantwortung, Abhängigkeiten, Konfiguration, Zustand und Austausch- beziehungsweise Entfernungspfad im bestätigten Prüfumfang |
 | Geänderte Nutzeroberfläche, Konfiguration, öffentliche API oder Betriebsweise | Dokumentation und Migrationshinweise |
 
 Die Tabelle ist eine Entscheidungshilfe, kein pauschaler Toolkatalog. Führe weder `npm audit`, `bandit`, Lighthouse noch ein anderes Werkzeug allein wegen seiner Verfügbarkeit aus. Wähle den kleinsten Check, der die konkrete Hypothese bestätigt oder widerlegt, und respektiere Stack, Zielumgebung, Scope und Autorisierung.

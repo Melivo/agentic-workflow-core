@@ -22,6 +22,10 @@ Dieses Bundle ist ein interner Index. Es führt keinen Workflow aus, dispatcht k
 - [Verifikation](references/verification.md) — Evidenz, Pflichtchecks, blockierte Prüfungen und Reviewurteile.
 - [Benutzeranweisungen](references/user-instructions-contract.md) — sichere Synchronisierung manueller `AGENTS.md`-Inhalte.
 
+## Fachhintergrund (nur Index)
+
+- [Softwaredesign-Prinzipien: Hintergrund](../core-architecture/references/principles-background.md): ausführliche Erläuterung der Prinzipien; nur bei Auslegungsbedarf laden. Die verbindliche Regel steht in `core-architecture`, Referenz S00.
+
 ## Vorlagen und Routingmetadaten
 
 - [Workflowkatalog](assets/workflow-catalog.yaml)

@@ -28,7 +28,9 @@
       ".apm/skills/core-milestone/SKILL.md",
       ".apm/skills/core-milestone/assets/goal-prompt.md",
       ".apm/skills/core-handoff/SKILL.md",
-      ".apm/skills/core-handoff/assets/start-prompt.md"
+      ".apm/skills/core-handoff/assets/start-prompt.md",
+      ".apm/skills/core-architecture/references/design-baseline.md",
+      ".apm/skills/core-architecture/references/principles-background.md"
     ],
     "domains": [
       ".apm/skills/core-backend/SKILL.md",
@@ -37,7 +39,9 @@
       ".apm/skills/core-mobile/SKILL.md",
       ".apm/skills/core-tf-infra/SKILL.md",
       ".apm/skills/core-debug/SKILL.md",
-      ".apm/skills/core-docs/SKILL.md"
+      ".apm/skills/core-docs/SKILL.md",
+      ".apm/skills/core-devops/SKILL.md",
+      ".apm/skills/core-devops/references/development-automation.md"
     ],
     "setup": [
       ".apm/skills/core-init-mcps/SKILL.md",

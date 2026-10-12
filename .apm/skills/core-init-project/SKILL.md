@@ -43,7 +43,7 @@ Führe den Preflight von `gortex-serena-configurator` mit der konkreten Reposito
 
 `Repository in Gortex tracken` ist immer **optional** und benötigt eine ausdrückliche Auswahl; fehlendes Tracking autorisiert keine automatische Registrierung. Entferne oder ändere vorhandenes Tracking niemals implizit.
 
-Serena bleibt auf dieses konkrete Projekt begrenzt. Aktiviere weder Benutzer-Home noch Dateisystemroot oder ein breites Elternverzeichnis und schließe Abhängigkeiten, Caches, generierte Bäume, Binärdateien und Vendor-Verzeichnisse vom breiten Suchraum aus. Projektbezogene Serena-Einrichtung und Sprachabgleich benötigen jeweils die dafür gezeigte Auswahl. Gortex bleibt der primäre Code-Intelligence-Provider.
+Serena bleibt auf dieses konkrete Projekt begrenzt. Aktiviere weder Benutzer-Home noch Dateisystemroot oder ein breites Elternverzeichnis und schließe Abhängigkeiten, Caches, generierte Bäume, Binärdateien und Vendor-Verzeichnisse vom breiten Suchraum aus. Projektbezogene Serena-Einrichtung und Sprachabgleich benötigen jeweils die dafür gezeigte Auswahl. Gortex bleibt der primäre Code-Intelligence-Provider. Der Readiness-Preflight löst keinen Vollscan und keine Installation aus. Die [S00-Basis](../core-architecture/references/design-baseline.md) gilt für geänderte Einrichtungsbestandteile wie den Projektblock oder eine ausdrücklich ausgewählte Provideraktion; dabei sind Abhängigkeiten, Konfiguration und Entfernungspfad zu benennen.
 
 ### 3. Kleinen verwalteten Projektblock entwerfen
 

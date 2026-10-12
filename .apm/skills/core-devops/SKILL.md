@@ -16,6 +16,7 @@ Benötigt werden Repositorywurzel, konkretes Ziel, betroffene Pfade/Refs, gewün
 - Trenne Prüfen, Konfigurationseinrichtung, Auslösen/Erzeugen, Commit, Push, Tag, Paketbau, Veröffentlichung und Deployment. Jede Wirkung benötigt ihre eigene passende aktuelle Freigabe.
 - Einrichten oder Prüfen autorisiert weder Toolinstallation noch unmittelbares Auslösen. Eine erfolgreiche Prüfung autorisiert keine Veröffentlichung.
 - Keine Änderungen am Produktcode, Datenbankschema/-migration, Infrastruktur oder produktiven Deployment im Rahmen dieses Skills.
+- Tool-, Paket-, Einrichtungs- und Automationsänderungen wenden die [S00-Basis](../core-architecture/references/design-baseline.md) proportional an. Für Installations-, Update- und Entfernungsabläufe gelten die Nachweis- und Restprüfungsregeln der [Entwicklungsautomation](references/development-automation.md); eine Entfernung wird nicht pauschal als rückstandsfrei bezeichnet.
 
 Bei jeder Mutation gelten der [Workflowvertrag](../core-shared/references/workflow-contract.md), der [Verifikationsvertrag](../core-shared/references/verification.md) und das [Toolrouting](../core-shared/references/tool-routing.md). Ziehe das [Git- und History-Handbuch](references/git-operations.md), [Automationshandbuch](references/development-automation.md), [Toolprofile](references/tooling-profiles.md), [Checks und Hooks](references/checks-and-hooks.md), [CI und Releases](references/ci-and-releases.md) oder [Fehlerbehebung und Recovery](references/failure-recovery.md) jeweils nur bei Bedarf hinzu.
 

@@ -37,6 +37,9 @@ CHARACTERIZED = {
     'setup': ['core-init-mcps', 'core-init-project', 'core-user2agent-instructions'],
     'docs': ['README.md', 'DESIGN.md'],
 }
+# G03/M01: explicit Markdown sources appended after the characterized entries (no PNG).
+CHARACTERIZED['workflows'] += ['design-baseline.md', 'principles-background.md']
+CHARACTERIZED['domains'] += ['core-devops/SKILL.md', 'development-automation.md']
 
 
 def source_files():

@@ -11,6 +11,8 @@ description: Fachmethode für proportionale Architekturentscheidungen zu Modulgr
 
 Nutze [S00 – SWE-Basis und Auswahl](references/design-baseline.md) für tatsächlich betroffene Struktur- und Vertragsfragen im bestätigten Prüfumfang. Detailmethoden werden nur bei konkretem Signal geladen, nicht als Vollscan. Die Referenzen aktivieren keinen Architekturworkflow und erlauben keine ungeplanten Refactorings.
 
+Die fünf Softwaredesign-Prinzipien sind in [S00](references/design-baseline.md) als verbindlicher Sollzustand verankert, beim Gestalten ebenso wie bei der Abschlussprüfung. Die ausführliche [Hintergrundreferenz](references/principles-background.md) mit Bild und Quellen wird nur bei Auslegungs- oder Erklärungsbedarf geladen; sie ersetzt keine Regel aus S00.
+
 Prüfe Wissenseigentum, versteckte Kopplung oder redundante Schichten mit [M01–M04](references/boundaries-and-abstractions.md); unnötige Aufruferentscheidungen oder Fehlerflächen mit [M05–M06](references/interface-and-errors.md). Bei materiellen Richtungsentscheidungen nutze [M10](references/alternatives.md).
 
 Wenn Tools benötigt werden, prüfe relevante aktuell verfügbare MCP-Fähigkeiten gemäß [Toolrouting](../core-shared/references/tool-routing.md); Verfügbarkeit erweitert weder Scope noch Autorisierung.

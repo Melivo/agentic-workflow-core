@@ -24,6 +24,8 @@ CHECKER = ROOT / 'scripts/check_core_contracts.py'
 CLI_GROUPS = ('selftest', 'milestones', 'shared', 'workflows', 'domains', 'setup', 'docs', 'all')
 CLI_DOMAIN_GROUPS = CLI_GROUPS[1:-1]
 LINK = re.compile(r'(?<!!)\[[^\]]*\]\(([^)\s]+)\)')
+# Former 'Coding-Tasks' anchors, widened to cross-cutting structural work (code, tools, packages, setup, automation).
+STRUCTURAL_TASKS = re.compile(r'Coding-Tasks|schreibenden strukturrelevanten Tasks')
 
 
 def skill_path(name):
@@ -97,7 +99,7 @@ def plan_problems(text, source):
         problems.append('plan: missing/unreadable S00 source does not block')
     graph = section(text, '4. Einen Taskgraphen zerlegen')
     rule = [p for p in paragraphs(graph) if p.startswith('- \x60context_paths\x60')]
-    if not rule or 'aufgelöste exakte S00-Lesepfad' not in rule[0] or 'Coding-Tasks' not in rule[0] or 'immer' not in rule[0]:
+    if not rule or 'aufgelöste exakte S00-Lesepfad' not in rule[0] or not STRUCTURAL_TASKS.search(rule[0]) or 'immer' not in rule[0]:
         problems.append('plan: exact resolved S00 read path in context_paths missing')
     elif BASELINE_PATH in rule[0] or 'nie ein fest codierter' not in rule[0]:
         problems.append('plan: hard-coded producer S00 path required')
@@ -127,7 +129,7 @@ def execute_problems(text, source):
         for part in ('Auftrag', '\x60context_paths\x60', '\x60scope\x60', 'Akzeptanzkriterien', 'Checks', 'Constraints'):
             if part not in b:
                 problems.append('execute: dispatch payload lacks ' + part)
-        if not links_to_baseline(b, source) or 'Coding-Tasks' not in b:
+        if not links_to_baseline(b, source) or not STRUCTURAL_TASKS.search(b):
             problems.append('execute: S00 handover in dispatch missing')
         if 'vor der ersten Codeänderung' not in b:
             problems.append('execute: pre-change application in handover missing')
@@ -140,7 +142,7 @@ def execute_problems(text, source):
     result = section(text, '4. Taskresultat prüfen')
     items = [p for p in paragraphs(result) if p.startswith('- ')]
     acc = [p for p in items if 'Akzeptanz-ID' in p]
-    if not acc or 'S00-Befund' not in acc[0] or 'Coding-Tasks' not in acc[0]:
+    if not acc or 'S00-Befund' not in acc[0] or not STRUCTURAL_TASKS.search(acc[0]):
         problems.append('execute: S00 completion finding in acceptance evidence missing')
     chk = [p for p in items if 'gepinnten Check' in p]
     if not chk or 'unverändertem Kommando' not in chk[0] or 'S00' not in chk[0]:
@@ -294,6 +296,7 @@ class DesignPrincipleTests(unittest.TestCase):
             'blocked': ('stoppe mit \x60blocked\x60', 'fahre fort'),
             'external_exception': ('auch wenn er außerhalb des Projekts liegt', ''),
             'acceptance': ('in den vorhandenen \x60acceptance\x60-/\x60checks\x60-Feldern', ''),
+            'structural_scope': ('bei schreibenden strukturrelevanten Tasks gehört', 'bei manchen Tasks gehört'),
         }
         for name, (old, new) in cases.items():
             with self.subTest(mutation=name):
@@ -334,6 +337,8 @@ class DesignPrincipleTests(unittest.TestCase):
             'subagent': ('**keinen Subagenten**', 'Subagenten'),
             'finding': ('einschließlich des S00-Befunds', ''),
             'schema': ('kein neues Schema', ''),
+            'structural_handover': ('Bei schreibenden strukturrelevanten Tasks ergänze', 'Bei Bedarf ergänze'),
+            'structural_finding': ('Verträge bei schreibenden strukturrelevanten Tasks,', 'Verträge,'),
         }
         for name, (old, new) in cases.items():
             with self.subTest(mutation=name):

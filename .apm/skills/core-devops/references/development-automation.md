@@ -17,6 +17,17 @@ Diese Referenz gilt für wiederholbare Projektaufgaben und ihre Verkabelung. „
 - Auslösen: Explizit sagen, welche Aufgabe ausgeführt wird und ob sie liest, Dateien schreibt, Code generiert, Dienste startet, Pakete baut oder Daten verändert. Einrichtung autorisiert keinen Run. Toolinstallation und Paket-/Deploymentwirkung bleiben eigene Freigaben.
 - Generierung/Migration: Nur existierende Projektverträge, Schemaquellen und Generatoranweisungen nutzen; tatsächliche Ausgabepfade und Diff kontrollieren. Keine Datenbankmodellierung oder Migration entwerfen.
 
+## Paket- und Toolaustausch
+
+Bei Installation, Update, Austausch oder Entfernung eines Tools oder Pakets gilt die [S00-Basis](../../core-architecture/references/design-baseline.md) proportional. Inventarisiere vor der Wirkung:
+
+- Zustand: Lock- und Cachedateien, laufende Prozesse, Hooks und Registrierungen,
+- Daten: vom Werkzeug angelegte oder gelesene Artefakte und Datenbestände,
+- Konfiguration: globale und projektbezogene Einstellungen, Versionspins und Umgebungsvariablen, ohne Secret-Werte offenzulegen,
+- Abhängigkeiten: Skripte, CI-Jobs, Hooks und andere Verbraucher des Werkzeugs.
+
+Ein Austausch benennt den Ersatz und die Übergabe der Verbraucher. Die Entfernung führt eine Restprüfung der vier Punkte aus. Die Aussage „rückstandsfrei“ ist nur zulässig, wenn diese Restprüfung belegt ist; sonst nennt der Bericht die verbleibenden Punkte. Diese Schritte sind Einrichtungsaufgaben und benötigen die jeweils ausdrückliche Freigabe.
+
 ## Nachweis
 
 Lokal und CI sollten dieselben Projektaufgaben verwenden, wenn das Projekt sie bereits definiert. Plattformworkflow darf Plattformsyntax enthalten, soll aber keine zweite abweichende Prüfimplementierung erzeugen. Prüfe Exitcode, relevante Ausgabe, Seiteneffekte und Artefakte. Dokumentiere Aufgabe, Voraussetzungen, Abhängigkeiten, Schreibwirkung und erwartete Nutzung knapp; bette keine Secrets in Taskdefinitionen ein.

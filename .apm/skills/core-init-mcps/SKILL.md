@@ -15,7 +15,7 @@ description: Prüft read-only die bereits vorhandenen MCP-Provider eines Harness
 | Credentials | Benutzer allein | sichere Ablage; der Skill sucht, liest oder erfragt keine Secrets |
 | projektspezifische Providerinitialisierung | `core-init-project` mit `gortex-serena-configurator` | ausschließlich konkret autorisierte Projektaktionen; kein globales Serena |
 
-Eine `apm.yml`-Deklaration oder ein Paket-Lockfile ist weder Voraussetzung noch Quelle für diese Bestandsprüfung. Dieser Skill ändert keine Paket-, Harness- oder Providerkonfiguration. Paketfreigabevalidierung und Installation sind separate, ausdrücklich autorisierte Aufgaben.
+Eine `apm.yml`-Deklaration oder ein Paket-Lockfile ist weder Voraussetzung noch Quelle für diese Bestandsprüfung. Dieser Skill ändert keine Paket-, Harness- oder Providerkonfiguration. Paketfreigabevalidierung und Installation sind separate, ausdrücklich autorisierte Aufgaben. Die Bestandsprüfung ist keine S00-Pflicht, löst keinen Vollscan aus und bewertet keine Architektur; eine spätere Installation berücksichtigt S00 mit Austausch- und Entfernungspfad im separat autorisierten Auftrag des zuständigen Installationsskills. Ein zusätzlicher Core-Plan wird dadurch nicht pauschal vorgeschrieben; bei planbasierter Arbeit gelten weiterhin die bestätigten Taskgrenzen.
 
 ## Verbindliche Verträge
 
