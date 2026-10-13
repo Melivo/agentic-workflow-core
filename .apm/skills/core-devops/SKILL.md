@@ -31,6 +31,10 @@ Bei jeder Mutation gelten der [Workflowvertrag](../core-shared/references/workfl
 | CI-Konfiguration, Paketbildung, Versionierung und Veröffentlichung | [CI und Releases](references/ci-and-releases.md) | vorhandene CI aufrufen; Releasewirkung separat autorisieren |
 | fehlgeschlagene Aufgaben, Hooks, CI oder unsichere Historyoperationen | [Failure Recovery](references/failure-recovery.md) | Ursache eingrenzen, sichere Wiederaufnahme oder Stopp bestimmen |
 
+## Optionale Habit-Feedback-Integration
+
+Wenn ein bestätigter Task eine Integration von Habit-Hooks-Feedback betrifft, nutze die [Nutzungsreferenz](references/habit-feedback.md) als produktbezogene Ergänzung. Sie beschreibt den geprüften, noch nicht veröffentlichten Paketstand und die qualifizierte Abdeckung. Eine künftige OpenCode-V2-Registrierung mit `package`/`options` ist eine getrennt freizugebende, additive Benutzer-/Harnesskonfiguration; sie erfordert keine Shell- oder Login-Umgebungsänderung und wird nicht vom normalen Hooklauf eingerichtet. Der Originalsensor und -mapper bleiben für Erkennung, Routing und Guide-Rendering zuständig; nicht geprüfte Abdeckung wird sichtbar ausgewiesen.
+
 ## Workflow
 
 1. **Klassifizieren:** Ist das ein read-only Inspect, eine lokale Prüfung, Konfigurationseinrichtung, Git-Mutation, Paket-/Releasewirkung oder produktives Deployment? Letzteres liegt außerhalb dieses Skills.

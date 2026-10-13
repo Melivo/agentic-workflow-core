@@ -23,7 +23,8 @@ ROOT = Path(__file__).resolve().parents[1]
 SKILLS = ROOT / '.apm/skills'
 DEVOPS = SKILLS / 'core-devops'
 REFS = ('git-operations', 'development-automation', 'tooling-profiles',
-        'checks-and-hooks', 'ci-and-releases', 'failure-recovery')
+        'checks-and-hooks', 'ci-and-releases', 'failure-recovery',
+        'habit-feedback')
 LINK = re.compile(r'(?<!!)\[[^\]]*\]\(([^)\s]+)\)')
 # Exactly one top-level SemVer core without leading zeros; YAML decides quoting, the value is semantic.
 SEMVER = re.compile(r'(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)')
@@ -175,6 +176,12 @@ class Fixture:
         baseline = 'core-architecture/references/design-baseline.md'
         (skills / baseline).parent.mkdir(parents=True)
         shutil.copy2(SKILLS / baseline, skills / baseline)
+        # habit-feedback.md links four workflow skill sources; copy those real
+        # files so link checks stay effective, not whole skills.
+        for name in ('core-plan', 'core-execute', 'core-refactor', 'core-review'):
+            target = skills / name / 'SKILL.md'
+            target.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copy2(SKILLS / name / 'SKILL.md', target)
         self.dir = skills / 'core-devops'
         return self
 
@@ -330,6 +337,11 @@ class Mutations(unittest.TestCase):
         with Fixture() as fx:
             (fx.dir / 'references/failure-recovery.md').unlink()
             self.assertIn(('SKILL.md', 'references/failure-recovery.md'), broken_links(fx.dir))
+
+    def test_removed_core_link_target_breaks_fixture_links(self):
+        with Fixture() as fx:
+            (fx.dir.parent / 'core-plan' / 'SKILL.md').unlink()
+            self.assertIn(('habit-feedback.md', '../../core-plan/SKILL.md'), broken_links(fx.dir))
 
     def test_unrelated_edit_keeps_rules_green(self):
         with Fixture() as fx:

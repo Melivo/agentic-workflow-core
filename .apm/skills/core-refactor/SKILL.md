@@ -15,6 +15,10 @@ Wähle bei unklarer Komplexität, gekoppelten Änderungen oder redundanten Schic
 
 Wenn Tools benötigt werden, prüfe relevante aktuell verfügbare MCP-Fähigkeiten gemäß [Toolrouting](../core-shared/references/tool-routing.md); Verfügbarkeit erweitert weder Scope noch Autorisierung.
 
+## Bedingte Habit-Feedback-Referenz
+
+Wenn ein Refactoring durch Habit-Feedback-Hinweise angestoßen wird, lies ergänzend die [Nutzungsreferenz](../core-devops/references/habit-feedback.md). Sie liefert Hinweise und überprüfbare Ziele, keine automatische Korrekturfreigabe. Beachte advisory coaching auch bei nicht blockierendem Mapperstatus; „no enforced findings“ ist kein „keine Befunde“, und nicht gescannte Bereiche dürfen nicht als sauber gelten. Die Original-Severityentscheidung und das Rendering des Originalmappers bleiben maßgeblich; Optionen für eine globale V2-Registrierung sind keine Refactoringfreigabe. Die Characterization-/Safety-Net-Trennung, Verhaltensbewahrung und alle Regeln dieses Skills bleiben bestehen.
+
 ## Unverhandelbare Trennung
 
 Brainstorm oder Plan können diese Fachmethode inline bei konkretem verhaltensbewahrendem Struktur-/Safety-Net-Signal berücksichtigen; das ist kein eigener Dispatch. Characterization Tests und Produktionsrefactoring müssen getrennte Tasks sein, mit ausdrücklicher Abhängigkeit vom Characterization-Task zum Refactoring-Task. Während Characterization bleibt Produktionscode eingefroren; im Refactoring bleiben Tests unverändert. Geht kein belastbares Safety Net hervor, stoppt das abhängige Refactoring.

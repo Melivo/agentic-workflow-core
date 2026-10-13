@@ -1,0 +1,40 @@
+{
+  "name": "opencode-habit-feedback",
+  "version": "0.1.0",
+  "description": "Scope-limited OpenCode V2 feedback from original Habit Hooks and canonical Core guides.",
+  "license": "MIT",
+  "private": false,
+  "type": "module",
+  "main": "index.js",
+  "exports": {
+    ".": "./index.js"
+  },
+  "peerDependencies": {
+    "@opencode/plugin": "2.0.25"
+  },
+  "peerDependenciesMeta": {
+    "@opencode/plugin": {
+      "optional": true
+    }
+  },
+  "files": [
+    "index.js",
+    "plugin/index.js",
+    "adapter/habit_feedback_pipeline.py",
+    "hook/habit_feedback_hook.py",
+    "guides/*.md",
+    "core/",
+    "inventory.json",
+    "LICENSE",
+    "README.md",
+    "VERSIONS.md",
+    "sdk-contract.md"
+  ],
+  "scripts": {},
+  "opencodeHabitFeedback": {
+    "sdkTarget": "2.0.25",
+    "pipeline": "habit-sensors | habit-mapper",
+    "canonicalSource": ".apm/skills/core-devops/assets/opencode-habit-feedback",
+    "build": "python3 -B scripts/check_habit_feedback.py package"
+  }
+}
