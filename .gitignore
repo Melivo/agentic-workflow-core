@@ -2,6 +2,7 @@
 .agents/
 .codex/
 .opencode/
+/opencode.jsonc
 AGENTS.md
 .antigravitycli/
 reference/source-material/
