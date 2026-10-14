@@ -100,6 +100,18 @@ def read(path):
     return path.read_text(encoding='utf-8')
 
 
+def authoring_tools_are_not_dependencies(text):
+    """Recognize a scoped declaration, not dependency words elsewhere in README."""
+    sentences = [sentence for paragraph in text.split(chr(10) * 2)
+                 for sentence in re.split(r'[.!?]', ' '.join(paragraph.split()))]
+    declarations = [s.strip() for s in sentences
+                    if re.search(r'\b(?:skill-creator|context-debloater)\b', s)]
+    pattern = (r'`skill-creator` und `context-debloater` sind '
+               r'(?:Werkzeuge für die Paketentwicklung|Authoring-Werkzeuge)'
+               r'(?:,| und) keine (?:Paketabhängigkeiten|zusätzlichen Verbraucherabhängigkeiten)')
+    return bool(declarations) and all(re.fullmatch(pattern, s) for s in declarations)
+
+
 def frontmatter(text):
     match = re.match(r'---\n(.*?)\n---\n', text, re.S)
     return dict(re.findall(r'^(\w+): (.+)$', match.group(1), re.M)) if match else {}
@@ -235,7 +247,7 @@ class CurrentText(unittest.TestCase):
             # Provenance may name authoring tools; consumer-loaded instructions must not.
             for path in SKILLS.glob('core-*/SKILL.md'):
                 self.assertNotIn(tool, read(path), f'{path} makes {tool} a consumer dependency')
-        self.assertIn('keine Paketabhängigkeiten', read(ROOT / 'README.md'))
+        self.assertTrue(authoring_tools_are_not_dependencies(read(ROOT / 'README.md')))
         self.assertIn('keine APM-Abhängigkeiten und keine Bestandteile eines Verbraucher-Workflows', read(ROOT / 'DESIGN.md'))
 
 
@@ -283,6 +295,62 @@ MUTATIONS = {
     'context_paths_not_scope': ('SKILL.md', '`context_paths` sind Lesequellen und erweitern keinen dieser Scopes.',
                                 '`context_paths` sind ebenfalls Schreibscope.'),
 }
+
+
+class AuthoringDependencyText(unittest.TestCase):
+    """Frozen text mutations; CurrentText separately checks the mutable README."""
+
+    DECLARATION = ('`skill-creator` und `context-debloater` sind Werkzeuge für die '
+                   'Paketentwicklung, keine zusätzlichen Verbraucherabhängigkeiten.')
+    TEXT = '## Lizenz' + chr(10) * 2 + DECLARATION
+
+    def test_both_valid_dependency_phrasings(self):
+        text = self.TEXT
+        anchor = 'keine zusätzlichen Verbraucherabhängigkeiten'
+        self.assertIn(anchor, text)
+        for phrase in ('keine Paketabhängigkeiten', anchor):
+            with self.subTest(phrase=phrase):
+                self.assertTrue(authoring_tools_are_not_dependencies(text.replace(anchor, phrase)))
+
+    def test_missing_contrary_and_misleading_declarations_fail(self):
+        text = self.TEXT
+        declaration = self.DECLARATION
+        self.assertEqual(text.count(declaration), 1)
+        variants = {
+            'removed': text.replace(declaration, ''),
+            'no negation': text.replace('keine zusätzlichen Verbraucherabhängigkeiten',
+                                       'zusätzliche Verbraucherabhängigkeiten'),
+            'package dependencies': text.replace('keine zusätzlichen Verbraucherabhängigkeiten',
+                                                 'Paketabhängigkeiten'),
+            'unrelated negation': text.replace(declaration,
+                '`skill-creator` und `context-debloater` sind Paketabhängigkeiten. '
+                'Andere Werkzeuge sind keine Paketabhängigkeiten.'),
+            'detached tool names': text.replace(declaration,
+                '`skill-creator` und `context-debloater` werden verwendet. '
+                'Andere Werkzeuge sind keine zusätzlichen Verbraucherabhängigkeiten.'),
+            'one tool missing': text.replace(' und `context-debloater`', ''),
+            'different tool': text.replace('`context-debloater`', '`other-tool`'),
+            'qualified denial': text.replace('keine zusätzlichen Verbraucherabhängigkeiten',
+                                             'keine zusätzlichen Verbraucherabhängigkeiten nur im Test'),
+            'quoted claim': text.replace(declaration, 'Ein Beispiel lautet: ' + declaration),
+            'contradiction': text + """
+`skill-creator` ist eine Paketabhängigkeit.""",
+        }
+        for label, mutated in variants.items():
+            with self.subTest(label=label):
+                self.assertNotEqual(mutated, text)
+                self.assertFalse(authoring_tools_are_not_dependencies(mutated))
+        self.assertFalse(authoring_tools_are_not_dependencies(''))
+        self.assertFalse(authoring_tools_are_not_dependencies('keine Paketabhängigkeiten'))
+
+    def test_irrelevant_text_and_line_wrapping_keep_contract_green(self):
+        text = self.TEXT
+        self.assertIn('## Lizenz', text)
+        self.assertTrue(authoring_tools_are_not_dependencies(text.replace('## Lizenz', '## Paketlizenz')))
+        self.assertTrue(authoring_tools_are_not_dependencies(text.replace(
+            'Paketentwicklung, keine zusätzlichen Verbraucherabhängigkeiten',
+            """Paketentwicklung,
+keine zusätzlichen Verbraucherabhängigkeiten""")))
 
 
 class PackageVersion(unittest.TestCase):

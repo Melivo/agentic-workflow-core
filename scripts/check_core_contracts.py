@@ -677,6 +677,9 @@ def check_setup_source(front, text):
 def check_group(root, group, with_authoring=False, tool_root=None):
     paths = targets(root, group)
     def action():
+        # Missing inputs take precedence over content findings in earlier targets.
+        for path in paths:
+            require(path.is_file(), 'Phasenvoraussetzung fehlt: ' + str(path.relative_to(root)))
         texts, examples = [], []
         for path in paths:
             require(path.is_file(), 'Phasenvoraussetzung fehlt: ' + str(path.relative_to(root)))

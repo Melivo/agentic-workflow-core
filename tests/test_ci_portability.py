@@ -6,6 +6,7 @@ import importlib.util
 import io
 import json
 import os
+import re
 from pathlib import Path
 import shutil
 import subprocess
@@ -113,6 +114,67 @@ class Targetsets(unittest.TestCase):
             result = subprocess.run([sys.executable, '-B', str(root / 'scripts/check_core_contracts.py'), '--group', 'all'], cwd=root, capture_output=True, text=True, timeout=300)
             self.assertEqual(result.returncode, 1)
             self.assertIn('Phasenvoraussetzung fehlt: DESIGN.md', result.stderr)
+
+    def test_all_targets_preflight_before_any_content_read(self):
+        for group in checker.TARGET_GROUPS:
+            with self.subTest(group=group), tempfile.TemporaryDirectory(prefix='preflight-') as directory:
+                root = fresh_fixture(directory)
+                paths = checker.targets(root, group)
+                missing = paths[-1]
+                missing.unlink()
+                with patch.object(Path, 'read_text', side_effect=AssertionError('content read before preflight')), \
+                     patch.object(checker, 'targets', return_value=paths), \
+                     patch.object(checker, 'check_links') as links, \
+                     patch.object(checker, 'guarded_run', wraps=checker.guarded_run) as guard:
+                    with self.assertRaisesRegex(checker.ContractError,
+                            '^Phasenvoraussetzung fehlt: ' + re.escape(str(missing.relative_to(root))) + '$'):
+                        checker.check_group(root, group)
+                    links.assert_not_called()
+                    guard.assert_called_once()
+
+    def test_missing_source_precedes_even_unrelated_broken_readme_link(self):
+        with tempfile.TemporaryDirectory(prefix='missing-before-link-') as directory:
+            root = fresh_fixture(directory)
+            readme = root / 'README.md'
+            readme.write_text(readme.read_text(encoding='utf-8') + """
+[broken](missing-link-target.md)
+""", encoding='utf-8')
+            (root / 'DESIGN.md').unlink()
+            for group in ('docs', 'all'):
+                result = subprocess.run([sys.executable, '-B', str(root / 'scripts/check_core_contracts.py'),
+                                         '--group', group], cwd=root, capture_output=True, text=True, timeout=300)
+                self.assertEqual(result.returncode, 1)
+                self.assertIn('Phasenvoraussetzung fehlt: DESIGN.md', result.stderr)
+                self.assertNotIn('fehlende/lokalfremde Referenz', result.stderr)
+
+    def test_present_targets_still_report_broken_links_without_source_writes(self):
+        with tempfile.TemporaryDirectory(prefix='broken-link-') as directory:
+            root = fresh_fixture(directory)
+            readme = root / 'README.md'
+            readme.write_text(readme.read_text(encoding='utf-8') + """
+[broken](missing-link-target.md)
+""", encoding='utf-8')
+            paths = checker.targets(root, 'docs')
+            self.assertTrue(all(path.is_file() for path in paths))
+            before = checker.snapshot(paths)
+            for group in ('docs', 'all'):
+                result = subprocess.run([sys.executable, '-B', str(root / 'scripts/check_core_contracts.py'),
+                                         '--group', group], cwd=root, capture_output=True, text=True, timeout=300)
+                self.assertEqual(result.returncode, 1)
+                self.assertIn('fehlende/lokalfremde Referenz: missing-link-target.md', result.stderr)
+                self.assertNotIn('Phasenvoraussetzung fehlt', result.stderr)
+            self.assertEqual(checker.snapshot(paths), before)
+
+    def test_target_disappearing_during_content_checks_trips_read_only_guard(self):
+        with tempfile.TemporaryDirectory(prefix='preflight-race-') as directory:
+            root = fresh_fixture(directory)
+            original = checker.check_links
+            def remove_later_target(workspace, path, text):
+                original(workspace, path, text)
+                (root / 'DESIGN.md').unlink()
+            with patch.object(checker, 'check_links', side_effect=remove_later_target), \
+                 self.assertRaisesRegex(checker.ContractError, 'Read-only-Guard: geprüfte Quellen verändert'):
+                checker.check_group(root, 'docs')
 
 
 class FreshFixture(unittest.TestCase):
