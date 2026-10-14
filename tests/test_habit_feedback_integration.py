@@ -76,6 +76,13 @@ def behavior(source):
     ns={}; exec(compile(source,'trusted-test-fixture','exec'),ns)
     return [ns['decision'](x) for x in range(8192)]
 
+def optional_config_snapshot(root):
+    """Absence is a state to preserve, not a required private CI input."""
+    path = root/'opencode.jsonc'
+    return {'exists':path.exists(), 'symlink':path.is_symlink(),
+            'sha256':package.sha(path.read_bytes()) if path.is_file() else None}
+
+
 def tree(root):
     return {p.relative_to(root).as_posix():package.sha(p.read_bytes()) for p in root.rglob('*') if p.is_file()}
 
@@ -678,7 +685,7 @@ def preflight(root):
 
 def verify_runtime(report):
     root=Path(tempfile.mkdtemp(prefix='habit-integration-',dir='/tmp/opencode'))
-    source_before=package.source_files(); foreign_before=package.sha((ROOT/'opencode.jsonc').read_bytes())
+    source_before=package.source_files(); foreign_before=optional_config_snapshot(ROOT)
     versions=preflight(root)
     # Runtime copies come only from the actual offline npm-installed tarball,
     # preserving every inventoried byte. No installation/downloader during checks.
@@ -782,7 +789,7 @@ def verify_runtime(report):
         package.require(BASELINE_CASES|ROUND_ONE_REVIEW_CASES <= set(results),'previous 76 baseline/review cases were lost')
         package.require(len(PREVIOUS_NINETY_CASES)==90 and PREVIOUS_NINETY_CASES <= set(results),'previous ninety cases were lost')
         package.require(package.source_files()==source_before,'canonical sources mutated by runtime check')
-        package.require(package.sha((ROOT/'opencode.jsonc').read_bytes())==foreign_before,'foreign config changed')
+        package.require(optional_config_snapshot(ROOT)==foreign_before,'foreign config changed')
         report_out={'verified':True,'cases':results,'projects':[str(p) for p in projects],
          'effective_coverage_proof':rv06,'options_proof':options_proof,'review_repros':review,'versions':versions,'archive_sha256':report['sha256'],'source_sha256':report['source_sha256'],
          'receipt_qualification':'rebased real-receipt CONTRACT REPLAY through actual execute, NOT a fresh Gortex daemon mutation',
@@ -808,6 +815,36 @@ class BehaviorFixtures(unittest.TestCase):
         self.assertEqual(REAL_APPLIED['mutation_receipt'],'commit-287')
         self.assertEqual(REAL_APPLIED['status'],'applied')
         self.assertTrue(REAL_APPLIED['path'].startswith('agentic-workflow-core/'))
+
+class OptionalConfigSnapshot(unittest.TestCase):
+    def test_fresh_checkout_needs_no_local_config_and_creates_none(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            before = optional_config_snapshot(root)
+            self.assertEqual(before, {'exists':False, 'symlink':False, 'sha256':None})
+            self.assertEqual(optional_config_snapshot(root), before)
+            self.assertEqual(list(root.iterdir()), [])
+
+    def test_existing_config_changes_and_deletion_remain_detectable(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); path = root/'opencode.jsonc'
+            path.write_text('{"plugins":[]}')
+            before = optional_config_snapshot(root)
+            self.assertEqual(optional_config_snapshot(root), before)
+            path.write_text('{"plugins":["changed"]}')
+            self.assertNotEqual(optional_config_snapshot(root), before)
+            path.unlink()
+            self.assertNotEqual(optional_config_snapshot(root), before)
+
+    def test_creation_and_dangling_symlink_are_not_absence(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); path = root/'opencode.jsonc'
+            before = optional_config_snapshot(root)
+            path.write_text('{}')
+            self.assertNotEqual(optional_config_snapshot(root), before)
+            path.unlink(); path.symlink_to(root/'missing-target')
+            self.assertNotEqual(optional_config_snapshot(root), before)
+
 
 class PackedActualRuntime(unittest.TestCase):
     def test_actual_packed_original_pipeline_two_projects_and_lifecycle(self):
