@@ -68,11 +68,12 @@ def isolated_env(ws):
     """Every tool sees only the workspace as home, cache and config."""
     env = {k: v for k, v in os.environ.items() if not k.startswith(('PIP_', 'NPM_', 'npm_', 'PYTHON', 'NODE_', 'XDG_', 'APM_'))}
     env.update(
+        AWC_CI_WORKSPACE=str(ws), AWC_HABIT_SDK=str(ws / "habit-sdk"),
         HOME=str(ws / 'home'), XDG_CONFIG_HOME=str(ws / 'home/.config'), XDG_CACHE_HOME=str(ws / 'cache'), XDG_DATA_HOME=str(ws / 'home/.local/share'),
         TMPDIR=str(ws / 'tmp'), PIP_CACHE_DIR=str(ws / 'cache/pip'), PIP_CONFIG_FILE=os.devnull, PIP_DISABLE_PIP_VERSION_CHECK='1', PIP_NO_INPUT='1',
         npm_config_cache=str(ws / 'cache/npm'), npm_config_userconfig=str(ws / 'npmrc'), npm_config_globalconfig=str(ws / 'npmrc-global'), npm_config_prefix=str(ws / 'npm-prefix'),
         npm_config_update_notifier='false', PYTHONDONTWRITEBYTECODE='1', PYTHONNOUSERSITE='1',
-        PATH=os.pathsep.join([str(ws / 'venv/bin'), str(ws / 'node/bin'), str(ws / 'apm'), str(ws / 'actionlint'), str(ws / 'shellcheck'), env.get('PATH', '')]),
+        PATH=os.pathsep.join([str(ws / 'venv/bin'), str(ws / 'node/bin'), str(ws / 'apm'), str(ws / 'actionlint'), str(ws / 'shellcheck'), str(ws / 'habit-sdk/bin'), env.get('PATH', '')]),
     )
     return env
 
@@ -202,6 +203,8 @@ def setup():
         shutil.copyfile(ROOT / tc['npm'][name], ws / 'npm' / Path(tc['npm'][name]).name)
     run([ws / 'node/bin/node', ws / 'node/lib/node_modules/npm/bin/npm-cli.js', 'ci', '--ignore-scripts', '--no-audit', '--no-fund', '--registry=https://registry.npmjs.org/'], env, cwd=ws / 'npm')
     (ws / 'toolchain-receipt.json').write_text(json.dumps(dict(toolchain_sha256=sha256(TOOLCHAIN)), indent=2) + '\n', encoding='utf-8')
+    import bootstrap_habit_ci
+    bootstrap_habit_ci.setup(ws, env)
     _, _, _, observed = verify(ws)
     require(source_snapshot() == before, 'Setup hat Quellbestand verändert')
     print('PASS tools:setup', json.dumps(observed, sort_keys=True), 'workspace=' + str(ws))
@@ -211,6 +214,8 @@ def setup():
 
 def check():
     _, ws, env, observed = verify()
+    import bootstrap_habit_ci
+    bootstrap_habit_ci.verify(ws, env)
     print('TOOLS', json.dumps(observed, sort_keys=True), 'workspace=' + str(ws))
     before = source_snapshot()
     python = ws / 'venv/bin/python'

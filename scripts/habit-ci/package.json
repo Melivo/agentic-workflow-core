@@ -1,0 +1,13 @@
+{
+  "name": "habit-feedback-ci",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@opencode/plugin": "2.0.25",
+    "@opencode/schema": "2.0.25",
+    "@opencode/client": "2.0.25",
+    "@opencode/cli-linux-x64-baseline": "2.0.25",
+    "typescript": "5.9.3",
+    "@types/node": "22.19.1"
+  }
+}

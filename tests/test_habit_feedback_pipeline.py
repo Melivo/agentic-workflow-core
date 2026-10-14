@@ -30,6 +30,7 @@ import unittest
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
+CI = Path(os.environ.get('AWC_CI_WORKSPACE', '/tmp/opencode/agentic-workflow-core-ci'))
 ADAPTER = ROOT / '.apm/skills/core-devops/assets/opencode-habit-feedback/adapter/habit_feedback_pipeline.py'
 
 spec = importlib.util.spec_from_file_location('habit_feedback_pipeline', ADAPTER)
@@ -1155,7 +1156,7 @@ class RealOriginalRoundTwoTest(unittest.TestCase):
     original helper, resolver, spawn.py and mapper remain unchanged."""
 
     def setUp(self):
-        self.bin = Path('/tmp/opencode/agentic-workflow-core-ci/venv/bin')
+        self.bin = Path(str(CI / 'venv/bin'))
         self.assertTrue((self.bin / 'habit-sensors').is_file(), 'qualified CI toolchain required')
         self.tmp = tempfile.TemporaryDirectory(prefix='t01-real-r2-', dir='/tmp/opencode')
         self.addCleanup(self.tmp.cleanup)

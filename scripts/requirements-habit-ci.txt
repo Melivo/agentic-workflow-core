@@ -1,0 +1,17 @@
+# Pinned Habit test dependencies, CPython 3.13 Linux x64; wheels only.
+habit-hooks==1.5.0 \
+    --hash=sha256:24452d9a28b899fb1def515e017181ef9a51a2f8c31dcf44f6532d9e891a9a70
+habit-hooks-generic==1.5.0 \
+    --hash=sha256:7893d20827f804f47f4cf9e6caf54e6431d93901148af17cc6858ae6fb80c1eb
+habit-hooks-python==1.5.0 \
+    --hash=sha256:a113b9492bbaa106f8314b69b2f76430b5e5c34a693aff23233e8af7d081f51c
+ruff==0.14.5 \
+    --hash=sha256:7497d19dce23976bdaca24345ae131a1d38dcfe1b0850ad8e9e6e4fa321a6e19
+attrs==26.1.0 \
+    --hash=sha256:c647aa4a12dfbad9333ca4e71fe62ddc36f4e63b2d260a37a8b83d2f043ac309
+Jinja2==3.1.6 \
+    --hash=sha256:85ece4451f492d0c13c5dd7c13a64681a86afae63a5f347908daf103ce6d2f67
+MarkupSafe==3.0.4 \
+    --hash=sha256:434139499bb20b502ed3baa1f169e618f924a97e7a777fea1a49446d80106cf6
+pathspec==1.1.1 \
+    --hash=sha256:a00ce642f577bf7f473932318056212bc4f8bfdf53128c78bbd5af0b9b20b189

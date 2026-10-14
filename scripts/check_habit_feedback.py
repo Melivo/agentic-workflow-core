@@ -24,7 +24,8 @@ ROOT = Path(__file__).resolve().parents[1]
 ASSET = ROOT / '.apm/skills/core-devops/assets/opencode-habit-feedback'
 SCRATCH = Path('/tmp/opencode')
 HOST_ROOT = SCRATCH / 'habit-feedback-t03-runtime'
-SDK = SCRATCH / 'opencode-plugin-sdk/runtime/node_modules'
+SDK_ROOT = Path(os.environ.get('AWC_HABIT_SDK', SCRATCH / 'opencode-plugin-sdk'))
+SDK = SDK_ROOT / 'runtime/node_modules'
 CI = Path(os.environ.get('AWC_CI_WORKSPACE', SCRATCH / 'agentic-workflow-core-ci'))
 VERSION = '0.1.0'
 SDK_VERSION = '2.0.25'
@@ -110,7 +111,7 @@ def isolated_env(root):
     root.mkdir(parents=True,mode=0o700,exist_ok=True)
     st=root.stat()
     require(st.st_uid==os.getuid() and not st.st_mode & 0o022, 'scratch ownership/mode refused')
-    env = {'PATH': str(CI / 'venv/bin') + ':' + str(CI / 'node/bin') + ':/usr/bin:/bin',
+    env = {'PATH': str(CI / 'venv/bin') + ':' + str(CI / 'node/bin') + ':' + str(SDK_ROOT / 'bin') + ':/usr/bin:/bin',
            'HOME': str(root / 'home'), 'TMPDIR': str(root / 'tmp'),
            'XDG_CONFIG_HOME': str(root / 'config'), 'XDG_CACHE_HOME': str(root / 'cache'),
            'XDG_DATA_HOME': str(root / 'data'), 'XDG_STATE_HOME': str(root / 'state'),

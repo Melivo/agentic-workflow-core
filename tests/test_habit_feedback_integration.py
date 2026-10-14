@@ -153,7 +153,8 @@ class ActualHost:
           'experimental':{'policies':[{'action':'provider.use','resource':'*','effect':'deny'},
                                      {'action':'provider.use','resource':'fixture','effect':'allow'}]}}
         self.write_config()
-        binary=shutil.which('opencode')
+        # Detector PATH overrides must not replace/hide the qualified host.
+        binary=str(package.SDK_ROOT/'bin/opencode') if os.environ.get('AWC_HABIT_SDK') else shutil.which('opencode')
         package.require(binary is not None,'OpenCode host missing; no auto-download')
         package.require(package.run([binary,'--version'],root,self.env).strip()==HOST_VERSION,'host version mismatch')
         self.port=free_port();self.url='http://127.0.0.1:%s'%self.port
@@ -667,7 +668,7 @@ def preflight(root):
         if command in ('jscpd','node'):
             expected=('jscpd '+version) if command=='jscpd' else version
             package.require(output.strip()==expected,command+' exact version mismatch')
-    sdk=Path('/tmp/opencode/opencode-plugin-sdk')
+    sdk=package.SDK_ROOT
     metadata=json.loads((sdk/'meta.json').read_text())['versions']['2.0.25']
     integrity='sha512-'+base64.b64encode(hashlib.sha512((sdk/'pkg.tgz').read_bytes()).digest()).decode()
     package.require(integrity==metadata['dist']['integrity'],'pinned plugin tarball integrity mismatch')

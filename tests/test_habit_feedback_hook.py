@@ -29,10 +29,11 @@ from pathlib import Path
 from types import SimpleNamespace
 
 ROOT = Path(__file__).resolve().parents[1]
+CI = Path(os.environ.get('AWC_CI_WORKSPACE', '/tmp/opencode/agentic-workflow-core-ci'))
 ASSETS = ROOT / '.apm/skills/core-devops/assets/opencode-habit-feedback'
 HOOK = ASSETS / 'hook/habit_feedback_hook.py'
 SHIM = ASSETS / 'plugin/index.ts'
-NODE = Path('/tmp/opencode/agentic-workflow-core-ci/node/bin/node')
+NODE = CI / 'node/bin/node'
 
 spec = importlib.util.spec_from_file_location('habit_feedback_hook', HOOK)
 hook = importlib.util.module_from_spec(spec)
@@ -105,7 +106,7 @@ class HookTestBase(unittest.TestCase):
         return hook.process_event(event, scope_root=self.scope, state_root=self.state,
                                   session=session, sensor=self.sensor, mapper=self.mapper,
                                   runner=runner, trusted_tool_roots=kwargs.pop(
-                                      "trusted_tool_roots", [Path("/tmp/opencode/agentic-workflow-core-ci/venv/bin")]),
+                                      "trusted_tool_roots", [Path(str(CI / 'venv/bin'))]),
                                   **kwargs)
 
     def before(self, tool='edit', path='big.py', **extra):
@@ -500,7 +501,7 @@ class ExplicitInstallationTrustTest(HookTestBase):
     """Actual original CLIs; caller-owned launch env, never global env mutation."""
 
     def bridge(self, path, *, roots=None, sensor=None, event=None):
-        ci = Path('/tmp/opencode/agentic-workflow-core-ci/venv/bin')
+        ci = Path(str(CI / 'venv/bin'))
         env = dict(os.environ)
         env.update(PATH=path, HABIT_FEEDBACK_SCOPE=str(self.scope),
                    HABIT_FEEDBACK_STATE_ROOT=str(self.state),
@@ -516,7 +517,7 @@ class ExplicitInstallationTrustTest(HookTestBase):
         return json.loads(proc.stdout)
 
     def test_inherited_project_relative_empty_and_alias_paths_never_execute(self):
-        ci = '/tmp/opencode/agentic-workflow-core-ci/venv/bin'
+        ci = str(CI / 'venv/bin')
         tools = self.scope / 'tools'
         tools.mkdir()
         marker = self.tmp / 'executed'
@@ -534,14 +535,14 @@ class ExplicitInstallationTrustTest(HookTestBase):
                 self.assertNotIn(': clean', result['feedback'])
 
     def test_explicit_external_original_installation_runs(self):
-        ci = '/tmp/opencode/agentic-workflow-core-ci/venv/bin'
+        ci = str(CI / 'venv/bin')
         result = self.bridge(ci + ':/usr/bin:/bin', roots=[ci])
         self.assertTrue(result['scanned'][0]['complete'], result)
         self.assertIn('duplicated-code', result['feedback'])
         self.assertIn('unused-dependency', result['feedback'])
 
     def test_separate_owned_detector_installation_needs_explicit_binding(self):
-        ci = '/tmp/opencode/agentic-workflow-core-ci/venv/bin'
+        ci = str(CI / 'venv/bin')
         install = self.tmp / 'owned-detector-install'
         install.mkdir()
         marker = self.tmp / 'owned-executed'
@@ -555,7 +556,7 @@ class ExplicitInstallationTrustTest(HookTestBase):
         self.assertTrue(accepted['scanned'][0]['complete'], accepted)
 
     def test_event_fields_cannot_grant_repository_trust(self):
-        ci = '/tmp/opencode/agentic-workflow-core-ci/venv/bin'
+        ci = str(CI / 'venv/bin')
         tools = self.scope / 'tools'
         tools.mkdir()
         marker = self.tmp / 'executed'
@@ -578,7 +579,7 @@ class ExplicitInstallationTrustTest(HookTestBase):
 
     def test_path_discovery_alone_never_qualifies_original_clis(self):
         env = dict(os.environ)
-        env.update(PATH='/tmp/opencode/agentic-workflow-core-ci/venv/bin:/usr/bin:/bin',
+        env.update(PATH=str(CI / 'venv/bin') + ':/usr/bin:/bin',
                    HABIT_FEEDBACK_SCOPE=str(self.scope),
                    HABIT_FEEDBACK_STATE_ROOT=str(self.state))
         for key in ('HABIT_FEEDBACK_SENSOR', 'HABIT_FEEDBACK_MAPPER',
@@ -643,12 +644,12 @@ class RealAdapterIntegrationTest(HookTestBase):
         wrapper.chmod(wrapper.stat().st_mode | stat.S_IEXEC)
         hook.process_event(self.after(), scope_root=self.scope, state_root=self.state,
                            session='s1', sensor=wrapper, mapper=self.mapper,
-                           trusted_tool_roots=[Path("/tmp/opencode/agentic-workflow-core-ci/venv/bin")])
+                           trusted_tool_roots=[Path(str(CI / 'venv/bin'))])
         (self.scope / "big.py").write_text("x = 2\n", encoding="utf-8")
         outcome = hook.process_event(self.after(), scope_root=self.scope,
                                      state_root=self.state, session='s1',
                                      sensor=wrapper, mapper=self.mapper,
-                           trusted_tool_roots=[Path("/tmp/opencode/agentic-workflow-core-ci/venv/bin")])
+                           trusted_tool_roots=[Path(str(CI / 'venv/bin'))])
         self.assertEqual(outcome['status'], 'scanned', outcome['reasons'])
         recorded = json.loads(record.read_text(encoding='utf-8'))
         self.assertTrue(str(recorded['HOME']).startswith(str(self.state)), recorded)
@@ -806,7 +807,7 @@ class BridgeSignalTest(HookTestBase):
                'HABIT_FEEDBACK_STATE_ROOT': str(self.state),
                'HABIT_FEEDBACK_SESSION': 'sig',
                'HABIT_FEEDBACK_TRUSTED_TOOL_ROOTS': json.dumps([
-                   '/tmp/opencode/agentic-workflow-core-ci/venv/bin']),
+                   str(CI / 'venv/bin')]),
                'HABIT_FEEDBACK_SENSOR': str(sleeping),
                'HABIT_FEEDBACK_MAPPER': str(self.mapper),
                'PATH': os.environ.get('PATH', '/usr/bin:/bin')}
@@ -1029,7 +1030,7 @@ class ShimExecutionTest(unittest.TestCase):
             # Explicit qualification of the existing owned test installation;
             # not a grant derived from PATH or any event/fixture project.
             'HABIT_FEEDBACK_TRUSTED_TOOL_ROOTS': json.dumps([
-                '/tmp/opencode/agentic-workflow-core-ci/venv/bin']),
+                str(CI / 'venv/bin')]),
         })
         env.update(env_extra or {})
         proc = subprocess.run(
@@ -1120,8 +1121,8 @@ time.sleep(60)''' % str(pidfile))
 
     def test_repository_trust_grant_refused_in_actual_sdk_shim_content(self):
         self.assert_scenario_ok('trust-refused', env_extra={
-            'HABIT_FEEDBACK_SENSOR': '/tmp/opencode/agentic-workflow-core-ci/venv/bin/habit-sensors',
-            'HABIT_FEEDBACK_MAPPER': '/tmp/opencode/agentic-workflow-core-ci/venv/bin/habit-mapper',
+            'HABIT_FEEDBACK_SENSOR': str(CI / 'venv/bin/habit-sensors'),
+            'HABIT_FEEDBACK_MAPPER': str(CI / 'venv/bin/habit-mapper'),
             'HABIT_FEEDBACK_TRUSTED_TOOL_ROOTS': json.dumps([str(self.scopeA)])})
 
     def test_invalid_launch_trust_shape_warns_without_content_loss(self):
@@ -1183,7 +1184,7 @@ class PluginOptionsTransportTest(unittest.TestCase):
         return json.loads(proc.stdout)
 
     def bindings(self, **overrides):
-        ci = '/tmp/opencode/agentic-workflow-core-ci/venv/bin'
+        ci = str(CI / 'venv/bin')
         values = dict(sensor=str(self.sensor), mapper=str(self.mapper),
                       python=sys.executable, trustedToolRoots=[ci],
                       stateRoot=str(self.state))
@@ -1193,7 +1194,7 @@ class PluginOptionsTransportTest(unittest.TestCase):
     def test_options_only_real_original_installation_and_no_environment_grant(self):
         (self.scopeA / 'big.py').write_text(
             'def f(a, b, c, d, e, f, g, h):\n    return a\n')
-        ci = '/tmp/opencode/agentic-workflow-core-ci/venv/bin'
+        ci = str(CI / 'venv/bin')
         result = self.options_run([self.bindings(sensor=ci+'/habit-sensors',
             mapper=ci+'/habit-mapper')], HABIT_FEEDBACK_SENSOR='', HABIT_FEEDBACK_MAPPER='',
             PATH='/usr/bin:/bin')
@@ -1299,7 +1300,7 @@ class ResultShapeContractTest(unittest.TestCase):
 
 class MapperRuntimeGuideTest(HookTestBase):
     def test_real_original_mapper_uses_runtime_core_guide_without_project_writes(self):
-        mapper = Path('/tmp/opencode/agentic-workflow-core-ci/venv/bin/habit-mapper')
+        mapper = Path(str(CI / 'venv/bin/habit-mapper'))
         self.assertTrue(mapper.is_file(), 'qualified mapper required, no skip')
         before = {p.relative_to(self.scope).as_posix(): p.read_bytes()
                   for p in self.scope.rglob('*') if p.is_file()}
@@ -1388,7 +1389,7 @@ class BoundedEventRegressionTest(HookTestBase):
 
 class SDKTypecheckTest(unittest.TestCase):
     def test_actual_shim_typechecks_against_exact_sdk_2_0_25(self):
-        runtime = Path('/tmp/opencode/opencode-plugin-sdk/runtime')
+        runtime = Path(os.environ.get('AWC_HABIT_SDK', '/tmp/opencode/opencode-plugin-sdk')) / 'runtime'
         modules = runtime / 'node_modules'
         for name in ('@opencode/plugin', '@opencode/schema', '@opencode/client'):
             manifest = json.loads((modules / name / 'package.json').read_text())
