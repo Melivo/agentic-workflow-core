@@ -161,6 +161,9 @@ def tool_versions(tc, ws, env):
         actionlint=run([ws / 'actionlint/actionlint', '-version'], env).split()[0],
         shellcheck=re.search(r'(?m)^version: (\S+)', run([ws / 'shellcheck/shellcheck', '--version'], env))[1],
     )
+    observed.update(json.loads(run([venv_python, '-c',
+        'import importlib.metadata as m,json; print(json.dumps({n:m.version(n) for n in ' +
+        repr(list(tc['python']['packages'])) + '}))'], env)))
     for name in tc['npm']['packages']:
         manifest = ws / 'npm/node_modules' / name / 'package.json'
         require(manifest.is_file(), 'isoliertes npm-Paket fehlt: ' + name + '; zuerst mise run tools:setup ausführen')

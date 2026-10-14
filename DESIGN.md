@@ -86,7 +86,7 @@ Nach bestandenem Review:
 - `core-init-mcps`: read-only Bereitschaftsprüfung bereits vorhandener Toolprovider; keine Installation oder Konfiguration
 - `core-milestone`: Ziel, unveränderliche Etappendefinitionen und aktualisierbarer Auswahl-/Nachweisindex ausschließlich für ausdrücklich mehrstufige Vorhaben
 - `core-handoff`: autorisierte Sitzungs- und Etappenübergabe anhand exakter Artefaktpfade, ohne Statusverwaltung
-- `gortex-serena-configurator`: externe, inline verwendete Readiness- und Konfigurationsmethode für Gortex und den projektspezifischen Serena-Fallback
+- `gortex-serena-configurator`: mitgelieferte, inline verwendete Readiness- und Konfigurationsmethode für Gortex und den projektspezifischen Serena-Fallback
 - `core-user2agent-instructions`: kontrollierte Pflege globaler und lokaler Benutzeranweisungen
 - `core-repo-audit`: read-only Repositoryhygiene und Public-Readiness
 - `core-devops`: eigenständige, klar benannte Git-/Releaseaufträge nach ausdrücklicher Freigabe (ohne Implementierungsplan); geplante Automationseinrichtung dagegen über bestätigte Tasks mit `core-plan`/`core-execute`; Releases nach Codeänderungen erst nach bestandenem Review
@@ -150,23 +150,22 @@ apm.yml
 
 Jedes neu erstellte paketeigene Skillverzeichnis verwendet das Präfix `core-` und ist ein gültiges APM-Skillbundle mit `SKILL.md`; Verzeichnisname und Frontmatter-`name` sind identisch. `core-shared` ist ein intern referenziertes Bundle und kein fünfter Workflow. Seine `SKILL.md` ist ein kurzer Index; Verträge und Vorlagen liegen in `references/` beziehungsweise `assets/`.
 
-Die Paketquelle enthält aktuell 22 paketeigene `core-*`-Skillbundles einschließlich des internen `core-shared`; die externe APM-Abhängigkeit `gortex-serena-configurator` zählt nicht dazu.
+Die Paketquelle enthält aktuell 22 paketeigene `core-*`-Skillbundles einschließlich des internen `core-shared`; der mitgelieferte Begleitskill `gortex-serena-configurator` ergänzt diese 22 Bundles, ohne selbst ein Kernworkflow zu sein.
 
 APM projiziert `.apm/` in die Zielharnesses. Generierte `.agents/`, `.opencode/` oder `.codex/`-Kopien sind keine kanonischen Quellen und werden nicht manuell gepflegt.
 
 Optionale Slash-Command-Adapter dürfen unter `.apm/prompts/` angeboten werden. Sie enthalten nur den Aufruf beziehungsweise die Übergabe an den kanonischen Skill und duplizieren keine Workflowlogik. Die Funktion des Pakets darf nicht von Command-Support eines einzelnen Harnesses abhängen.
 
-### Externe APM-Skillabhängigkeit
+### Mitgelieferte Code-Intelligence-Methode
 
-Nur `gortex-serena-configurator` ist eine Laufzeitabhängigkeit der Workflow-Werkbank. Er wird als präzise virtuelle Unterverzeichnis-Abhängigkeit aus <https://github.com/Melivo/apm-package> bezogen, damit nicht die gesamte dortige Skillsammlung installiert wird und keine unnötigen Skillkollisionen entstehen:
+[`gortex-serena-configurator`](.apm/skills/gortex-serena-configurator/SKILL.md) liegt vollständig in der kanonischen Paketquelle. Die ursprüngliche Skill-ID, englischen Instruktionen und ausführbaren Quellen bleiben bei der Migration unverändert; Herkunft und die ausdrückliche MIT-Freigabe sind in seinem `PROVENANCE.md` dokumentiert. Die übrige private Sammlung wurde nicht übernommen oder neu lizenziert.
 
 ```yaml
 dependencies:
-  apm:
-    - Melivo/apm-package/skills/gortex-serena-configurator
+  apm: []
 ```
 
-`apm install` materialisiert diese Abhängigkeit und erzeugt beziehungsweise aktualisiert `apm.lock.yaml`. Der Lockfile wird versioniert und niemals manuell geändert. Vor Veröffentlichung wird eine verfügbare stabile Tag- oder Commit-Referenz bevorzugt; unabhängig davon hält der Lockfile den tatsächlich aufgelösten Commit und die Dateihashes fest.
+Der Paketbau benötigt damit keine privaten Git-Clones oder Zugangsdaten. APM erzeugt den versionierten Lockfile; Archive und frische Installationen müssen alle Dateien des Begleitskills bytegenau gegen die kanonische Quelle prüfen. Seine unveränderten Sicherheitsprüfungen gehören über einen Test-Discovery-Adapter zur normalen CI.
 
 ### Sprache und Authoring-Gates
 
@@ -684,7 +683,7 @@ Ausführliche Domainhandbücher gehören in Fachskills, nicht in `AGENTS.md`. Da
 
 ### Code-Intelligence-Readiness mit `gortex-serena-configurator`
 
-Nach Repository- und Stackinventur, aber vor dem Schreiben des verwalteten `AGENTS.md`-Blocks, lädt `core-init-project` den über APM installierten `gortex-serena-configurator` inline. Er wird nicht als Subagent dispatcht und erzeugt keinen eigenen Workflowzustand.
+Nach Repository- und Stackinventur, aber vor dem Schreiben des verwalteten `AGENTS.md`-Blocks, lädt `core-init-project` den mitgelieferten `gortex-serena-configurator` inline. Er wird nicht als Subagent dispatcht und erzeugt keinen eigenen Workflowzustand.
 
 Der Integrationsablauf ist:
 
@@ -817,9 +816,9 @@ Das Design gilt als umgesetzt, wenn:
 12. `.apm/` die einzige Paketquelle ist und alle generierten Projektionen reproduzierbar sind,
 13. kein Paketdefault Builds, SCM, Deployment oder destruktive Aktionen implizit autorisiert,
 14. APM-Validierung keine toten Workflow-, Agenten-, Skill- oder MCP-Referenzen findet,
-15. `apm install` die virtuelle `gortex-serena-configurator`-Abhängigkeit aus `Melivo/apm-package` auflöst und der versionierte Lockfile ihren konkreten Commit und ihre Hashes festhält,
+15. `gortex-serena-configurator` vollständig aus `.apm/skills/` mitgeliefert, quellgebunden geprüft und ohne private Paketabhängigkeit installiert wird,
 16. `core-init-project` den `gortex-serena-configurator` inline und ohne konkurrierenden `AGENTS.md`-Schreiber verwendet,
-17. alle paket eigenen Markdown-Dateien von Skills und Workflows auf Deutsch verfasst sind,
+17. alle neu verfassten paketeigenen Markdown-Dateien von Skills und Workflows auf Deutsch verfasst sind; die quelltreue englische Konfigurator-Migration bleibt als dokumentierte Ausnahme erhalten,
 18. jeder neu erstellte oder materiell geänderte Skill mit `skill-creator` erstellt beziehungsweise revidiert und anschließend mit `context-debloater` geprüft wurde.
 
 ## 23. Provenienz und aktuelle Referenzen

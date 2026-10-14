@@ -34,7 +34,7 @@ PRODUCER_COMMANDS = (
     ('audit', '--ci'),
     ('pack', '--offline', '--target', 'agent-skills', '--archive', '--output', 'dist'),
 )
-DEPENDENCY_SKILL = 'gortex-serena-configurator'
+BUNDLED_SKILL = release_guard.BUNDLED_SKILL
 FORBIDDEN_PARTS = {'.agentic-workflow', '.git', 'apm_modules', 'node_modules', '__pycache__', '.agents', '.opencode', '.codex'}
 FORBIDDEN_NAME = re.compile(r'(\.env(\..+)?|\.npmrc|\.pypirc|id_rsa|id_ed25519|.*\.(pem|key|p12|pfx|pyc))$')
 SECRET = re.compile(rb'-----BEGIN [A-Z ]*PRIVATE KEY-----|gh[pousr]_[A-Za-z0-9]{36}|github_pat_[A-Za-z0-9_]{40,}|AKIA[0-9A-Z]{16}|xox[abprs]-[A-Za-z0-9-]{10,}')
@@ -53,6 +53,26 @@ def sha256(data):
 def core_files(files, prefix):
     """{'core-x/rel': bytes} for every file below prefix + 'core-*/'."""
     return {k[len(prefix):]: v for k, v in files.items() if k.startswith(prefix + 'core-')}
+
+
+def auxiliary_files(files, prefix):
+    return {k[len(prefix):]: v for k, v in files.items()
+            if k.startswith(prefix + BUNDLED_SKILL + '/')}
+
+
+def compare_auxiliary(sources, actual, where):
+    expected = auxiliary_files(sources, '.apm/skills/')
+    violations = []
+    if BUNDLED_SKILL + '/SKILL.md' not in expected:
+        violations.append('kanonischer Begleitskill fehlt: ' + BUNDLED_SKILL)
+    for key in sorted(set(expected) | set(actual)):
+        if key not in actual:
+            violations.append(where + ': Begleitskill-Datei fehlt: ' + key)
+        elif key not in expected:
+            violations.append(where + ': unerwartete Begleitskill-Datei: ' + key)
+        elif expected[key] != actual[key]:
+            violations.append(where + ': Begleitskill-Datei verändert: ' + key)
+    return violations
 
 
 def bundles(mapping):
@@ -76,7 +96,7 @@ def links(files, prefix):
     known = set(files) | {posixpath.dirname(p) for p in files}
     count, unresolved = 0, []
     for path, data in sorted(files.items()):
-        if not path.startswith(prefix + 'core-') or not path.endswith('.md'):
+        if not (path.startswith(prefix + 'core-') or path.startswith(prefix + BUNDLED_SKILL + '/')) or not path.endswith('.md'):
             continue
         for ref in LINK.findall(data.decode('utf-8')):
             if re.match(r'[a-z][a-z0-9+.-]*:', ref) or ref.startswith('#'):
@@ -110,6 +130,8 @@ def licenses(files, prefix, sources):
         violations.append(prefix + 'core-shared/LICENSE fehlt oder weicht von LICENSE ab')
     if b'MIT' not in files.get(prefix + 'core-architecture/THIRD_PARTY_NOTICES.md', b''):
         violations.append(prefix + 'core-architecture/THIRD_PARTY_NOTICES.md fehlt oder ohne MIT-Hinweis')
+    if files.get(prefix + BUNDLED_SKILL + '/LICENSE') != sources.get('LICENSE'):
+        violations.append(prefix + BUNDLED_SKILL + '/LICENSE fehlt oder weicht von LICENSE ab')
     return violations
 
 
@@ -138,10 +160,9 @@ def inspect_archive(name, entries, sources, version):
         violations.append('Agentendefinitionen weichen von .apm/agents ab')
     core = core_files(files, 'skills/')
     violations += compare_core(sources, core, 'Archiv')
-    dependency = [k for k in files if k.startswith('skills/' + DEPENDENCY_SKILL + '/')]
-    if 'skills/%s/SKILL.md' % DEPENDENCY_SKILL not in dependency:
-        violations.append('externe Abhängigkeit %s fehlt im Archiv' % DEPENDENCY_SKILL)
-    known = set(agents) | {'skills/' + k for k in core} | set(dependency) | {'plugin.json', 'apm.lock.yaml'}
+    auxiliary = auxiliary_files(files, 'skills/')
+    violations += compare_auxiliary(sources, auxiliary, 'Archiv')
+    known = set(agents) | {'skills/' + k for k in core} | {'skills/' + k for k in auxiliary} | {'plugin.json', 'apm.lock.yaml'}
     violations += ['unerwarteter Archivinhalt: ' + k for k in sorted(set(files) - known)]
     violations += licenses(files, 'skills/', sources)
     return {'archive_files': len(files), 'core_bundles': len(bundles(core)), 'core_files': len(core)}, violations
@@ -152,12 +173,14 @@ def inspect_installation(files, sources):
     prefix = '.agents/skills/'
     core = core_files(files, prefix)
     violations = compare_core(sources, core, 'Installation')
-    if prefix + DEPENDENCY_SKILL + '/SKILL.md' not in files:
-        violations.append('externe Abhängigkeit %s wurde nicht installiert' % DEPENDENCY_SKILL)
-    unexpected = sorted(k for k in files if k != 'apm.lock.yaml' and not k.startswith(prefix))
+    auxiliary = auxiliary_files(files, prefix)
+    violations += compare_auxiliary(sources, auxiliary, 'Installation')
+    known = {prefix + k for k in core} | {prefix + k for k in auxiliary} | {'apm.lock.yaml'}
+    unexpected = sorted(set(files) - known)
     violations += ['unerwartete Installationsdatei: ' + k for k in unexpected]
     count, unresolved = links(files, prefix)
-    expected_count, _ = links({'.agents/skills/' + k: v for k, v in core_files(sources, '.apm/skills/').items()}, prefix)
+    expected_skills = core_files(sources, '.apm/skills/') | auxiliary_files(sources, '.apm/skills/')
+    expected_count, _ = links({'.agents/skills/' + k: v for k, v in expected_skills.items()}, prefix)
     violations += ['interner Link nicht auflösbar: ' + u for u in unresolved]
     if count != expected_count or count == 0:
         violations.append('interne Links: %d installiert, %d in den Quellen' % (count, expected_count))
@@ -238,8 +261,9 @@ def verify(output=None):
         'archive': {'name': archive.name, 'sha256': sha256(data), 'bytes': len(data)},
         'core_bundles': install_summary['core_bundles'], 'core_files': install_summary['core_files'],
         'internal_links': install_summary['internal_links'], 'archive_files': archive_summary.get('archive_files'),
-        'external_dependency': release_guard.EXTERNAL_DEPENDENCY + '#' + release_guard.EXTERNAL_COMMIT,
-        'licenses': ['core-shared/LICENSE', 'core-architecture/THIRD_PARTY_NOTICES.md'],
+        'bundled_skills': [BUNDLED_SKILL],
+        'external_dependencies': [],
+        'licenses': ['core-shared/LICENSE', 'core-architecture/THIRD_PARTY_NOTICES.md', BUNDLED_SKILL + '/LICENSE'],
         'inventory': {k: sha256(v) for k, v in sorted(entries.items())},
         'violations': violations, 'commands': log, 'scratch': str(scratch),
     }

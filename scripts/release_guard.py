@@ -19,8 +19,7 @@ PACKAGE = 'agentic-workflow-core'
 BRANCH = 'main'
 CORE_BUNDLES = 22
 BASELINE_COMMIT = 'a541a41a8a100f8a72d680356dd3b08e335ef068'
-EXTERNAL_DEPENDENCY = 'Melivo/apm-package/skills/gortex-serena-configurator'
-EXTERNAL_COMMIT = '0c7838d8072dfd70c702cf2d04734a7241550c3e'
+BUNDLED_SKILL = 'gortex-serena-configurator'
 MANIFEST = '.release-please-manifest.json'
 CONFIG = '.release-please-config.json'
 VERSION_FILE = 'scripts/release-version.txt'
@@ -112,24 +111,20 @@ def release_config(config_text):
 
 
 def apm_pin(apm_text, lock_text):
-    """The external APM dependency is pinned to, and locked at, exactly EXTERNAL_COMMIT."""
-    violations = []
+    """Validate the self-contained package contract (legacy entry-point name).
+
+    No external APM skill dependency may silently reintroduce private clone or
+    credential requirements. The migrated configurator is a canonical source.
+    """
     try:
         apm, lock = yaml.safe_load(apm_text), yaml.safe_load(lock_text)
     except yaml.YAMLError:
         return ['apm.yml oder apm.lock.yaml ist kein YAML']
-    deps = ((apm or {}).get('dependencies') or {}).get('apm') if isinstance(apm, dict) else None
-    if deps != [EXTERNAL_DEPENDENCY + '#' + EXTERNAL_COMMIT]:
-        violations.append(APM_MANIFEST + ' muss genau ' + EXTERNAL_DEPENDENCY + '#' + EXTERNAL_COMMIT + ' deklarieren: ' + repr(deps))
-    locked = (lock or {}).get('dependencies') if isinstance(lock, dict) else None
-    if not (isinstance(locked, list) and len(locked) == 1 and isinstance(locked[0], dict)):
-        return violations + [APM_LOCK + ' muss genau eine aufgelöste Abhängigkeit enthalten']
-    entry = locked[0]
-    owner_repo, _, path = EXTERNAL_DEPENDENCY.partition('/skills/')
-    expected = {'repo_url': owner_repo.lower(), 'virtual_path': 'skills/' + path, 'resolved_commit': EXTERNAL_COMMIT, 'resolved_ref': EXTERNAL_COMMIT}
-    for key, value in expected.items():
-        if str(entry.get(key, '')).lower() != value.lower():
-            violations.append('%s: %s=%r, erwartet %r' % (APM_LOCK, key, entry.get(key), value))
+    violations = []
+    if not isinstance(apm, dict) or apm.get('dependencies') != {'apm': []}:
+        violations.append(APM_MANIFEST + ' muss das autarke Paket mit dependencies.apm: [] deklarieren')
+    if not isinstance(lock, dict) or lock.get('dependencies') != []:
+        violations.append(APM_LOCK + ' darf keine externe Skillabhängigkeit enthalten')
     return violations
 
 
@@ -153,7 +148,7 @@ def package_report(report, version, commit, archive_sha256):
     archive = report.get('archive') or {}
     expected = {
         'schema': 'core-package-report/v1', 'verified': True, 'version': version, 'source_commit': commit,
-        'source_clean': True, 'core_bundles': CORE_BUNDLES,
+        'source_clean': True, 'core_bundles': CORE_BUNDLES, 'bundled_skills': [BUNDLED_SKILL],
     }
     violations = ['Paketbericht: %s=%r, erwartet %r' % (k, report.get(k), v) for k, v in expected.items() if report.get(k) != v]
     if archive.get('name') != '%s-%s.zip' % (PACKAGE, version):
@@ -282,8 +277,8 @@ def main(argv=None):
         print('FAIL:', violation, file=sys.stderr)
     if violations:
         return 1
-    print('PASS version-check version=%s manifest=%s version_file=%s apm.yml=%s release-please=%s apm-dependency=%s#%s'
-          % (version, version, version, version, CONFIG, EXTERNAL_DEPENDENCY, EXTERNAL_COMMIT))
+    print('PASS version-check version=%s manifest=%s version_file=%s apm.yml=%s release-please=%s bundled-skill=%s external-apm-dependencies=0'
+          % (version, version, version, version, CONFIG, BUNDLED_SKILL))
     return 0
 
 

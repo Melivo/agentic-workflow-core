@@ -1,15 +1,1511 @@
 lockfile_version: '1'
-apm_version: 0.31.0
-dependencies:
-- repo_url: melivo/apm-package
-  materialization_repo_url: Melivo/apm-package
-  name: gortex-serena-configurator
-  host: github.com
-  resolved_commit: 0c7838d8072dfd70c702cf2d04734a7241550c3e
-  resolved_ref: 0c7838d8072dfd70c702cf2d04734a7241550c3e
-  version: unknown
-  virtual_path: skills/gortex-serena-configurator
-  is_virtual: true
-  package_type: claude_skill
-  content_hash: sha256:b99f15e22f4b2c5b8176d18b4d73cbd9a714dc6de70ff3fe4aa1c8a519be7f97
-deployments: []
+dependencies: []
+deployments:
+- kind: project-relative
+  target: codex
+  value: .codex/agents/architecture-reviewer.toml
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:5bddb592ba0de2bd3db3f52d15f2a6c3ea98a28c5c2cfb86f24c134b8f3f0d1f
+- kind: project-relative
+  target: codex
+  value: .codex/agents/backend-engineer.toml
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:e8bf5cc612c6410926e66c865a11344f39eae749b385a41bad7ca077ba88ae96
+- kind: project-relative
+  target: codex
+  value: .codex/agents/db-engineer.toml
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:30f8829b94cecb97a75cedd94956d9ba4b4deea3f5853ad9bcdbc089e5cfd703
+- kind: project-relative
+  target: codex
+  value: .codex/agents/debug-investigator.toml
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:b6bdf245374e0bfa806c7d050caaef9f716398b31d3bef7337a8f362bbeaa529
+- kind: project-relative
+  target: codex
+  value: .codex/agents/docs-curator.toml
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:d20230bebf70ae0e0dcce317e3fcdc6a9c37c6c10bc6c5f26352d6a5b68b4bd0
+- kind: project-relative
+  target: codex
+  value: .codex/agents/frontend-engineer.toml
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:f216d181c3c3545427a1ecbee508f4e469545c27b1a028bc2eed1056e6d07367
+- kind: project-relative
+  target: codex
+  value: .codex/agents/mobile-engineer.toml
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:87e900ef8d2226b55bc279ff16237c9d1b6fd9eab250603b06f8bb177e8cf6c7
+- kind: project-relative
+  target: codex
+  value: .codex/agents/pm-planner.toml
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:0e28693e47b24d717718c637189a2dfb22967335675ac024db43ef5fafd92918
+- kind: project-relative
+  target: codex
+  value: .codex/agents/qa-reviewer.toml
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:2e4dc42cc2efde418ba1b7a33ce9b2baff94008cd3d39762d81759f8de9ee236
+- kind: project-relative
+  target: codex
+  value: .codex/agents/refactor-engineer.toml
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:5b1308a7c6142f9f84023fc238375cd98c16f0cce973e12824f330cde49d81cf
+- kind: project-relative
+  target: codex
+  value: .codex/agents/research-explorer.toml
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:8e294c412ab13ae5aba1e6b213e9d692afd57797a8b3607e0c81992837396e32
+- kind: project-relative
+  target: codex
+  value: .codex/agents/tf-infra-engineer.toml
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:00e1a54fed05a679476dd076ccf32445f2ffbd43b3a050434e641425e651f6c6
+- kind: project-relative
+  target: legacy
+  value: .agents/skills/core-architecture
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: null
+- kind: project-relative
+  target: legacy
+  value: .agents/skills/core-architecture/PROVENANCE.md
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:ab339659e70ec17468edefc5c3290daae1450bb941e930d90256be4a3fb69955
+- kind: project-relative
+  target: legacy
+  value: .agents/skills/core-architecture/SKILL.md
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:1f8395ad21ba5aceb9e902262fd4a743e24af3ab7c7a7dfac1515562c944445c
+- kind: project-relative
+  target: legacy
+  value: .agents/skills/core-architecture/THIRD_PARTY_NOTICES.md
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:9dcdfa09b59ed5ec5f9b2b1013f988f1c696de089c9d48baa78cc01cd2b90f16
+- kind: project-relative
+  target: legacy
+  value: .agents/skills/core-architecture/assets/software-design-principles.png
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:878f2297c71134e8f4489a8982096c0cdfe6a3564bbec926be8fbc45b6ae1397
+- kind: project-relative
+  target: legacy
+  value: .agents/skills/core-architecture/references/alternatives.md
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:dcbcb83e21eaaecfa3213bd76497f7505fe1dfee7d74f4799214fb3bc820d543
+- kind: project-relative
+  target: legacy
+  value: .agents/skills/core-architecture/references/boundaries-and-abstractions.md
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:b2cf766ac6ce113ba654159e819cf40064c38dd77d65d0d246bcd51cf5dc2cbc
+- kind: project-relative
+  target: legacy
+  value: .agents/skills/core-architecture/references/design-baseline.md
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:e6adcf10932d0b84d608c1553bf4ebbab9b956804e6aa4151795d3523eb97da7
+- kind: project-relative
+  target: legacy
+  value: .agents/skills/core-architecture/references/evolution-and-clarity.md
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:e94f0f4489e54b623074263592f318bd9b5081fb5d635df6c2abefe1d73adae2
+- kind: project-relative
+  target: legacy
+  value: .agents/skills/core-architecture/references/interface-and-errors.md
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:9d35d8ce37680e9faeb09ab835ce5c8461c989d4735bf9ef2ff2e76c6d430585
+- kind: project-relative
+  target: legacy
+  value: .agents/skills/core-architecture/references/principles-background.md
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:cc423cbbefe2adf2a8727f06d79c18563e63f2d20c340f8b828e4ad12e4ef988
+- kind: project-relative
+  target: legacy
+  value: .agents/skills/core-backend
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: null
+- kind: project-relative
+  target: legacy
+  value: .agents/skills/core-backend/SKILL.md
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:ba3aab7fd455f3cb5f83ca648c269704bf4d1209905b83e3536a801dae4d1921
+- kind: project-relative
+  target: legacy
+  value: .agents/skills/core-backend/references/security.md
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:894c58d0dd7fbe62e8470db3346e5bcda86db6bea3f23c93d11b9f05a7757a7c
+- kind: project-relative
+  target: legacy
+  value: .agents/skills/core-backend/references/validation.md
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:fa0108a045ee7652e1768eabccf2a760fc4e518f2c83417d692e9fa4ee38e7dc
+- kind: project-relative
+  target: legacy
+  value: .agents/skills/core-brainstorm
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: null
+- kind: project-relative
+  target: legacy
+  value: .agents/skills/core-brainstorm/SKILL.md
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:61cc5661fb7aeb037a6481cec890c160222697f596f19f2a3101faae2089d6b8
+- kind: project-relative
+  target: legacy
+  value: .agents/skills/core-database
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: null
+- kind: project-relative
+  target: legacy
+  value: .agents/skills/core-database/SKILL.md
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:48d2bd6f5b1d73f264d4a5b5d5a80d591657a912d6001871de02b50562ddd008
+- kind: project-relative
+  target: legacy
+  value: .agents/skills/core-database/references/integrity.md
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:7f5f07b28ae3f6c07fa636a5cb26248b8258827d6c0d95a05645db9533896b08
+- kind: project-relative
+  target: legacy
+  value: .agents/skills/core-database/references/migrations.md
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:3813f04c413b7b1c1da1d67eba7dcf9d21c5c0b09f2787b88dd7c0edaa396113
+- kind: project-relative
+  target: legacy
+  value: .agents/skills/core-database/references/security.md
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:8ca23eb3e16b2a4a427709c1f0f6c5e8fa075e2e50512b796b55988cb034753d
+- kind: project-relative
+  target: legacy
+  value: .agents/skills/core-database/references/transactions.md
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:2525866b77683d0c5d5d530f53a2518eb8219a8f81662ce803f6a48e9bbf06e5
+- kind: project-relative
+  target: legacy
+  value: .agents/skills/core-debug
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: null
+- kind: project-relative
+  target: legacy
+  value: .agents/skills/core-debug/SKILL.md
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:ad81e9d0a53bf28aaa34e8acc1b05d40bb59f5a5fa1358bfb71cf3a302f24d2c
+- kind: project-relative
+  target: legacy
+  value: .agents/skills/core-devops
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: null
+- kind: project-relative
+  target: legacy
+  value: .agents/skills/core-devops/SKILL.md
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:c09f97560d7511a53c1c32f66b9f0ce5789d563edf96a9eff0310ae3e322ead9
+- kind: project-relative
+  target: legacy
+  value: .agents/skills/core-devops/assets/opencode-habit-feedback/LICENSE
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:a517feabaaa0415dc9eaf718b627fa666eb3e3b9c6ef4126a207b2129c38599b
+- kind: project-relative
+  target: legacy
+  value: .agents/skills/core-devops/assets/opencode-habit-feedback/README.md
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:b3df531e80b2a6a847ddf964bf38d4c0641d2bcaff7305c2237074e233c9a325
+- kind: project-relative
+  target: legacy
+  value: .agents/skills/core-devops/assets/opencode-habit-feedback/VERSIONS.md
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:6d0b0f0b5f3462fcd212cb841598f1be8bbc6332a98698f6ce593059d5d7d603
+- kind: project-relative
+  target: legacy
+  value: .agents/skills/core-devops/assets/opencode-habit-feedback/adapter/habit_feedback_pipeline.py
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:a349afc90a2f183d60281b44ef04f5e7298e545e45b471db25b42a2d0d066b00
+- kind: project-relative
+  target: legacy
+  value: .agents/skills/core-devops/assets/opencode-habit-feedback/guides/deep-nesting.md
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:55c3d6a1e44333a95810090e3913c192b2930433a93dc6bb73e7992e85e93d22
+- kind: project-relative
+  target: legacy
+  value: .agents/skills/core-devops/assets/opencode-habit-feedback/guides/duplicated-code.md
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:865c4d87196dbea2d8e8b387294fadc016eb81db2d03cd33a3e55c4646afea7f
+- kind: project-relative
+  target: legacy
+  value: .agents/skills/core-devops/assets/opencode-habit-feedback/guides/incomplete-run.md
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:997152db1b36871ee94a0e626205f8b26d4f78ef62c37eadf97913e60c32dddf
+- kind: project-relative
+  target: legacy
+  value: .agents/skills/core-devops/assets/opencode-habit-feedback/guides/oversized-file.md
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:a8d4f421bf31405d8c8afaede60e047ed6508bc98c05f70c979703181b48c7f7
+- kind: project-relative
+  target: legacy
+  value: .agents/skills/core-devops/assets/opencode-habit-feedback/guides/oversized-function.md
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:7a555229c797988c2ade20d833f293c656861be365ff04c0425691bb8b9a93ec
+- kind: project-relative
+  target: legacy
+  value: .agents/skills/core-devops/assets/opencode-habit-feedback/guides/too-many-parameters.md
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:4bd415027baf1a91c5d1e394b65c97d5d97f5c7316ce876abccf14c943e62475
+- kind: project-relative
+  target: legacy
+  value: .agents/skills/core-devops/assets/opencode-habit-feedback/hook/habit_feedback_hook.py
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:c641f5f944d75dde1c8a281a5130bb7ec6401a8d24082aaf0702f3901105e183
+- kind: project-relative
+  target: legacy
+  value: .agents/skills/core-devops/assets/opencode-habit-feedback/package.json
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:c95be37115a7816b00d745b4756b3ef5e49e3d30bc5d5d8692608e1d1467cf8e
+- kind: project-relative
+  target: legacy
+  value: .agents/skills/core-devops/assets/opencode-habit-feedback/plugin/index.ts
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:c9d186ceae8a3aea7eb4a9edbc93aa8473f1b0cd1e41b42113bbe635c6afe2fa
+- kind: project-relative
+  target: legacy
+  value: .agents/skills/core-devops/assets/opencode-habit-feedback/sdk-contract.md
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:1cf3ed007debb41b69d3c696c13c7f9a224ba764ae92628e5e4937939d6dca15
+- kind: project-relative
+  target: legacy
+  value: .agents/skills/core-devops/references/checks-and-hooks.md
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:46b9e474f3a1bd6c51a842b04f375004e05888c745f95c0c64d73ba5c5741aa3
+- kind: project-relative
+  target: legacy
+  value: .agents/skills/core-devops/references/ci-and-releases.md
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:2a069ab054a074b728857c7563254996860175baf173f2a0ad47610a5b6e4466
+- kind: project-relative
+  target: legacy
+  value: .agents/skills/core-devops/references/development-automation.md
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:420e53c0a27c6bbccc2e8edaf4961438d83d979c63b7517f7613a6bca4c3109a
+- kind: project-relative
+  target: legacy
+  value: .agents/skills/core-devops/references/failure-recovery.md
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:c974d61498e67feaeb8e47e26c50dd32cf8b5fe2e85b0e356f7a1a69bdd73d10
+- kind: project-relative
+  target: legacy
+  value: .agents/skills/core-devops/references/git-operations.md
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:7935e7b8433c6d9f038089cb9acd70fa03f57b5a5182d51493a01755f45f9ea6
+- kind: project-relative
+  target: legacy
+  value: .agents/skills/core-devops/references/habit-feedback.md
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:ac28b78cf23b45faa129f753bfdc37ab897a1c713c7bc0012a31714cf7d3632f
+- kind: project-relative
+  target: legacy
+  value: .agents/skills/core-devops/references/tooling-profiles.md
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:ed4eefed089a92f70f01733239f17acf089be7c27c991cb9cd1d28592b2f1e65
+- kind: project-relative
+  target: legacy
+  value: .agents/skills/core-docs
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: null
+- kind: project-relative
+  target: legacy
+  value: .agents/skills/core-docs/SKILL.md
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:6cbe977541a743661e4748e7afe91ce307783e22d788e344669dfad46f8aebe1
+- kind: project-relative
+  target: legacy
+  value: .agents/skills/core-execute
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: null
+- kind: project-relative
+  target: legacy
+  value: .agents/skills/core-execute/SKILL.md
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:7770c7c97b3f9163475566a49fd25b80a621928da6737824ab4db0e3d6b80ca8
+- kind: project-relative
+  target: legacy
+  value: .agents/skills/core-frontend
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: null
+- kind: project-relative
+  target: legacy
+  value: .agents/skills/core-frontend/SKILL.md
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:2f3e6cfb317d45603350126e173ec4ee44d2ba9b0cabe857114b6f1d718d9c63
+- kind: project-relative
+  target: legacy
+  value: .agents/skills/core-frontend/references/angular.md
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:6ca1d45cfb41781238f583cc49cc1fd651bc752e8e29e4645b7ef02f65b16fb1
+- kind: project-relative
+  target: legacy
+  value: .agents/skills/core-frontend/references/react-nextjs.md
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:25472748b25d849841a19e8e0decc6053332f42661e80b380d9421eecc5c75cf
+- kind: project-relative
+  target: legacy
+  value: .agents/skills/core-handoff
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: null
+- kind: project-relative
+  target: legacy
+  value: .agents/skills/core-handoff/SKILL.md
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:683ddcba2bc7ba5873b347271494a2f3943c52da3bb33ca31d0ebe1ce4b3232a
+- kind: project-relative
+  target: legacy
+  value: .agents/skills/core-handoff/agents/openai.yaml
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:9215bba327ba8790f76cf35ad6135441b50b133c9e4151f39e3b89ab7baffd02
+- kind: project-relative
+  target: legacy
+  value: .agents/skills/core-handoff/assets/start-prompt.md
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:f8ba18727e8207c9aaad8e9336444464917e3e1a033b6075f70f0653a7dea959
+- kind: project-relative
+  target: legacy
+  value: .agents/skills/core-init-mcps
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: null
+- kind: project-relative
+  target: legacy
+  value: .agents/skills/core-init-mcps/SKILL.md
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:9c593ac47d0e413003ddf01c8b208f771f8fae66f1e1df9a3d4cd523d41ce867
+- kind: project-relative
+  target: legacy
+  value: .agents/skills/core-init-project
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: null
+- kind: project-relative
+  target: legacy
+  value: .agents/skills/core-init-project/SKILL.md
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:82e7921b65c9e0b8aa8cb4189ae7d58ddb7292e94e7e1a7f902113db371f0129
+- kind: project-relative
+  target: legacy
+  value: .agents/skills/core-init-project/assets/core-routing.md
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:5378908b414fcae9bb7138d495a589e1d32377d664a9e878646687e72541c74d
+- kind: project-relative
+  target: legacy
+  value: .agents/skills/core-milestone
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: null
+- kind: project-relative
+  target: legacy
+  value: .agents/skills/core-milestone/SKILL.md
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:50bb35e9eada993a538fe3033ffe839d92caf5781943696c6b4ca00113033921
+- kind: project-relative
+  target: legacy
+  value: .agents/skills/core-milestone/agents/openai.yaml
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:6d555ca997b5938f524ff608d43730ecbbcc84c51a8708d5667eeb30fae90350
+- kind: project-relative
+  target: legacy
+  value: .agents/skills/core-milestone/assets/goal-prompt.md
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:6313b443c72e1d14324f9901b297d56167b6824070166ea47e4e3cc306ea607f
+- kind: project-relative
+  target: legacy
+  value: .agents/skills/core-milestone/references/goal-format.md
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:8a84075a4ce9929432d2b66050d54aae7642089c4bf419fd08159bebdfecad6b
+- kind: project-relative
+  target: legacy
+  value: .agents/skills/core-milestone/references/milestone-format.md
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:9636c3ee71d916416920ca9de298a83490529fd215910dfb1fc00c13fdec1a7a
+- kind: project-relative
+  target: legacy
+  value: .agents/skills/core-milestone/references/milestone-index-format.md
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:9b274586b7f5a0035213c7234380acf87b1e483c5a221f9ac207fd879b32a259
+- kind: project-relative
+  target: legacy
+  value: .agents/skills/core-mobile
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: null
+- kind: project-relative
+  target: legacy
+  value: .agents/skills/core-mobile/SKILL.md
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:7d0cc0364ba768d43e34b92d072408a0d7f9ab0fc7520f3ccf749b48af22c8fb
+- kind: project-relative
+  target: legacy
+  value: .agents/skills/core-mobile/references/flutter.md
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:cf704bdd30d4c5d0a4fb7165ef51f428f683a9f1e3fa2f76176aaa460433c013
+- kind: project-relative
+  target: legacy
+  value: .agents/skills/core-mobile/references/react-native.md
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:7eaf58d096a26bc46b8c09136ac4b7558fa9d3e2ac2a2d2549d92a981822e303
+- kind: project-relative
+  target: legacy
+  value: .agents/skills/core-mobile/references/swift-ios.md
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:e3d200020a513d19a261bfcc6d1a94449de579fe0e40c459e83d6c5f4339ef3f
+- kind: project-relative
+  target: legacy
+  value: .agents/skills/core-plan
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: null
+- kind: project-relative
+  target: legacy
+  value: .agents/skills/core-plan/SKILL.md
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:4ec46b290e3ededae5bb633f295a3cf104c65168fec9c82364a5e668fefd4e94
+- kind: project-relative
+  target: legacy
+  value: .agents/skills/core-refactor
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: null
+- kind: project-relative
+  target: legacy
+  value: .agents/skills/core-refactor/SKILL.md
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:cf06950c7fb19b96dd842d589db78a2aeb35f1a8a135285dd7acc1fa257d683e
+- kind: project-relative
+  target: legacy
+  value: .agents/skills/core-repo-audit
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: null
+- kind: project-relative
+  target: legacy
+  value: .agents/skills/core-repo-audit/SKILL.md
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:e90b4f0658a3a5ad20cfe7cbccb7914132cba8923fb4519120b1e1b1038a6fee
+- kind: project-relative
+  target: legacy
+  value: .agents/skills/core-research
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: null
+- kind: project-relative
+  target: legacy
+  value: .agents/skills/core-research/SKILL.md
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:1883063baabd8b6fef27a7c70a0f540d44f06e3224423b51f3d21b8647a56831
+- kind: project-relative
+  target: legacy
+  value: .agents/skills/core-review
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: null
+- kind: project-relative
+  target: legacy
+  value: .agents/skills/core-review/SKILL.md
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:2a01d8e3aed0dbd76bb055d0c7849e4a05dd19b6d759cedd7b8f53bd0ecbbc1a
+- kind: project-relative
+  target: legacy
+  value: .agents/skills/core-shared
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: null
+- kind: project-relative
+  target: legacy
+  value: .agents/skills/core-shared/LICENSE
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:a517feabaaa0415dc9eaf718b627fa666eb3e3b9c6ef4126a207b2129c38599b
+- kind: project-relative
+  target: legacy
+  value: .agents/skills/core-shared/SKILL.md
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:8e556d6f2dbf3b5c93a88806bfdb17ab48684d875eaa72261b5c1ed61a02f484
+- kind: project-relative
+  target: legacy
+  value: .agents/skills/core-shared/assets/handoff.md
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:67ed59562e098112304f3faf2b719d51fdd72b5e41435b4c27893c4f27c36e5f
+- kind: project-relative
+  target: legacy
+  value: .agents/skills/core-shared/assets/review-finding.yaml
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:32e0e067a68ffe82eeea0116b71b6eb1f5f3c57b1498568fd58bc6599a6cf10c
+- kind: project-relative
+  target: legacy
+  value: .agents/skills/core-shared/assets/workflow-catalog.yaml
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:b7eb5b25ef51a8bb8e543518ed64abfad3aa72645e949bfcb9bd1c040bf46603
+- kind: project-relative
+  target: legacy
+  value: .agents/skills/core-shared/references/artifact-contract.md
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:20e03bba5813423027eb19f81a20f2d471f664e8b9e0db0d04abb837d24a3cbb
+- kind: project-relative
+  target: legacy
+  value: .agents/skills/core-shared/references/tool-routing.md
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:bdab2eb6221fc7593c84b563d9f51964522ed12ebbd35aea36809f690f915a6c
+- kind: project-relative
+  target: legacy
+  value: .agents/skills/core-shared/references/user-instructions-contract.md
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:6e14c3577e540c09b0d42b0b80186f5a6934b5443629aaa105989e4e628b7040
+- kind: project-relative
+  target: legacy
+  value: .agents/skills/core-shared/references/verification.md
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:202d4ff0dd03a290cab07910fbdf4d88352aee94f8d659540480619b847db3b8
+- kind: project-relative
+  target: legacy
+  value: .agents/skills/core-shared/references/workflow-contract.md
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:cdab5da07b71ac1426bcbf4cf3be80a176ab0769f6649346efc07d39dc717537
+- kind: project-relative
+  target: legacy
+  value: .agents/skills/core-tf-infra
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: null
+- kind: project-relative
+  target: legacy
+  value: .agents/skills/core-tf-infra/SKILL.md
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:33c8e3d2e230cd3e30dd707e82610bee746eb744321460cd6c2cf572330a2fc7
+- kind: project-relative
+  target: legacy
+  value: .agents/skills/core-tf-infra/references/cost-and-rollback.md
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:3559f5876079e99e58987e3438cbcc4f035343a6bd9b7ed2fcd2e997b3760352
+- kind: project-relative
+  target: legacy
+  value: .agents/skills/core-tf-infra/references/identity-and-authorization.md
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:c705bc58186c343329fae0705a527cddca7585e0b76ad76afe2351b1e8eddb43
+- kind: project-relative
+  target: legacy
+  value: .agents/skills/core-tf-infra/references/state-and-drift.md
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:1ba73e46755fa5cff0c00763b7f8ad041e156494863048f75136aa6014c72614
+- kind: project-relative
+  target: legacy
+  value: .agents/skills/core-user2agent-instructions
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: null
+- kind: project-relative
+  target: legacy
+  value: .agents/skills/core-user2agent-instructions/SKILL.md
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:b0e582f33bef16ac574f48fa8094089f3913afe8077275a70567f8383d24c9ea
+- kind: project-relative
+  target: legacy
+  value: .agents/skills/gortex-serena-configurator
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: null
+- kind: project-relative
+  target: legacy
+  value: .agents/skills/gortex-serena-configurator/LICENSE
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:a517feabaaa0415dc9eaf718b627fa666eb3e3b9c6ef4126a207b2129c38599b
+- kind: project-relative
+  target: legacy
+  value: .agents/skills/gortex-serena-configurator/PROVENANCE.md
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:4e98a09c0bcbf10925be59dddad19c3aae72f473b0ca496389d65da13097030b
+- kind: project-relative
+  target: legacy
+  value: .agents/skills/gortex-serena-configurator/REQUIREMENTS.md
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:5857c37fbd94135dcccd224c5d409a28e3803c0b768b566913a15a37170efdae
+- kind: project-relative
+  target: legacy
+  value: .agents/skills/gortex-serena-configurator/SKILL.md
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:4959b985902a785b55e27afc05defca08d9edb1dadb6175d8db6c7010ec8766a
+- kind: project-relative
+  target: legacy
+  value: .agents/skills/gortex-serena-configurator/agents/openai.yaml
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:98162f5d955ffa2ff2cb02d7a58eaf4b988686548a036c8f77972fb03cdb8dda
+- kind: project-relative
+  target: legacy
+  value: .agents/skills/gortex-serena-configurator/references/configuration-precedence.md
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:fea904ad710c696ca621836cdbf4f89e76446910762b426665e195a8a48fae22
+- kind: project-relative
+  target: legacy
+  value: .agents/skills/gortex-serena-configurator/scripts/requirements.txt
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:3eb0bcd11c478e00ecb6dca8668b5ed32dc5aa273cb278411c1d0d90e6a72584
+- kind: project-relative
+  target: legacy
+  value: .agents/skills/gortex-serena-configurator/scripts/serena_safety.py
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:fdc269704b2913441fcfeacf7abef5c9960124a553a61d67823f1e43c64e67b5
+- kind: project-relative
+  target: legacy
+  value: .agents/skills/gortex-serena-configurator/scripts/test_serena_safety.py
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:a580f15ad982629d544fe20bad4b46cb036b6643d52bd3628ed094b50bfa2a05
+- kind: project-relative
+  target: opencode
+  value: .opencode/agents/architecture-reviewer.md
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:056ef752774b6c5915c18a82ddd1da9b91a81f135bca141f83d19d982cc16884
+- kind: project-relative
+  target: opencode
+  value: .opencode/agents/backend-engineer.md
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:985f41b49482eff0c7bdeb6f0ea34f8f62b484d9f9827032d917d65d31fe480b
+- kind: project-relative
+  target: opencode
+  value: .opencode/agents/db-engineer.md
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:df371f5b4949b60c46b94f090feea63c2266ed181aa875aff7aeece245287873
+- kind: project-relative
+  target: opencode
+  value: .opencode/agents/debug-investigator.md
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:c54953fd47c063690a4021363a057385cdc80b1cd5db1f1620ab138a70ef0ccd
+- kind: project-relative
+  target: opencode
+  value: .opencode/agents/docs-curator.md
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:ebd30d8ce10cc029dece682b6470167e07e68ac808916ac0f52a2be739c1c1f5
+- kind: project-relative
+  target: opencode
+  value: .opencode/agents/frontend-engineer.md
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:600f7642a848e291af16a4c4eca28fa453505d3ca61a326ce0da910d4729acc1
+- kind: project-relative
+  target: opencode
+  value: .opencode/agents/mobile-engineer.md
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:e845e48fa8427cc80bea98b33c492fdb3ea52dcd66e2c580f8eea53308127dbc
+- kind: project-relative
+  target: opencode
+  value: .opencode/agents/pm-planner.md
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:f827dc1b4a2099c8df86f9494019902859927a5fab80b9f67c53b473fb88c022
+- kind: project-relative
+  target: opencode
+  value: .opencode/agents/qa-reviewer.md
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:c30235e1c003d72d917354d4c740f35ab7db11282f8f06d86a32841ac72bdc7b
+- kind: project-relative
+  target: opencode
+  value: .opencode/agents/refactor-engineer.md
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:8fe7c8dce7b9e87f5813ebfb0a87d2e6cea06d767061c1bcd1ff19d218d1f1ef
+- kind: project-relative
+  target: opencode
+  value: .opencode/agents/research-explorer.md
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:c240e8aa9f869ac5f2ca1ef99323acbeeb742b853419a7593760240f2a086e2b
+- kind: project-relative
+  target: opencode
+  value: .opencode/agents/tf-infra-engineer.md
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:6d496b6c460e7e6b621fb0d391ced9bdd0c4b7ca2a59c7e0fdb847a24179555e
+local_deployed_files:
+- .agents/skills/core-architecture
+- .agents/skills/core-architecture/PROVENANCE.md
+- .agents/skills/core-architecture/SKILL.md
+- .agents/skills/core-architecture/THIRD_PARTY_NOTICES.md
+- .agents/skills/core-architecture/assets/software-design-principles.png
+- .agents/skills/core-architecture/references/alternatives.md
+- .agents/skills/core-architecture/references/boundaries-and-abstractions.md
+- .agents/skills/core-architecture/references/design-baseline.md
+- .agents/skills/core-architecture/references/evolution-and-clarity.md
+- .agents/skills/core-architecture/references/interface-and-errors.md
+- .agents/skills/core-architecture/references/principles-background.md
+- .agents/skills/core-backend
+- .agents/skills/core-backend/SKILL.md
+- .agents/skills/core-backend/references/security.md
+- .agents/skills/core-backend/references/validation.md
+- .agents/skills/core-brainstorm
+- .agents/skills/core-brainstorm/SKILL.md
+- .agents/skills/core-database
+- .agents/skills/core-database/SKILL.md
+- .agents/skills/core-database/references/integrity.md
+- .agents/skills/core-database/references/migrations.md
+- .agents/skills/core-database/references/security.md
+- .agents/skills/core-database/references/transactions.md
+- .agents/skills/core-debug
+- .agents/skills/core-debug/SKILL.md
+- .agents/skills/core-devops
+- .agents/skills/core-devops/SKILL.md
+- .agents/skills/core-devops/assets/opencode-habit-feedback/LICENSE
+- .agents/skills/core-devops/assets/opencode-habit-feedback/README.md
+- .agents/skills/core-devops/assets/opencode-habit-feedback/VERSIONS.md
+- .agents/skills/core-devops/assets/opencode-habit-feedback/adapter/habit_feedback_pipeline.py
+- .agents/skills/core-devops/assets/opencode-habit-feedback/guides/deep-nesting.md
+- .agents/skills/core-devops/assets/opencode-habit-feedback/guides/duplicated-code.md
+- .agents/skills/core-devops/assets/opencode-habit-feedback/guides/incomplete-run.md
+- .agents/skills/core-devops/assets/opencode-habit-feedback/guides/oversized-file.md
+- .agents/skills/core-devops/assets/opencode-habit-feedback/guides/oversized-function.md
+- .agents/skills/core-devops/assets/opencode-habit-feedback/guides/too-many-parameters.md
+- .agents/skills/core-devops/assets/opencode-habit-feedback/hook/habit_feedback_hook.py
+- .agents/skills/core-devops/assets/opencode-habit-feedback/package.json
+- .agents/skills/core-devops/assets/opencode-habit-feedback/plugin/index.ts
+- .agents/skills/core-devops/assets/opencode-habit-feedback/sdk-contract.md
+- .agents/skills/core-devops/references/checks-and-hooks.md
+- .agents/skills/core-devops/references/ci-and-releases.md
+- .agents/skills/core-devops/references/development-automation.md
+- .agents/skills/core-devops/references/failure-recovery.md
+- .agents/skills/core-devops/references/git-operations.md
+- .agents/skills/core-devops/references/habit-feedback.md
+- .agents/skills/core-devops/references/tooling-profiles.md
+- .agents/skills/core-docs
+- .agents/skills/core-docs/SKILL.md
+- .agents/skills/core-execute
+- .agents/skills/core-execute/SKILL.md
+- .agents/skills/core-frontend
+- .agents/skills/core-frontend/SKILL.md
+- .agents/skills/core-frontend/references/angular.md
+- .agents/skills/core-frontend/references/react-nextjs.md
+- .agents/skills/core-handoff
+- .agents/skills/core-handoff/SKILL.md
+- .agents/skills/core-handoff/agents/openai.yaml
+- .agents/skills/core-handoff/assets/start-prompt.md
+- .agents/skills/core-init-mcps
+- .agents/skills/core-init-mcps/SKILL.md
+- .agents/skills/core-init-project
+- .agents/skills/core-init-project/SKILL.md
+- .agents/skills/core-init-project/assets/core-routing.md
+- .agents/skills/core-milestone
+- .agents/skills/core-milestone/SKILL.md
+- .agents/skills/core-milestone/agents/openai.yaml
+- .agents/skills/core-milestone/assets/goal-prompt.md
+- .agents/skills/core-milestone/references/goal-format.md
+- .agents/skills/core-milestone/references/milestone-format.md
+- .agents/skills/core-milestone/references/milestone-index-format.md
+- .agents/skills/core-mobile
+- .agents/skills/core-mobile/SKILL.md
+- .agents/skills/core-mobile/references/flutter.md
+- .agents/skills/core-mobile/references/react-native.md
+- .agents/skills/core-mobile/references/swift-ios.md
+- .agents/skills/core-plan
+- .agents/skills/core-plan/SKILL.md
+- .agents/skills/core-refactor
+- .agents/skills/core-refactor/SKILL.md
+- .agents/skills/core-repo-audit
+- .agents/skills/core-repo-audit/SKILL.md
+- .agents/skills/core-research
+- .agents/skills/core-research/SKILL.md
+- .agents/skills/core-review
+- .agents/skills/core-review/SKILL.md
+- .agents/skills/core-shared
+- .agents/skills/core-shared/LICENSE
+- .agents/skills/core-shared/SKILL.md
+- .agents/skills/core-shared/assets/handoff.md
+- .agents/skills/core-shared/assets/review-finding.yaml
+- .agents/skills/core-shared/assets/workflow-catalog.yaml
+- .agents/skills/core-shared/references/artifact-contract.md
+- .agents/skills/core-shared/references/tool-routing.md
+- .agents/skills/core-shared/references/user-instructions-contract.md
+- .agents/skills/core-shared/references/verification.md
+- .agents/skills/core-shared/references/workflow-contract.md
+- .agents/skills/core-tf-infra
+- .agents/skills/core-tf-infra/SKILL.md
+- .agents/skills/core-tf-infra/references/cost-and-rollback.md
+- .agents/skills/core-tf-infra/references/identity-and-authorization.md
+- .agents/skills/core-tf-infra/references/state-and-drift.md
+- .agents/skills/core-user2agent-instructions
+- .agents/skills/core-user2agent-instructions/SKILL.md
+- .agents/skills/gortex-serena-configurator
+- .agents/skills/gortex-serena-configurator/LICENSE
+- .agents/skills/gortex-serena-configurator/PROVENANCE.md
+- .agents/skills/gortex-serena-configurator/REQUIREMENTS.md
+- .agents/skills/gortex-serena-configurator/SKILL.md
+- .agents/skills/gortex-serena-configurator/agents/openai.yaml
+- .agents/skills/gortex-serena-configurator/references/configuration-precedence.md
+- .agents/skills/gortex-serena-configurator/scripts/requirements.txt
+- .agents/skills/gortex-serena-configurator/scripts/serena_safety.py
+- .agents/skills/gortex-serena-configurator/scripts/test_serena_safety.py
+- .codex/agents/architecture-reviewer.toml
+- .codex/agents/backend-engineer.toml
+- .codex/agents/db-engineer.toml
+- .codex/agents/debug-investigator.toml
+- .codex/agents/docs-curator.toml
+- .codex/agents/frontend-engineer.toml
+- .codex/agents/mobile-engineer.toml
+- .codex/agents/pm-planner.toml
+- .codex/agents/qa-reviewer.toml
+- .codex/agents/refactor-engineer.toml
+- .codex/agents/research-explorer.toml
+- .codex/agents/tf-infra-engineer.toml
+- .opencode/agents/architecture-reviewer.md
+- .opencode/agents/backend-engineer.md
+- .opencode/agents/db-engineer.md
+- .opencode/agents/debug-investigator.md
+- .opencode/agents/docs-curator.md
+- .opencode/agents/frontend-engineer.md
+- .opencode/agents/mobile-engineer.md
+- .opencode/agents/pm-planner.md
+- .opencode/agents/qa-reviewer.md
+- .opencode/agents/refactor-engineer.md
+- .opencode/agents/research-explorer.md
+- .opencode/agents/tf-infra-engineer.md
+local_deployed_file_hashes:
+  .agents/skills/core-architecture/PROVENANCE.md: sha256:ab339659e70ec17468edefc5c3290daae1450bb941e930d90256be4a3fb69955
+  .agents/skills/core-architecture/SKILL.md: sha256:1f8395ad21ba5aceb9e902262fd4a743e24af3ab7c7a7dfac1515562c944445c
+  .agents/skills/core-architecture/THIRD_PARTY_NOTICES.md: sha256:9dcdfa09b59ed5ec5f9b2b1013f988f1c696de089c9d48baa78cc01cd2b90f16
+  .agents/skills/core-architecture/assets/software-design-principles.png: sha256:878f2297c71134e8f4489a8982096c0cdfe6a3564bbec926be8fbc45b6ae1397
+  .agents/skills/core-architecture/references/alternatives.md: sha256:dcbcb83e21eaaecfa3213bd76497f7505fe1dfee7d74f4799214fb3bc820d543
+  .agents/skills/core-architecture/references/boundaries-and-abstractions.md: sha256:b2cf766ac6ce113ba654159e819cf40064c38dd77d65d0d246bcd51cf5dc2cbc
+  .agents/skills/core-architecture/references/design-baseline.md: sha256:e6adcf10932d0b84d608c1553bf4ebbab9b956804e6aa4151795d3523eb97da7
+  .agents/skills/core-architecture/references/evolution-and-clarity.md: sha256:e94f0f4489e54b623074263592f318bd9b5081fb5d635df6c2abefe1d73adae2
+  .agents/skills/core-architecture/references/interface-and-errors.md: sha256:9d35d8ce37680e9faeb09ab835ce5c8461c989d4735bf9ef2ff2e76c6d430585
+  .agents/skills/core-architecture/references/principles-background.md: sha256:cc423cbbefe2adf2a8727f06d79c18563e63f2d20c340f8b828e4ad12e4ef988
+  .agents/skills/core-backend/SKILL.md: sha256:ba3aab7fd455f3cb5f83ca648c269704bf4d1209905b83e3536a801dae4d1921
+  .agents/skills/core-backend/references/security.md: sha256:894c58d0dd7fbe62e8470db3346e5bcda86db6bea3f23c93d11b9f05a7757a7c
+  .agents/skills/core-backend/references/validation.md: sha256:fa0108a045ee7652e1768eabccf2a760fc4e518f2c83417d692e9fa4ee38e7dc
+  .agents/skills/core-brainstorm/SKILL.md: sha256:61cc5661fb7aeb037a6481cec890c160222697f596f19f2a3101faae2089d6b8
+  .agents/skills/core-database/SKILL.md: sha256:48d2bd6f5b1d73f264d4a5b5d5a80d591657a912d6001871de02b50562ddd008
+  .agents/skills/core-database/references/integrity.md: sha256:7f5f07b28ae3f6c07fa636a5cb26248b8258827d6c0d95a05645db9533896b08
+  .agents/skills/core-database/references/migrations.md: sha256:3813f04c413b7b1c1da1d67eba7dcf9d21c5c0b09f2787b88dd7c0edaa396113
+  .agents/skills/core-database/references/security.md: sha256:8ca23eb3e16b2a4a427709c1f0f6c5e8fa075e2e50512b796b55988cb034753d
+  .agents/skills/core-database/references/transactions.md: sha256:2525866b77683d0c5d5d530f53a2518eb8219a8f81662ce803f6a48e9bbf06e5
+  .agents/skills/core-debug/SKILL.md: sha256:ad81e9d0a53bf28aaa34e8acc1b05d40bb59f5a5fa1358bfb71cf3a302f24d2c
+  .agents/skills/core-devops/SKILL.md: sha256:c09f97560d7511a53c1c32f66b9f0ce5789d563edf96a9eff0310ae3e322ead9
+  .agents/skills/core-devops/assets/opencode-habit-feedback/LICENSE: sha256:a517feabaaa0415dc9eaf718b627fa666eb3e3b9c6ef4126a207b2129c38599b
+  .agents/skills/core-devops/assets/opencode-habit-feedback/README.md: sha256:b3df531e80b2a6a847ddf964bf38d4c0641d2bcaff7305c2237074e233c9a325
+  .agents/skills/core-devops/assets/opencode-habit-feedback/VERSIONS.md: sha256:6d0b0f0b5f3462fcd212cb841598f1be8bbc6332a98698f6ce593059d5d7d603
+  .agents/skills/core-devops/assets/opencode-habit-feedback/adapter/habit_feedback_pipeline.py: sha256:a349afc90a2f183d60281b44ef04f5e7298e545e45b471db25b42a2d0d066b00
+  .agents/skills/core-devops/assets/opencode-habit-feedback/guides/deep-nesting.md: sha256:55c3d6a1e44333a95810090e3913c192b2930433a93dc6bb73e7992e85e93d22
+  .agents/skills/core-devops/assets/opencode-habit-feedback/guides/duplicated-code.md: sha256:865c4d87196dbea2d8e8b387294fadc016eb81db2d03cd33a3e55c4646afea7f
+  .agents/skills/core-devops/assets/opencode-habit-feedback/guides/incomplete-run.md: sha256:997152db1b36871ee94a0e626205f8b26d4f78ef62c37eadf97913e60c32dddf
+  .agents/skills/core-devops/assets/opencode-habit-feedback/guides/oversized-file.md: sha256:a8d4f421bf31405d8c8afaede60e047ed6508bc98c05f70c979703181b48c7f7
+  .agents/skills/core-devops/assets/opencode-habit-feedback/guides/oversized-function.md: sha256:7a555229c797988c2ade20d833f293c656861be365ff04c0425691bb8b9a93ec
+  .agents/skills/core-devops/assets/opencode-habit-feedback/guides/too-many-parameters.md: sha256:4bd415027baf1a91c5d1e394b65c97d5d97f5c7316ce876abccf14c943e62475
+  .agents/skills/core-devops/assets/opencode-habit-feedback/hook/habit_feedback_hook.py: sha256:c641f5f944d75dde1c8a281a5130bb7ec6401a8d24082aaf0702f3901105e183
+  .agents/skills/core-devops/assets/opencode-habit-feedback/package.json: sha256:c95be37115a7816b00d745b4756b3ef5e49e3d30bc5d5d8692608e1d1467cf8e
+  .agents/skills/core-devops/assets/opencode-habit-feedback/plugin/index.ts: sha256:c9d186ceae8a3aea7eb4a9edbc93aa8473f1b0cd1e41b42113bbe635c6afe2fa
+  .agents/skills/core-devops/assets/opencode-habit-feedback/sdk-contract.md: sha256:1cf3ed007debb41b69d3c696c13c7f9a224ba764ae92628e5e4937939d6dca15
+  .agents/skills/core-devops/references/checks-and-hooks.md: sha256:46b9e474f3a1bd6c51a842b04f375004e05888c745f95c0c64d73ba5c5741aa3
+  .agents/skills/core-devops/references/ci-and-releases.md: sha256:2a069ab054a074b728857c7563254996860175baf173f2a0ad47610a5b6e4466
+  .agents/skills/core-devops/references/development-automation.md: sha256:420e53c0a27c6bbccc2e8edaf4961438d83d979c63b7517f7613a6bca4c3109a
+  .agents/skills/core-devops/references/failure-recovery.md: sha256:c974d61498e67feaeb8e47e26c50dd32cf8b5fe2e85b0e356f7a1a69bdd73d10
+  .agents/skills/core-devops/references/git-operations.md: sha256:7935e7b8433c6d9f038089cb9acd70fa03f57b5a5182d51493a01755f45f9ea6
+  .agents/skills/core-devops/references/habit-feedback.md: sha256:ac28b78cf23b45faa129f753bfdc37ab897a1c713c7bc0012a31714cf7d3632f
+  .agents/skills/core-devops/references/tooling-profiles.md: sha256:ed4eefed089a92f70f01733239f17acf089be7c27c991cb9cd1d28592b2f1e65
+  .agents/skills/core-docs/SKILL.md: sha256:6cbe977541a743661e4748e7afe91ce307783e22d788e344669dfad46f8aebe1
+  .agents/skills/core-execute/SKILL.md: sha256:7770c7c97b3f9163475566a49fd25b80a621928da6737824ab4db0e3d6b80ca8
+  .agents/skills/core-frontend/SKILL.md: sha256:2f3e6cfb317d45603350126e173ec4ee44d2ba9b0cabe857114b6f1d718d9c63
+  .agents/skills/core-frontend/references/angular.md: sha256:6ca1d45cfb41781238f583cc49cc1fd651bc752e8e29e4645b7ef02f65b16fb1
+  .agents/skills/core-frontend/references/react-nextjs.md: sha256:25472748b25d849841a19e8e0decc6053332f42661e80b380d9421eecc5c75cf
+  .agents/skills/core-handoff/SKILL.md: sha256:683ddcba2bc7ba5873b347271494a2f3943c52da3bb33ca31d0ebe1ce4b3232a
+  .agents/skills/core-handoff/agents/openai.yaml: sha256:9215bba327ba8790f76cf35ad6135441b50b133c9e4151f39e3b89ab7baffd02
+  .agents/skills/core-handoff/assets/start-prompt.md: sha256:f8ba18727e8207c9aaad8e9336444464917e3e1a033b6075f70f0653a7dea959
+  .agents/skills/core-init-mcps/SKILL.md: sha256:9c593ac47d0e413003ddf01c8b208f771f8fae66f1e1df9a3d4cd523d41ce867
+  .agents/skills/core-init-project/SKILL.md: sha256:82e7921b65c9e0b8aa8cb4189ae7d58ddb7292e94e7e1a7f902113db371f0129
+  .agents/skills/core-init-project/assets/core-routing.md: sha256:5378908b414fcae9bb7138d495a589e1d32377d664a9e878646687e72541c74d
+  .agents/skills/core-milestone/SKILL.md: sha256:50bb35e9eada993a538fe3033ffe839d92caf5781943696c6b4ca00113033921
+  .agents/skills/core-milestone/agents/openai.yaml: sha256:6d555ca997b5938f524ff608d43730ecbbcc84c51a8708d5667eeb30fae90350
+  .agents/skills/core-milestone/assets/goal-prompt.md: sha256:6313b443c72e1d14324f9901b297d56167b6824070166ea47e4e3cc306ea607f
+  .agents/skills/core-milestone/references/goal-format.md: sha256:8a84075a4ce9929432d2b66050d54aae7642089c4bf419fd08159bebdfecad6b
+  .agents/skills/core-milestone/references/milestone-format.md: sha256:9636c3ee71d916416920ca9de298a83490529fd215910dfb1fc00c13fdec1a7a
+  .agents/skills/core-milestone/references/milestone-index-format.md: sha256:9b274586b7f5a0035213c7234380acf87b1e483c5a221f9ac207fd879b32a259
+  .agents/skills/core-mobile/SKILL.md: sha256:7d0cc0364ba768d43e34b92d072408a0d7f9ab0fc7520f3ccf749b48af22c8fb
+  .agents/skills/core-mobile/references/flutter.md: sha256:cf704bdd30d4c5d0a4fb7165ef51f428f683a9f1e3fa2f76176aaa460433c013
+  .agents/skills/core-mobile/references/react-native.md: sha256:7eaf58d096a26bc46b8c09136ac4b7558fa9d3e2ac2a2d2549d92a981822e303
+  .agents/skills/core-mobile/references/swift-ios.md: sha256:e3d200020a513d19a261bfcc6d1a94449de579fe0e40c459e83d6c5f4339ef3f
+  .agents/skills/core-plan/SKILL.md: sha256:4ec46b290e3ededae5bb633f295a3cf104c65168fec9c82364a5e668fefd4e94
+  .agents/skills/core-refactor/SKILL.md: sha256:cf06950c7fb19b96dd842d589db78a2aeb35f1a8a135285dd7acc1fa257d683e
+  .agents/skills/core-repo-audit/SKILL.md: sha256:e90b4f0658a3a5ad20cfe7cbccb7914132cba8923fb4519120b1e1b1038a6fee
+  .agents/skills/core-research/SKILL.md: sha256:1883063baabd8b6fef27a7c70a0f540d44f06e3224423b51f3d21b8647a56831
+  .agents/skills/core-review/SKILL.md: sha256:2a01d8e3aed0dbd76bb055d0c7849e4a05dd19b6d759cedd7b8f53bd0ecbbc1a
+  .agents/skills/core-shared/LICENSE: sha256:a517feabaaa0415dc9eaf718b627fa666eb3e3b9c6ef4126a207b2129c38599b
+  .agents/skills/core-shared/SKILL.md: sha256:8e556d6f2dbf3b5c93a88806bfdb17ab48684d875eaa72261b5c1ed61a02f484
+  .agents/skills/core-shared/assets/handoff.md: sha256:67ed59562e098112304f3faf2b719d51fdd72b5e41435b4c27893c4f27c36e5f
+  .agents/skills/core-shared/assets/review-finding.yaml: sha256:32e0e067a68ffe82eeea0116b71b6eb1f5f3c57b1498568fd58bc6599a6cf10c
+  .agents/skills/core-shared/assets/workflow-catalog.yaml: sha256:b7eb5b25ef51a8bb8e543518ed64abfad3aa72645e949bfcb9bd1c040bf46603
+  .agents/skills/core-shared/references/artifact-contract.md: sha256:20e03bba5813423027eb19f81a20f2d471f664e8b9e0db0d04abb837d24a3cbb
+  .agents/skills/core-shared/references/tool-routing.md: sha256:bdab2eb6221fc7593c84b563d9f51964522ed12ebbd35aea36809f690f915a6c
+  .agents/skills/core-shared/references/user-instructions-contract.md: sha256:6e14c3577e540c09b0d42b0b80186f5a6934b5443629aaa105989e4e628b7040
+  .agents/skills/core-shared/references/verification.md: sha256:202d4ff0dd03a290cab07910fbdf4d88352aee94f8d659540480619b847db3b8
+  .agents/skills/core-shared/references/workflow-contract.md: sha256:cdab5da07b71ac1426bcbf4cf3be80a176ab0769f6649346efc07d39dc717537
+  .agents/skills/core-tf-infra/SKILL.md: sha256:33c8e3d2e230cd3e30dd707e82610bee746eb744321460cd6c2cf572330a2fc7
+  .agents/skills/core-tf-infra/references/cost-and-rollback.md: sha256:3559f5876079e99e58987e3438cbcc4f035343a6bd9b7ed2fcd2e997b3760352
+  .agents/skills/core-tf-infra/references/identity-and-authorization.md: sha256:c705bc58186c343329fae0705a527cddca7585e0b76ad76afe2351b1e8eddb43
+  .agents/skills/core-tf-infra/references/state-and-drift.md: sha256:1ba73e46755fa5cff0c00763b7f8ad041e156494863048f75136aa6014c72614
+  .agents/skills/core-user2agent-instructions/SKILL.md: sha256:b0e582f33bef16ac574f48fa8094089f3913afe8077275a70567f8383d24c9ea
+  .agents/skills/gortex-serena-configurator/LICENSE: sha256:a517feabaaa0415dc9eaf718b627fa666eb3e3b9c6ef4126a207b2129c38599b
+  .agents/skills/gortex-serena-configurator/PROVENANCE.md: sha256:4e98a09c0bcbf10925be59dddad19c3aae72f473b0ca496389d65da13097030b
+  .agents/skills/gortex-serena-configurator/REQUIREMENTS.md: sha256:5857c37fbd94135dcccd224c5d409a28e3803c0b768b566913a15a37170efdae
+  .agents/skills/gortex-serena-configurator/SKILL.md: sha256:4959b985902a785b55e27afc05defca08d9edb1dadb6175d8db6c7010ec8766a
+  .agents/skills/gortex-serena-configurator/agents/openai.yaml: sha256:98162f5d955ffa2ff2cb02d7a58eaf4b988686548a036c8f77972fb03cdb8dda
+  .agents/skills/gortex-serena-configurator/references/configuration-precedence.md: sha256:fea904ad710c696ca621836cdbf4f89e76446910762b426665e195a8a48fae22
+  .agents/skills/gortex-serena-configurator/scripts/requirements.txt: sha256:3eb0bcd11c478e00ecb6dca8668b5ed32dc5aa273cb278411c1d0d90e6a72584
+  .agents/skills/gortex-serena-configurator/scripts/serena_safety.py: sha256:fdc269704b2913441fcfeacf7abef5c9960124a553a61d67823f1e43c64e67b5
+  .agents/skills/gortex-serena-configurator/scripts/test_serena_safety.py: sha256:a580f15ad982629d544fe20bad4b46cb036b6643d52bd3628ed094b50bfa2a05
+  .codex/agents/architecture-reviewer.toml: sha256:5bddb592ba0de2bd3db3f52d15f2a6c3ea98a28c5c2cfb86f24c134b8f3f0d1f
+  .codex/agents/backend-engineer.toml: sha256:e8bf5cc612c6410926e66c865a11344f39eae749b385a41bad7ca077ba88ae96
+  .codex/agents/db-engineer.toml: sha256:30f8829b94cecb97a75cedd94956d9ba4b4deea3f5853ad9bcdbc089e5cfd703
+  .codex/agents/debug-investigator.toml: sha256:b6bdf245374e0bfa806c7d050caaef9f716398b31d3bef7337a8f362bbeaa529
+  .codex/agents/docs-curator.toml: sha256:d20230bebf70ae0e0dcce317e3fcdc6a9c37c6c10bc6c5f26352d6a5b68b4bd0
+  .codex/agents/frontend-engineer.toml: sha256:f216d181c3c3545427a1ecbee508f4e469545c27b1a028bc2eed1056e6d07367
+  .codex/agents/mobile-engineer.toml: sha256:87e900ef8d2226b55bc279ff16237c9d1b6fd9eab250603b06f8bb177e8cf6c7
+  .codex/agents/pm-planner.toml: sha256:0e28693e47b24d717718c637189a2dfb22967335675ac024db43ef5fafd92918
+  .codex/agents/qa-reviewer.toml: sha256:2e4dc42cc2efde418ba1b7a33ce9b2baff94008cd3d39762d81759f8de9ee236
+  .codex/agents/refactor-engineer.toml: sha256:5b1308a7c6142f9f84023fc238375cd98c16f0cce973e12824f330cde49d81cf
+  .codex/agents/research-explorer.toml: sha256:8e294c412ab13ae5aba1e6b213e9d692afd57797a8b3607e0c81992837396e32
+  .codex/agents/tf-infra-engineer.toml: sha256:00e1a54fed05a679476dd076ccf32445f2ffbd43b3a050434e641425e651f6c6
+  .opencode/agents/architecture-reviewer.md: sha256:056ef752774b6c5915c18a82ddd1da9b91a81f135bca141f83d19d982cc16884
+  .opencode/agents/backend-engineer.md: sha256:985f41b49482eff0c7bdeb6f0ea34f8f62b484d9f9827032d917d65d31fe480b
+  .opencode/agents/db-engineer.md: sha256:df371f5b4949b60c46b94f090feea63c2266ed181aa875aff7aeece245287873
+  .opencode/agents/debug-investigator.md: sha256:c54953fd47c063690a4021363a057385cdc80b1cd5db1f1620ab138a70ef0ccd
+  .opencode/agents/docs-curator.md: sha256:ebd30d8ce10cc029dece682b6470167e07e68ac808916ac0f52a2be739c1c1f5
+  .opencode/agents/frontend-engineer.md: sha256:600f7642a848e291af16a4c4eca28fa453505d3ca61a326ce0da910d4729acc1
+  .opencode/agents/mobile-engineer.md: sha256:e845e48fa8427cc80bea98b33c492fdb3ea52dcd66e2c580f8eea53308127dbc
+  .opencode/agents/pm-planner.md: sha256:f827dc1b4a2099c8df86f9494019902859927a5fab80b9f67c53b473fb88c022
+  .opencode/agents/qa-reviewer.md: sha256:c30235e1c003d72d917354d4c740f35ab7db11282f8f06d86a32841ac72bdc7b
+  .opencode/agents/refactor-engineer.md: sha256:8fe7c8dce7b9e87f5813ebfb0a87d2e6cea06d767061c1bcd1ff19d218d1f1ef
+  .opencode/agents/research-explorer.md: sha256:c240e8aa9f869ac5f2ca1ef99323acbeeb742b853419a7593760240f2a086e2b
+  .opencode/agents/tf-infra-engineer.md: sha256:6d496b6c460e7e6b621fb0d391ced9bdd0c4b7ca2a59c7e0fdb847a24179555e

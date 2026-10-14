@@ -15,9 +15,9 @@ Lade vor einer Mutation:
 
 - den [Vertrag für Benutzeranweisungen](../core-shared/references/user-instructions-contract.md) für Pfade, Marker, Vorschau, Bestätigung und Erhaltung außerhalb des Zielbereichs;
 - das [Toolrouting](../core-shared/references/tool-routing.md) für Providerreihenfolge, Projektgrenzen und sichtbare Fallbacks;
-- den externen, über APM bereitgestellten Skill `gortex-serena-configurator` für die Code-Intelligence-Readiness.
+- den mitgelieferten Skill [`gortex-serena-configurator`](../gortex-serena-configurator/SKILL.md) für die Code-Intelligence-Readiness.
 
-`gortex-serena-configurator` bleibt eine unveränderte externe Abhängigkeit. Verwende ihn **inline** als Methode im aktuellen Lauf: nicht kopieren, nicht umbenennen, nicht als Subagent dispatchen und keinen separaten Status anlegen.
+`gortex-serena-configurator` ist eine quelltreu migrierte Konfigurationsmethode der kanonischen Paketquelle. Verwende ihn **inline** als Methode im aktuellen Lauf: nicht kopieren, nicht umbenennen, nicht als Subagent dispatchen und keinen separaten Status anlegen.
 
 ## Workflow
 

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Gortex Serena Configurator"
+  short_description: "Prepare Gortex with Serena fallback"
+  default_prompt: "Use $gortex-serena-configurator to audit Gortex and Serena readiness, ask which setup actions to apply, and keep native tools as the final fallback."

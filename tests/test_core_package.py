@@ -44,8 +44,7 @@ def archive_entries(sources=SOURCES, version=VERSION):
     """Entries as apm pack --target agent-skills lays them out, with a matching embedded inventory."""
     files = {'plugin.json': json.dumps({'name': 'agentic-workflow-core', 'version': version}).encode()}
     files.update({'agents/' + k[len('.apm/agents/'):]: v for k, v in sources.items() if k.startswith('.apm/agents/')})
-    files.update({'skills/' + k[len('.apm/skills/'):]: v for k, v in sources.items() if k.startswith('.apm/skills/core-')})
-    files['skills/gortex-serena-configurator/SKILL.md'] = b'---\nname: gortex-serena-configurator\n---\n'
+    files.update({'skills/' + k[len('.apm/skills/'):]: v for k, v in sources.items() if k.startswith('.apm/skills/')})
     return with_inventory(files, version)
 
 
@@ -57,8 +56,7 @@ def with_inventory(files, version=VERSION):
 
 
 def installation(sources=SOURCES):
-    files = {'.agents/skills/' + k[len('.apm/skills/'):]: v for k, v in sources.items() if k.startswith('.apm/skills/core-')}
-    files['.agents/skills/gortex-serena-configurator/SKILL.md'] = b'---\nname: gortex-serena-configurator\n---\n'
+    files = {'.agents/skills/' + k[len('.apm/skills/'):]: v for k, v in sources.items() if k.startswith('.apm/skills/')}
     files['apm.lock.yaml'] = b'lockfile_version: "1"\n'
     return files
 
@@ -120,12 +118,19 @@ class ArchiveInspection(unittest.TestCase):
         entries[TOP + 'plugin.json'] = json.dumps({'name': 'agentic-workflow-core', 'version': VERSION, 'x': 1}).encode()
         self.assertFlags(entries, 'eingebettetes Inventar')
 
-    def test_license_notices_and_dependency_required(self):
+    def test_license_notices_and_bundled_configurator_required(self):
         files = {k[len(TOP):]: v for k, v in archive_entries().items()}
         files['skills/core-shared/LICENSE'] = b'other'
         self.assertFlags(with_inventory(files), 'core-shared/LICENSE')
         files = {k[len(TOP):]: v for k, v in archive_entries().items() if 'gortex-serena-configurator' not in k}
-        self.assertFlags(with_inventory(files), 'externe Abhängigkeit')
+        self.assertFlags(with_inventory(files), 'Begleitskill-Datei fehlt')
+
+    def test_migrated_scripts_and_license_are_source_bound(self):
+        for rel in ('scripts/serena_safety.py', 'scripts/test_serena_safety.py', 'LICENSE'):
+            files = {k[len(TOP):]: v for k, v in archive_entries().items()}
+            key = 'skills/gortex-serena-configurator/' + rel
+            files[key] += b'changed'
+            self.assertFlags(with_inventory(files), 'Begleitskill-Datei verändert')
 
 
 class InstallationInspection(unittest.TestCase):
@@ -160,7 +165,7 @@ class InstallationInspection(unittest.TestCase):
 class ReportBinding(unittest.TestCase):
     def report(self, **change):
         report = {'schema': 'core-package-report/v1', 'verified': True, 'version': '0.3.0', 'source_commit': 'c' * 40,
-                  'source_clean': True, 'core_bundles': 22, 'archive': {'name': 'agentic-workflow-core-0.3.0.zip', 'sha256': 'd' * 64}}
+                  'source_clean': True, 'core_bundles': 22, 'bundled_skills': [release_guard.BUNDLED_SKILL], 'archive': {'name': 'agentic-workflow-core-0.3.0.zip', 'sha256': 'd' * 64}}
         report.update(change)
         return release_guard.package_report(report, '0.3.0', 'c' * 40, 'd' * 64)
 
@@ -169,7 +174,7 @@ class ReportBinding(unittest.TestCase):
 
     def test_wrongly_bound_or_unverified_package_blocks(self):
         for change in ({'verified': False}, {'version': '0.2.9'}, {'source_commit': 'e' * 40}, {'source_clean': False},
-                       {'core_bundles': 21}, {'archive': {'name': 'agentic-workflow-core-0.3.0.zip', 'sha256': 'f' * 64}},
+                       {'core_bundles': 21}, {'bundled_skills': []}, {'archive': {'name': 'agentic-workflow-core-0.3.0.zip', 'sha256': 'f' * 64}},
                        {'archive': {'name': 'other.zip', 'sha256': 'd' * 64}}, {'schema': 'x'}):
             with self.subTest(change=change):
                 self.assertNotEqual(self.report(**change), [])

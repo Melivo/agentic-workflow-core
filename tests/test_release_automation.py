@@ -211,7 +211,8 @@ class VersionCheck(unittest.TestCase):
             (release_guard.MANIFEST, release_guard.VERSION_FILE, release_guard.APM_MANIFEST)))
         self.assertEqual(violations, [])
         self.assertIn('version=' + version, result.stdout)
-        self.assertIn('#' + release_guard.EXTERNAL_COMMIT, result.stdout)
+        self.assertIn('bundled-skill=' + release_guard.BUNDLED_SKILL, result.stdout)
+        self.assertIn('external-apm-dependencies=0', result.stdout)
         self.assertEqual(json.loads(CURRENT_FILES[release_guard.MANIFEST]), {'.': version})
         self.assertEqual(self.run_check().returncode, 0)
 
@@ -227,9 +228,8 @@ class VersionCheck(unittest.TestCase):
             'version file newline': edit(release_guard.VERSION_FILE, '0.2.1\n', '0.2.1'),
             'apm version': edit(release_guard.APM_MANIFEST, 'version: "0.2.1"', 'version: "0.3.0"'),
             'consistent 1.0.0': lambda r: [edit(p, '0.2.1', '1.0.0')(r) for p in (release_guard.MANIFEST, release_guard.VERSION_FILE, release_guard.APM_MANIFEST)],
-            'unpinned dependency': edit(release_guard.APM_MANIFEST, '#' + release_guard.EXTERNAL_COMMIT, ''),
-            'other pin': edit(release_guard.APM_MANIFEST, release_guard.EXTERNAL_COMMIT, 'f' * 40),
-            'lock commit': edit(release_guard.APM_LOCK, 'resolved_commit: ' + release_guard.EXTERNAL_COMMIT, 'resolved_commit: ' + 'f' * 40),
+            'external dependency reintroduced': edit(release_guard.APM_MANIFEST, 'apm: []', 'apm: [Melivo/apm-package/skills/gortex-serena-configurator]'),
+            'locked external dependency': edit(release_guard.APM_LOCK, 'dependencies: []', 'dependencies: [{repo_url: melivo/apm-package}]'),
             'config bump': edit(release_guard.CONFIG, '"bump-patch-for-minor-pre-major": false', '"bump-patch-for-minor-pre-major": true'),
             'config release-as': edit(release_guard.CONFIG, '"release-type"', '"release-as": "1.0.0",\n  "release-type"'),
             'config baseline': edit(release_guard.CONFIG, BASE, OLDER),
@@ -273,7 +273,7 @@ def facts(**change):
         'sources': {'manifest': '{".":"0.3.0"}\n', 'version_file': '0.3.0\n', 'apm_yml': 'name: agentic-workflow-core\nversion: 0.3.0\n'},
         'check_runs': {sha: [{'id': 1, 'name': n, 'status': 'completed', 'conclusion': 'success'} for n in ('check', 'acceptance')] for sha in ('a' * 40, 'c' * 40)},
         'package': {'schema': 'core-package-report/v1', 'verified': True, 'version': '0.3.0', 'source_commit': 'c' * 40, 'source_clean': True,
-                    'core_bundles': 22, 'archive': archive},
+                    'core_bundles': 22, 'bundled_skills': [release_guard.BUNDLED_SKILL], 'archive': archive},
         'archive_sha256': 'd' * 64, 'tags': {'v0.2.1': BASE}, 'releases': [],
     }
     for key, value in change.items():

@@ -9,7 +9,7 @@ Agentic Workflow Core ist ein portables Microsoft-APM-Paket für OpenCode und Co
 - Gortex als primäre Repository-Code-Intelligence
 - projektbezogen konfiguriertes Serena nur als erlaubter Fallback
 
-Das Manifest deklariert ausschließlich die externe APM-Abhängigkeit `Melivo/apm-package/skills/gortex-serena-configurator`. `skill-creator` und `context-debloater` sind lokale Authoring-Werkzeuge und keine Paketabhängigkeiten.
+Der Skill [`gortex-serena-configurator`](.apm/skills/gortex-serena-configurator/SKILL.md) gehört zur kanonischen Paketquelle und wird einschließlich Skripten, Tests und MIT-Lizenz mitgeliefert. Das Manifest benötigt keine externe APM-Skillabhängigkeit und keinen Zugriff auf die private Sammlung. `skill-creator` und `context-debloater` sind lokale Authoring-Werkzeuge und keine Paketabhängigkeiten.
 
 ## Installation
 
@@ -34,7 +34,7 @@ APM schreibt die aufgelösten Versionen nach `apm.lock.yaml` und projiziert Skil
 
 ## Lokale Prüfungen und Paketabnahme
 
-Die wiederholbaren lokalen und CI-Einstiegspunkte verwenden `mise` 2026.10.6. `mise run tools:setup` lädt und installiert die geprüften Werkzeuge — Python 3.13.14, Node.js 22.23.3, PyYAML 6.0.3, APM 0.31.0, Release Please 17.11.2, actionlint 1.7.12 und ShellCheck 0.11.0 — ausschließlich in den isolierten Projektarbeitsbereich. Der Setup-Schritt verändert weder globale Werkzeuge noch die Quellen. Er muss vor den Prüfungen ausdrücklich gestartet werden; die Prüftasks installieren nichts automatisch.
+Die wiederholbaren lokalen und CI-Einstiegspunkte verwenden `mise` 2026.10.6. `mise run tools:setup` lädt und installiert die geprüften Werkzeuge — Python 3.13.14, Node.js 22.23.3, PyYAML 6.0.3, ruamel.yaml 0.19.1, APM 0.31.0, Release Please 17.11.2, actionlint 1.7.12 und ShellCheck 0.11.0 — ausschließlich in den isolierten Projektarbeitsbereich. Der Setup-Schritt verändert weder globale Werkzeuge noch die Quellen. Er muss vor den Prüfungen ausdrücklich gestartet werden; die Prüftasks installieren nichts automatisch.
 
 ```bash
 mise run tools:setup
@@ -77,11 +77,11 @@ Für eine ZIP-Datei ergänze beim Packen `--archive`. Bei der Installation eines
 
 Das Pack-Ziel ist in APM 0.31/0.33 zwar als deprecated markiert, hier aber absichtlich gesetzt: Ohne den Schalter kann APM `pack.target: minimal` schreiben und die Bundle-Installation mit `KeyError: minimal` abbrechen. Nutze in diesen Versionen das geprüfte Standardformat; `--format apm` ist kein Ersatz für das installierbare Plugin-Bundle.
 
-Der Abnahmecheck muss Installation, alle 22 Core-Bundles, auflösbare interne Methoden-/Vertragslinks und beide Lizenzhinweise prüfen. Ein erfolgreicher Pack- oder Install-Exitcode allein genügt nicht. Die Paket-MIT-Lizenz liegt dafür zusätzlich im mitgelieferten Bundle `core-shared/LICENSE`; Clairvoyance-Hinweise bleiben unter `core-architecture/THIRD_PARTY_NOTICES.md`. Native Agentendefinitionen werden bei `agent-skills` nicht installiert.
+Der Abnahmecheck muss Installation, alle 22 Core-Bundles und den vollständig quellgebundenen `gortex-serena-configurator`, auflösbare interne Methoden-/Vertragslinks und alle Lizenzhinweise prüfen. Ein erfolgreicher Pack- oder Install-Exitcode allein genügt nicht. Die Paket-MIT-Lizenz liegt dafür zusätzlich im mitgelieferten Bundle `core-shared/LICENSE`; Clairvoyance-Hinweise bleiben unter `core-architecture/THIRD_PARTY_NOTICES.md`. Native Agentendefinitionen werden bei `agent-skills` nicht installiert.
 
 ## Namens- und Paketvertrag
 
-Jedes paketeigene Skillbundle liegt unter `.apm/skills/core-<name>/`. Verzeichnisname und `name` im `SKILL.md`-Frontmatter müssen identisch sein. Das gemeinsame interne Bundle liegt unter `.apm/skills/core-shared/` und verwendet `name: core-shared`. Die externe Abhängigkeit `gortex-serena-configurator` wird weder kopiert noch in das `core-`-Schema umbenannt.
+Jedes Core-Skillbundle liegt unter `.apm/skills/core-<name>/`. Verzeichnisname und `name` im `SKILL.md`-Frontmatter müssen identisch sein. Das gemeinsame interne Bundle liegt unter `.apm/skills/core-shared/` und verwendet `name: core-shared`. Der migrierte Begleitskill liegt aus Kompatibilitätsgründen unverändert benannt unter `.apm/skills/gortex-serena-configurator/`; er ist kein zusätzlicher Kernworkflow. Seine englischen Originalanweisungen, Skripte und Tests werden bei der Migration quelltreu erhalten.
 
 In diesem Repository bleibt das gesamte Verzeichnis `.agentic-workflow/` lokal und wird von Git ignoriert, einschließlich Plänen und Laufartefakten. Laufstatus und Nachweise werden niemals in den bestätigten Plan zurückgeschrieben.
 

@@ -141,7 +141,7 @@ class Toolchain(unittest.TestCase):
     def test_pins_are_exact_and_consistent(self):
         tc = bootstrap.load_toolchain()
         self.assertEqual((tc['mise']['version'], tc['python']['version'], tc['node']['version'], tc['apm']['version'], tc['actionlint']['version'], tc['shellcheck']['version']), ('2026.10.6', '3.13.14', '22.23.3', '0.31.0', '1.7.12', '0.11.0'))
-        self.assertEqual(tc['python']['packages'], {'PyYAML': '6.0.3'})
+        self.assertEqual(tc['python']['packages'], {'PyYAML': '6.0.3', 'ruamel.yaml': '0.19.1'})
         self.assertEqual(tc['npm']['packages'], {'release-please': '17.11.2'})
         bootstrap.check_pins(tc)
 
