@@ -4,6 +4,13 @@
 
 - Ergänzt reproduzierbare lokale/CI-Prüfungen und eine standardmäßig deaktivierte, getrennte Release-PR- und Veröffentlichungskette. GitHub-Livebetrieb und App-Einrichtung sind nicht bestätigt.
 
+## [0.3.1](https://github.com/Melivo/agentic-workflow-core/compare/v0.3.0...v0.3.1) (2026-10-14)
+
+
+### Bug Fixes
+
+* **release:** allow publisher to complete pull request labels ([447f889](https://github.com/Melivo/agentic-workflow-core/commit/447f8899428660acdbc9b3c291871f65e2a9bb40))
+
 ## [0.3.0](https://github.com/Melivo/agentic-workflow-core/compare/v0.2.1...v0.3.0) (2026-10-14)
 
 
