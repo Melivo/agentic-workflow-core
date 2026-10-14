@@ -303,7 +303,7 @@ jobs:
           repositories: ${{ github.event.repository.name }}
           permission-contents: write
           permission-issues: write
-          permission-pull-requests: read
+          permission-pull-requests: write
           permission-checks: read
       - name: Publish (re-decides; ordered effects; never overwrites)
         timeout-minutes: 20

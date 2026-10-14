@@ -45,14 +45,15 @@ TRUSTED = {
     "github.event.workflow_run.head_branch == 'main'", 'github.event.workflow_run.head_repository.full_name == github.repository',
 }
 # Release jobs: activation gate, GITHUB_TOKEN rights, required identities and app-token rights (None = no app token).
-# publish_release.py reads pulls, contents and check runs and writes releases, tags (contents) and labels (issues).
+# publish_release.py reads pulls, contents and check runs and writes releases, tags (contents)
+# and PR labels (issues and pull-requests write).
 JOBS = {
     'release-pr': (PR_GATE, {'contents': 'read'}, {'APP_CLIENT_ID', 'RELEASE_BOT_LOGIN'},
                    {'contents': 'write', 'pull-requests': 'write', 'issues': 'write'}),
     'build': (PUB_GATE, {'contents': 'read', 'pull-requests': 'read', 'checks': 'read'},
               {'APP_CLIENT_ID', 'RELEASE_BOT_LOGIN', 'RELEASE_MAINTAINERS', 'RELEASE_REQUIRED_CHECKS'}, None),
     'publish': (PUB_GATE, {'contents': 'read'}, {'APP_CLIENT_ID', 'RELEASE_BOT_LOGIN', 'RELEASE_MAINTAINERS', 'RELEASE_REQUIRED_CHECKS'},
-                {'contents': 'write', 'issues': 'write', 'pull-requests': 'read', 'checks': 'read'}),
+                {'contents': 'write', 'issues': 'write', 'pull-requests': 'write', 'checks': 'read'}),
 }
 TOKEN_SECTION_MINUTES = 45
 PROVIDER_STEP_MINUTES = 20
@@ -316,6 +317,7 @@ RELEASE_MUTATIONS = {
     'write-all': ('permissions: {}\n', 'permissions: write-all\n', 'permissions'),
     'build may write': ('      contents: read\n      pull-requests: read\n', '      contents: write\n      pull-requests: read\n', 'permissions'),
     'publish job write token': ('    permissions:\n      contents: read\n    env:\n', '    permissions:\n      contents: write\n    env:\n', 'permissions'),
+    'publisher PR labels read-only': ('          permission-pull-requests: write\n          permission-checks: read\n', '          permission-pull-requests: read\n          permission-checks: read\n', 'token'),
     'token not revoked': ('          permission-checks: read\n', '          permission-checks: read\n          skip-token-revoke: true\n', 'token'),
     'token for all repos': ('          repositories: ${{ github.event.repository.name }}\n', '', 'token', 2),
     'token too broad': ('          permission-issues: write\n', '          permission-issues: write\n          permission-administration: write\n', 'token'),
