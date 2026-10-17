@@ -1,6 +1,6 @@
 # Shared local and CI entry points. Setup installs only into the isolated
 # workspace (AWC_CI_WORKSPACE); every other task verifies and never installs.
-min_version = "2026.10.6"
+min_version = "2026.10.11"
 
 [tasks."tools:setup"]
 description = "Install pinned, hash-verified tools into the isolated workspace"

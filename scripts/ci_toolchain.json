@@ -2,7 +2,7 @@
   "schema": "ci-toolchain/v1",
   "platform": "linux-x64",
   "mise": {
-    "version": "2026.10.6"
+    "version": "2026.10.11"
   },
   "python": {
     "version": "3.13.14",

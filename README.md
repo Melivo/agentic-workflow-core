@@ -145,7 +145,7 @@ Core-Skills liegen unter `.apm/skills/core-<name>/`; der quelltreu migrierte Beg
 
 ### Lokale Prüfungen und Paketabnahme
 
-Die lokalen und CI-Aufgaben verwenden `mise` 2026.10.6 und Python 3.13.14. Weitere Versionen und Integritätswerte: [ci_toolchain.json](scripts/ci_toolchain.json), [requirements-ci.txt](scripts/requirements-ci.txt) und [Habit-Testtoolchain](scripts/habit-ci/package.json).
+Die lokalen und CI-Aufgaben verwenden `mise` 2026.10.11 und Python 3.13.14. Weitere Versionen und Integritätswerte: [ci_toolchain.json](scripts/ci_toolchain.json), [requirements-ci.txt](scripts/requirements-ci.txt) und [Habit-Testtoolchain](scripts/habit-ci/package.json).
 
 ```bash
 # Einmaliges, ausdrücklich freigegebenes Setup im isolierten Arbeitsbereich

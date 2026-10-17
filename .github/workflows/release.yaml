@@ -73,8 +73,8 @@ jobs:
           check-latest: false
       - uses: jdx/mise-action@2d8d4cafcbd33be2ea37d2b6f5ad595363d1f1ca # v5.1.1
         with:
-          version: '2026.10.6'
-          sha256: '3f44343eebc7e0d6623bcea46e304864f02dff648edd75c82871b53cc697b366'
+          version: '2026.10.11'
+          sha256: 'f9612efcddda0ae55b62d3b6f82a6c860d5b54ebee0807d4f1a1d578055e1607'
           mise_dir: ${{ runner.temp }}/mise
           install: false
           cache: false
@@ -180,8 +180,8 @@ jobs:
       - if: steps.release-pr.outputs.pr != ''
         uses: jdx/mise-action@2d8d4cafcbd33be2ea37d2b6f5ad595363d1f1ca # v5.1.1
         with:
-          version: '2026.10.6'
-          sha256: '3f44343eebc7e0d6623bcea46e304864f02dff648edd75c82871b53cc697b366'
+          version: '2026.10.11'
+          sha256: 'f9612efcddda0ae55b62d3b6f82a6c860d5b54ebee0807d4f1a1d578055e1607'
           mise_dir: ${{ runner.temp }}/mise
           install: false
           cache: false
@@ -267,8 +267,8 @@ jobs:
           check-latest: false
       - uses: jdx/mise-action@2d8d4cafcbd33be2ea37d2b6f5ad595363d1f1ca # v5.1.1
         with:
-          version: '2026.10.6'
-          sha256: '3f44343eebc7e0d6623bcea46e304864f02dff648edd75c82871b53cc697b366'
+          version: '2026.10.11'
+          sha256: 'f9612efcddda0ae55b62d3b6f82a6c860d5b54ebee0807d4f1a1d578055e1607'
           mise_dir: ${{ runner.temp }}/mise
           install: false
           cache: false

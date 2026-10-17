@@ -202,7 +202,7 @@ class FreshFixture(unittest.TestCase):
 class Toolchain(unittest.TestCase):
     def test_pins_are_exact_and_consistent(self):
         tc = bootstrap.load_toolchain()
-        self.assertEqual((tc['mise']['version'], tc['python']['version'], tc['node']['version'], tc['apm']['version'], tc['actionlint']['version'], tc['shellcheck']['version']), ('2026.10.6', '3.13.14', '22.23.3', '0.31.0', '1.7.12', '0.11.0'))
+        self.assertEqual((tc['mise']['version'], tc['python']['version'], tc['node']['version'], tc['apm']['version'], tc['actionlint']['version'], tc['shellcheck']['version']), ('2026.10.11', '3.13.14', '22.23.3', '0.31.0', '1.7.12', '0.11.0'))
         self.assertEqual(tc['python']['packages'], {'PyYAML': '6.0.3', 'ruamel.yaml': '0.19.1'})
         self.assertEqual(tc['npm']['packages'], {'release-please': '17.11.2'})
         bootstrap.check_pins(tc)
@@ -233,9 +233,9 @@ class Toolchain(unittest.TestCase):
 
     def test_wrong_runtime_versions_fail_without_substitution(self):
         tc = bootstrap.load_toolchain()
-        with patch.object(bootstrap.subprocess, 'run', return_value=subprocess.CompletedProcess([], 0, '2026.10.7 linux-x64\n', '')), self.assertRaisesRegex(bootstrap.ToolchainError, 'mise 2026.10.6'):
+        with patch.object(bootstrap.subprocess, 'run', return_value=subprocess.CompletedProcess([], 0, '2026.10.7 linux-x64\n', '')), self.assertRaisesRegex(bootstrap.ToolchainError, 'mise 2026.10.11'):
             bootstrap.check_runtime(tc)
-        with patch.object(bootstrap.subprocess, 'run', return_value=subprocess.CompletedProcess([], 0, '2026.10.6 linux-x64\n', '')), patch.object(bootstrap.sys, 'version_info', (3, 13, 13)), self.assertRaisesRegex(bootstrap.ToolchainError, 'keine Ersatzversion'):
+        with patch.object(bootstrap.subprocess, 'run', return_value=subprocess.CompletedProcess([], 0, '2026.10.11 linux-x64\n', '')), patch.object(bootstrap.sys, 'version_info', (3, 13, 13)), self.assertRaisesRegex(bootstrap.ToolchainError, 'keine Ersatzversion'):
             bootstrap.check_runtime(tc)
 
     def test_workspace_must_be_isolated(self):
@@ -290,7 +290,7 @@ class MiseTasks(unittest.TestCase):
 
     def test_required_tasks_and_no_auto_install(self):
         self.assertEqual(set(self.tasks), {'tools:setup', 'check', 'version:check', 'release:test', 'workflows:check', 'docs:check', 'acceptance'})
-        self.assertEqual(self.config['min_version'], '2026.10.6')
+        self.assertEqual(self.config['min_version'], '2026.10.11')
         self.assertIs(self.config['settings']['auto_install'], False)
         self.assertNotIn('tools', self.config)
 

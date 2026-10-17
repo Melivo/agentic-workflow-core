@@ -35,7 +35,7 @@ PINS = {
     'actions/download-artifact': '9000827ccba6bdab643e8b6fd33ac0654aef8333',  # v8.0.2
 }
 # Release asset digest of mise-v<version>-linux-x64 (the binary mise-action hashes).
-MISE_SHA256 = '3f44343eebc7e0d6623bcea46e304864f02dff648edd75c82871b53cc697b366'
+MISE_SHA256 = 'f9612efcddda0ae55b62d3b6f82a6c860d5b54ebee0807d4f1a1d578055e1607'
 TOKEN_ACTION = 'actions/create-github-app-token'
 HEAD_SHA = '${{ github.event.workflow_run.head_sha }}'
 PR_GATE = "vars.RELEASE_PR_AUTOMATION_ENABLED == 'true'"
@@ -294,7 +294,7 @@ CI_MUTATIONS = {
     'action tag': ('actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1', 'actions/checkout@v7', 'pin'),
     'foreign sha': ('jdx/mise-action@2d8d4cafcbd33be2ea37d2b6f5ad595363d1f1ca', 'jdx/mise-action@2d8d4cafcbd33be2ea37d2b6f5ad595363d1f1cb', 'pin'),
     'python minor only': ("python-version: '3.13.14'", "python-version: '3.13'", 'toolchain'),
-    'mise unpinned': ("version: '2026.10.6'", "version: 'latest'", 'toolchain'),
+    'mise unpinned': ("version: '2026.10.11'", "version: 'latest'", 'toolchain'),
     'mise cache': ('cache: false', 'cache: true', 'toolchain'),
     'kept credentials': ('persist-credentials: false', 'persist-credentials: true', 'credentials'),
     'weaker task': ('run: mise run acceptance', 'run: mise run check', 'tasks'),
