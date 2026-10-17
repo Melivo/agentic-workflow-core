@@ -3,7 +3,7 @@
 **Status:** Final und verbindlich
 **Geltungsbereich:** öffentliches Microsoft-APM-Paket und dessen Workflow-Werkbank
 **Kanonische Paketquelle:** `.apm/`
-**Kernablauf:** `core-brainstorm? → core-plan → frischer Kontext → core-execute ↔ core-review`
+**Kernablauf:** `core-brainstorm? → core-plan → core-review (Planreview, Text) → Nutzerbestätigung → core-execute ↔ core-review (Umsetzungsreview)`
 
 ## 1. Zweck und Autorität
 
@@ -16,7 +16,7 @@ In diesem Repository bezeichnet `DESIGN.md` das Systemdesign der Workflow-Werkba
 Das Paket soll:
 
 - wenige klar abgegrenzte Workflows bereitstellen, die ohne Parallelarchitektur ineinandergreifen,
-- Planung, Ausführung und unabhängiges Review durch frische Kontexte trennen,
+- Planung, Planreview vor Nutzerbestätigung und read-only Umsetzungsreview nach Execute durch frische Kontexte trennen,
 - Fachagenten auf kleine, überprüfbare Aufgaben begrenzen,
 - Gortex als primäre Code-Intelligence verwenden und passende Gortex-Skills bedarfsgerecht einbinden,
 - Context7, YouTube Transcript und Serena nach klaren Recherchegrenzen einsetzen,
@@ -51,7 +51,7 @@ Nicht Teil des Kerns sind:
 7. **Freshness vor Erinnerung.** Aktueller Code und bestätigte Artefakte schlagen semantisches Memory.
 8. **Verifikation ist beobachtbar.** Exitcode, Behauptung oder Agentenselbstauskunft allein reichen nicht.
 9. **Parallelität ist eine Optimierung.** Bei unklarer Isolation oder Abhängigkeit wird serialisiert.
-10. **Lean bedeutet keine fehlenden Grenzen.** Kleine Verträge ersetzen große Orchestratoren.
+10. **Lean bedeutet keine fehlenden Grenzen.** Kleine Verträge ersetzen große Orchestratoren. Geplant und umgesetzt wird nur die kleinste hinreichende Lösung für das ursprüngliche Ziel; der kumulative Scope zählt, nicht nur der direkte Vorgänger. Ein erlaubter Dateipfad ist keine Freigabe für beliebige zusätzliche Funktionen.
 
 ## 5. Gesamtmodell
 
@@ -76,9 +76,9 @@ Nach bestandenem Review:
 | ID | Verantwortung | Mutiert Produktcode? | Primärer Output |
 |---|---|---:|---|
 | `core-brainstorm` | Absicht, Scope und Lösungsrichtung klären | nein | kompakter Decision-Handoff |
-| `core-plan` | Repositoryanalyse, Research, Entscheidungen und Taskgraph | nein | bestätigter `plan/v1` |
+| `core-plan` | Repositoryanalyse, Research, Entscheidungen, Taskgraph und eng begrenzter Planreview-Dispatch an `qa-reviewer`/`core-review` | nein | bestätigungsfähiger `plan/v1` |
 | `core-execute` | bestätigten Taskgraph ausführen und integrieren | ja | Run-Artefakte und Review-Handoff |
-| `core-review` | unabhängige Prüfung und Urteil | nein | `review/v1` mit Findings oder `pass` |
+| `core-review` | unabhängiges Planreview vor Bestätigung und read-only Umsetzungsreview nach Execute | nein | Texturteil im Planreview; `review/v1` im Umsetzungsreview |
 
 ### Unterstützende Skills
 
@@ -203,8 +203,9 @@ Verbindliche Übergänge:
 
 ```text
 core-brainstorm → core-plan
-core-plan → core-execute
-core-execute → core-review
+core-plan → core-review (Planreview; Textantwort vor Bestätigung)
+core-plan → core-execute (erst nach Nutzerbestätigung)
+core-execute → core-review (Umsetzungsreview; review/v1)
 core-review.pass → completed
 core-review.changes_requested → core-execute
 core-review.material_scope_change → core-plan
@@ -286,7 +287,7 @@ Standardoutput ist ein kompakter Decision-Handoff. Ein separates dauerhaftes Dok
 - Akzeptanzkriterien und Checks,
 - statische Validierung und Nutzerbestätigung.
 
-`core-plan` implementiert nicht und verwaltet keinen Laufzustand.
+`core-plan` implementiert nicht und verwaltet keinen Laufzustand. Ausschließlich für das Planreview vor Nutzerbestätigung darf es den `qa-reviewer` mit `core-review` in frischem Kontext beauftragen; dieser enge QA-Dispatch ist keine allgemeine Agentenkoordination.
 
 ### Research-Hierarchie
 
@@ -336,6 +337,7 @@ tasks:
 
 Regeln:
 
+- Plan und Tasks binden jede Arbeit an ein ursprüngliches Zielkriterium samt Notwendigkeit; Folge- und Ersatzpläne prüfen den kumulativen Scope gegen das Originalziel, nicht nur den direkten Vorgänger. Ein erlaubter Pfad ist keine Funktionsfreigabe.
 - Bei Coding-Tasks wendet `core-plan` S00 bereits auf Lösungswahl und Taskgrenzen an, auch wenn kein Architektur-Trigger vorliegt.
 - `context_paths` enthalten für Coding-Tasks die kanonische S00-Referenz und alle weiteren exakt benötigten Lesequellen; `scope` ist der erlaubte Änderungsscope.
 - Akzeptanzkriterien und Checks decken anwendbare S00-relevante Ergebnisse konkret und überprüfbar ab, ohne ein neues Planfeld oder einen pauschalen Architektur-Vollscan.
@@ -427,17 +429,14 @@ Exitcode 0 allein beweist keine fachliche Erfüllung. Pflichtchecks ohne aktuell
 
 ## 12. Workflow: `core-review`
 
-### Verantwortung
+### Verantwortung und zwei Modi
 
-`core-review` startet in einem frischen Kontext und besitzt das unabhängige Urteil. Es liest:
+`core-review` urteilt unabhängig und read-only in frischem Kontext. Es hat zwei getrennte Modi:
 
-- bestätigten Plan,
-- aktuellen Gesamtdiff,
-- kompaktes Handoff,
-- aktuelle Task- und Checkevidenz,
-- bekannte Einschränkungen.
+- **Planreview:** Nach vollständigem Entwurf und vor Nutzerbestätigung. Es prüft Entwurf und Originalauftrag und gibt `pass`, `changes_requested` oder `blocked` als kurze Textantwort mit konkreten Stellen aus. Es entsteht kein Run und kein `review/v1`; pass bedeutet nur bestätigungsfähig. Materielle Entwurfsänderungen werden erneut geprüft.
+- **Umsetzungsreview:** Nach `core-execute` prüft es die integrierte Gesamtänderung anhand des bestätigten Plans, aktuellen Gesamtdiffs, kompakten Handoffs, Task-/Checkevidenz und Einschränkungen. Dieser Modus verwendet das bestehende `review/v1`.
 
-Es liest nicht die vollständige Implementierungsdiskussion und implementiert keine Korrekturen.
+In keinem Modus liest es die vollständige Implementierungsdiskussion oder implementiert Korrekturen. Im Umsetzungsreview empfiehlt es bei anhand von Originalziel, Kriterien, Nichtzielen und Diff belegtem Bloat ausdrücklich das Verwerfen beziehungsweise den kleinsten sicheren Rückbau statt zusätzlichen Ausbau. Unsichere Notwendigkeit wird als Evidenzlücke behandelt; notwendige Schutzmaßnahmen sowie fremde Änderungen bleiben erhalten. Die Empfehlung ist keine Mutationserlaubnis.
 
 ### Prüfreihenfolge
 
@@ -482,7 +481,7 @@ findings:
 
 ## 13. Fachagentenmodell
 
-Workflows besitzen den Lebenszyklus; Fachagenten besitzen Rollen. **Während der Ausführung eines Plans darf kein Fachagent eigene Subagenten starten; jeder weitere Dispatch bleibt ausschließlich bei `core-execute`.** Agenten erweitern keinen Scope.
+Workflows besitzen den Lebenszyklus; Fachagenten besitzen Rollen. **Während der Ausführung eines Plans darf kein Fachagent eigene Subagenten starten; jeder Dispatch bleibt ausschließlich bei `core-execute`.** Einzige Ausnahme außerhalb der Ausführung: `core-plan` darf ausschließlich für das Planreview `qa-reviewer`/`core-review` in frischem Kontext beauftragen. Agenten erweitern keinen Scope.
 
 | Agent | Primäre Verwendung | Grenze |
 |---|---|---|
@@ -499,7 +498,7 @@ Workflows besitzen den Lebenszyklus; Fachagenten besitzen Rollen. **Während der
 | `research-explorer` | fokussierte read-only Evidenzsynthese | keine Repositorymutation |
 | `tf-infra-engineer` | Terraform, IAM, Netzwerk und State | kein Apply oder Destroy ohne Autorisierung |
 
-Fachmethodik liegt in Skills und bedingt geladenen Referenzen und wird bei Bedarf inline verwendet; sie ist kein Agenten-Dispatch. Während eines Plans startet ausschließlich `core-execute` Fachagenten, je einen registrierten Agenten pro Task; kein Agent startet weitere Agenten. Agentendefinitionen bleiben kurz und verweisen auf ihren Eigentümer-Skill. Die QA-Methode liegt im `core-review`-Skill; ein paralleler öffentlicher `qa`-Workflow oder zweiter QA-Lebenszyklus entfällt.
+Fachmethodik liegt in Skills und bedingt geladenen Referenzen und wird bei Bedarf inline verwendet; sie ist kein Agenten-Dispatch. Während der Ausführung startet ausschließlich `core-execute` Fachagenten, je einen registrierten Agenten pro Task; kein Agent startet weitere Agenten. Die einzige enge Ausnahme außerhalb der Ausführung: `core-plan` darf für das Planreview einen `qa-reviewer` mit `core-review` in frischem Kontext beauftragen. Agentendefinitionen bleiben kurz und verweisen auf ihren Eigentümer-Skill. Die QA-Methode liegt im `core-review`-Skill; ein paralleler öffentlicher `qa`-Workflow oder zweiter QA-Lebenszyklus entfällt.
 
 ## 14. Tool- und MCP-Architektur
 

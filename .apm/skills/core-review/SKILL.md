@@ -1,11 +1,11 @@
 ---
 name: core-review
-description: Prüft die integrierte Gesamtänderung unabhängig in frischem Kontext, wählt Qualitätsprüfungen risikobasiert und erzeugt ein evidenzbasiertes review/v1 mit pass, changes_requested oder blocked. Verwenden nach core-execute; nicht für Implementierung, Fixes oder Planung.
+description: Prüft unabhängig in frischem Kontext entweder einen vollständigen Planentwurf vor der Nutzerbestätigung (Planreview, Textergebnis) oder die integrierte Gesamtänderung nach core-execute (Umsetzungsreview, review/v1) mit pass, changes_requested oder blocked. Verwenden auf Anforderung von core-plan oder nach core-execute; nicht für Implementierung, Fixes, Planung oder Nutzerfreigabe.
 ---
 
 # Core Review
 
-`core-review` ist der unabhängige, read-only Prüfworkflow nach `core-execute`. Die QA-Methode gehört intern dem `qa-reviewer`; sie bildet keinen zweiten öffentlichen QA-Lebenszyklus. `core-review` implementiert **keine Fixes**, erweitert keinen Scope, steuert keine Reparaturschleife und startet keine Subagenten.
+`core-review` ist der unabhängige, read-only Prüfworkflow mit zwei getrennten Modi: Planreview vor der Nutzerbestätigung und Umsetzungsreview nach `core-execute`. Beide messen zuerst an der [Zielbindung](../core-shared/references/workflow-contract.md#zielbindung-und-funktionaler-scope), danach an technischer Korrektheit. Die QA-Methode gehört intern dem `qa-reviewer`; sie bildet keinen zweiten öffentlichen QA-Lebenszyklus. `core-review` implementiert **keine Fixes**, erweitert keinen Scope, steuert keine Reparaturschleife und startet keine Subagenten.
 
 ## Situative Designmethoden
 
@@ -21,7 +21,10 @@ Wenn Habit-Feedback-Ausgaben Teil der geprüften Änderung sind, lies ergänzend
 
 ## Aktivierung und Eingaben
 
-Aktiviere den Skill nur für einen konkreten Run, dessen integrierter Stand durch `core-execute` zur Prüfung übergeben wurde. Beginne in einem frischen Kontext und lade ausschließlich:
+Beginne immer in frischem Kontext und bestimme genau einen Modus:
+
+- **Planreview:** für einen vollständigen, noch unbestätigten Entwurf, den `core-plan` oder eine ausdrückliche Übergabe vorlegt. Lade nur die im [Planreview](../core-shared/references/workflow-contract.md#planreview) genannten Eingaben und folge dem [Planreview-Modus](#planreview-modus).
+- **Umsetzungsreview:** nur für einen konkreten Run, dessen integrierter Stand durch `core-execute` zur Prüfung übergeben wurde. Lade ausschließlich:
 
 - den exakten bestätigten Plan mit `plan/v1`,
 - den aktuellen Gesamtdiff und Repositorystand,
@@ -30,7 +33,7 @@ Aktiviere den Skill nur für einen konkreten Run, dessen integrierter Stand durc
 - bekannte Einschränkungen und blockierte Prüfungen,
 - relevante Projektanweisungen und lokale Verträge.
 
-Lies nicht die vollständige Implementierungsdiskussion, frühere Chatverläufe, vermutete Defekte oder vorgeschlagene Fixes. Sie würden das unabhängige Urteil vorprägen und ersetzen keine aktuelle Evidenz. Fehlt ein erforderlicher Pfad oder ist die Evidenz durch Drift veraltet, fordere das aktuelle Artefakt an oder urteile `blocked`.
+Lies in keinem Modus die vollständige Implementierungsdiskussion, frühere Chatverläufe, vermutete Defekte, vorgeschlagene Fixes oder erwartete Urteile. Sie würden das unabhängige Urteil vorprägen und ersetzen keine aktuelle Evidenz. Fehlt ein erforderlicher Pfad oder ist die Evidenz durch Drift veraltet, fordere das aktuelle Artefakt an oder urteile `blocked`.
 
 ## Verbindliche Verträge
 
@@ -43,9 +46,15 @@ Lade vor der Prüfung:
 - die [Reviewvorlage](../core-shared/assets/review-finding.yaml) als alleinige Feld- und Schweregradvorlage,
 - den [Workflowkatalog](../core-shared/assets/workflow-catalog.yaml) nur zur Validierung von Übergängen und bekannten IDs.
 
-Schreibe das kanonische Ergebnis nach `.agentic-workflow/runs/<run-id>/review.yaml`. Ergänze `review/v1` weder um eigene Statusfelder noch um ein alternatives Severity- oder Findingformat.
+Schreibe das kanonische Ergebnis des Umsetzungsreviews nach `.agentic-workflow/runs/<run-id>/review.yaml`. Ergänze `review/v1` weder um eigene Statusfelder noch um ein alternatives Severity- oder Findingformat.
 
-## Workflow: unabhängige QA-Methode
+## Planreview-Modus
+
+1. Prüfe, dass Entwurf und Originalauftrag vorliegen und zusammengehören. Fehlende Eingaben, widersprüchliche Übergaben oder ein vorgegebenes Urteil ergeben `blocked` mit der Bitte um eine korrigierte Übergabe.
+2. Prüfe die Task-Kriterium-Zuordnung samt Notwendigkeit, den Vorrang bestehender Lösungen, Standards und offizieller Dokumentation, die kleinste hinreichende Lösung, funktionalen und kumulativen Scope, übernommene Voraussetzungen, spekulative Erweiterungen, Ausführbarkeit, angemessene Checks und den Vereinfachungsstopp. Empfiehl, unnötige geplante Arbeit vor ihrer Umsetzung zu streichen.
+3. Antworte knapp als Text mit `pass`, `changes_requested` oder `blocked` und konkreten Planstellen samt Gründen. `pass` heißt bestätigungsfähig, nicht bestätigt. Schreibe keine Datei, keinen Run und kein `review.yaml`.
+
+## Workflow: Umsetzungsreview als unabhängige QA-Methode
 
 ### 1. Prüfgrundlage validieren
 
@@ -79,9 +88,11 @@ Die Tabelle ist eine Entscheidungshilfe, kein pauschaler Toolkatalog. Führe wed
 3. Ergänze eng begrenzte statische Analysen, Tests, Security-, Performance- oder Accessibility-Prüfungen nur, wenn die Risikohypothese sie rechtfertigt.
 4. Behandle Build, Compile, Bundle, Package, Installation, SCM, Deployment und produktive oder destruktive Aktionen ohne ausdrückliche Autorisierung als `blocked`; ersetze sie nicht stillschweigend durch schwächere Checks.
 5. Dokumentiere jeden Provider-Fallback und die verbleibende Evidenzlücke.
-6. Prüfe den Diff anschließend manuell in der Reihenfolge: Ziel-, Scope- und Akzeptanzerfüllung; funktionale Korrektheit; Security und Datenrisiken; Tests und Regressionen; Architektur; danach Performance, Accessibility und Dokumentation nach Relevanz.
+6. Prüfe den Diff anschließend manuell in der Reihenfolge: Originalziel und Notwendigkeit der Gesamtänderung, auch ungeplante Rollen, Runner, Harnesses, Snapshot- oder Freigabeprotokolle und neue Voraussetzungen innerhalb erlaubter Dateien; Scope- und Akzeptanzerfüllung; funktionale Korrektheit; Security und Datenrisiken; Tests und Regressionen; Architektur; danach Performance, Accessibility und Dokumentation nach Relevanz.
 
 Werkzeuge liefern Hinweise. Melde einen Defekt erst, wenn Quellstelle, Auslöseweg und Auswirkung mit aktueller Evidenz bestätigt sind. Unbestätigte Hypothesen bleiben Prüf- oder Evidenzlücken und werden nicht als Finding ausgegeben.
+
+Prüfe API-, Versions- und Vertragsannahmen unabhängig anhand aktueller maßgeblicher Quellen, wenn sie für das Urteil wesentlich sind und lokale Evidenz sie nicht entscheidet. Nutze dafür inline die kanonische [Core Research](../core-research/SKILL.md); sie bestimmt Recherchefrage, zulässige Quellen und Abbruch, nicht aber das Reviewurteil. Dokumentationsaussagen oder Researchbefunde allein begründen kein Finding: bestätige es anhand des aktuellen Diffs, lokalen Vertrags, Tests oder anderer lokaler Evidenz. Bleibt eine wesentliche Annahme unaufgelöst, dokumentiere die Evidenzlücke und urteile `blocked`, statt sie als Defekt auszugeben.
 
 ### 4. Findings formulieren
 
@@ -98,10 +109,12 @@ Jedes Finding folgt exakt der Shared-Reviewvorlage und enthält:
 
 Bilde einen bestätigten CRITICAL-Befund als `blocking` ab; HIGH bleibt `high`. Die Severity beschreibt die Auswirkung, nicht die Unsicherheit der Evidenz. Melde keine False Positives, Stilpräferenzen ohne Vertragsbezug oder bloße Toolwarnungen. `expected_resolution` darf beispielhaften Remediation-Code enthalten, aber `core-review` führt ihn nicht aus und verändert keinen Produktcode.
 
+**Bloat verwerfen statt ausbauen:** Ist implementierter Bloat anhand von Originalauftrag, Kriterien, Nichtzielen und tatsächlichem Diff belegt, empfiehl ausdrücklich dessen Verwerfen beziehungsweise gezielten Rückbau, nicht zusätzliche Tests, Abstraktionen oder Härtungen. Das Finding nennt Funktion und Stelle, den fehlenden oder widersprüchlichen Zielbezug und die Auswirkung; `expected_resolution` beschreibt den kleinsten sicheren Rückbau einschließlich nur dazugehöriger Tests, Konfiguration und Dokumentation, `verification` die danach weiterhin erfüllten Originalkriterien. Dateigröße, Eigenentwicklung oder fehlender direkter Nutzerdialog allein beweisen keinen Bloat; ist die Notwendigkeit unsicher, benenne die Evidenzlücke statt zum Verwerfen aufzufordern. Notwendige Schutzmaßnahmen, Daten und Secrets bleiben erhalten; die Empfehlung autorisiert weder Git-Reset noch das Verwerfen fremder Änderungen. Ein früheres Planreview-pass schützt implementierten Bloat nicht.
+
 ### 5. Urteil und Routing festlegen
 
 - `pass`: Scope, Akzeptanzkriterien und relevante Risiken des Plans sind auf dem aktuellen Stand belegt; `findings: []`. Bei Etappenplanung bedeutet das nur Run-/Plan-pass. Der nächste Übergang ist die separate Milestone-Prüfung der gepinnten Definition; ausschließlich `core-milestone` aktualisiert danach Abschlussreferenzen im Index.
-- `changes_requested`: Mindestens ein bestätigtes Finding ist innerhalb des bestätigten Ziels und Scopes durch `core-execute` behebbar.
+- `changes_requested`: Mindestens ein bestätigtes Finding, auch ein Bloat-Rückbau, ist innerhalb des bestätigten Ziels und Scopes durch `core-execute` behebbar.
 - `blocked`: Eine materielle Eingabe, Autorisierung, Fähigkeit oder Evidenzlücke verhindert ein belastbares Urteil oder eine zulässige Behebung.
 
 Verändert die erforderliche Lösung Ziel, Scope, Architektur oder Akzeptanzkriterien materiell, verwende kein neues Verdict und kein zusätzliches Schemafeld: urteile `blocked`, beschreibe die reproduzierbare Lücke im bestehenden Findingformat und route den nächsten zulässigen Übergang zu `core-plan`. Innerhalb des bestätigten Scopes geht `changes_requested` an `core-execute`; `core-review` weist keinen Reparaturagenten zu und zählt keine Reparaturrunden selbst.
@@ -112,7 +125,7 @@ Jede neue Reviewrunde beginnt erneut in frischem Kontext aus aktuellen Artefakte
 
 ## Abschluss
 
-Ein Review ist abgeschlossen, wenn `.agentic-workflow/runs/<run-id>/review.yaml` dem unveränderten `review/v1` entspricht, jedes Finding reproduzierbar ist, das Urteil aus aktueller Evidenz folgt und der nächste Übergang eindeutig ist. Berichte zusätzlich knapp:
+Ein Planreview ist mit seiner Textantwort abgeschlossen. Ein Umsetzungsreview ist abgeschlossen, wenn `.agentic-workflow/runs/<run-id>/review.yaml` dem unveränderten `review/v1` entspricht, jedes Finding reproduzierbar ist, das Urteil aus aktueller Evidenz folgt und der nächste Übergang eindeutig ist. Berichte zusätzlich knapp:
 
 - geprüfte Risiken und bewusst nicht aktivierte Prüfdimensionen,
 - ausgeführte und blockierte Checks mit Grund,

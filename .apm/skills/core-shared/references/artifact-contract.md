@@ -49,7 +49,7 @@ tasks:
         pass: "Exitcode 0 und erwartete fachliche Beobachtung"
 ```
 
-Jeder Task hat genau einen registrierten Agenten. `context_paths` und `scope` bleiben getrennt; leeres `scope` bedeutet read-only. Abhängigkeiten sind der einzige Ordnungsmechanismus. Jedes Akzeptanzkriterium wird durch mindestens einen Check gedeckt. Materielle Unsicherheit verhindert `Confirmed`.
+Jeder Task hat genau einen registrierten Agenten. `context_paths` und `scope` bleiben getrennt; leeres `scope` bedeutet read-only. Abhängigkeiten sind der einzige Ordnungsmechanismus. Jedes Akzeptanzkriterium wird durch mindestens einen Check gedeckt. Materielle Unsicherheit verhindert `Confirmed`. Task-Kriterium-Zuordnung und der Abschnitt `## Planreview` stehen im Markdowntext um den Graphen; das Kernformat erhält dafür keine Felder, und ein Planreview erzeugt weder Run noch `review/v1` ([Planreview](workflow-contract.md#planreview)).
 
 ## Runzustand
 
@@ -87,7 +87,7 @@ Das Handoff verwendet [`../assets/handoff.md`](../assets/handoff.md). Bei Etappe
 
 ## `review/v1`
 
-Das Review verwendet [`../assets/review-finding.yaml`](../assets/review-finding.yaml). Ein Finding enthält reproduzierbare Evidenz, Owner, Ort, Auswirkung, erwartete Behebung und Wiederprüfung. `task_id` wird gesetzt, wenn eine eindeutige Zuordnung möglich ist; ein Querschnittsfinding erhält mindestens einen klaren `owner` und Bereich.
+Das Umsetzungsreview verwendet [`../assets/review-finding.yaml`](../assets/review-finding.yaml). Ein Finding enthält reproduzierbare Evidenz, Owner, Ort, Auswirkung, erwartete Behebung und Wiederprüfung. `task_id` wird gesetzt, wenn eine eindeutige Zuordnung möglich ist; ein Querschnittsfinding erhält mindestens einen klaren `owner` und Bereich. Ein Bloat-Finding nutzt dieselben Felder: `expected_resolution` nennt den kleinsten sicheren Rückbau, `verification` die danach weiterhin erfüllten Originalkriterien.
 
 Die Schweregrade bleiben `blocking | high | medium | low`; ein CRITICAL-Befund wird als `blocking` abgebildet, HIGH bleibt `high`. Materielle Änderungen an Ziel, Scope, Architektur oder Akzeptanz werden an `core-plan` zurückgegeben und nicht durch zusätzliche Schemafelder verschleiert.
 

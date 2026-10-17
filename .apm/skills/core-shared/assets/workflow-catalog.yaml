@@ -25,7 +25,7 @@ workflows:
     fresh_context_on_entry: true
   - id: core-plan
     predecessors: [core-brainstorm, core-milestone, core-review]
-    successors: [core-execute]
+    successors: [core-review, core-execute]
     input_schemas: [text]
     output_schemas: [plan/v1]
     mutation_class: plan-artifact-write
@@ -39,10 +39,10 @@ workflows:
     fresh_context_on_entry: true
     max_automatic_review_repair_rounds: 2
   - id: core-review
-    predecessors: [core-execute]
+    predecessors: [core-plan, core-execute]
     successors: [core-execute, core-plan, completed]
-    input_schemas: [plan/v1, task-result/v1]
-    output_schemas: [review/v1]
+    input_schemas: [text, plan/v1, task-result/v1]
+    output_schemas: [text, review/v1]
     mutation_class: review-artifact-write
     fresh_context_on_entry: true
 
@@ -59,6 +59,12 @@ transitions:
   - from: core-milestone
     outcome: completion_handoff_ready
     to: core-handoff
+  - from: core-plan
+    outcome: plan_review_requested
+    to: core-review
+  - from: core-review
+    outcome: plan_review_result
+    to: core-plan
   - from: core-plan
     outcome: confirmed
     to: core-execute

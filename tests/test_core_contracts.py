@@ -7,6 +7,7 @@ import importlib.util
 import io
 import json
 from pathlib import Path
+import re
 import subprocess
 import tempfile
 import unittest
@@ -438,9 +439,9 @@ class ContractTests(unittest.TestCase):
                 checker.check_setup_source(front, text + '\n' + instruction)
 
     def test_catalog_edges_are_bidirectional_and_complete(self):
-        edges = [('core-plan', 'core-execute'), ('core-execute', 'core-review'), ('core-execute', 'core-milestone'), ('core-milestone', 'core-plan'), ('core-milestone', 'core-handoff')]
+        edges = [('core-plan', 'core-review'), ('core-review', 'core-plan'), ('core-plan', 'core-execute'), ('core-execute', 'core-review'), ('core-execute', 'core-milestone'), ('core-milestone', 'core-plan'), ('core-milestone', 'core-handoff')]
         ids = ['core-plan', 'core-execute', 'core-review', 'core-brainstorm', 'core-milestone', 'core-handoff']
-        workflows = [dict(id=i, successors=[b for a, b in edges if a == i], predecessors=[a for a, b in edges if b == i], fresh_context_on_entry=i in ('core-execute', 'core-review'), input_schemas=['milestone/v1'] if i == 'core-milestone' else [], output_schemas=[]) for i in ids]
+        workflows = [dict(id=i, successors=[b for a, b in edges if a == i], predecessors=[a for a, b in edges if b == i], fresh_context_on_entry=i in ('core-execute', 'core-review'), input_schemas=['milestone/v1'] if i == 'core-milestone' else [], output_schemas=['text'] if i == 'core-review' else []) for i in ids]
         catalog = dict(catalog_version=1, max_automatic_review_repair_rounds=2, workflows=workflows, transitions=[dict(**{'from': a, 'to': b}, outcome='conditional') for a, b in edges], known_agent_ids=['backend-engineer'], known_tool_ids=['gortex'])
         checker.validate_catalog(catalog)
         bad = copy.deepcopy(catalog)
@@ -451,6 +452,49 @@ class ContractTests(unittest.TestCase):
         bad['transitions'].pop()
         with self.assertRaisesRegex(checker.ContractError, 'Workflowübergänge'):
             checker.validate_catalog(bad)
+
+    def test_scope_guardrail_clauses_accept_minimal_work_and_reject_violations(self):
+        # Fixture sentences per clause; text matches show contract wording, not live model compliance.
+        cases = {
+            'Dateiscope ist keine Funktionsfreigabe': ('Ein Dateiscope autorisiert keine neuen Verantwortlichkeiten.', 'Ein neuer Harness im erlaubten Verzeichnis ist durch den Dateiscope gedeckt.'),
+            'kumulativer Scope gegen Originalbezug': ('Ersatzpläne prüfen den kumulativen Scope gegen den ursprünglichen Auftrag.', 'Ersatzpläne prüfen nur den direkten Vorgänger.'),
+            'Vereinfachungsstopp': ('Beim zweiten Ersatzplan ohne neues fachliches Ergebnis stoppt der Zyklus.', 'Jeder Ersatzplan startet automatisch den nächsten.'),
+            'Umbenennung setzt nicht zurück': ('Eine Umbenennung des Findings setzt die Zählung nicht zurück.', 'Ein neuer Findingname beginnt eine neue Zählung.'),
+            'Planreview ohne Run': ('Das Planreview erzeugt keinen Run.', 'Das Planreview legt einen Run mit review.yaml an.'),
+            'Planreview-pass ist keine Bestätigung': ('Ein Planreview-pass bedeutet nur bestätigungsfähig, nicht vom Nutzer bestätigt.', 'Ein Planreview-pass startet die Ausführung.'),
+            'schmale Planreview-Dispatchausnahme': ('Ausschließlich für das Planreview darf core-plan einen qa-reviewer beauftragen.', 'core-plan darf Implementierungsagenten und einen qa-reviewer beauftragen.'),
+            'Legacy-Kompatibilitätsprüfung': ('Für Runs ohne historisches Planreview gilt eine Kompatibilitätsprüfung.', 'Fehlt das Planreview, wird es rückwirkend als bestanden eingetragen.'),
+            'Bloat verwerfen statt ausbauen': ('Ist Bloat belegt, empfiehl dessen Verwerfen.', 'Ist ein Zusatzfeature unnötig, empfiehl mehr Tests und Härtung.'),
+            'Standard vor unbegründeter Eigenentwicklung': ('Standardlösung plus kleiner Regressionstest genügt; eine Eigenentwicklung braucht eine belegte Lücke.', 'Ein eigener Runner ist technisch attraktiver als der vorhandene Standard.'),
+            'kein präventiver Zusatz': ('Notwendige Voraussetzungen sind zulässig, aber keine präventiven Optimierungen.', 'Zur Zukunftssicherheit ergänzen wir präventiv ein Cache-Framework.'),
+            'übernommene Voraussetzung neu begründen': ('Übernommene technische Voraussetzungen werden neu begründet, sobald sie Blocker erzeugen.', 'Der Ersatzplan übernimmt den Runner als Nutzerpflicht.'),
+            'Vereinfachen statt kompensieren': ('Unnötige Komplexität wird entfernt, nicht durch weitere Mechanismen ausgeglichen.', 'Gegen den selbst erzeugten Blocker bauen wir ein weiteres Gate.'),
+        }
+        policies = {label: pattern for group in ('shared', 'workflows') for pattern, label in checker.POLICIES[group]}
+        self.assertLessEqual(set(cases), set(policies))
+        for label, (allowed, violated) in cases.items():
+            with self.subTest(label=label):
+                self.assertRegex(allowed, '(?i)' + policies[label])
+                self.assertNotRegex(violated, '(?i)' + policies[label])
+        catalog = checker.load_yaml((ROOT / '.apm/skills/core-shared/assets/workflow-catalog.yaml').read_text(encoding='utf-8'))
+        checker.validate_catalog(catalog)
+        bad = copy.deepcopy(catalog)
+        bad['transitions'] = [t for t in bad['transitions'] if (t['from'], t['to']) != ('core-plan', 'core-review')]
+        with self.assertRaisesRegex(checker.ContractError, 'Planreviewübergang'):
+            checker.validate_catalog(bad)
+
+    def test_scope_guardrail_mutations_of_canonical_clauses_fail(self):
+        # Controlled in-memory removal of canonical workflow-contract bullets; sources stay untouched.
+        contract = ROOT / '.apm/skills/core-shared/references/workflow-contract.md'
+        original_read = Path.read_text
+        mutations = {'Kleinste hinreichende Lösung': 'Standard vor unbegründeter Eigenentwicklung|kein präventiver Zusatz', 'Keine vererbten Anforderungen': 'übernommene Voraussetzung neu begründen', 'Vereinfachen statt kompensieren': 'Vereinfachen statt kompensieren'}
+        for heading, label in mutations.items():
+            text, count = re.subn(r'^- \*\*' + re.escape(heading) + r':\*\*.*\n', '', original_read(contract, encoding='utf-8'), flags=re.M)
+            self.assertEqual(count, 1)
+            def read_text(path, *args, _text=text, **kwargs):
+                return _text if Path(path) == contract else original_read(path, *args, **kwargs)
+            with self.subTest(heading=heading), patch.object(Path, 'read_text', read_text), contextlib.redirect_stdout(io.StringIO()), self.assertRaisesRegex(checker.ContractError, label):
+                checker.check_group(ROOT, 'shared')
 
     def test_staged_targetsets(self):
         for group in checker.TARGET_GROUPS:

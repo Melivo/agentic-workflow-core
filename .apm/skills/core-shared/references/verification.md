@@ -40,13 +40,13 @@ Ein Task ist `completed`, wenn alle Kriterien und Pflichtchecks aktuell belegt s
 5. Nach jeder Korrektur alle betroffenen Checks und die Reviewprüfung wiederholen.
 6. Evidenz nur wiederverwenden, wenn Eingaben, Abhängigkeiten und Repositorystand unverändert sind. Ein Task-Retry erzeugt einen neuen unveränderlichen Versuchspfad; Resume oder Review-Reparatur erzeugt dagegen keinen neuen Run und übernimmt keine ältere Taskevidenz ungeprüft. Bei Etappenabschluss deckt aktuelles Review-pass nur Plan/Run ab; `core-milestone` prüft zusätzlich die gepinnte Definition, bevor es deren Abschluss im Index verknüpft. Folgeetappen benötigen ausdrückliche Freigabe, Gesamtabschluss eigene Zielkriterien und Nachweise.
 
-Tests, Hooks oder Validierungen dürfen nicht deaktiviert, übersprungen oder abgeschwächt werden, um einen Lauf grün erscheinen zu lassen.
+Tests, Hooks oder Validierungen dürfen nicht deaktiviert, übersprungen oder abgeschwächt werden, um einen Lauf grün erscheinen zu lassen. Statische Checks und Fixtures belegen Vertragskonsistenz, keine künftige Modellbefolgung; fehlende Verhaltensevidenz bleibt sichtbar, und grüne Tests ersetzen keinen fachlichen Zielnachweis.
 
 ## Unabhängiges Review
 
-`core-review` startet in frischem Kontext, implementiert keine Fixes und liest den bestätigten Plan, aktuellen Gesamtdiff, das kompakte Handoff, aktuelle Task- und Checkevidenz sowie Einschränkungen. Es urteilt:
+`core-review` startet in frischem Kontext und implementiert keine Fixes. Das Planreview folgt dem [Workflowvertrag](workflow-contract.md#planreview) und erzeugt kein `review/v1`. Das Umsetzungsreview liest den bestätigten Plan, aktuellen Gesamtdiff, das kompakte Handoff, aktuelle Task- und Checkevidenz sowie Einschränkungen. Es urteilt:
 
-- `pass`, wenn Scope, Kriterien und relevante Risiken mit aktueller Evidenz erfüllt sind;
+- `pass`, wenn Zielbezug, funktionaler Scope, Kriterien und relevante Risiken mit aktueller Evidenz erfüllt sind; technische Korrektheit allein genügt bei belegtem Scopeverstoß nicht;
 - `changes_requested`, wenn innerhalb des bestätigten Scopes behebbarer Änderungsbedarf besteht;
 - `blocked`, wenn ein belastbares Urteil oder eine erforderliche Behebung durch eine materielle Lücke verhindert wird.
 

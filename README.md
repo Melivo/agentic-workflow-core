@@ -5,7 +5,7 @@
 
 **Planen, kontrolliert umsetzen, unabhängig prüfen.**
 
-Agentic Workflow Core ist ein portables Paket aus Agent-Skills für KI-gestützte Softwareentwicklung mit OpenCode und Codex. Ein bestätigter Plan bestimmt die Umsetzung; ein unabhängiges Review prüft das Ergebnis. Entscheidungen, Fortschritt und Nachweise bleiben in nachvollziehbaren Dateien erhalten – nicht ausschließlich im Chatverlauf.
+Agentic Workflow Core ist ein portables Paket aus Agent-Skills für KI-gestützte Softwareentwicklung mit OpenCode und Codex. Ein unabhängiges Planreview prüft den Entwurf vor deiner Bestätigung; nach der Umsetzung prüft ein getrenntes Umsetzungsreview die integrierte Änderung. Entscheidungen, Fortschritt und Nachweise bleiben in nachvollziehbaren Dateien erhalten – nicht ausschließlich im Chatverlauf.
 
 Core ist keine zusätzliche Orchestrierungs-CLI und kein autonomer Releasebot. Es nutzt die Fähigkeiten des jeweiligen Agent-Harnesses, also der Umgebung, in der der KI-Agent arbeitet. Du entscheidest über Ziel, Umfang und freizugebende Aktionen.
 
@@ -13,7 +13,7 @@ Core ist keine zusätzliche Orchestrierungs-CLI und kein autonomer Releasebot. E
 
 ## Was Core bietet
 
-- **Einen durchgängigen Ablauf:** optionales Brainstorming, Detailplanung, Umsetzung und unabhängiges Review.
+- **Einen durchgängigen Ablauf:** optionales Brainstorming, Planreview vor deiner Bestätigung, Umsetzung und unabhängiges Umsetzungsreview.
 - **Passende Fachmethoden:** Architektur, Backend, Frontend, Mobile, Datenbanken, Terraform, Debugging und Refactoring.
 - **Überprüfbare Übergaben:** Pläne, Task-Ergebnisse und Reviews mit festen Formaten.
 - **Wiederaufnahme:** Arbeit anhand ihrer Artefakte in einer neuen Sitzung fortsetzen.
@@ -73,14 +73,14 @@ Dieser Modus integriert auch die vorgesehenen Agentendefinitionen und kann Harne
 Der normale Implementierungsablauf:
 
 ```text
-core-brainstorm? → core-plan → Freigabe → core-execute ↔ core-review → Abschluss
+core-brainstorm? → core-plan → Planreview → deine Freigabe → core-execute ↔ Umsetzungsreview → Abschluss
 ```
 
 1. **Projekt prüfen:** `core-init-project` prüft Repository und Code-Intelligence-Bereitschaft. Änderungen an Providerkonfiguration oder `AGENTS.md` brauchen ihre eigene Freigabe.
 2. **Ziel beschreiben:** gewünschtes Verhalten, betroffene Bereiche und Grenzen nennen. Bei materiellen Unklarheiten hilft `core-brainstorm`.
-3. **Plan bestätigen:** `core-plan` erstellt einen `plan/v1` mit Aufgaben, Abhängigkeiten, Akzeptanzkriterien und Checks. Vor der Umsetzung prüfst und bestätigst du ihn.
+3. **Planreview und bestätigen:** `core-plan` erstellt einen `plan/v1` mit Aufgaben, Abhängigkeiten, Akzeptanzkriterien und Checks. `core-review` prüft den Entwurf in frischem Kontext als kurze Textantwort – ohne Run oder `review/v1`. Ein Review-pass macht ihn nur bestätigungsfähig; erst deine ausdrückliche Bestätigung erlaubt die Umsetzung.
 4. **Umsetzen:** `core-execute` arbeitet den eindeutig identifizierten, bestätigten Plan ab und koordiniert passende Fachagenten.
-5. **Unabhängig prüfen:** `core-review` bewertet die integrierte Änderung in frischem Kontext. Korrekturen gehören zurück in die Umsetzung, nicht in das Review.
+5. **Unabhängig prüfen:** Danach bewertet `core-review` in frischem Kontext die integrierte Gesamtänderung. Das Umsetzungsreview bleibt read-only; Korrekturen gehören zurück in die Umsetzung, nicht in das Review.
 
 Du kannst Skills in normaler Sprache anfordern; die Auswahl- oder Aufrufoberfläche hängt vom Harness ab. Beispiele:
 
@@ -90,7 +90,7 @@ Du kannst Skills in normaler Sprache anfordern; die Auswahl- oder Aufrufoberflä
 
 > Nutze core-review für eine unabhängige Prüfung. Implementiere dabei keine Korrekturen.
 
-**Keine pauschale Freigabe:** Build, Compile, Bundle, Packaging, Installation, Commit, Push, Tag, Release, Deployment und destruktive Aktionen benötigen jeweils eine passende ausdrückliche Autorisierung. Fachagenten arbeiten innerhalb ihres Taskscopes und starten keine eigenen Subagenten.
+**Scope und Freigabe:** Ein erlaubter Dateipfad ist keine Freigabe für beliebige zusätzliche Funktionen. Plan und Umsetzung bleiben am ursprünglichen Ziel und dessen Kriterien; Folgearbeit berücksichtigt den kumulativen Umfang. Bevorzugt wird die kleinste hinreichende Lösung. Build, Compile, Bundle, Packaging, Installation, Commit, Push, Tag, Release, Deployment und destruktive Aktionen benötigen jeweils eine passende ausdrückliche Autorisierung. Fachagenten arbeiten innerhalb ihres Taskscopes und starten keine eigenen Subagenten.
 
 ### Größere Vorhaben und Sitzungswechsel
 

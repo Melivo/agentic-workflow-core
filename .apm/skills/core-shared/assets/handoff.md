@@ -23,6 +23,7 @@
 
 - `<bestätigter Planabschnitt oder belegte Projektinvariante>`
 - `<Run-pass ist kein Etappen-/Gesamtabschluss; Folgefreigabe wird nicht durch Handoff erteilt>`
+- `<Verweis auf den aktuellen Ziel-/Scopeabschnitt; bestätigte Nutzeranforderungen getrennt von technischen Annahmen; ungeklärte Entscheidungen>`
 
 ## Aktuelle Evidenz
 
@@ -34,4 +35,4 @@
 
 ## Fresh-Context-Anweisung
 
-Lade die oben referenzierten Artefakte und den aktuellen Repositorystand neu. Verwende weder die Implementierungsdiskussion noch Chatverlauf, Honcho oder Provider-Memories als Source of Truth. Prüfe Pfade, Drift und Freshness vor Wiederverwendung vorhandener Evidenz.
+Lade die oben referenzierten Artefakte und den aktuellen Repositorystand neu. Verwende weder die Implementierungsdiskussion noch Chatverlauf, Honcho oder Provider-Memories als Source of Truth; erwartete Urteile oder vorgeschlagene Fixes gehören nicht in diese Übergabe. Prüfe Pfade, Drift und Freshness vor Wiederverwendung vorhandener Evidenz.
