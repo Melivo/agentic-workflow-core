@@ -4,6 +4,13 @@
 
 - Ergänzt reproduzierbare lokale/CI-Prüfungen und eine standardmäßig deaktivierte, getrennte Release-PR- und Veröffentlichungskette. GitHub-Livebetrieb und App-Einrichtung sind nicht bestätigt.
 
+## [0.6.1](https://github.com/Melivo/agentic-workflow-core/compare/v0.6.0...v0.6.1) (2026-10-17)
+
+
+### Bug Fixes
+
+* **init:** prepare configurator runtime before project audit ([c2f7ab9](https://github.com/Melivo/agentic-workflow-core/commit/c2f7ab972b9ffeb19c93b903da68170f6e188973))
+
 ## [0.6.0](https://github.com/Melivo/agentic-workflow-core/compare/v0.5.0...v0.6.0) (2026-10-17)
 
 
