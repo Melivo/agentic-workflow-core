@@ -1,5 +1,4 @@
 # Local harness projections and runtime artifacts — do not commit
-.agents/
 .codex/
 .opencode/
 /opencode.jsonc
