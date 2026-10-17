@@ -469,6 +469,19 @@ class ContractTests(unittest.TestCase):
             'kein präventiver Zusatz': ('Notwendige Voraussetzungen sind zulässig, aber keine präventiven Optimierungen.', 'Zur Zukunftssicherheit ergänzen wir präventiv ein Cache-Framework.'),
             'übernommene Voraussetzung neu begründen': ('Übernommene technische Voraussetzungen werden neu begründet, sobald sie Blocker erzeugen.', 'Der Ersatzplan übernimmt den Runner als Nutzerpflicht.'),
             'Vereinfachen statt kompensieren': ('Unnötige Komplexität wird entfernt, nicht durch weitere Mechanismen ausgeglichen.', 'Gegen den selbst erzeugten Blocker bauen wir ein weiteres Gate.'),
+            # Behavior requirements: plan scenarios 1-8 as fixture sentences, not evidence of agent compliance.
+            'Verhalten getrennt von Lösung': ('Der Plan beschreibt beobachtbares Verhalten samt Fehlerfällen getrennt von technischen Entscheidungen.', 'Der Plan beschreibt die Datenbanktabellen als Anforderung.'),
+            'Agentenpräferenz keine Nutzeranforderung': ('Die vom Agenten vorgeschlagene Datenbank ist eine Agentenpräferenz und wird nicht zur Nutzeranforderung.', 'Der Agent schlägt eine Datenbank vor; sie ist damit Nutzer-Muss.'),
+            'Nutzerconstraint bleibt verbindlich': ('Schreibt der Nutzer die Datenbank vor, bleiben bestätigte technische Nutzerconstraints verbindlich.', 'Der Agent ersetzt die vorgeschriebene Datenbank durch eine bessere Wahl.'),
+            'schlanker Kleinfix': ('Ein Kleinfix nennt nur Fehler, erwartetes Ergebnis und Regressionstest.', 'Auch ein Kleinfix braucht eine eigene Verhaltensspezifikation.'),
+            'vollständige Originalabdeckung': ('Jede ursprüngliche Anforderung samt Fehlerfall führt zu Task und Check.', 'Alle Tasks haben grüne Checks.'),
+            'grüne Eigenkriterien genügen nicht': ('Grüne selbst gewählte Kriterien genügen nicht, solange ein ursprünglicher Fehlerfall ungedeckt ist.', 'Alle Tasktests sind grün, also ist der Auftrag erfüllt.'),
+            'keine ungefragten Zusätze': ('Unbegründete Zusätze entfallen, auch in Spezifikationsprosa.', 'Die Spezifikationsprosa ergänzt ein ungefragtes Exportfeature.'),
+            'Abdeckung ohne neue Felder': ('Dafür gibt es keine zusätzlichen YAML-Felder.', 'Jeder Task erhält ein Feld requirement_refs.'),
+            'Verhaltensänderung über Ersatzplanung': ('Ändert sich bestätigtes Verhalten, nennt der Ersatzplan Vorher/Nachher.', 'Eine neue Anforderung wird still in den bestätigten Plan editiert.'),
+            'technische Alternative ohne neue Freigabe': ('Eine technische Alternative ohne Verhaltensänderung ist keine neue Nutzeranforderung.', 'Jede andere Bibliothek braucht eine neue Planfreigabe.'),
+            'Plan trennt Anforderung und Lösung': ('Trenne Verhalten, Fehlergrenzen und Anforderungsherkunft von technischen Entscheidungen.', 'Übernimm die Lösung des Agenten als Anforderung.'),
+            'Plan prüft Originalabdeckung': ('Alle ursprünglichen Anforderungen sind gedeckt, und unbegründete Zusätze fehlen.', 'Jeder Task hat mindestens einen Check.'),
         }
         policies = {label: pattern for group in ('shared', 'workflows') for pattern, label in checker.POLICIES[group]}
         self.assertLessEqual(set(cases), set(policies))
@@ -487,7 +500,8 @@ class ContractTests(unittest.TestCase):
         # Controlled in-memory removal of canonical workflow-contract bullets; sources stay untouched.
         contract = ROOT / '.apm/skills/core-shared/references/workflow-contract.md'
         original_read = Path.read_text
-        mutations = {'Kleinste hinreichende Lösung': 'Standard vor unbegründeter Eigenentwicklung|kein präventiver Zusatz', 'Keine vererbten Anforderungen': 'übernommene Voraussetzung neu begründen', 'Vereinfachen statt kompensieren': 'Vereinfachen statt kompensieren'}
+        mutations = {'Kleinste hinreichende Lösung': 'Standard vor unbegründeter Eigenentwicklung|kein präventiver Zusatz', 'Keine vererbten Anforderungen': 'übernommene Voraussetzung neu begründen', 'Vereinfachen statt kompensieren': 'Vereinfachen statt kompensieren',
+                     'Anforderung und Lösung trennen': 'Verhalten getrennt von Lösung', 'Vollständige Originalabdeckung': 'vollständige Originalabdeckung', 'Verhaltensänderung': 'Verhaltensänderung über Ersatzplanung'}
         for heading, label in mutations.items():
             text, count = re.subn(r'^- \*\*' + re.escape(heading) + r':\*\*.*\n', '', original_read(contract, encoding='utf-8'), flags=re.M)
             self.assertEqual(count, 1)
@@ -495,6 +509,15 @@ class ContractTests(unittest.TestCase):
                 return _text if Path(path) == contract else original_read(path, *args, **kwargs)
             with self.subTest(heading=heading), patch.object(Path, 'read_text', read_text), contextlib.redirect_stdout(io.StringIO()), self.assertRaisesRegex(checker.ContractError, label):
                 checker.check_group(ROOT, 'shared')
+        # core-plan keeps only short references; removing them fails the workflows group.
+        plan = ROOT / '.apm/skills/core-plan/SKILL.md'
+        for pattern, label in ((r'Trenne Verhalten[^.]*technischen Entscheidungen', 'Plan trennt Anforderung und Lösung'), (r'^11\. .*\n', 'Plan prüft Originalabdeckung')):
+            text, count = re.subn(pattern, '', original_read(plan, encoding='utf-8'), flags=re.M)
+            self.assertEqual(count, 1)
+            def read_text(path, *args, _text=text, **kwargs):
+                return _text if Path(path) == plan else original_read(path, *args, **kwargs)
+            with self.subTest(label=label), patch.object(Path, 'read_text', read_text), contextlib.redirect_stdout(io.StringIO()), self.assertRaisesRegex(checker.ContractError, label):
+                checker.check_group(ROOT, 'workflows')
 
     def test_staged_targetsets(self):
         for group in checker.TARGET_GROUPS:
