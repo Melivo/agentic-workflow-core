@@ -428,6 +428,36 @@ class ContractTests(unittest.TestCase):
             with self.assertRaises(checker.ContractError):
                 checker.local_path(root, '../outside.md')
 
+    def test_init_project_checks_configurator_runtime_before_audit(self):
+        # Static instruction regression, not a live agent or installation test.
+        skill = ROOT / '.apm/skills/core-init-project/SKILL.md'
+        text = skill.read_text(encoding='utf-8')
+        runtime = text.split('#### Konfigurator-Laufzeit vorbereiten', 1)[1].split('#### Provideraudit durchführen', 1)[0]
+        for requirement in (
+            '../gortex-serena-configurator/REQUIREMENTS.md',
+            '../gortex-serena-configurator/scripts/requirements.txt',
+            'einzige Quelle',
+            'from ruamel.yaml import YAML, YAMLError',
+            "version('ruamel.yaml')",
+            'ein erfolgreicher Import allein genügt nicht',
+            'PyYAML ersetzt `ruamel.yaml` nicht',
+            'als eigene Auswahl',
+            'Netzwerk-/Dateiwirkungen und Entfernungspfad',
+            'erst nach ausdrücklicher Freigabe',
+            '"<python>" -m pip install -r',
+            'Keine globale oder Systeminstallation',
+            'keine Änderung der Anwendungsabhängigkeiten',
+            'allein ist keine Installationsfreigabe',
+            'verifizierten absoluten Interpreterpfad für alle Audit- und ausgewählten Apply-Aufrufe',
+            'überspringe die Einrichtung, wenn alles passt',
+            'führe das Audit-Skript nicht aus',
+        ):
+            with self.subTest(requirement=requirement):
+                self.assertIn(requirement, runtime)
+        self.assertIn('Readiness-Preflight löst keinen Vollscan und keine Installation aus', text)
+        self.assertIn('**completed:** Konfigurator-Laufzeit und Preflight sind belegt', text)
+        self.assertIn('**partial:** Der Harness oder Block ist gültig, aber die Konfigurator-Laufzeit', text)
+
     def test_setup_source_rejects_old_installer_and_unrelated_keywords(self):
         front = {'description': 'Prüft vorhandene MCP-Provider read-only; keine Einrichtung.'}
         text = 'Kein Secretzugriff; Secrets werden nicht gesucht.\n1. Prüfe den Provider read-only.'

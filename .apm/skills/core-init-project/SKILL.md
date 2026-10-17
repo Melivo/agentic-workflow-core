@@ -33,7 +33,22 @@ Dateiglobs sind nur Signale. Kombiniere sie mit Taskabsicht, Stack und Pfadkonte
 
 ### 2. Provider-Readiness inline prüfen
 
-Führe den Preflight von `gortex-serena-configurator` mit der konkreten Repositorywurzel read-only aus; halte `--apply-agents` und jede entsprechende `AGENTS.md`-Schreiboption deaktiviert. Provideraktionen benötigen eine konkret gezeigte Auswahl und passende ausdrückliche Autorisierung. Serena darf ausschließlich für dieses konkrete Projekt initialisiert werden; aktiviere oder konfiguriere niemals globales Serena. Der Configurator liefert den Readiness-Befund; der Schreibbesitz für den unten definierten Projektblock bleibt bei `core-init-project`.
+Prüfe vor dem ersten Skriptaufruf die Konfigurator-Laufzeit; führe erst danach den Preflight von `gortex-serena-configurator` mit der konkreten Repositorywurzel read-only aus. Halte `--apply-agents` und jede entsprechende `AGENTS.md`-Schreiboption deaktiviert. Provideraktionen benötigen eine konkret gezeigte Auswahl und passende ausdrückliche Autorisierung. Serena darf ausschließlich für dieses konkrete Projekt initialisiert werden; aktiviere oder konfiguriere niemals globales Serena. Der Configurator liefert den Readiness-Befund; der Schreibbesitz für den unten definierten Projektblock bleibt bei `core-init-project`.
+
+#### Konfigurator-Laufzeit vorbereiten
+
+1. Lies die [Laufzeitanforderungen](../gortex-serena-configurator/REQUIREMENTS.md) und die [Dependencydeklaration](../gortex-serena-configurator/scripts/requirements.txt). Sie bleiben die einzige Quelle für Python-Mindestversion und Paketversionsbereiche. PyYAML ersetzt `ruamel.yaml` nicht.
+2. Wähle einen vorhandenen geeigneten Python-Interpreter und ermittle dessen absoluten Pfad. Prüfe mit genau diesem Interpreter read-only Python-Version, Paketversion und tatsächlichen Import:
+
+   ```text
+   "<python>" -B -c "import sys; from importlib.metadata import version; from ruamel.yaml import YAML, YAMLError; print(sys.executable); print(sys.version); print(version('ruamel.yaml'))"
+   ```
+
+   Vergleiche die beobachteten Versionen mit den Anforderungen; ein erfolgreicher Import allein genügt nicht. Verwechsle die Umgebung des Serena-CLI/MCP-Prozesses nicht mit der Laufzeit des Audit-Skripts.
+3. Fehlt Python, das Paket oder eine passende Version, biete die notwendige Laufzeiteinrichtung als eigene Auswahl an. Zeige vor der Freigabe Interpreter, absoluten Umgebungspfad, Requirementsdatei, konkrete Befehle, Netzwerk-/Dateiwirkungen und Entfernungspfad. Bevorzuge eine vorhandene geeignete isolierte Werkzeugumgebung; andernfalls schlage eine separate virtuelle Umgebung vor. Erzeuge sie erst nach ausdrücklicher Freigabe. Installiere Pakete ausschließlich über den bestätigten Interpreter mit `"<python>" -m pip install -r "<absoluter-konfiguratorpfad>/scripts/requirements.txt"`. Keine globale oder Systeminstallation, kein `sudo`, kein `--break-system-packages` und keine Änderung der Anwendungsabhängigkeiten. Die Auswahl einer Serena-Provideraktion allein ist keine Installationsfreigabe.
+4. Wiederhole nach einer freigegebenen Einrichtung dieselbe Versions- und Importprüfung. Verwende den verifizierten absoluten Interpreterpfad für alle Audit- und ausgewählten Apply-Aufrufe; kein Rückfall auf ein unqualifiziertes `python`. Bei erneutem Init prüfe erneut und überspringe die Einrichtung, wenn alles passt. Fehlt die Freigabe oder scheitert die Einrichtung, führe das Audit-Skript nicht aus und melde die konkrete Laufzeitlücke; ein nicht gestartetes Audit ist kein erfolgreicher Readiness-Nachweis.
+
+#### Provideraudit durchführen
 
 1. Prüfe Gortex-Gesundheit und vorhandenes Tracking read-only.
 2. Prüfe Serena-Verfügbarkeit, projektspezifische Initialisierung, effektive Sprachen und autoritative MCP-Quelle read-only.
@@ -97,8 +112,8 @@ Zeige den `.gitignore`-Diff mit absolutem Zielpfad zusammen mit der Projektblock
 
 ## Ergebnisse und Zustände
 
-- **completed:** Preflight ist belegt, ausgewählte Provideraktionen sind geprüft, der bestätigte Projektblock und der Artefaktschutz sind verifiziert, keine Artefakte in den beiden Verzeichnissen sind getrackt und ein zweiter Lauf wäre diff-frei.
-- **partial:** Der Harness oder Block ist gültig, aber eine optionale Providerfähigkeit fehlt oder bereits getrackte Artefakte lassen eine Datenschutzlücke offen; nenne die konkrete Einschränkung.
+- **completed:** Konfigurator-Laufzeit und Preflight sind belegt, ausgewählte Provideraktionen sind geprüft, der bestätigte Projektblock und der Artefaktschutz sind verifiziert, keine Artefakte in den beiden Verzeichnissen sind getrackt und ein zweiter Lauf wäre diff-frei.
+- **partial:** Der Harness oder Block ist gültig, aber die Konfigurator-Laufzeit oder eine optionale Providerfähigkeit fehlt oder bereits getrackte Artefakte lassen eine Datenschutzlücke offen; nenne die konkrete Einschränkung.
 - **blocked:** Projektgrenze, Eingabeartefakt, exakte Diff-Bestätigung, sichere Markerlage oder erforderliche Providerfähigkeit fehlt oder der wirksame Artefaktschutz bleibt ungeklärt.
 - **failed:** Eine ausgewählte Aktion oder verifizierte Mutation schlug fehl; nenne Pfad, Teilwirkung und sicheren nächsten Schritt.
 

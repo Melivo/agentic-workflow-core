@@ -28,6 +28,9 @@ Nur die für den Auftrag passende Methodik und Referenzen laden. Keine
 Workflowzustände in Skills oder Provider-Memories ablegen. Änderungen an
 Verträgen, Vorlagen und konsumierenden Skills gemeinsam auf Konsistenz prüfen,
 ohne unautorisierte Folgeworkflows zu starten.
+`core-init-project` prüft vor dem Konfigurator-Audit dessen deklarierte
+Python-Laufzeitabhängigkeiten; eine isolierte Einrichtung benötigt eine eigene
+ausdrückliche Installationsfreigabe.
 
 ## Verification
 
