@@ -79,6 +79,24 @@ class ArchiveInspection(unittest.TestCase):
         self.assertEqual(summary['core_bundles'], release_guard.CORE_BUNDLES)
         self.assertEqual(summary['core_files'], len([k for k in SOURCES if k.startswith('.apm/skills/core-')]))
 
+    def test_skill_index_is_required_and_source_bound(self):
+        key = TOP + 'skills/AGENTS.md'
+        self.assertIn('.apm/skills/AGENTS.md', SOURCES)
+        for replacement in (None, b'changed guidance'):
+            with self.subTest(replacement=replacement):
+                files = {k[len(TOP):]: v for k, v in archive_entries().items()}
+                if replacement is None:
+                    del files[key[len(TOP):]]
+                else:
+                    files[key[len(TOP):]] = replacement
+                self.assertFlags(with_inventory(files), 'DOX-Index')
+
+    def test_skill_index_without_canonical_source_is_rejected(self):
+        sources = dict(SOURCES)
+        del sources['.apm/skills/AGENTS.md']
+        _, violations = package.inspect_archive(TOP[:-1] + '.zip', archive_entries(), sources, VERSION)
+        self.assertIn('unerwarteter Archivinhalt: skills/AGENTS.md', violations)
+
     def test_source_inventory_has_exactly_22_core_bundles(self):
         self.assertEqual(len(package.bundles(package.core_files(SOURCES, '.apm/skills/'))), 22)
 
@@ -143,6 +161,29 @@ class InstallationInspection(unittest.TestCase):
         self.assertEqual(violations, [])
         self.assertEqual(summary['core_bundles'], 22)
         self.assertGreaterEqual(summary['internal_links'], 217)
+
+    def test_skill_index_is_required_and_source_bound(self):
+        key = '.agents/skills/AGENTS.md'
+        for replacement in (None, b'changed guidance'):
+            with self.subTest(replacement=replacement):
+                files = installation()
+                if replacement is None:
+                    del files[key]
+                else:
+                    files[key] = replacement
+                self.assertFlags(files, 'DOX-Index')
+
+    def test_skill_index_without_canonical_source_is_rejected(self):
+        sources = dict(SOURCES)
+        del sources['.apm/skills/AGENTS.md']
+        _, violations = package.inspect_installation(installation(), sources)
+        self.assertIn('unerwartete Installationsdatei: .agents/skills/AGENTS.md', violations)
+
+    def test_skill_index_links_are_checked(self):
+        key = '.agents/skills/AGENTS.md'
+        count, unresolved = package.links({key: b'[missing](missing.md)'}, '.agents/skills/')
+        self.assertEqual(count, 1)
+        self.assertEqual(unresolved, [key + ' -> missing.md'])
 
     def test_broken_or_cache_bound_link_is_detected(self):
         for target in ('references/missing.md', '../../../apm_modules/x/SKILL.md'):

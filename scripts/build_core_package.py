@@ -35,6 +35,7 @@ PRODUCER_COMMANDS = (
     ('pack', '--offline', '--target', 'agent-skills', '--archive', '--output', 'dist'),
 )
 BUNDLED_SKILL = release_guard.BUNDLED_SKILL
+SKILL_INDEX = 'AGENTS.md'
 FORBIDDEN_PARTS = {'.agentic-workflow', '.git', 'apm_modules', 'node_modules', '__pycache__', '.agents', '.opencode', '.codex'}
 FORBIDDEN_NAME = re.compile(r'(\.env(\..+)?|\.npmrc|\.pypirc|id_rsa|id_ed25519|.*\.(pem|key|p12|pfx|pyc))$')
 SECRET = re.compile(rb'-----BEGIN [A-Z ]*PRIVATE KEY-----|gh[pousr]_[A-Za-z0-9]{36}|github_pat_[A-Za-z0-9_]{40,}|AKIA[0-9A-Z]{16}|xox[abprs]-[A-Za-z0-9-]{10,}')
@@ -75,6 +76,19 @@ def compare_auxiliary(sources, actual, where):
     return violations
 
 
+def compare_skill_index(sources, files, prefix, where):
+    """Only the canonical shared skill guide is allowed, required and byte-bound."""
+    source = '.apm/skills/' + SKILL_INDEX
+    expected = {prefix + SKILL_INDEX: sources[source]} if source in sources else {}
+    violations = []
+    for key, content in expected.items():
+        if key not in files:
+            violations.append(where + ': DOX-Index fehlt: ' + key)
+        elif files[key] != content:
+            violations.append(where + ': DOX-Index verändert: ' + key)
+    return set(expected), violations
+
+
 def bundles(mapping):
     return sorted({k.split('/', 1)[0] for k in mapping})
 
@@ -92,11 +106,12 @@ def leaks(files):
 
 
 def links(files, prefix):
-    """(count, unresolved) of relative Markdown links in prefix + 'core-*' files, resolved within files."""
+    """Check relative Markdown links in skills and their shared canonical DOX index."""
     known = set(files) | {posixpath.dirname(p) for p in files}
     count, unresolved = 0, []
     for path, data in sorted(files.items()):
-        if not (path.startswith(prefix + 'core-') or path.startswith(prefix + BUNDLED_SKILL + '/')) or not path.endswith('.md'):
+        if not (path.startswith(prefix + 'core-') or path.startswith(prefix + BUNDLED_SKILL + '/')
+                or path == prefix + SKILL_INDEX) or not path.endswith('.md'):
             continue
         for ref in LINK.findall(data.decode('utf-8')):
             if re.match(r'[a-z][a-z0-9+.-]*:', ref) or ref.startswith('#'):
@@ -162,7 +177,9 @@ def inspect_archive(name, entries, sources, version):
     violations += compare_core(sources, core, 'Archiv')
     auxiliary = auxiliary_files(files, 'skills/')
     violations += compare_auxiliary(sources, auxiliary, 'Archiv')
-    known = set(agents) | {'skills/' + k for k in core} | {'skills/' + k for k in auxiliary} | {'plugin.json', 'apm.lock.yaml'}
+    index, problems = compare_skill_index(sources, files, 'skills/', 'Archiv')
+    violations += problems
+    known = set(agents) | {'skills/' + k for k in core} | {'skills/' + k for k in auxiliary} | index | {'plugin.json', 'apm.lock.yaml'}
     violations += ['unerwarteter Archivinhalt: ' + k for k in sorted(set(files) - known)]
     violations += licenses(files, 'skills/', sources)
     return {'archive_files': len(files), 'core_bundles': len(bundles(core)), 'core_files': len(core)}, violations
@@ -175,11 +192,15 @@ def inspect_installation(files, sources):
     violations = compare_core(sources, core, 'Installation')
     auxiliary = auxiliary_files(files, prefix)
     violations += compare_auxiliary(sources, auxiliary, 'Installation')
-    known = {prefix + k for k in core} | {prefix + k for k in auxiliary} | {'apm.lock.yaml'}
+    index, problems = compare_skill_index(sources, files, prefix, 'Installation')
+    violations += problems
+    known = {prefix + k for k in core} | {prefix + k for k in auxiliary} | index | {'apm.lock.yaml'}
     unexpected = sorted(set(files) - known)
     violations += ['unerwartete Installationsdatei: ' + k for k in unexpected]
     count, unresolved = links(files, prefix)
     expected_skills = core_files(sources, '.apm/skills/') | auxiliary_files(sources, '.apm/skills/')
+    if index:
+        expected_skills[SKILL_INDEX] = sources['.apm/skills/' + SKILL_INDEX]
     expected_count, _ = links({'.agents/skills/' + k: v for k, v in expected_skills.items()}, prefix)
     violations += ['interner Link nicht auflösbar: ' + u for u in unresolved]
     if count != expected_count or count == 0:
