@@ -5,7 +5,7 @@ description: Initialisiert oder aktualisiert den kleinen Repository-Preflight, p
 
 # Core Init Project
 
-Richte den Repository-Harness für genau ein konkretes Projekt ein. Bewahre manuelle Inhalte, bestehende generierte Bereiche und fremde verwaltete Blöcke. `core-init-project` besitzt ausschließlich seinen eigenen Projektblock in `AGENTS.md`; es installiert keine Provider, startet keine Subagenten und erzeugt keinen Workflowzustand.
+Richte den Repository-Harness für genau ein konkretes Projekt ein. Bewahre manuelle Inhalte, bestehende generierte Bereiche und fremde verwaltete Blöcke. `core-init-project` pflegt seinen eigenen Projektblock in `AGENTS.md` und den unten begrenzten lokalen Artefaktschutz in `.gitignore`; es installiert keine Provider, startet keine Subagenten und erzeugt keinen Workflowzustand.
 
 ## Eingaben und Verträge
 
@@ -67,7 +67,22 @@ Lade ausschließlich beim Entwurf dieses Blocks die [Core-Routingvorlage](assets
 
 Prüfe den Entwurf vor der Diff-Vorschau auf passenden Einstieg, Fortführung bereits autorisierter Arbeit einschließlich Review, bedingten Etappenabschluss mit verpflichtendem `core-handoff` und anschließendem Halt vor der Folgeetappe, bedarfsabhängige Fachmethoden und sicheren Wiedereinstieg. Die Handoff-Pflicht nach verifiziertem Milestone-Abschluss darf beim Anpassen der Vorlage nicht zu einem bloßen Angebot abgeschwächt werden; am Gesamtzielende bleibt der belegte Abschluss ohne erfundene Folgearbeit erhalten. Bei Widerspruch zu manuellen Anweisungen oder fehlender Voraussetzung kläre die konkrete Lücke statt fremde Bereiche anzupassen oder Freigaben zu erfinden. Ausführliche Fachmethodik bleibt in den zuständigen Skills. Globale Benutzeranweisungen gehören `core-user2agent-instructions`; fremde generierte oder verwaltete Blöcke bleiben unverändert.
 
-### 4. Exakten Diff bestätigen und idempotent schreiben
+### 4. Lokale Artefakte vor Veröffentlichung schützen
+
+Prüfe bei Erstinitialisierung und erneutem Init die `.gitignore` an der konkreten Repositorywurzel. Stelle für lokale Pläne, persönliche Überlegungen, Run-Artefakte, Logs und Serena-Zustand diese Verzeichnisausschlüsse sicher:
+
+```gitignore
+/.agentic-workflow/
+/.serena/
+```
+
+Ergänze nur fehlenden wirksamen Schutz; gleichwertige bestehende Regeln benötigen keinen zusätzlichen Eintrag. Erhalte bestehende Inhalte und Zeilenenden; lege eine fehlende `.gitignore` erst nach bestätigter Vorschau an. Füge keine pauschale Dotfile-Regel hinzu und nimm weder `.agents/` noch `.apm/` in den Ausschluss auf. Ändere vorhandene Regeln für diese oder andere Pfade nicht. Bei widersprüchlichen Negationsregeln kläre den Konflikt, statt sie still zu überschreiben. Erzeuge die ausgeschlossenen Verzeichnisse nicht allein für diese Prüfung.
+
+Prüfe read-only mit `git ls-files -- .agentic-workflow .serena`, ob dort bereits Dateien getrackt werden. Melde nur betroffene Pfade, nicht persönliche Inhalte: `.gitignore` entfernt weder getrackte Dateien noch frühere Commits. Entferne nichts aus Index, Arbeitsbaum oder Historie und führe keinen Commit oder Push aus. Bereinigung braucht einen gesonderten Auftrag; Dateien außerhalb dieser beiden Verzeichnisse sind durch diese Regel nicht geschützt.
+
+Zeige den `.gitignore`-Diff mit absolutem Zielpfad zusammen mit der Projektblock-Vorschau und hole vor dem Schreiben die ausdrückliche Bestätigung ein. Verwirf ihn bei zwischenzeitlichen Änderungen. Verifiziere danach mit `git check-ignore --no-index --stdin` anhand hypothetischer Dateipfade in beiden Verzeichnissen den wirksamen Ausschluss, ohne Dateien anzulegen. Prüfe bestehende Negationsregeln auch für konkrete Unterpfade. Ein zweiter Entwurf darf keinen weiteren Diff erzeugen. Melde fehlenden Schutz oder getrackte Artefakte als offene Datenschutzlücke, nicht als erfolgreich geschützten Zustand.
+
+### 5. Exakten Diff bestätigen und idempotent schreiben
 
 1. Lies das Projektziel und erfasse den Inhalt außerhalb des eigenen Markerpaares bytegenau.
 2. Blockiere bei doppelten, verschachtelten, ungepaarten oder beschädigten eigenen Markern; repariere sie nicht heuristisch.
@@ -82,9 +97,9 @@ Prüfe den Entwurf vor der Diff-Vorschau auf passenden Einstieg, Fortführung be
 
 ## Ergebnisse und Zustände
 
-- **completed:** Preflight ist belegt, ausgewählte Provideraktionen sind geprüft, der bestätigte Projektblock ist verifiziert und ein zweiter Lauf wäre diff-frei.
-- **partial:** Der Harness oder Block ist gültig, aber eine optionale Providerfähigkeit fehlt; nenne die sichtbare Degradierung.
-- **blocked:** Projektgrenze, Eingabeartefakt, exakte Diff-Bestätigung, sichere Markerlage oder erforderliche Providerfähigkeit fehlt.
+- **completed:** Preflight ist belegt, ausgewählte Provideraktionen sind geprüft, der bestätigte Projektblock und der Artefaktschutz sind verifiziert, keine Artefakte in den beiden Verzeichnissen sind getrackt und ein zweiter Lauf wäre diff-frei.
+- **partial:** Der Harness oder Block ist gültig, aber eine optionale Providerfähigkeit fehlt oder bereits getrackte Artefakte lassen eine Datenschutzlücke offen; nenne die konkrete Einschränkung.
+- **blocked:** Projektgrenze, Eingabeartefakt, exakte Diff-Bestätigung, sichere Markerlage oder erforderliche Providerfähigkeit fehlt oder der wirksame Artefaktschutz bleibt ungeklärt.
 - **failed:** Eine ausgewählte Aktion oder verifizierte Mutation schlug fehl; nenne Pfad, Teilwirkung und sicheren nächsten Schritt.
 
 Ist Gortex nicht bereit, Serena aber projektspezifisch verfügbar, darf der Init mit sichtbarer Degradierung abschließen. Sind beide nicht bereit, darf der Repository-Harness entstehen; spätere Gortex-pflichtige Tasks bleiben jedoch blockiert.
