@@ -18,6 +18,8 @@ Fachmethodik bleiben bei den konsumierenden Skills.
 - [Verifikation](references/verification.md): Nachweise und Reviewgrenzen.
 - [Benutzeranweisungen](references/user-instructions-contract.md): sichere
   Änderungen an manuellen Anweisungen.
+- [Projektdokumentation und DOX](references/workflow-contract.md#projektdokumentation-und-dox):
+  gemeinsame Dokumentationsabdeckung, Baumprüfung und Setupgrenzen.
 
 ## Work Guidance
 

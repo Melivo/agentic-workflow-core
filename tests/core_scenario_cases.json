@@ -6,7 +6,8 @@
     "review_scenario-Einträge benennen Abdeckung durch Unit-Tests/CLI-Gruppen oder unabhängiges Review statt eines Szenariofalls.",
     "revalidation_path und decision_refs werden auf exakte Zuordnung bzw. Existenz geprüft; ob deren Inhalt die neue Fassung tatsächlich deckt, bleibt eine Grenze statischer Modelle und Aufgabe des Reviews.",
     "RV06: evidence_paths werden nur statisch als sichere projektrelative Pfadform mit Präfix des gepinnten Originalruns geprüft; Existenz und inhaltliche Beweiskraft illustrativer Fixturepfade werden nicht geprüft.",
-    "RV07: Versionswerte an Definition, Indexeintrag, Abhängigkeit, Abschlussnachweis, Auswahl, Prompt und Planfolge müssen den Typ int (nicht bool) mit Wert > 0 haben; numerisch gleiche bool-, float- oder Stringwerte werden fail-closed abgewiesen. Geprüft wird nur der YAML-/JSON-Typ, nicht die Schreibweise im Quelltext."
+    "RV07: Versionswerte an Definition, Indexeintrag, Abhängigkeit, Abschlussnachweis, Auswahl, Prompt und Planfolge müssen den Typ int (nicht bool) mit Wert > 0 haben; numerisch gleiche bool-, float- oder Stringwerte werden fail-closed abgewiesen. Geprüft wird nur der YAML-/JSON-Typ, nicht die Schreibweise im Quelltext.",
+    "DOX-Docsfälle modellieren Plan-/Task-Beziehungen (Baumzustand, Setupfreigabe, Belege, Secret- und Scopegrenzen) als statische Eingaben; sie belegen weder tatsächliche Agentenbefolgung noch Inhalt oder Qualität realer Guides."
   ],
   "cases": [
     {
@@ -1435,8 +1436,25 @@
       "source": ".apm/skills/core-docs/SKILL.md",
       "input": {
         "kind": "docs",
-        "proven_drift": true,
+        "mode": "write",
+        "tree": "valid",
+        "initializes": false,
+        "setup_planned": false,
+        "setup_available": true,
+        "conflict_resolved": false,
+        "reported_blocked": false,
+        "docs_needed": true,
+        "dox_pass_reason": "",
+        "evidence": "drift",
         "sources_exist": true,
+        "task_confirmed": true,
+        "diff_evidence": true,
+        "unrelated_legacy": false,
+        "new_interface": false,
+        "connections_documented": false,
+        "parallel_docs": false,
+        "secret_values": false,
+        "secret_store_access": false,
         "changes_goal_decisions": false,
         "changed_paths": [
           "README.md"
@@ -1454,8 +1472,25 @@
       "source": ".apm/skills/core-docs/SKILL.md",
       "input": {
         "kind": "docs",
-        "proven_drift": false,
+        "mode": "write",
+        "tree": "valid",
+        "initializes": false,
+        "setup_planned": false,
+        "setup_available": true,
+        "conflict_resolved": false,
+        "reported_blocked": false,
+        "docs_needed": true,
+        "dox_pass_reason": "",
+        "evidence": "none",
         "sources_exist": true,
+        "task_confirmed": true,
+        "diff_evidence": true,
+        "unrelated_legacy": false,
+        "new_interface": false,
+        "connections_documented": false,
+        "parallel_docs": false,
+        "secret_values": false,
+        "secret_store_access": false,
         "changes_goal_decisions": false,
         "changed_paths": [
           "README.md"
@@ -1465,7 +1500,7 @@
         ]
       },
       "expected": "fail",
-      "observation": "belegte Drift"
+      "observation": "belegte Drift oder Lücke"
     },
     {
       "id": "docs-missing-source",
@@ -1473,8 +1508,25 @@
       "source": ".apm/skills/core-docs/SKILL.md",
       "input": {
         "kind": "docs",
-        "proven_drift": true,
+        "mode": "write",
+        "tree": "valid",
+        "initializes": false,
+        "setup_planned": false,
+        "setup_available": true,
+        "conflict_resolved": false,
+        "reported_blocked": false,
+        "docs_needed": true,
+        "dox_pass_reason": "",
+        "evidence": "drift",
         "sources_exist": false,
+        "task_confirmed": true,
+        "diff_evidence": true,
+        "unrelated_legacy": false,
+        "new_interface": false,
+        "connections_documented": false,
+        "parallel_docs": false,
+        "secret_values": false,
+        "secret_store_access": false,
         "changes_goal_decisions": false,
         "changed_paths": [
           "README.md"
@@ -1492,8 +1544,25 @@
       "source": ".apm/skills/core-docs/SKILL.md",
       "input": {
         "kind": "docs",
-        "proven_drift": true,
+        "mode": "write",
+        "tree": "valid",
+        "initializes": false,
+        "setup_planned": false,
+        "setup_available": true,
+        "conflict_resolved": false,
+        "reported_blocked": false,
+        "docs_needed": true,
+        "dox_pass_reason": "",
+        "evidence": "drift",
         "sources_exist": true,
+        "task_confirmed": true,
+        "diff_evidence": true,
+        "unrelated_legacy": false,
+        "new_interface": false,
+        "connections_documented": false,
+        "parallel_docs": false,
+        "secret_values": false,
+        "secret_store_access": false,
         "changes_goal_decisions": true,
         "changed_paths": [
           "README.md"
@@ -1511,11 +1580,1109 @@
       "source": ".apm/skills/core-docs/SKILL.md",
       "input": {
         "kind": "docs",
-        "proven_drift": true,
+        "mode": "write",
+        "tree": "valid",
+        "initializes": false,
+        "setup_planned": false,
+        "setup_available": true,
+        "conflict_resolved": false,
+        "reported_blocked": false,
+        "docs_needed": true,
+        "dox_pass_reason": "",
+        "evidence": "drift",
         "sources_exist": true,
+        "task_confirmed": true,
+        "diff_evidence": true,
+        "unrelated_legacy": false,
+        "new_interface": false,
+        "connections_documented": false,
+        "parallel_docs": false,
+        "secret_values": false,
+        "secret_store_access": false,
         "changes_goal_decisions": false,
         "changed_paths": [
           "goal.md"
+        ],
+        "scope": [
+          "README.md"
+        ]
+      },
+      "expected": "fail",
+      "observation": "Scope"
+    },
+    {
+      "id": "dox-valid-tree-new-gap",
+      "group": "docs",
+      "source": ".apm/skills/core-shared/references/workflow-contract.md",
+      "input": {
+        "kind": "docs",
+        "mode": "write",
+        "tree": "valid",
+        "initializes": false,
+        "setup_planned": false,
+        "setup_available": true,
+        "conflict_resolved": false,
+        "reported_blocked": false,
+        "docs_needed": true,
+        "dox_pass_reason": "",
+        "evidence": "new_gap",
+        "sources_exist": true,
+        "task_confirmed": true,
+        "diff_evidence": true,
+        "unrelated_legacy": false,
+        "new_interface": false,
+        "connections_documented": false,
+        "parallel_docs": false,
+        "secret_values": false,
+        "secret_store_access": false,
+        "changes_goal_decisions": false,
+        "changed_paths": [
+          "scripts/AGENTS.md"
+        ],
+        "scope": [
+          "scripts/AGENTS.md"
+        ]
+      },
+      "expected": "pass",
+      "observation": "gültige Beziehungen akzeptiert"
+    },
+    {
+      "id": "dox-new-gap-unconfirmed-task",
+      "group": "docs",
+      "source": ".apm/skills/core-docs/SKILL.md",
+      "input": {
+        "kind": "docs",
+        "mode": "write",
+        "tree": "valid",
+        "initializes": false,
+        "setup_planned": false,
+        "setup_available": true,
+        "conflict_resolved": false,
+        "reported_blocked": false,
+        "docs_needed": true,
+        "dox_pass_reason": "",
+        "evidence": "new_gap",
+        "sources_exist": true,
+        "task_confirmed": false,
+        "diff_evidence": true,
+        "unrelated_legacy": false,
+        "new_interface": false,
+        "connections_documented": false,
+        "parallel_docs": false,
+        "secret_values": false,
+        "secret_store_access": false,
+        "changes_goal_decisions": false,
+        "changed_paths": [
+          "README.md"
+        ],
+        "scope": [
+          "README.md"
+        ]
+      },
+      "expected": "fail",
+      "observation": "bestätigten Task"
+    },
+    {
+      "id": "dox-new-gap-no-diff",
+      "group": "docs",
+      "source": ".apm/skills/core-docs/SKILL.md",
+      "input": {
+        "kind": "docs",
+        "mode": "write",
+        "tree": "valid",
+        "initializes": false,
+        "setup_planned": false,
+        "setup_available": true,
+        "conflict_resolved": false,
+        "reported_blocked": false,
+        "docs_needed": true,
+        "dox_pass_reason": "",
+        "evidence": "new_gap",
+        "sources_exist": true,
+        "task_confirmed": true,
+        "diff_evidence": false,
+        "unrelated_legacy": false,
+        "new_interface": false,
+        "connections_documented": false,
+        "parallel_docs": false,
+        "secret_values": false,
+        "secret_store_access": false,
+        "changes_goal_decisions": false,
+        "changed_paths": [
+          "README.md"
+        ],
+        "scope": [
+          "README.md"
+        ]
+      },
+      "expected": "fail",
+      "observation": "aktuellen Diff"
+    },
+    {
+      "id": "dox-unrelated-legacy-gap",
+      "group": "docs",
+      "source": ".apm/skills/core-docs/SKILL.md",
+      "input": {
+        "kind": "docs",
+        "mode": "write",
+        "tree": "valid",
+        "initializes": false,
+        "setup_planned": false,
+        "setup_available": true,
+        "conflict_resolved": false,
+        "reported_blocked": false,
+        "docs_needed": true,
+        "dox_pass_reason": "",
+        "evidence": "new_gap",
+        "sources_exist": true,
+        "task_confirmed": true,
+        "diff_evidence": true,
+        "unrelated_legacy": true,
+        "new_interface": false,
+        "connections_documented": false,
+        "parallel_docs": false,
+        "secret_values": false,
+        "secret_store_access": false,
+        "changes_goal_decisions": false,
+        "changed_paths": [
+          "README.md"
+        ],
+        "scope": [
+          "README.md"
+        ]
+      },
+      "expected": "fail",
+      "observation": "Altlast"
+    },
+    {
+      "id": "dox-new-api-config-connections",
+      "group": "docs",
+      "source": ".apm/skills/core-shared/references/workflow-contract.md",
+      "input": {
+        "kind": "docs",
+        "mode": "write",
+        "tree": "valid",
+        "initializes": false,
+        "setup_planned": false,
+        "setup_available": true,
+        "conflict_resolved": false,
+        "reported_blocked": false,
+        "docs_needed": true,
+        "dox_pass_reason": "",
+        "evidence": "new_gap",
+        "sources_exist": true,
+        "task_confirmed": true,
+        "diff_evidence": true,
+        "unrelated_legacy": false,
+        "new_interface": true,
+        "connections_documented": true,
+        "parallel_docs": false,
+        "secret_values": false,
+        "secret_store_access": false,
+        "changes_goal_decisions": false,
+        "changed_paths": [
+          "api/AGENTS.md"
+        ],
+        "scope": [
+          "api/AGENTS.md"
+        ]
+      },
+      "expected": "pass",
+      "observation": "gültige Beziehungen akzeptiert"
+    },
+    {
+      "id": "dox-new-api-config-no-connections",
+      "group": "docs",
+      "source": ".apm/skills/core-shared/references/workflow-contract.md",
+      "input": {
+        "kind": "docs",
+        "mode": "write",
+        "tree": "valid",
+        "initializes": false,
+        "setup_planned": false,
+        "setup_available": true,
+        "conflict_resolved": false,
+        "reported_blocked": false,
+        "docs_needed": true,
+        "dox_pass_reason": "",
+        "evidence": "new_gap",
+        "sources_exist": true,
+        "task_confirmed": true,
+        "diff_evidence": true,
+        "unrelated_legacy": false,
+        "new_interface": true,
+        "connections_documented": false,
+        "parallel_docs": false,
+        "secret_values": false,
+        "secret_store_access": false,
+        "changes_goal_decisions": false,
+        "changed_paths": [
+          "api/AGENTS.md"
+        ],
+        "scope": [
+          "api/AGENTS.md"
+        ]
+      },
+      "expected": "fail",
+      "observation": "Verbindungen"
+    },
+    {
+      "id": "dox-missing-tree-planned-setup",
+      "group": "docs",
+      "source": ".apm/skills/core-plan/SKILL.md",
+      "input": {
+        "kind": "docs",
+        "mode": "write",
+        "tree": "missing",
+        "initializes": true,
+        "setup_planned": true,
+        "setup_available": true,
+        "conflict_resolved": false,
+        "reported_blocked": false,
+        "docs_needed": true,
+        "dox_pass_reason": "",
+        "evidence": "new_gap",
+        "sources_exist": true,
+        "task_confirmed": true,
+        "diff_evidence": true,
+        "unrelated_legacy": false,
+        "new_interface": false,
+        "connections_documented": false,
+        "parallel_docs": false,
+        "secret_values": false,
+        "secret_store_access": false,
+        "changes_goal_decisions": false,
+        "changed_paths": [
+          "AGENTS.md",
+          "src/AGENTS.md"
+        ],
+        "scope": [
+          "AGENTS.md",
+          "src/AGENTS.md"
+        ]
+      },
+      "expected": "pass",
+      "observation": "gültige Beziehungen akzeptiert"
+    },
+    {
+      "id": "dox-partial-tree-planned-setup",
+      "group": "docs",
+      "source": ".apm/skills/core-plan/SKILL.md",
+      "input": {
+        "kind": "docs",
+        "mode": "write",
+        "tree": "partial",
+        "initializes": true,
+        "setup_planned": true,
+        "setup_available": true,
+        "conflict_resolved": false,
+        "reported_blocked": false,
+        "docs_needed": true,
+        "dox_pass_reason": "",
+        "evidence": "new_gap",
+        "sources_exist": true,
+        "task_confirmed": true,
+        "diff_evidence": true,
+        "unrelated_legacy": false,
+        "new_interface": false,
+        "connections_documented": false,
+        "parallel_docs": false,
+        "secret_values": false,
+        "secret_store_access": false,
+        "changes_goal_decisions": false,
+        "changed_paths": [
+          "AGENTS.md",
+          "src/AGENTS.md"
+        ],
+        "scope": [
+          "AGENTS.md",
+          "src/AGENTS.md"
+        ]
+      },
+      "expected": "pass",
+      "observation": "gültige Beziehungen akzeptiert"
+    },
+    {
+      "id": "dox-missing-tree-unauthorized-init",
+      "group": "docs",
+      "source": ".apm/skills/core-execute/SKILL.md",
+      "input": {
+        "kind": "docs",
+        "mode": "write",
+        "tree": "missing",
+        "initializes": true,
+        "setup_planned": false,
+        "setup_available": true,
+        "conflict_resolved": false,
+        "reported_blocked": false,
+        "docs_needed": true,
+        "dox_pass_reason": "",
+        "evidence": "new_gap",
+        "sources_exist": true,
+        "task_confirmed": true,
+        "diff_evidence": true,
+        "unrelated_legacy": false,
+        "new_interface": false,
+        "connections_documented": false,
+        "parallel_docs": false,
+        "secret_values": false,
+        "secret_store_access": false,
+        "changes_goal_decisions": false,
+        "changed_paths": [
+          "AGENTS.md",
+          "src/AGENTS.md"
+        ],
+        "scope": [
+          "AGENTS.md",
+          "src/AGENTS.md"
+        ]
+      },
+      "expected": "fail",
+      "observation": "unautorisierte DOX-Initialisierung"
+    },
+    {
+      "id": "dox-init-on-valid-tree",
+      "group": "docs",
+      "source": ".apm/skills/core-execute/SKILL.md",
+      "input": {
+        "kind": "docs",
+        "mode": "write",
+        "tree": "valid",
+        "initializes": true,
+        "setup_planned": true,
+        "setup_available": true,
+        "conflict_resolved": false,
+        "reported_blocked": false,
+        "docs_needed": true,
+        "dox_pass_reason": "",
+        "evidence": "new_gap",
+        "sources_exist": true,
+        "task_confirmed": true,
+        "diff_evidence": true,
+        "unrelated_legacy": false,
+        "new_interface": false,
+        "connections_documented": false,
+        "parallel_docs": false,
+        "secret_values": false,
+        "secret_store_access": false,
+        "changes_goal_decisions": false,
+        "changed_paths": [
+          "AGENTS.md",
+          "src/AGENTS.md"
+        ],
+        "scope": [
+          "AGENTS.md",
+          "src/AGENTS.md"
+        ]
+      },
+      "expected": "fail",
+      "observation": "gültigem Baum"
+    },
+    {
+      "id": "dox-setup-unavailable-blocked",
+      "group": "docs",
+      "source": ".apm/skills/core-docs/SKILL.md",
+      "input": {
+        "kind": "docs",
+        "mode": "write",
+        "tree": "missing",
+        "initializes": false,
+        "setup_planned": false,
+        "setup_available": false,
+        "conflict_resolved": false,
+        "reported_blocked": true,
+        "docs_needed": true,
+        "dox_pass_reason": "",
+        "evidence": "drift",
+        "sources_exist": true,
+        "task_confirmed": true,
+        "diff_evidence": true,
+        "unrelated_legacy": false,
+        "new_interface": false,
+        "connections_documented": false,
+        "parallel_docs": false,
+        "secret_values": false,
+        "secret_store_access": false,
+        "changes_goal_decisions": false,
+        "changed_paths": [],
+        "scope": [
+          "README.md"
+        ]
+      },
+      "expected": "pass",
+      "observation": "gültige Beziehungen akzeptiert"
+    },
+    {
+      "id": "dox-setup-unavailable-init",
+      "group": "docs",
+      "source": ".apm/skills/core-docs/SKILL.md",
+      "input": {
+        "kind": "docs",
+        "mode": "write",
+        "tree": "missing",
+        "initializes": true,
+        "setup_planned": true,
+        "setup_available": false,
+        "conflict_resolved": false,
+        "reported_blocked": false,
+        "docs_needed": true,
+        "dox_pass_reason": "",
+        "evidence": "new_gap",
+        "sources_exist": true,
+        "task_confirmed": true,
+        "diff_evidence": true,
+        "unrelated_legacy": false,
+        "new_interface": false,
+        "connections_documented": false,
+        "parallel_docs": false,
+        "secret_values": false,
+        "secret_store_access": false,
+        "changes_goal_decisions": false,
+        "changed_paths": [
+          "AGENTS.md",
+          "src/AGENTS.md"
+        ],
+        "scope": [
+          "AGENTS.md",
+          "src/AGENTS.md"
+        ]
+      },
+      "expected": "fail",
+      "observation": "Setupfähigkeit"
+    },
+    {
+      "id": "dox-blocked-still-writes",
+      "group": "docs",
+      "source": ".apm/skills/core-docs/SKILL.md",
+      "input": {
+        "kind": "docs",
+        "mode": "write",
+        "tree": "missing",
+        "initializes": false,
+        "setup_planned": false,
+        "setup_available": false,
+        "conflict_resolved": false,
+        "reported_blocked": true,
+        "docs_needed": true,
+        "dox_pass_reason": "",
+        "evidence": "drift",
+        "sources_exist": true,
+        "task_confirmed": true,
+        "diff_evidence": true,
+        "unrelated_legacy": false,
+        "new_interface": false,
+        "connections_documented": false,
+        "parallel_docs": false,
+        "secret_values": false,
+        "secret_store_access": false,
+        "changes_goal_decisions": false,
+        "changed_paths": [
+          "README.md"
+        ],
+        "scope": [
+          "README.md"
+        ]
+      },
+      "expected": "fail",
+      "observation": "blockierter DOX-Task"
+    },
+    {
+      "id": "dox-missing-tree-silent",
+      "group": "docs",
+      "source": ".apm/skills/core-plan/SKILL.md",
+      "input": {
+        "kind": "docs",
+        "mode": "write",
+        "tree": "missing",
+        "initializes": false,
+        "setup_planned": false,
+        "setup_available": true,
+        "conflict_resolved": false,
+        "reported_blocked": false,
+        "docs_needed": true,
+        "dox_pass_reason": "",
+        "evidence": "drift",
+        "sources_exist": true,
+        "task_confirmed": true,
+        "diff_evidence": true,
+        "unrelated_legacy": false,
+        "new_interface": false,
+        "connections_documented": false,
+        "parallel_docs": false,
+        "secret_values": false,
+        "secret_store_access": false,
+        "changes_goal_decisions": false,
+        "changed_paths": [
+          "README.md"
+        ],
+        "scope": [
+          "README.md"
+        ]
+      },
+      "expected": "fail",
+      "observation": "weder geplant noch blockiert"
+    },
+    {
+      "id": "dox-conflict-tree-unresolved",
+      "group": "docs",
+      "source": ".apm/skills/core-docs/SKILL.md",
+      "input": {
+        "kind": "docs",
+        "mode": "write",
+        "tree": "conflict",
+        "initializes": true,
+        "setup_planned": true,
+        "setup_available": true,
+        "conflict_resolved": false,
+        "reported_blocked": false,
+        "docs_needed": true,
+        "dox_pass_reason": "",
+        "evidence": "new_gap",
+        "sources_exist": true,
+        "task_confirmed": true,
+        "diff_evidence": true,
+        "unrelated_legacy": false,
+        "new_interface": false,
+        "connections_documented": false,
+        "parallel_docs": false,
+        "secret_values": false,
+        "secret_store_access": false,
+        "changes_goal_decisions": false,
+        "changed_paths": [
+          "AGENTS.md",
+          "src/AGENTS.md"
+        ],
+        "scope": [
+          "AGENTS.md",
+          "src/AGENTS.md"
+        ]
+      },
+      "expected": "fail",
+      "observation": "Konflikt"
+    },
+    {
+      "id": "dox-conflict-tree-resolved",
+      "group": "docs",
+      "source": ".apm/skills/core-docs/SKILL.md",
+      "input": {
+        "kind": "docs",
+        "mode": "write",
+        "tree": "conflict",
+        "initializes": true,
+        "setup_planned": true,
+        "setup_available": true,
+        "conflict_resolved": true,
+        "reported_blocked": false,
+        "docs_needed": true,
+        "dox_pass_reason": "",
+        "evidence": "new_gap",
+        "sources_exist": true,
+        "task_confirmed": true,
+        "diff_evidence": true,
+        "unrelated_legacy": false,
+        "new_interface": false,
+        "connections_documented": false,
+        "parallel_docs": false,
+        "secret_values": false,
+        "secret_store_access": false,
+        "changes_goal_decisions": false,
+        "changed_paths": [
+          "AGENTS.md",
+          "src/AGENTS.md"
+        ],
+        "scope": [
+          "AGENTS.md",
+          "src/AGENTS.md"
+        ]
+      },
+      "expected": "pass",
+      "observation": "gültige Beziehungen akzeptiert"
+    },
+    {
+      "id": "dox-secret-reference-names",
+      "group": "docs",
+      "source": ".apm/skills/core-shared/references/workflow-contract.md",
+      "input": {
+        "kind": "docs",
+        "mode": "write",
+        "tree": "valid",
+        "initializes": false,
+        "setup_planned": false,
+        "setup_available": true,
+        "conflict_resolved": false,
+        "reported_blocked": false,
+        "docs_needed": true,
+        "dox_pass_reason": "",
+        "evidence": "new_gap",
+        "sources_exist": true,
+        "task_confirmed": true,
+        "diff_evidence": true,
+        "unrelated_legacy": false,
+        "new_interface": false,
+        "connections_documented": false,
+        "parallel_docs": false,
+        "secret_values": false,
+        "secret_store_access": false,
+        "changes_goal_decisions": false,
+        "changed_paths": [
+          "AGENTS.md"
+        ],
+        "scope": [
+          "AGENTS.md"
+        ]
+      },
+      "expected": "pass",
+      "observation": "gültige Beziehungen akzeptiert"
+    },
+    {
+      "id": "dox-secret-value",
+      "group": "docs",
+      "source": ".apm/skills/core-shared/references/workflow-contract.md",
+      "input": {
+        "kind": "docs",
+        "mode": "write",
+        "tree": "valid",
+        "initializes": false,
+        "setup_planned": false,
+        "setup_available": true,
+        "conflict_resolved": false,
+        "reported_blocked": false,
+        "docs_needed": true,
+        "dox_pass_reason": "",
+        "evidence": "drift",
+        "sources_exist": true,
+        "task_confirmed": true,
+        "diff_evidence": true,
+        "unrelated_legacy": false,
+        "new_interface": false,
+        "connections_documented": false,
+        "parallel_docs": false,
+        "secret_values": true,
+        "secret_store_access": false,
+        "changes_goal_decisions": false,
+        "changed_paths": [
+          "README.md"
+        ],
+        "scope": [
+          "README.md"
+        ]
+      },
+      "expected": "fail",
+      "observation": "Secretwert"
+    },
+    {
+      "id": "dox-secret-store-search",
+      "group": "docs",
+      "source": ".apm/skills/core-shared/references/workflow-contract.md",
+      "input": {
+        "kind": "docs",
+        "mode": "write",
+        "tree": "valid",
+        "initializes": false,
+        "setup_planned": false,
+        "setup_available": true,
+        "conflict_resolved": false,
+        "reported_blocked": false,
+        "docs_needed": true,
+        "dox_pass_reason": "",
+        "evidence": "drift",
+        "sources_exist": true,
+        "task_confirmed": true,
+        "diff_evidence": true,
+        "unrelated_legacy": false,
+        "new_interface": false,
+        "connections_documented": false,
+        "parallel_docs": false,
+        "secret_values": false,
+        "secret_store_access": true,
+        "changes_goal_decisions": false,
+        "changed_paths": [
+          "README.md"
+        ],
+        "scope": [
+          "README.md"
+        ]
+      },
+      "expected": "fail",
+      "observation": "Secretablage"
+    },
+    {
+      "id": "dox-parallel-docs",
+      "group": "docs",
+      "source": ".apm/skills/core-shared/references/workflow-contract.md",
+      "input": {
+        "kind": "docs",
+        "mode": "write",
+        "tree": "valid",
+        "initializes": false,
+        "setup_planned": false,
+        "setup_available": true,
+        "conflict_resolved": false,
+        "reported_blocked": false,
+        "docs_needed": true,
+        "dox_pass_reason": "",
+        "evidence": "drift",
+        "sources_exist": true,
+        "task_confirmed": true,
+        "diff_evidence": true,
+        "unrelated_legacy": false,
+        "new_interface": false,
+        "connections_documented": false,
+        "parallel_docs": true,
+        "secret_values": false,
+        "secret_store_access": false,
+        "changes_goal_decisions": false,
+        "changed_paths": [
+          "docs/architecture.md"
+        ],
+        "scope": [
+          "docs/architecture.md"
+        ]
+      },
+      "expected": "fail",
+      "observation": "parallele Dokumentationsstruktur"
+    },
+    {
+      "id": "dox-harmless-no-edit",
+      "group": "docs",
+      "source": ".apm/skills/core-shared/references/workflow-contract.md",
+      "input": {
+        "kind": "docs",
+        "mode": "write",
+        "tree": "valid",
+        "initializes": false,
+        "setup_planned": false,
+        "setup_available": true,
+        "conflict_resolved": false,
+        "reported_blocked": false,
+        "docs_needed": false,
+        "dox_pass_reason": "geprüft: AGENTS.md, scripts/AGENTS.md; keine Vertrags- oder Ablaufänderung",
+        "evidence": "drift",
+        "sources_exist": true,
+        "task_confirmed": true,
+        "diff_evidence": true,
+        "unrelated_legacy": false,
+        "new_interface": false,
+        "connections_documented": false,
+        "parallel_docs": false,
+        "secret_values": false,
+        "secret_store_access": false,
+        "changes_goal_decisions": false,
+        "changed_paths": [],
+        "scope": [
+          "README.md"
+        ]
+      },
+      "expected": "pass",
+      "observation": "gültige Beziehungen akzeptiert"
+    },
+    {
+      "id": "dox-harmless-missing-tree-no-setup",
+      "group": "docs",
+      "source": ".apm/skills/core-shared/references/workflow-contract.md",
+      "input": {
+        "kind": "docs",
+        "mode": "write",
+        "tree": "missing",
+        "initializes": false,
+        "setup_planned": false,
+        "setup_available": true,
+        "conflict_resolved": false,
+        "reported_blocked": false,
+        "docs_needed": false,
+        "dox_pass_reason": "geprüft: AGENTS.md, scripts/AGENTS.md; keine Vertrags- oder Ablaufänderung",
+        "evidence": "drift",
+        "sources_exist": true,
+        "task_confirmed": true,
+        "diff_evidence": true,
+        "unrelated_legacy": false,
+        "new_interface": false,
+        "connections_documented": false,
+        "parallel_docs": false,
+        "secret_values": false,
+        "secret_store_access": false,
+        "changes_goal_decisions": false,
+        "changed_paths": [],
+        "scope": [
+          "README.md"
+        ]
+      },
+      "expected": "pass",
+      "observation": "gültige Beziehungen akzeptiert"
+    },
+    {
+      "id": "dox-harmless-without-reason",
+      "group": "docs",
+      "source": ".apm/skills/core-shared/references/workflow-contract.md",
+      "input": {
+        "kind": "docs",
+        "mode": "write",
+        "tree": "valid",
+        "initializes": false,
+        "setup_planned": false,
+        "setup_available": true,
+        "conflict_resolved": false,
+        "reported_blocked": false,
+        "docs_needed": false,
+        "dox_pass_reason": "",
+        "evidence": "drift",
+        "sources_exist": true,
+        "task_confirmed": true,
+        "diff_evidence": true,
+        "unrelated_legacy": false,
+        "new_interface": false,
+        "connections_documented": false,
+        "parallel_docs": false,
+        "secret_values": false,
+        "secret_store_access": false,
+        "changes_goal_decisions": false,
+        "changed_paths": [],
+        "scope": [
+          "README.md"
+        ]
+      },
+      "expected": "fail",
+      "observation": "DOX-Pass ohne geprüfte Pfade/Grund"
+    },
+    {
+      "id": "dox-harmless-unneeded-edit",
+      "group": "docs",
+      "source": ".apm/skills/core-docs/SKILL.md",
+      "input": {
+        "kind": "docs",
+        "mode": "write",
+        "tree": "valid",
+        "initializes": false,
+        "setup_planned": false,
+        "setup_available": true,
+        "conflict_resolved": false,
+        "reported_blocked": false,
+        "docs_needed": false,
+        "dox_pass_reason": "geprüft: AGENTS.md, scripts/AGENTS.md; keine Vertrags- oder Ablaufänderung",
+        "evidence": "drift",
+        "sources_exist": true,
+        "task_confirmed": true,
+        "diff_evidence": true,
+        "unrelated_legacy": false,
+        "new_interface": false,
+        "connections_documented": false,
+        "parallel_docs": false,
+        "secret_values": false,
+        "secret_store_access": false,
+        "changes_goal_decisions": false,
+        "changed_paths": [
+          "README.md"
+        ],
+        "scope": [
+          "README.md"
+        ]
+      },
+      "expected": "fail",
+      "observation": "belegte Drift oder Lücke"
+    },
+    {
+      "id": "dox-needed-without-edit",
+      "group": "docs",
+      "source": ".apm/skills/core-execute/SKILL.md",
+      "input": {
+        "kind": "docs",
+        "mode": "write",
+        "tree": "valid",
+        "initializes": false,
+        "setup_planned": false,
+        "setup_available": true,
+        "conflict_resolved": false,
+        "reported_blocked": false,
+        "docs_needed": true,
+        "dox_pass_reason": "",
+        "evidence": "drift",
+        "sources_exist": true,
+        "task_confirmed": true,
+        "diff_evidence": true,
+        "unrelated_legacy": false,
+        "new_interface": false,
+        "connections_documented": false,
+        "parallel_docs": false,
+        "secret_values": false,
+        "secret_store_access": false,
+        "changes_goal_decisions": false,
+        "changed_paths": [],
+        "scope": [
+          "README.md"
+        ]
+      },
+      "expected": "fail",
+      "observation": "erforderliche Dokumentation fehlt"
+    },
+    {
+      "id": "dox-run-artifact-only",
+      "group": "docs",
+      "source": ".apm/skills/core-shared/references/workflow-contract.md",
+      "input": {
+        "kind": "docs",
+        "mode": "write",
+        "tree": "valid",
+        "initializes": false,
+        "setup_planned": false,
+        "setup_available": true,
+        "conflict_resolved": false,
+        "reported_blocked": false,
+        "docs_needed": true,
+        "dox_pass_reason": "",
+        "evidence": "drift",
+        "sources_exist": true,
+        "task_confirmed": true,
+        "diff_evidence": true,
+        "unrelated_legacy": false,
+        "new_interface": false,
+        "connections_documented": false,
+        "parallel_docs": false,
+        "secret_values": false,
+        "secret_store_access": false,
+        "changes_goal_decisions": false,
+        "changed_paths": [
+          ".agentic-workflow/runs/run-x/tasks/T01/attempt-01.yaml"
+        ],
+        "scope": [
+          ".agentic-workflow/runs/run-x/tasks/T01/attempt-01.yaml"
+        ]
+      },
+      "expected": "fail",
+      "observation": "Laufartefakt"
+    },
+    {
+      "id": "dox-read-only",
+      "group": "docs",
+      "source": ".apm/skills/core-shared/references/workflow-contract.md",
+      "input": {
+        "kind": "docs",
+        "mode": "read-only",
+        "tree": "missing",
+        "initializes": false,
+        "setup_planned": false,
+        "setup_available": true,
+        "conflict_resolved": false,
+        "reported_blocked": false,
+        "docs_needed": true,
+        "dox_pass_reason": "",
+        "evidence": "drift",
+        "sources_exist": true,
+        "task_confirmed": true,
+        "diff_evidence": true,
+        "unrelated_legacy": false,
+        "new_interface": false,
+        "connections_documented": false,
+        "parallel_docs": false,
+        "secret_values": false,
+        "secret_store_access": false,
+        "changes_goal_decisions": false,
+        "changed_paths": [],
+        "scope": [
+          "README.md"
+        ]
+      },
+      "expected": "pass",
+      "observation": "gültige Beziehungen akzeptiert"
+    },
+    {
+      "id": "dox-read-only-writes",
+      "group": "docs",
+      "source": ".apm/skills/core-shared/references/workflow-contract.md",
+      "input": {
+        "kind": "docs",
+        "mode": "read-only",
+        "tree": "valid",
+        "initializes": false,
+        "setup_planned": false,
+        "setup_available": true,
+        "conflict_resolved": false,
+        "reported_blocked": false,
+        "docs_needed": true,
+        "dox_pass_reason": "",
+        "evidence": "drift",
+        "sources_exist": true,
+        "task_confirmed": true,
+        "diff_evidence": true,
+        "unrelated_legacy": false,
+        "new_interface": false,
+        "connections_documented": false,
+        "parallel_docs": false,
+        "secret_values": false,
+        "secret_store_access": false,
+        "changes_goal_decisions": false,
+        "changed_paths": [
+          "README.md"
+        ],
+        "scope": [
+          "README.md"
+        ]
+      },
+      "expected": "fail",
+      "observation": "Read-only-Arbeit"
+    },
+    {
+      "id": "dox-read-only-init",
+      "group": "docs",
+      "source": ".apm/skills/core-shared/references/workflow-contract.md",
+      "input": {
+        "kind": "docs",
+        "mode": "read-only",
+        "tree": "missing",
+        "initializes": true,
+        "setup_planned": false,
+        "setup_available": true,
+        "conflict_resolved": false,
+        "reported_blocked": false,
+        "docs_needed": true,
+        "dox_pass_reason": "",
+        "evidence": "drift",
+        "sources_exist": true,
+        "task_confirmed": true,
+        "diff_evidence": true,
+        "unrelated_legacy": false,
+        "new_interface": false,
+        "connections_documented": false,
+        "parallel_docs": false,
+        "secret_values": false,
+        "secret_store_access": false,
+        "changes_goal_decisions": false,
+        "changed_paths": [],
+        "scope": [
+          "README.md"
+        ]
+      },
+      "expected": "fail",
+      "observation": "Read-only-Arbeit"
+    },
+    {
+      "id": "dox-scope-overreach",
+      "group": "docs",
+      "source": ".apm/skills/core-docs/SKILL.md",
+      "input": {
+        "kind": "docs",
+        "mode": "write",
+        "tree": "valid",
+        "initializes": false,
+        "setup_planned": false,
+        "setup_available": true,
+        "conflict_resolved": false,
+        "reported_blocked": false,
+        "docs_needed": true,
+        "dox_pass_reason": "",
+        "evidence": "drift",
+        "sources_exist": true,
+        "task_confirmed": true,
+        "diff_evidence": true,
+        "unrelated_legacy": false,
+        "new_interface": false,
+        "connections_documented": false,
+        "parallel_docs": false,
+        "secret_values": false,
+        "secret_store_access": false,
+        "changes_goal_decisions": false,
+        "changed_paths": [
+          "README.md",
+          "docs/extra.md"
         ],
         "scope": [
           "README.md"
@@ -13078,6 +14245,40 @@
         "t08-artifacts-two-current",
         "t08-artifacts-current-unapproved",
         "t08-artifacts-index-duplicates-status"
+      ]
+    },
+    "S-dox-projektdokumentation": {
+      "cases": [
+        "dox-valid-tree-new-gap",
+        "dox-new-gap-unconfirmed-task",
+        "dox-new-gap-no-diff",
+        "dox-unrelated-legacy-gap",
+        "dox-new-api-config-connections",
+        "dox-new-api-config-no-connections",
+        "dox-missing-tree-planned-setup",
+        "dox-partial-tree-planned-setup",
+        "dox-missing-tree-unauthorized-init",
+        "dox-init-on-valid-tree",
+        "dox-setup-unavailable-blocked",
+        "dox-setup-unavailable-init",
+        "dox-blocked-still-writes",
+        "dox-missing-tree-silent",
+        "dox-conflict-tree-unresolved",
+        "dox-conflict-tree-resolved",
+        "dox-secret-reference-names",
+        "dox-secret-value",
+        "dox-secret-store-search",
+        "dox-parallel-docs",
+        "dox-harmless-no-edit",
+        "dox-harmless-missing-tree-no-setup",
+        "dox-harmless-without-reason",
+        "dox-harmless-unneeded-edit",
+        "dox-needed-without-edit",
+        "dox-run-artifact-only",
+        "dox-read-only",
+        "dox-read-only-writes",
+        "dox-read-only-init",
+        "dox-scope-overreach"
       ]
     }
   }

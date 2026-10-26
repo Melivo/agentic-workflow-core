@@ -74,7 +74,7 @@ Nach bestandenem Review:
 ### Öffentliche Kernworkflows
 
 | ID | Verantwortung | Mutiert Produktcode? | Primärer Output |
-|---|---|---:|---|
+| --- | --- | ---: | --- |
 | `core-brainstorm` | Absicht, Scope und Lösungsrichtung klären | nein | kompakter Decision-Handoff |
 | `core-plan` | Repositoryanalyse, Research, Entscheidungen, Taskgraph und eng begrenzter Planreview-Dispatch an `qa-reviewer`/`core-review` | nein | bestätigungsfähiger `plan/v1` |
 | `core-execute` | bestätigten Taskgraph ausführen und integrieren | ja | Run-Artefakte und Review-Handoff |
@@ -362,13 +362,13 @@ Constraints: relevante Planabschnitte
 
 ## 11. Workflow: `core-execute`
 
-### Verantwortung
+### Verantwortung des Execute-Workflows
 
 `core-execute` ist der einzige öffentliche Implementierungs- und Ausführungsworkflow. Er besitzt Planvalidierung, Driftprüfung, Scheduling, Fachagenten-Dispatch, Isolation, Integration, Evidenz, Wiederaufnahme und die begrenzte Reparaturschleife.
 
 Er plant nicht neu, urteilt nicht unabhängig über seine eigene Gesamtänderung und führt keine SCM- oder Deploymentoperation aus.
 
-### Ablauf
+### Ablauf des Execute-Workflows
 
 1. bestätigten Plan und Projektpreflight laden,
 2. Schema, Agenten, MCPs, Scopes, Abhängigkeiten und Checks validieren; bei Coding-Tasks S00 direkt auf die betroffenen Strukturen und Verträge anwenden,
@@ -484,12 +484,12 @@ findings:
 Workflows besitzen den Lebenszyklus; Fachagenten besitzen Rollen. **Während der Ausführung eines Plans darf kein Fachagent eigene Subagenten starten; jeder Dispatch bleibt ausschließlich bei `core-execute`.** Einzige Ausnahme außerhalb der Ausführung: `core-plan` darf ausschließlich für das Planreview `qa-reviewer`/`core-review` in frischem Kontext beauftragen. Agenten erweitern keinen Scope.
 
 | Agent | Primäre Verwendung | Grenze |
-|---|---|---|
+| --- | --- | --- |
 | `architecture-reviewer` | materielle Architekturentscheidung und strukturelles Review | keine Produktplanung, keine ungeplante Implementierung |
 | `backend-engineer` | APIs, Authentifizierung, serverseitige Integration | keine unbestätigten Schemaentscheidungen |
 | `db-engineer` | Datenmodell, Migration, Query und Index | keine produktive/destruktive Operation ohne Autorisierung |
 | `debug-investigator` | unklare Ursachen, Regressionen, intermittierende Fehler | kein unabhängiges Refactoring |
-| `docs-curator` | durch Änderungen verursachte Dokumentationsdrift | kein Produktcode |
+| `docs-curator` | durch Änderungen belegte Dokumentationsdrift oder Dokumentationslücken entlang der DOX-Hierarchie | kein Produktcode |
 | `frontend-engineer` | Web-UI und frontendseitige Integration | kein Frameworkwechsel ohne Entscheidung |
 | `mobile-engineer` | Flutter, React Native und Swift | nur passende Plattformreferenz |
 | `pm-planner` | bestätigungsfähiger Taskgraph | keine Implementierung |
@@ -532,7 +532,7 @@ Gortex-Views müssen zum aktuellen Checkout oder Worktree passen. Ein Fallback- 
 Gortex-Skills werden als bedingt geladene Arbeitsmethoden verwendet, nicht pauschal in jeden Kontext geladen:
 
 | Situation | Bevorzugte Gortex-Skills |
-|---|---|
+| --- | --- |
 | Repository kennenlernen | `gortex-onboarding`, `gortex-explore` |
 | Architektur und Grenzen | `gortex-architecture-review`, `gortex-co-change` |
 | Planung und Änderungsfolgen | `gortex-impact`, `gortex-dataflow-trace`, `gortex-cross-repo-usage` |
@@ -635,7 +635,7 @@ Geschrieben werden nur knappe, langlebige und bestätigte Informationen mit erke
 ```
 
 | Information | Source of Truth |
-|---|---|
+| --- | --- |
 | Produktcode und Konfiguration | Repository und Git-Diff |
 | Systemdesign dieses Pakets | `DESIGN.md` |
 | Projektinvarianten | projektspezifische `AGENTS.md` und dokumentierte Verträge |
@@ -778,7 +778,7 @@ Jede Regel hat genau einen Eigentümer. Paketdefaults autorisieren keine Migrati
 ## 21. Harmonisierung der Entwurfskonflikte
 
 | Konflikt in den Entwürfen | Finale Entscheidung |
-|---|---|
+| --- | --- |
 | `work` oder `core-execute` | ausschließlich `core-execute`; kein Alias |
 | `prime` oder Preflight | kein `prime`; kompakter Preflight in Projekt-`AGENTS.md` |
 | `DESIGN.md` nur visuell | in diesem Repository Systemdesign; visuelle Designsysteme bleiben domänenspezifisch |

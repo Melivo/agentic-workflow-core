@@ -19,6 +19,12 @@ Die Workflowverkabelung bleibt unter
 - [ci_toolchain.json](ci_toolchain.json) und Requirements/Lockdateien bestimmen
   Versionen und Integrität; keine stillen Installationen in Prüftasks.
 - [ci_contract_targets.json](ci_contract_targets.json) ordnet Vertragsgruppen zu.
+- `check_core_contracts.py` prüft den
+  [DOX-Vertrag](../.apm/skills/core-shared/references/workflow-contract.md#projektdokumentation-und-dox)
+  über Klauselmuster in den Gruppen `shared`, `workflows` und `domains` sowie
+  über modellierte `kind: docs`-Beziehungen (Baumzustand, Setupfreigabe, Belege,
+  Secret- und Scopegrenzen). Das ist statische Konsistenz, kein Nachweis
+  tatsächlicher Agentenbefolgung oder der Qualität realer Guides.
 - Der Paketproducer prüft den kanonischen DOX-Skillindex und alle Skilldateien
   bytegenau sowie relative Links innerhalb der Installation. Repositorywerkzeuge
   werden aus portablen Guides über ihre Repositoryquellen referenziert.

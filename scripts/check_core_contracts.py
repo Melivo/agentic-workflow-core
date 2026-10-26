@@ -265,6 +265,48 @@ def validate_goal_change(data):
         require(data['successor_confirmed'], 'Nachfolgeziel nicht bestätigt')
         require(before['id'] in data['retained_goal_ids'], 'referenziertes historisches Ziel entfernt')
 
+DOX_GAP_STATES = ('missing', 'partial', 'conflict')
+RUN_ARTIFACT_PREFIX = '.agentic-workflow/'
+DOCS_FIELDS = ('mode', 'tree', 'initializes', 'setup_planned', 'setup_available', 'conflict_resolved', 'reported_blocked', 'docs_needed', 'dox_pass_reason', 'evidence', 'sources_exist', 'task_confirmed', 'diff_evidence', 'unrelated_legacy', 'new_interface', 'connections_documented', 'parallel_docs', 'secret_values', 'secret_store_access', 'changes_goal_decisions', 'changed_paths', 'scope')
+
+def validate_docs(data):
+    """Modeled DOX documentation relations of one task; not observed agent behavior."""
+    missing = [f for f in DOCS_FIELDS if f not in data]
+    require(not missing, 'Docsmodell unvollständig: ' + ', '.join(missing))
+    changed = data['changed_paths']
+    require(set(changed) <= set(data['scope']), 'Docs erweitert Scope')
+    require(not data['changes_goal_decisions'], 'Docs überschreibt bestätigte Zielentscheidung')
+    require(not data['secret_values'] and not data['secret_store_access'], 'Docs enthält Secretwert oder durchsucht Secretablage')
+    require(not data['parallel_docs'], 'parallele Dokumentationsstruktur ohne Auftrag')
+    initializes = data['initializes']
+    if data['mode'] == 'read-only':
+        require(not changed and not initializes, 'Read-only-Arbeit schreibt Docs oder DOX-Setup')
+        return
+    require(data['mode'] == 'write', 'unbekannter Docsmodus: ' + str(data['mode']))
+    tree = data['tree']
+    require(tree == 'valid' or tree in DOX_GAP_STATES, 'unbekannter DOX-Zustand: ' + str(tree))
+    if initializes:
+        require(tree != 'valid', 'DOX-Initialisierung trotz gültigem Baum')
+        require(data['setup_planned'], 'unautorisierte DOX-Initialisierung ohne bestätigten Plan')
+        require(data['setup_available'], 'DOX-Setupfähigkeit oder gültige Quelle fehlt')
+        require(tree != 'conflict' or data['conflict_resolved'], 'DOX-Konflikt ungeklärt')
+    if data['reported_blocked']:
+        require(not changed and not initializes, 'blockierter DOX-Task schreibt dennoch')
+        return
+    if not data['docs_needed']:
+        # Harmless change: no guide edit and no setup duty, but a reasoned DOX pass.
+        require(not changed, 'Docs ohne belegte Drift oder Lücke')
+        require(data['dox_pass_reason'], 'DOX-Pass ohne geprüfte Pfade/Grund')
+        return
+    require(tree == 'valid' or initializes, 'unvollständiger DOX-Baum weder geplant noch blockiert')
+    require(changed, 'erforderliche Dokumentation fehlt')
+    require(not all(p.startswith(RUN_ARTIFACT_PREFIX) for p in changed), 'Laufartefakt ersetzt Projektdokumentation')
+    require(data['evidence'] in ('drift', 'new_gap'), 'Docs ohne belegte Drift oder Lücke')
+    require(data['sources_exist'], 'Docs ohne autoritative Quelle')
+    require(data['evidence'] != 'new_gap' or (data['task_confirmed'] and data['diff_evidence']), 'neue Lücke ohne bestätigten Task/aktuellen Diff')
+    require(not data['unrelated_legacy'], 'unabhängige Altlast nebenbei dokumentiert')
+    require(not data['new_interface'] or data['connections_documented'], 'neue Schnittstelle/Konfiguration ohne dokumentierte Verbindungen')
+
 def validate_artifacts(documents):
     for document in documents:
         check_format(document['schema'], document)
@@ -316,9 +358,7 @@ def validate_scenario(data):
         require(data['next_owner'] == ('core-brainstorm' if data['material_uncertainty'] else 'core-plan'), 'Auditroute widerspricht Entscheidungsbedarf')
         require(not data['product_write'], 'Audit implementiert')
     elif kind == 'docs':
-        require(data['proven_drift'] and data['sources_exist'], 'Docs ohne belegte Drift/Quelle')
-        require(not data['changes_goal_decisions'], 'Docs überschreibt bestätigte Zielentscheidung')
-        require(set(data['changed_paths']) <= set(data['scope']), 'Docs erweitert Scope')
+        validate_docs(data)
     elif kind == 'legacy':
         require(data['schema'] == 'milestone/v1' and not data['mixed_formats'], 'Legacyformat vermischt')
         require(not data['automatic_migration'] and not data['automatic_rename'], 'automatische Legacy-Migration/Umbenennung')
@@ -472,11 +512,17 @@ POLICIES = {
                (r'Eigenentwicklung[^.!\n]*belegte Lücke', 'Standard vor unbegründeter Eigenentwicklung'), (r'(?:keine|kein)[^.!\n]*präventiv', 'kein präventiver Zusatz'), (r'Übernommen\w* technisch\w* Voraussetzung\w*[^.!\n]*neu begründet', 'übernommene Voraussetzung neu begründen'), (r'(?:entfernt|vereinfach)[^.!\n]*nicht durch weitere Mechanismen', 'Vereinfachen statt kompensieren'),
                (r'beobachtbar\w* Verhalten[^.!\n]*Fehler\w*[^.!\n]*getrennt von technischen Entscheidungen', 'Verhalten getrennt von Lösung'), (r'technisch\w* Nutzerconstraints?[^.!\n]*verbindlich', 'Nutzerconstraint bleibt verbindlich'), (r'Agentenpräferenz[^.!\n]*nicht[^.!\n]*Nutzeranforderung', 'Agentenpräferenz keine Nutzeranforderung'), (r'Kleinfix[^.!\n]*nur[^.!\n]*Regressionstest', 'schlanker Kleinfix'),
                (r'(?:jede|alle) ursprünglich\w* Anforderung\w*[^.!\n]*Fehlerf', 'vollständige Originalabdeckung'), (r'Grün\w* selbst gewählt\w* Kriterien genügen nicht[^.!\n]*ursprünglich\w* Fehlerfall', 'grüne Eigenkriterien genügen nicht'), (r'Unbegründet\w* Zusätze entfallen', 'keine ungefragten Zusätze'), (r'keine zusätzlichen YAML-Felder', 'Abdeckung ohne neue Felder'),
-               (r'bestätigt\w* Verhalten[^.!\n]*Vorher/Nachher', 'Verhaltensänderung über Ersatzplanung'), (r'technische Alternative ohne Verhaltens[^.!\n]*keine neue Nutzeranforderung', 'technische Alternative ohne neue Freigabe')],
+               (r'bestätigt\w* Verhalten[^.!\n]*Vorher/Nachher', 'Verhaltensänderung über Ersatzplanung'), (r'technische Alternative ohne Verhaltens[^.!\n]*keine neue Nutzeranforderung', 'technische Alternative ohne neue Freigabe'),
+               # DOX documentation contract (T02 of plan-dox-projektdokumentation).
+               (r'Root-to-Target-Kette[^.!\n]*AGENTS\.md', 'DOX Root-to-Target-Dokumentation'), (r'nicht ohne erforderliche Dokumentationsaktualisierung abgeschlossen', 'kein Abschluss ohne Dokumentation'), (r'kein Guide-Edit nötig[^.!\n]*geprüfte Pfade[^.!\n]*Grund', 'begründeter DOX-Pass'),
+               (r'Read-only-Arbeit[^.!\n]*harmlose Änderungen[^.!\n]*weder Schreib- noch Setup-Pflicht', 'read-only ohne DOX-Setuppflicht'), (r'Laufartefakte ersetzen keine Projektdokumentation', 'Laufartefakt ist keine Projektdokumentation'), (r'neue Dokumentationslücke[^.!\n]*bestätigt\w* Task[^.!\n]*Diff[^.!\n]*autoritativ', 'belegte neue Dokumentationslücke'),
+               (r'Erst Planbestätigung autorisiert[^.!\n]*Setupwirkung', 'DOX-Setup nur nach Planbestätigung'), (r'Fehlt es oder eine gültige Quelle[^.!\n]*blockiert', 'fehlende DOX-Setupfähigkeit blockiert'), (r'Secrets nennt nur[^.!\n]*Referenznamen[^.!\n]*weder Secretwerte', 'kein Secretwert in Dokumentation')],
     'workflows': [(r'(?:Start|Resume)[^.!\n]*(?:Version|Auswahl|Definition)', 'Start/Resume Versionsprüfung'), (r'(?:Folgeetappe|nächste Etappe)[^.!\n]*(?:Freigabe|Bestätigung)', 'Folgefreigabe'), (r'(?:Review|core-review)[^.!\n]*(?:gepinnt|festgelegt|Definitionsversion)', 'Review gegen gepinnte Fassung'),
                   (r'Ausschließlich für das \[?Planreview\]?(?:\([^)\s]*\))?[^.!\n]*qa-reviewer', 'schmale Planreview-Dispatchausnahme'), (r'ohne historisch\w* Planreview[^.!\n]*Kompatibilitätsprüfung', 'Legacy-Kompatibilitätsprüfung'), (r'Bloat[^.!\n]*(?:Verwerfen|Rückbau)', 'Bloat verwerfen statt ausbauen'),
-                  (r'Trenne Verhalten[^.!\n]*Anforderungsherkunft[^.!\n]*technischen Entscheidungen', 'Plan trennt Anforderung und Lösung'), (r'Alle ursprünglichen Anforderungen[^.!\n]*gedeckt[^.!\n]*unbegründete Zusätze fehlen', 'Plan prüft Originalabdeckung')],
-    'domains': [(r'(?:Bedarf|Übergabe)[^.!\n]*(?:Execute|core-execute)', 'vermittelter Domainbedarf'), (r'(?:fehlend\w* Task|fehlt[^.!\n]*Task|materiell\w* Vertragsänderung)[^.!\n]*(?:Plan|core-plan)', 'fehlender Task zurück an Plan'), (r'(?:Fachagent|Fachskill)[^.!\n]*(?:nicht|keine|weder)[^.!\n]*(?:Version|Ziel|Index)', 'Zielschutz')],
+                  (r'Trenne Verhalten[^.!\n]*Anforderungsherkunft[^.!\n]*technischen Entscheidungen', 'Plan trennt Anforderung und Lösung'), (r'Alle ursprünglichen Anforderungen[^.!\n]*gedeckt[^.!\n]*unbegründete Zusätze fehlen', 'Plan prüft Originalabdeckung'),
+                  (r'DOX-Zustand[^.!\n]*vorhanden, fehlend, teilweise oder widersprüchlich', 'Plan prüft DOX-Zustand'), (r'Initialisierung oder Ergänzung darf nur ausgeführt werden, wenn konkrete Pfade[^.!\n]*bestätigten Task-Scope', 'Execute initialisiert nur gescopt'), (r'Laufprotokoll ist kein Ersatz für Projektdokumentation', 'Review prüft Projektdokumentation')],
+    'domains': [(r'(?:Bedarf|Übergabe)[^.!\n]*(?:Execute|core-execute)', 'vermittelter Domainbedarf'), (r'(?:fehlend\w* Task|fehlt[^.!\n]*Task|materiell\w* Vertragsänderung)[^.!\n]*(?:Plan|core-plan)', 'fehlender Task zurück an Plan'), (r'(?:Fachagent|Fachskill)[^.!\n]*(?:nicht|keine|weder)[^.!\n]*(?:Version|Ziel|Index)', 'Zielschutz'),
+                (r'widersprüchlich\w* Prosa[^.!\n]*Dokumentationslücke nicht erforderlich', 'neue belegte Lücke ohne Driftpflicht'), (r'Fehlt die Fähigkeit oder eine gültige Quelle, blockiere', 'Docs blockiert ohne DOX-Setupfähigkeit')],
     'setup': [(r'(?:MCP|Provider)[^.!\n]*read-only|read-only[^.!\n]*(?:MCP|Provider)', 'read-only Providerprüfung'), (r'(?:keine|kein|nicht)[^.!\n]*(?:Installation|Installer|installiert)', 'kein Installer'), (r'(?:einzeln|beschädigt|doppelt)[^.!\n]*(?:block|stopp)', 'beschädigte Marker blockieren')],
     'docs': [(r'(?:einfache Vorhaben|ohne Milestones)[^.!\n]*(?:keine|nur|ohne)[^.!\n]*(?:Zielstruktur|Plan|Ziel)', 'einfacher Einstieg'), (r'Resume[^.!\n]*(?:dieselbe|gleichen|unverändert)[^.!\n]*Run', 'Resume behält Run'), (r'(?:Definition|Version)[^.!\n]*unveränder', 'unveränderliche Definition')],
 }
@@ -487,6 +533,7 @@ REQUIRED_COVERAGE = (
     'S-brainstorm-plan-milestone', 'S-plan-fachmethoden', 'S-refactor-safety-net', 'S-execute-review-debug', 'S-audit-plan-brainstorm', 'S-milestone-handoff-wiedereinstieg', 'S-domain-uebergaben', 'S-fachskill-docs',
     'gueltige-neuanlage', 'legacy-einstieg', 'bestaetigter-ersatz', 'nicht-ausgewaehlte-neuere-datei', 'veralteter-plan-goal-prompt', 'laufender-run-versionswechsel', 'geaenderte-abhaengigkeit', 'fehlende-definition-designquelle', 'id-versionskonflikt', 'zyklischer-graph', 'teilweise-geschriebene-struktur', 'konkurrierende-aenderung', 'historische-abschlusszuordnung',
     'namenskollision', 'widerspruechliche-ids', 'falsche-versionszuordnung', 'ersatzplannummer', 'run-id-resume-review-reparatur', 'keine-automatische-umbenennung', 'kein-geerbter-abschluss', 'resume', 'review-ready', 'folgefreigabe', 'gesamtabschluss', 'unveraenderliches-ziel', 'hoechstens-eine-aktuelle-etappe',
+    'S-dox-projektdokumentation',
 )
 
 def check_coverage(fixture):
@@ -675,6 +722,15 @@ def check_execute_attempts(text):
             require('Legacy' in sentence and re.search(r'gelesen|lesen', sentence) and re.search(r'weder neu beschrieben|nicht neu beschrieben', sentence) and not re.search(r'\bVerlange\b', sentence), 'Execute schreibt Legacy-Taskpfad statt attempt-Pfad')
 
 
+DOCS_EXCLUSIVE = re.compile(r'\b(?:ausschließlich|nur|einzig)\b', re.I)
+DOCS_ACTION = re.compile(r'\b(?:Ändere|Dokumentiere|dokumentiert|Bearbeite|bearbeitet|Korrigiere|korrigiert|ergänz\w*)\b', re.I)
+
+def check_docs_source(text):
+    # One work rule must not limit docs work exclusively to drift while another allows a proven new gap.
+    for sentence in re.split(r'(?<=[.!?])\s+|\n', text):
+        if re.search(r'Drift|veraltet', sentence) and DOCS_EXCLUSIVE.search(sentence) and DOCS_ACTION.search(sentence):
+            require(re.search(r'Lücke', sentence, re.I), 'core-docs beschränkt Arbeit ausschließlich auf Drift: ' + sentence.strip()[:120])
+
 def check_setup_source(front, text):
     description = front['description']
     require(re.search(r'(?:prüft|Prüfung|Prüfskill)[^.!]*read-only|read-only[^.!]*(?:prüft|Prüfung|Prüfskill)', description, re.I), 'core-init-mcps beschreibt Einrichtung statt read-only Prüfung')
@@ -704,6 +760,8 @@ def check_group(root, group, with_authoring=False, tool_root=None):
                     require(front.get('name') == path.parent.name and isinstance(front.get('description'), str), 'Skillname/Ordner inkonsistent')
                     if group == 'setup' and path.parent.name == 'core-init-mcps':
                         check_setup_source(front, text)
+                if path.parent.name == 'core-docs' and path.name == 'SKILL.md':
+                    check_docs_source(text)
                 if path.parent.name == 'core-execute' and path.name == 'SKILL.md':
                     check_execute_attempts(text)
             elif path.suffix == '.yaml':

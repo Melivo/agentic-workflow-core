@@ -34,6 +34,16 @@ Ein Workflow lädt sein exakt identifiziertes Eingabeartefakt und den aktuellen 
 - Jeder Plantask gehört genau einem registrierten Fachagenten. Fachagenten erweitern ihren Scope nicht und starten keine Subagenten.
 - Abhängigkeiten bestimmen Reihenfolge und Parallelität. Integration in den autoritativen Checkout erfolgt serialisiert.
 
+## Projektdokumentation und DOX
+
+Bei schreibender Arbeit an bestehender oder neuer Funktionalität prüfen `core-plan`, `core-execute`, `core-docs` und beide Modi von `core-review` die notwendige dauerhafte Dokumentation entlang der Root-to-Target-Kette der zuständigen `AGENTS.md`-Dateien. Guides erklären Verantwortung, Funktionalität und öffentliche Verträge sowie relevante Aufrufer, Abhängigkeiten, Daten-/Prozessfluss, Einrichtung/Konfiguration und belegte Betriebs-/Fehlerabläufe proportional zur Änderung; sie verlinken vorhandene maßgebliche Quellen, statt Fachmethodik, README/DESIGN oder Implementierungsinterna zu duplizieren. Es entsteht kein neues Dokumentschema.
+
+Relevante Änderungen werden nicht ohne erforderliche Dokumentationsaktualisierung abgeschlossen. Ist kein Guide-Edit nötig, werden geprüfte Pfade und der Grund festgehalten. Read-only-Arbeit und harmlose Änderungen ohne Dokumentationsbedarf lösen weder Schreib- noch Setup-Pflichten aus; Laufartefakte ersetzen keine Projektdokumentation. Eine neue Dokumentationslücke darf ergänzt werden, wenn sie durch bestätigten Task, aktuellen Diff und autoritative Quelle belegt ist; unbelegte Vermutungen und unabhängige Altlasten bleiben außerhalb des Scopes.
+
+`core-plan` prüft den Baum als vorhanden, fehlend, teilweise oder widersprüchlich. Fehlende Initialisierung wird ausdrücklich mit konkreten Guide-/Indexpfaden, Wirkungen, Checks und Abhängigkeiten vor abhängiger Arbeit geplant. Erst Planbestätigung autorisiert die benannten Setupwirkungen; `core-execute` improvisiert keine Initialisierung. Für Setup wird das verfügbare `dox-setup` gemäß seinen Schutzregeln verwendet. Fehlt es oder eine gültige Quelle, wird der Task blockiert statt installiert oder durch erfundene Regeln ersetzt. Strengere Freigaben anderer AGENTS-Schreiber bleiben unberührt.
+
+Dokumentation zu Secrets nennt nur freigegebene Referenznamen, logischen Ablageort, sichere Bereitstellung und Verbraucher; sie enthält weder Secretwerte noch Inhalte geheimnistragender Dateien. Fehlende Informationen werden als Lücke gemeldet.
+
 ## Plan- und Scopeintegrität
 
 Der bestätigte Plan bleibt während der Ausführung unverändert. Status, Retryzähler, Findings oder Checkresultate werden nie in ihn zurückgeschrieben. Für materielle Abweichungen gilt die folgende Ersatzplanung; sie werden nicht als Implementierungsdetail behandelt.
@@ -92,7 +102,6 @@ Diese Regeln gelten für Planung, Ausführung und beide Reviewmodi. Skills verwe
 Ein Workflow ist nur abgeschlossen, wenn:
 
 Bei ausgewählter Etappenplanung bedeutet Run-pass nur, dass die im Plan abgedeitete Arbeit geprüft wurde. `core-milestone` verifiziert zusätzlich die Kriterien der exakten Definitionsversion und verknüpft Originalnachweise im Index. Ein Folge-Milestone benötigt ausdrückliche Auswahl/Freigabe; Gesamtzielerfolg benötigt die Gesamtzielkriterien und ihre aktuellen Originalnachweise. Ohne Etappenmodus gibt es keinen zusätzlichen Milestone-Schritt.
-
 
 - sein kanonisches Ausgabeartefakt am vereinbarten Pfad vorliegt,
 - Scope und Autorisierungsgrenzen eingehalten sind,

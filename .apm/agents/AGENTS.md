@@ -13,6 +13,9 @@ Die Fachmethodik bleibt beim jeweils im Profil genannten Skill unter
 ## Local Contracts
 
 - Profile verweisen auf ihren Eigentümer-Skill statt dessen Methodik zu kopieren.
+- `docs-curator` nutzt für dauerhafte Dokumentation den gemeinsamen
+  [DOX-Vertrag](../skills/core-shared/references/workflow-contract.md#projektdokumentation-und-dox)
+  und die vorhandene Guide-Hierarchie; das Profil ergänzt keine zweite Methode.
 - Fachagenten verwalten keinen eigenen Workflowzustand und starten keine Subagenten.
 - Review bleibt unabhängig und implementiert keine Korrekturen; siehe
   [QA-Profil](qa-reviewer.agent.md).
