@@ -5,7 +5,7 @@ description: Prüft unabhängig in frischem Kontext entweder einen vollständige
 
 # Core Review
 
-`core-review` ist der unabhängige, read-only Prüfworkflow mit zwei getrennten Modi: Planreview vor der Nutzerbestätigung und Umsetzungsreview nach `core-execute`. Beide messen zuerst an der [Zielbindung](../core-shared/references/workflow-contract.md#zielbindung-und-funktionaler-scope), danach an technischer Korrektheit. Die QA-Methode gehört intern dem `qa-reviewer`; sie bildet keinen zweiten öffentlichen QA-Lebenszyklus. `core-review` implementiert **keine Fixes**, erweitert keinen Scope, steuert keine Reparaturschleife und startet keine Subagenten.
+`core-review` ist der unabhängige, read-only Prüfworkflow mit zwei getrennten Modi: Planreview vor der Nutzerbestätigung und Umsetzungsreview nach `core-execute`. Beide messen zuerst an der [Zielbindung](../core-shared/references/workflow-contract.md#zielbindung-und-funktionaler-scope), danach an technischer Korrektheit. Bei schreibenden Änderungen prüfen beide Modi die notwendige Dokumentationsabdeckung entlang der betroffenen `AGENTS.md`-Kette, Quellenverknüpfungen und Child-Indizes anhand des gemeinsamen [DOX-Vertrags](../core-shared/references/workflow-contract.md#projektdokumentation-und-dox); ein Laufprotokoll ist kein Ersatz für Projektdokumentation. Read-only und harmlose Änderungen ohne nötige Dokumentation begründen kein Finding wegen fehlender Docs. Die QA-Methode gehört intern dem `qa-reviewer`; sie bildet keinen zweiten öffentlichen QA-Lebenszyklus. `core-review` implementiert **keine Fixes**, erweitert keinen Scope, steuert keine Reparaturschleife und startet keine Subagenten.
 
 ## Situative Designmethoden
 
@@ -69,7 +69,7 @@ Schreibe das kanonische Ergebnis des Umsetzungsreviews nach `.agentic-workflow/r
 Erstelle vor der Toolwahl eine knappe Risikohypothese aus Akzeptanzkriterien, Diff, Datenfluss, Vertrauensgrenzen, betroffenen Schnittstellen und Fehlerfolgen. Prüfe jede Qualitätsdimension nur, wenn die Änderung dafür einen konkreten Expositionspfad besitzt:
 
 | Änderungssignal | Relevante Prüfung |
-|---|---|
+| --- | --- |
 | Authentifizierung, Autorisierung, Secrets, externe Eingaben, Datei-, Netzwerk- oder Prozessgrenzen | Security, Missbrauchspfade und sichere Fehlerbehandlung |
 | Geändertes beobachtbares Verhalten, Zustandsübergänge oder Fehlerpfade | funktionale Korrektheit und Regressionen |
 | Datenmodell, Persistenz, Migration, Nebenläufigkeit oder Wiederholung | Integrität, Transaktionen, Idempotenz und Datenverlust |

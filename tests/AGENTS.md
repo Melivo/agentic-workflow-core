@@ -16,7 +16,10 @@ unter [.apm/skills/](../.apm/skills/AGENTS.md), Prüf- und Paketwerkzeuge unter
 
 [ci_contract_targets.json](../scripts/ci_contract_targets.json) bestimmt die
 Vertragsgruppen; [mise.toml](../mise.toml) die gemeinsamen Prüfeinstiege.
-Szenariodaten liegen in `core_scenario_cases.json`. Paket- und Hosttests
+Szenariodaten liegen in `core_scenario_cases.json`; die Abdeckung
+`S-dox-projektdokumentation` verlangt Positiv- und Negativfälle der DOX-Docsregeln,
+Mutationstests entfernen die kanonischen DOX-Sätze nur im Speicher
+und führen dort die früheren Drift-only-Klauseln von core-docs wieder ein. Paket- und Hosttests
 benötigen ihre dokumentierte isolierte Toolchain. Pakettests verlangen den
 quellengebundenen DOX-Skillindex, prüfen seine Links und weisen fehlende,
 veränderte oder nicht aus den Quellen stammende Indexdateien zurück.

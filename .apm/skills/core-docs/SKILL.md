@@ -1,11 +1,11 @@
 ---
 name: core-docs
-description: Pflegt nachgewiesene Dokumentationsdrift nach Code-, Vertrags- oder Konfigurationsänderungen innerhalb eines bestätigten Scopes. Verwenden für veraltete Prosa, Pfade, Befehle, Konfigurationsschlüssel und Referenzen; nicht für Produktcode, unbelegte Neudokumentation oder Änderungen manueller Inhalte außerhalb des Auftrags.
+description: Pflegt im bestätigten Scope durch Task, aktuellen Diff und autoritative Quellen belegte Dokumentationslücken oder Drift. Verwenden für notwendige neue Dokumentation sowie veraltete Prosa, Pfade, Befehle, Konfigurationsschlüssel und Referenzen; nicht für unbelegte Ergänzungen, unabhängige Altlasten, Produktcode oder Änderungen manueller Inhalte außerhalb des Auftrags.
 ---
 
 # Core Documentation
 
-`core-docs` ist die Fachmethode des `docs-curator`, kein öffentlicher Workflow. Der Skill bearbeitet nur Dokumentation, deren Drift durch den bestätigten Task oder einen aktuellen Diff nachgewiesen ist. Er startet keine Subagenten, erweitert keinen Scope und ändert keinen Produktcode.
+`core-docs` ist die Fachmethode des `docs-curator`, kein öffentlicher Workflow. Der Skill ergänzt notwendige Dokumentation zu einer neuen Lücke oder korrigiert Drift nur, wenn sie durch bestätigten Task, aktuellen Diff und autoritative Quelle belegt und im Schreibscope liegt. Er bearbeitet keine unbelegten Ergänzungen oder unabhängigen Altlasten, startet keine Subagenten, erweitert keinen Scope und ändert keinen Produktcode.
 
 ## Eingaben und verbindliche Verträge
 
@@ -17,11 +17,12 @@ Lade bei mutierender Arbeit den [Workflowvertrag](../core-shared/references/work
 
 Eine Dokumentationsänderung ist nur zulässig, wenn alle folgenden Punkte belegt sind:
 
-1. Eine Aussage, Referenz oder Anleitung liegt im Schreibscope des Tasks.
-2. Aktueller Code, Konfiguration, Vertrag, Test, bestätigte Entscheidung oder Diff widerspricht dem dokumentierten Stand.
+1. Die Aussage oder notwendige neue Dokumentation liegt im Schreibscope des Tasks.
+2. Aktueller Code, Konfiguration, Vertrag, Test, bestätigte Entscheidung oder Diff belegt die Drift beziehungsweise eine echte Dokumentationslücke.
 3. Die kleinste notwendige Korrektur lässt sich aus dieser Evidenz ableiten.
 4. Betroffene manuelle Inhalte außerhalb des Scopes bleiben unverändert.
 
+Eine vorhandene widersprüchliche Prosa ist für eine neue, durch Task, Diff und autoritative Quelle belegte Dokumentationslücke nicht erforderlich. Unbelegte Ergänzungen und unabhängige Altlasten bleiben ausgeschlossen. Bei einem fehlenden oder teilweisen DOX-Baum wird nur die ausdrücklich bestätigte, konkret gescopte Initialisierung bearbeitet; nutze dafür `dox-setup` und befolge dessen Hierarchie-, Quellen-, Lizenz- und Konfliktregeln. Fehlt die Fähigkeit oder eine gültige Quelle, blockiere statt still zu installieren oder eigene Setupregeln zu erfinden. Read-only und harmlose Änderungen ohne Dokumentationsbedarf erfordern keinen Guide-Edit; dokumentiere den DOX-Pass mit geprüften Pfaden und Grund.
 `context_paths` erlauben Lesen, nicht Schreiben. Ähnliche Formulierungen in anderen Dokumenten sind kein Beleg dafür, dass sie ebenfalls geändert werden dürfen. Unabhängige Altlasten, Stilwünsche und nicht taskbezogene defekte Referenzen werden als offene Drift gemeldet, nicht nebenbei korrigiert.
 
 ## Schutzgrenzen
@@ -36,15 +37,15 @@ Eine Dokumentationsänderung ist nur zulässig, wenn alle folgenden Punkte beleg
 - Führe keine Builds, Compiles, Installationen, SCM-, Deployment- oder destruktiven Aktionen als Nebenwirkung aus.
 - Berücksichtige Dokumentationsbedarf früh im Task und melde ihn an `core-execute`; vorhandene bestätigte Tasks nutzen explizite `dependencies` und exakte, notwendige Vertrags-, API-, Design- und gegebenenfalls Zielquellen in `context_paths`. Nur Execute dispatcht oder erteilt Folgearbeit; fehlende Tasks und materielle Änderungen gehen über Execute an `core-plan`.
 - Fachskills wählen keine Ziel-/Milestone-Version und ändern weder Ziel, Definition, Index noch Freigaben.
-- Dokumentiere ausschließlich belegte Drift innerhalb des bestätigten Docs-Scopes. Ein bestätigtes Ziel, eine unveränderliche Definitionsversion, Indexauswahl oder Freigabe ist keine normale Dokumentation: ändere sie nicht. Verwende nur exakt gepinnte Quellen; melde Konflikte an Execute zur Klärung, nicht durch Umschreiben oder Versionsauswahl.
+- Dokumentiere nur eine durch bestätigten Task, aktuellen Diff und autoritative Quelle belegte notwendige neue Dokumentationslücke oder Drift innerhalb des bestätigten Docs-Scopes. Unbelegte oder unabhängige Altlasten bleiben ausgeschlossen. Ein bestätigtes Ziel, eine unveränderliche Definitionsversion, Indexauswahl oder Freigabe ist keine normale Dokumentation: ändere sie nicht. Verwende nur exakt gepinnte Quellen; melde Konflikte an Execute zur Klärung, nicht durch Umschreiben oder Versionsauswahl.
 
 ## Workflow
 
 ### 1. Auftrag und Ausgangszustand festhalten
 
-Lade den exakten Task, seine Akzeptanzkriterien, den erlaubten Schreibscope und die benannten Kontextpfade. Erfasse vor Änderungen den aktuellen Referenz- oder Driftzustand mit dem gepinnten Dokumentationscheck. Ist ein solcher Check nicht verfügbar, dokumentiere die engste reproduzierbare statische Prüfung und die verbleibende Lücke; installiere kein Werkzeug eigenmächtig.
+Lade den exakten Task, seine Akzeptanzkriterien, den erlaubten Schreibscope und die benannten Kontextpfade. Erfasse vor Änderungen den aktuellen Dokumentationszustand mit dem gepinnten Check: bestehende Drift oder eine belegte neue Lücke; fehlende Altprosa allein schließt eine nötige Ergänzung nicht aus. Ist ein solcher Check nicht verfügbar, dokumentiere die engste reproduzierbare statische Prüfung und die verbleibende Lücke; installiere kein Werkzeug eigenmächtig.
 
-### 2. Drift lokalisieren und belegen
+### 2. Dokumentationslücken oder Drift lokalisieren und belegen
 
 Verwende Gortex primär, um geänderte Dateien, betroffene Verträge und referenzierende Dokumentation zu lokalisieren. Ordne jede Kandidatenstelle einer konkreten Evidenz zu:
 
@@ -52,7 +53,7 @@ Verwende Gortex primär, um geänderte Dateien, betroffene Verträge und referen
 - geänderter Befehl oder Parameter,
 - geänderter Konfigurationsschlüssel oder Umgebungsvertrag,
 - geändertes beobachtbares Verhalten,
-- bestätigte Architektur- oder Prozessentscheidung.
+- bestätigte Architektur- oder Prozessentscheidung, die eine nötige Dokumentationslücke begründet; zum Beispiel eine neu eingeführte API ohne Altprosa, sofern Task, Diff und autoritative Quelle die Dokumentation verlangen.
 
 Nutze Context7 nur für eine enge aktuelle Frage zu einer Bibliothek, API, CLI oder Cloud-Dokumentation. Externe Quellen belegen keine lokale Implementierung; gleiche sie mit dem Repositorystand ab.
 
@@ -62,7 +63,7 @@ Prüfe vor dem Schreiben Dokumentabhängigkeiten, Links, zentrale Begriffsverwen
 
 ### 4. Minimal korrigieren
 
-Ändere nur die nachgewiesen veralteten Sätze, Tabellenzeilen, Beispiele oder Referenzen. Bewahre angrenzende manuelle Inhalte bytegenau, soweit kein notwendiger Kontextübergang betroffen ist. Verwende technische IDs, Schemanamen, Pfade, Befehle und Konfigurationsschlüssel exakt wie in der autoritativen Quelle.
+Korrigiere Drift minimal an den nachweislich veralteten Sätzen, Tabellenzeilen, Beispielen oder Referenzen. Ergänze bei einer belegten neuen Lücke nur die dafür notwendige Dokumentation, auch wenn keine Altprosa existiert. Bewahre angrenzende manuelle Inhalte bytegenau, soweit kein notwendiger Kontextübergang betroffen ist. Verwende technische IDs, Schemanamen, Pfade, Befehle und Konfigurationsschlüssel exakt wie in der autoritativen Quelle.
 
 ### 5. Post-edit prüfen
 
@@ -82,10 +83,10 @@ Liefere:
 
 - Status `completed | partial | blocked | failed`,
 - geänderte Dokumentationspfade,
-- je Änderung den Drift-Nachweis und die autoritative Quelle,
+- je Änderung den Nachweis der Dokumentationslücke oder Drift und die autoritative Quelle,
 - ausgeführte Checks mit Kommando, Arbeitsverzeichnis, Exitcode und fachlicher Beobachtung,
 - bestätigten Schutz manueller Inhalte und den Nachweis, dass kein Produktcode geändert wurde,
 - übersprungene Kandidaten mit Grund,
-- offene oder außerhalb des Scopes liegende Drift.
+- offene oder außerhalb des Scopes liegende Drift beziehungsweise Dokumentationslücken.
 
-`completed` ist nur zulässig, wenn jede Änderung belegt, der tatsächliche Diff im Scope und das Akzeptanzkriterium aktuell verifiziert ist. Fehlende Evidenz oder ein blockierter Pflichtcheck führt zu `partial` beziehungsweise `blocked`; Fehler werden nicht als bereinigte Drift ausgegeben.
+`completed` ist nur zulässig, wenn jede Änderung belegt, der tatsächliche Diff im Scope und das Akzeptanzkriterium aktuell verifiziert ist. Fehlende Evidenz oder ein blockierter Pflichtcheck führt zu `partial` beziehungsweise `blocked`; Fehler werden nicht als behobene Drift oder geschlossene Dokumentationslücke ausgegeben.

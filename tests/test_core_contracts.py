@@ -66,7 +66,7 @@ class ContractTests(unittest.TestCase):
     def test_no_success_defaults(self):
         with self.assertRaises(checker.ContractError):
             checker.validate_scenario({})
-        for kind in ('marker', 'handoff', 'result_owner', 'provider', 'version', 'completion', 'name', 'graph', 'progression', 'selection', 'prompt', 'write_sequence', 'goal_change', 'artifacts'):
+        for kind in ('marker', 'handoff', 'result_owner', 'provider', 'version', 'completion', 'name', 'graph', 'progression', 'selection', 'prompt', 'write_sequence', 'goal_change', 'artifacts', 'docs'):
             with self.subTest(kind=kind), self.assertRaises((KeyError, checker.ContractError)):
                 checker.validate_scenario({'kind': kind})
 
@@ -548,6 +548,92 @@ class ContractTests(unittest.TestCase):
                 return _text if Path(path) == plan else original_read(path, *args, **kwargs)
             with self.subTest(label=label), patch.object(Path, 'read_text', read_text), contextlib.redirect_stdout(io.StringIO()), self.assertRaisesRegex(checker.ContractError, label):
                 checker.check_group(ROOT, 'workflows')
+
+    def test_dox_docs_relation_fails_closed_per_field(self):
+        # Each modeled docs/DOX input is mandatory; a missing field is never a silent default.
+        base = next(c['input'] for c in json.loads((ROOT / 'tests/core_scenario_cases.json').read_text())['cases'] if c['id'] == 'docs-positive')
+        checker.validate_scenario(base)
+        for field in base:
+            if field == 'kind':
+                continue
+            mutated = {k: v for k, v in base.items() if k != field}
+            with self.subTest(field=field), self.assertRaises((KeyError, checker.ContractError)):
+                checker.validate_scenario(mutated)
+        for field, value in (('mode', 'draft'), ('tree', 'unknown')):
+            with self.subTest(field=field), self.assertRaisesRegex(checker.ContractError, 'unbekannt'):
+                checker.validate_scenario(dict(base, **{field: value}))
+
+    def test_dox_clauses_accept_contract_wording_and_reject_violations(self):
+        # Fixture sentences per clause; text matches show contract wording, not live model compliance.
+        cases = {
+            'kein Abschluss ohne Dokumentation': ('Relevante Änderungen werden nicht ohne erforderliche Dokumentationsaktualisierung abgeschlossen.', 'Relevante Änderungen werden auch ohne Dokumentation abgeschlossen.'),
+            'begründeter DOX-Pass': ('Ist kein Guide-Edit nötig, werden geprüfte Pfade und der Grund festgehalten.', 'Ist kein Guide-Edit nötig, entfällt der DOX-Pass.'),
+            'read-only ohne DOX-Setuppflicht': ('Read-only-Arbeit und harmlose Änderungen lösen weder Schreib- noch Setup-Pflichten aus.', 'Read-only-Arbeit initialisiert fehlende Guides automatisch.'),
+            'Laufartefakt ist keine Projektdokumentation': ('Laufartefakte ersetzen keine Projektdokumentation.', 'Das Taskresultat dokumentiert die neue API ausreichend.'),
+            'belegte neue Dokumentationslücke': ('Eine neue Dokumentationslücke wird ergänzt, wenn bestätigter Task, aktueller Diff und autoritative Quelle sie belegen.', 'Eine vermutete Dokumentationslücke wird vorsorglich ergänzt.'),
+            'DOX-Setup nur nach Planbestätigung': ('Erst Planbestätigung autorisiert die benannten Setupwirkungen.', 'Execute initialisiert fehlende Guides spontan.'),
+            'fehlende DOX-Setupfähigkeit blockiert': ('Fehlt es oder eine gültige Quelle, wird der Task blockiert.', 'Fehlt dox-setup, installiert Execute es still nach.'),
+            'kein Secretwert in Dokumentation': ('Dokumentation zu Secrets nennt nur freigegebene Referenznamen und enthält weder Secretwerte noch Dateiinhalte.', 'Die Dokumentation zitiert den API-Schlüssel aus der .env-Datei.'),
+            'Plan prüft DOX-Zustand': ('Prüfe den DOX-Zustand im Änderungspfad: vorhanden, fehlend, teilweise oder widersprüchlich.', 'Eine vorhandene AGENTS.md gilt als vollständiger Baum.'),
+            'neue belegte Lücke ohne Driftpflicht': ('Eine vorhandene widersprüchliche Prosa ist für eine neue belegte Dokumentationslücke nicht erforderlich.', 'Ohne widersprüchliche Prosa ist keine Dokumentationsänderung zulässig.'),
+        }
+        policies = {label: pattern for group in ('shared', 'workflows', 'domains') for pattern, label in checker.POLICIES[group]}
+        self.assertLessEqual(set(cases), set(policies))
+        for label, (allowed, violated) in cases.items():
+            with self.subTest(label=label):
+                self.assertRegex(allowed, '(?i)' + policies[label])
+                self.assertNotRegex(violated, '(?i)' + policies[label])
+
+    def test_dox_mutations_of_canonical_sources_fail(self):
+        # Controlled in-memory removal of canonical DOX sentences; sources stay untouched.
+        original_read = Path.read_text
+        mutations = (
+            ('shared', '.apm/skills/core-shared/references/workflow-contract.md', r'Bei schreibender Arbeit an bestehender oder neuer Funktionalität[^\n]*', 'DOX Root-to-Target-Dokumentation'),
+            ('shared', '.apm/skills/core-shared/references/workflow-contract.md', r'Relevante Änderungen werden nicht ohne[^.]*\.', 'kein Abschluss ohne Dokumentation'),
+            ('shared', '.apm/skills/core-shared/references/workflow-contract.md', r'Eine neue Dokumentationslücke darf[^.]*\.', 'belegte neue Dokumentationslücke'),
+            ('shared', '.apm/skills/core-shared/references/workflow-contract.md', r'Erst Planbestätigung[^.]*\.', 'DOX-Setup nur nach Planbestätigung'),
+            ('shared', '.apm/skills/core-shared/references/workflow-contract.md', r'Dokumentation zu Secrets[^\n]*', 'kein Secretwert in Dokumentation'),
+            ('workflows', '.apm/skills/core-plan/SKILL.md', r'Prüfe bei schreibender Arbeit zusätzlich den DOX-Zustand[^\n]*', 'Plan prüft DOX-Zustand'),
+            ('workflows', '.apm/skills/core-execute/SKILL.md', r'Initialisierung oder Ergänzung darf nur[^.]*\.', 'Execute initialisiert nur gescopt'),
+            ('workflows', '.apm/skills/core-review/SKILL.md', r'ein Laufprotokoll ist kein Ersatz für Projektdokumentation', 'Review prüft Projektdokumentation'),
+            ('domains', '.apm/skills/core-docs/SKILL.md', r'Eine vorhandene widersprüchliche Prosa[^.]*\.', 'neue belegte Lücke ohne Driftpflicht'),
+            ('domains', '.apm/skills/core-docs/SKILL.md', r'Fehlt die Fähigkeit oder eine gültige Quelle[^.]*\.', 'Docs blockiert ohne DOX-Setupfähigkeit'),
+        )
+        for group, relative, pattern, label in mutations:
+            source = ROOT / relative
+            text, count = re.subn(pattern, '', original_read(source, encoding='utf-8'))
+            self.assertEqual(count, 1, label)
+            def read_text(path, *args, _text=text, _source=source, **kwargs):
+                return _text if Path(path) == _source else original_read(path, *args, **kwargs)
+            with self.subTest(label=label), patch.object(Path, 'read_text', read_text), contextlib.redirect_stdout(io.StringIO()), self.assertRaisesRegex(checker.ContractError, label):
+                checker.check_group(ROOT, group)
+
+    def test_rv02_core_docs_rejects_reintroduced_drift_only_rules(self):
+        # In-memory reinsertion of the former exclusive drift-only clauses of the complete consumer.
+        source = ROOT / '.apm/skills/core-docs/SKILL.md'
+        original_read = Path.read_text
+        text = original_read(source, encoding='utf-8')
+        checker.check_docs_source(text)
+        legacy = (
+            'Der Skill bearbeitet nur Dokumentation, deren Drift durch den bestätigten Task oder einen aktuellen Diff nachgewiesen ist.',
+            '- Dokumentiere ausschließlich belegte Drift innerhalb des bestätigten Docs-Scopes.',
+            'Ändere nur die nachgewiesen veralteten Sätze, Tabellenzeilen, Beispiele oder Referenzen.',
+        )
+        for clause in legacy:
+            mutated = text.replace('## Workflow\n', clause + '\n\n## Workflow\n', 1)
+            self.assertNotEqual(mutated, text)
+            def read_text(path, *args, _text=mutated, **kwargs):
+                return _text if Path(path) == source else original_read(path, *args, **kwargs)
+            with self.subTest(clause=clause[:40]), patch.object(Path, 'read_text', read_text), contextlib.redirect_stdout(io.StringIO()), self.assertRaisesRegex(checker.ContractError, 'ausschließlich auf Drift'):
+                checker.check_group(ROOT, 'domains')
+        # Gap-inclusive limits and unrelated drift reporting stay allowed.
+        checker.check_docs_source('Dokumentiere nur eine belegte neue Dokumentationslücke oder Drift. Unabhängige Altlasten werden als offene Drift gemeldet.')
+        # The modeled relations remain: new API without prior prose passes, unproven new gap fails.
+        cases = {c['id']: c for c in json.loads((ROOT / 'tests/core_scenario_cases.json').read_text())['cases']}
+        checker.validate_scenario(cases['dox-new-api-config-connections']['input'])
+        for case_id in ('dox-new-gap-unconfirmed-task', 'dox-new-gap-no-diff', 'docs-unproven'):
+            with self.subTest(case=case_id), self.assertRaises(checker.ContractError):
+                checker.validate_scenario(cases[case_id]['input'])
 
     def test_staged_targetsets(self):
         for group in checker.TARGET_GROUPS:

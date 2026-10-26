@@ -27,7 +27,10 @@ unten verlinkten eigenen Guides.
 Nur die für den Auftrag passende Methodik und Referenzen laden. Keine
 Workflowzustände in Skills oder Provider-Memories ablegen. Änderungen an
 Verträgen, Vorlagen und konsumierenden Skills gemeinsam auf Konsistenz prüfen,
-ohne unautorisierte Folgeworkflows zu starten.
+ohne unautorisierte Folgeworkflows zu starten. Dauerhafte Projektdokumentation
+folgt der zuständigen Root-to-Target-AGENTS-Kette und dem gemeinsamen
+[DOX-Vertrag](core-shared/references/workflow-contract.md#projektdokumentation-und-dox);
+die einzelnen Skills beschreiben nur ihre jeweiligen Arbeitsschritte.
 `core-init-project` prüft vor dem Konfigurator-Audit dessen deklarierte
 Python-Laufzeitabhängigkeiten; eine isolierte Einrichtung benötigt eine eigene
 ausdrückliche Installationsfreigabe.
