@@ -4,6 +4,13 @@
 
 - Ergänzt reproduzierbare lokale/CI-Prüfungen und eine standardmäßig deaktivierte, getrennte Release-PR- und Veröffentlichungskette. GitHub-Livebetrieb und App-Einrichtung sind nicht bestätigt.
 
+## [0.7.1](https://github.com/Melivo/agentic-workflow-core/compare/v0.7.0...v0.7.1) (2026-10-28)
+
+
+### Bug Fixes
+
+* **core-init-project:** clarify toolrouting precedence in template ([#7](https://github.com/Melivo/agentic-workflow-core/issues/7)) ([6d0e996](https://github.com/Melivo/agentic-workflow-core/commit/6d0e9967a80cfd29dde666fe40dee0325bfd6597))
+
 ## [0.7.0](https://github.com/Melivo/agentic-workflow-core/compare/v0.6.1...v0.7.0) (2026-10-26)
 
 
