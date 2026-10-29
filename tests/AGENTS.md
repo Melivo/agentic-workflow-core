@@ -30,6 +30,9 @@ Tests mit dem fachlich verantwortlichen Vertrag abgleichen, nicht zur bloßen
 Beseitigung eines Fehlers abschwächen. Kontrollierte Stubs, echte Werkzeuge
 und tatsächliche Hostintegration in Nachweisen klar unterscheiden.
 Keine globalen Provider oder Benutzerkonfiguration als Testnebenwirkung ändern.
+`test_project_block_reconcile.py` führt den Init-Helper in temporären Projekten
+aus und prüft Auswahl, Vorschau-/Bestätigungsbindung, Markerfehler, Fakten- und
+Byteerhaltung sowie den diff-freien Zweitlauf ohne Provideraktionen.
 
 ## Verification
 

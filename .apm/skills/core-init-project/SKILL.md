@@ -1,11 +1,11 @@
 ---
 name: core-init-project
-description: Initialisiert oder aktualisiert den kleinen Repository-Preflight, prüft Code-Intelligence-Readiness und pflegt einen idempotenten Projektblock in AGENTS.md. Verwenden für die einmalige oder erneute projektspezifische Einrichtung; nicht für MCP-Installation, globale Benutzeranweisungen oder allgemeine Repositoryaudits.
+description: Initialisiert oder aktualisiert den Repository-Preflight oder gleicht ausdrücklich ausgewählte verwaltete Projektanweisungen in AGENTS.md gegen ihre Vorlagen ab. Verwenden für projektspezifische Einrichtung und selektiven Core-/Serena-Gortex-Abgleich; nicht für MCP-Installation, globale Benutzeranweisungen oder allgemeine Repositoryaudits.
 ---
 
 # Core Init Project
 
-Richte den Repository-Harness für genau ein konkretes Projekt ein. Bewahre manuelle Inhalte, bestehende generierte Bereiche und fremde verwaltete Blöcke. `core-init-project` pflegt seinen eigenen Projektblock in `AGENTS.md` und den unten begrenzten lokalen Artefaktschutz in `.gitignore`; es installiert keine Provider, startet keine Subagenten und erzeugt keinen Workflowzustand.
+Bei ausdrücklich angefordertem Anweisungsabgleich führe ausschließlich Abschnitt 6 aus; überspringe normales Init, Provideraudit, Laufzeiteinrichtung und `.gitignore`-Pflege. Andernfalls richte den Repository-Harness für genau ein konkretes Projekt ein. Bewahre manuelle Inhalte, bestehende generierte Bereiche und fremde verwaltete Blöcke. `core-init-project` pflegt seinen eigenen Projektblock in `AGENTS.md` und den unten begrenzten lokalen Artefaktschutz in `.gitignore`; es installiert keine Provider, startet keine Subagenten und erzeugt keinen Workflowzustand.
 
 ## Eingaben und Verträge
 
@@ -109,6 +109,38 @@ Zeige den `.gitignore`-Diff mit absolutem Zielpfad zusammen mit der Projektblock
 8. Führe denselben Entwurf gedanklich beziehungsweise read-only erneut gegen das Ergebnis aus: Es darf kein weiterer Diff entstehen. Nur dann ist die Aktualisierung idempotent.
 
 Überschreibe niemals die gesamte `AGENTS.md`. Bei einem Schreib- oder Verifikationsfehler stoppe, berichte die beobachtete Teilwirkung und stelle den vor der Mutation erfassten Zustand nur dann wieder her, wenn dies ohne Verlust zwischenzeitlicher fremder Änderungen sicher möglich ist.
+
+### 6. Selektiver Abgleich bestehender Blöcke
+
+Für den erneuten Abgleich einer bestehenden `AGENTS.md` gegen die zuständigen Vorlagen nutze den deterministischen [Helper](scripts/reconcile_blocks.py) dieses Bundles statt eines nebenwirkenden Konfigurator-Apply. Er erzeugt getrennte Diffs für die verwalteten Markerpaare `CORE-INIT-PROJECT` und `SERENA-GORTEX-PROJECT`, schreibt ausschließlich die bestätigte Auswahl und verändert keine Provider, Tracking-Zustände, MCP-Konfiguration, `.gitignore` oder andere Dateien. Eine neue Abhängigkeit entsteht nicht; der Helper benötigt nur die Python-Standardbibliothek.
+
+Vorlagen bleiben bei ihrem Eigentümer und werden nicht dupliziert:
+
+- `CORE-INIT-PROJECT`: der nach Abschnitt 3 entworfene Block einschließlich der [Core-Routingvorlage](assets/core-routing.md). Erhalte sämtliche belegten Projektfakten aus dem bestehenden Block unverändert und ersetze nur eindeutig zuordenbares Routing. Ist die Fakt-/Anweisungsgrenze unklar, blockiere den konkreten Vorschlag; keine heuristische Löschung oder semantische Klassifikation. Der Aufrufer schreibt diesen vollständig geprüften Block als temporäre Vorlagendatei. Der Helper prüft Marker und Schreibgrenzen, nicht die fachliche Wahrheit der gelieferten Vorlage.
+- `SERENA-GORTEX-PROJECT`: Eigentum des Mitgelieferten Konfigurators. Extrahiere die Vorlage read-only aus der Konstante `PROJECT_PLAYBOOK` in `../gortex-serena-configurator/scripts/serena_safety.py` über `extract-template` und schreibe sie in eine temporäre Vorlagendatei; übernimm sie nicht in dieses Bundle. Enthält der bestehende Projektblock zusätzliche belegte Projektfakten, erhalte diese im geprüften Entwurf; bei unklarer Abgrenzung blockiere den Vorschlag ebenso wie beim Core-Block.
+
+Ablauf:
+
+1. Erzeuge mit `preview` den vollständigen read-only Bericht: je gültigem Block Status `current`, `drift` oder `missing` plus getrennter Unified Diff und ein Bestätigungstoken. Defekte Marker beenden bereits die Vorschau mit einem Fehler statt eines anwendbaren Tokens.
+2. Biete genau die vier Auswahlen an: nur Core, nur Serena/Gortex, beide oder keiner. Fehlende Blöcke werden mit Anlage-Diff vorgeschlagen; unmarkierte Außeninhalte werden nicht migriert.
+3. Zeige den absoluten Zielpfad, beide absoluten Vorlagenpfade, alle Diffs der Auswahl und das Token; verlange eine separate ausdrückliche Bestätigung genau dieser Fassung.
+4. Schreibe mit `apply`, `--select` und dem Bestätigungstoken. Ein falsches Token, ein verändertes Ziel oder eine veränderte Auswahl bricht den Schreibversuch ab; beschädigte, doppelte, verschachtelte oder ungepaarte Marker blockieren jede Anwendung.
+5. Verifiziere nach dem Schreiben Markerlage und bytegleiche Außenbereiche; führe `preview` erneut aus: der zweite Lauf muss diff-frei (`current`) sein.
+
+Der Helper bearbeitet ausschließlich Dateien namens `AGENTS.md`, lehnt Symlinks sowie Benutzer-Home und Dateisystemroot als Ziel ab und erhält Zeilenenden. Das normale Init-Verhalten der Abschnitte 1 bis 5 bleibt unverändert; der Abgleich ist eine zusätzliche, getrennt bestätigte Aktion.
+
+Beispiel (Helperpfad und alle Eingaben absolut setzen; `core-block.md` ist der geprüfte Entwurf einschließlich erhaltener Projektfakten):
+
+```sh
+python -B "$helper" extract-template --source "$configurator/scripts/serena_safety.py" --name PROJECT_PLAYBOOK > "$tmp/serena-block.md"
+python -B "$helper" preview --target "$project/AGENTS.md" --block "CORE-INIT-PROJECT=$tmp/core-block.md" --block "SERENA-GORTEX-PROJECT=$tmp/serena-block.md" --select "CORE-INIT-PROJECT,SERENA-GORTEX-PROJECT"
+# Erst nach separater Bestätigung der gezeigten Fassung:
+python -B "$helper" apply --target "$project/AGENTS.md" --block "CORE-INIT-PROJECT=$tmp/core-block.md" --block "SERENA-GORTEX-PROJECT=$tmp/serena-block.md" --select "CORE-INIT-PROJECT,SERENA-GORTEX-PROJECT" --confirm "$confirmed_token"
+```
+
+Für nur einen Block ist `--select` dessen Markername; für keinen `none`. Das Token ist ein Drift-Nachweis, keine Benutzerfreigabe: kopiere es nicht ohne separate Bestätigung nach `apply`. Nach bestätigtem Schreiben prüfe den vollständigen Zielinhalt; bei Fehlern keine blinde Wiederherstellung über zwischenzeitliche Fremdänderungen.
+
+Im reinen Abgleich bedeutet **completed**: bestätigte Auswahl geschrieben (oder keiner gewählt), Außenbereiche und Fakten erhalten, Zweitlauf für ausgewählte Blöcke diff-frei. **blocked**: unklare Faktenabgrenzung, ungültige Marker oder fehlende Bestätigung; **failed**: Schreib-/Verifikationsfehler mit benannter Teilwirkung. Providerbereitschaft und Artefaktschutz werden dabei nicht bewertet. Die folgenden Zustände gelten nur für normales Init.
 
 ## Ergebnisse und Zustände
 
