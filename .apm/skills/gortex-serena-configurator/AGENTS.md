@@ -27,6 +27,10 @@ Ohne ausgewählte Schreibaktion bleibt der Audit read-only. Nur die bestätigte
 Konfigurationsquelle ändern, keine generierten Projektionen. Kein globales
 Serena-MCP und kein automatisches Gortex-Tracking einrichten. Fehlende
 Abhängigkeiten sichtbar melden; ihre Installation ist keine Auditwirkung.
+Die Konstanten `PLAYBOOK` und `PROJECT_PLAYBOOK` in `serena_safety.py` sind die
+autorisierenden Vorlagen der verwalteten Blöcke; der selektive Abgleich durch
+[core-init-project](../core-init-project/SKILL.md) liest sie read-only aus und
+verändert sie nicht.
 
 ## Verification
 

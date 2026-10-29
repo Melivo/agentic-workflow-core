@@ -33,7 +33,11 @@ folgt der zuständigen Root-to-Target-AGENTS-Kette und dem gemeinsamen
 die einzelnen Skills beschreiben nur ihre jeweiligen Arbeitsschritte.
 `core-init-project` prüft vor dem Konfigurator-Audit dessen deklarierte
 Python-Laufzeitabhängigkeiten; eine isolierte Einrichtung benötigt eine eigene
-ausdrückliche Installationsfreigabe.
+ausdrückliche Installationsfreigabe. Der selektive Abgleich verwalteter
+`AGENTS.md`-Blöcke läuft über den deterministischen Helper im
+`core-init-project`-Bundle; die Vorlagen bleiben bei ihren Eigentümern
+(Core-Routing im Init-Skill, Serena/Gortex-Playbook im Konfigurator) und
+werden nicht dupliziert.
 
 ## Verification
 
