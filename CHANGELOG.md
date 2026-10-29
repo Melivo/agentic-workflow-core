@@ -4,6 +4,13 @@
 
 - Ergänzt reproduzierbare lokale/CI-Prüfungen und eine standardmäßig deaktivierte, getrennte Release-PR- und Veröffentlichungskette. GitHub-Livebetrieb und App-Einrichtung sind nicht bestätigt.
 
+## [0.8.0](https://github.com/Melivo/agentic-workflow-core/compare/v0.7.1...v0.8.0) (2026-10-29)
+
+
+### Features
+
+* **init:** add selective project instruction reconciliation ([#9](https://github.com/Melivo/agentic-workflow-core/issues/9)) ([c4b3f52](https://github.com/Melivo/agentic-workflow-core/commit/c4b3f5227f92df9d48b2078690cc135ff62d995a))
+
 ## [0.7.1](https://github.com/Melivo/agentic-workflow-core/compare/v0.7.0...v0.7.1) (2026-10-28)
 
 
