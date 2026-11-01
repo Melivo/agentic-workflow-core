@@ -40,7 +40,7 @@ ausdrückliche Installationsfreigabe. Der selektive Abgleich verwalteter
 werden nicht dupliziert.
 
 Bei Releaseautomation gilt in `core-devops` die
-[Bestandsaufnahme vor Rückfragen](core-devops/references/ci-and-releases.md#releasebestand-vor-rückfragen-prüfen);
+[Bestandsaufnahme vor Rückfragen](core-devops/references/ci-and-releases.md#releasebestand-zuerst-ermitteln);
 belegte Releasekonventionen werden nicht erneut abgefragt.
 
 ## Verification

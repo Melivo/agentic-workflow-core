@@ -2,7 +2,7 @@
 
 Releasearbeit beginnt mit der bestehenden Projektkonvention, nicht mit einem angenommenen Anbieter oder Paketmanager.
 
-## Releasebestand vor Rückfragen prüfen
+## Releasebestand zuerst ermitteln
 
 Bei einem Auftrag wie „Release-Automation einrichten“ führe zuerst diese read-only Bestandsaufnahme durch, bevor du nach Releaseart, Veröffentlichungsziel oder Auslöser fragst:
 
