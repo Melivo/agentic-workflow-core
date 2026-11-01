@@ -23,7 +23,7 @@ Bei jeder Mutation gelten der [Workflowvertrag](../core-shared/references/workfl
 ## Routing nach Bedarf
 
 | Bedarf | Referenz | Typische Arbeit |
-|---|---|---|
+| --- | --- | --- |
 | Branch, Commit, PR, History, Ownership, Merge-Konflikt, Tag oder Git-Baseline | [Git-Operationen](references/git-operations.md) | read-only Bestandsaufnahme, eng begrenzte und autorisierte SCM-Wirkung |
 | Wiederholbare Projektaufgaben, Toolversionen, Abhängigkeiten oder Konfiguration | [Entwicklungsautomation](references/development-automation.md) | bestehende Abläufe erkennen; fehlende Automation nach explizitem Auftrag ergänzen |
 | Auswahl passender Formatter, Linter, Typ- und Sprachprüfer | [Tooling-Profile](references/tooling-profiles.md) | Repo-eigene Werkzeuge und Profile erhalten |
@@ -33,7 +33,7 @@ Bei jeder Mutation gelten der [Workflowvertrag](../core-shared/references/workfl
 
 ## Optionale Habit-Feedback-Integration
 
-Wenn ein bestätigter Task eine Integration von Habit-Hooks-Feedback betrifft, nutze die [Nutzungsreferenz](references/habit-feedback.md) als produktbezogene Ergänzung. Sie beschreibt den geprüften, noch nicht veröffentlichten Paketstand und die qualifizierte Abdeckung. Eine künftige OpenCode-V2-Registrierung mit `package`/`options` ist eine getrennt freizugebende, additive Benutzer-/Harnesskonfiguration; sie erfordert keine Shell- oder Login-Umgebungsänderung und wird nicht vom normalen Hooklauf eingerichtet. Der Originalsensor und -mapper bleiben für Erkennung, Routing und Guide-Rendering zuständig; nicht geprüfte Abdeckung wird sichtbar ausgewiesen.
+Wenn ein bestätigter Task eine Integration von Habit-Hooks-Feedback betrifft, nutze die [Nutzungsreferenz](references/habit-feedback.md) als produktbezogene Ergänzung. Sie beschreibt den auf npm veröffentlichten Paketstand und die qualifizierte Abdeckung. Eine OpenCode-V2-Registrierung mit `package`/`options` ist eine getrennt freizugebende, additive Benutzer-/Harnesskonfiguration; sie erfordert keine Shell- oder Login-Umgebungsänderung und wird nicht vom normalen Hooklauf eingerichtet. Der Originalsensor und -mapper bleiben für Erkennung, Routing und Guide-Rendering zuständig; nicht geprüfte Abdeckung wird sichtbar ausgewiesen.
 
 ## Workflow
 
