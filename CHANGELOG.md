@@ -4,6 +4,14 @@
 
 - Ergänzt reproduzierbare lokale/CI-Prüfungen und eine standardmäßig deaktivierte, getrennte Release-PR- und Veröffentlichungskette. GitHub-Livebetrieb und App-Einrichtung sind nicht bestätigt.
 
+## [0.8.1](https://github.com/Melivo/agentic-workflow-core/compare/v0.8.0...v0.8.1) (2026-11-01)
+
+
+### Bug Fixes
+
+* **devops:** inspect existing releases before clarification ([cb9f57d](https://github.com/Melivo/agentic-workflow-core/commit/cb9f57df8af58f92a46f943e97fda581cde60255))
+* **devops:** use portable release inspection anchor ([f720cb9](https://github.com/Melivo/agentic-workflow-core/commit/f720cb94fe5e587e5a8306440724195891e71e6d))
+
 ## [0.8.0](https://github.com/Melivo/agentic-workflow-core/compare/v0.7.1...v0.8.0) (2026-10-29)
 
 
