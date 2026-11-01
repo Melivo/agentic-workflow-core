@@ -2,13 +2,24 @@
 
 Releasearbeit beginnt mit der bestehenden Projektkonvention, nicht mit einem angenommenen Anbieter oder Paketmanager.
 
+## Releasebestand vor Rückfragen prüfen
+
+Bei einem Auftrag wie „Release-Automation einrichten“ führe zuerst diese read-only Bestandsaufnahme durch, bevor du nach Releaseart, Veröffentlichungsziel oder Auslöser fragst:
+
+1. Lies Projektanweisungen, Paket-/Versionsmanifeste, Release-Dokumentation, Changelog, vorhandene CI-Workflows und Release-Skripte; prüfe lokale Tags und die Remote-Zuordnung.
+2. Prüfe am zugeordneten Remote die jüngsten vorhandenen Releases einschließlich Tags, Release Notes und Assetnamen/-typen sowie die zugehörigen Releaseworkflows. Nutze den passenden vorhandenen Providerzugang; bei GitHub `gh`. Metadaten genügen, lade keine Pakete herunter und führe keine Release-Skripte aus. Ein GitHub-Remote allein belegt weder GitHub Packages noch npm als Veröffentlichungsziel.
+3. Leite aus diesen Nachweisen den bisherigen Releaseweg ab: Versions-/Tagmuster, Changelog, ausgelieferte Artefakte, belegte Veröffentlichungsziele und vorhandene Trigger/Freigabepunkte. Übernimm eindeutige bestehende Konventionen als Grundlage des Einrichtungsentwurfs, sofern der Auftrag ihnen nicht widerspricht, und benenne die Grundlage knapp. Bestehende Releases allein belegen keine gewünschte neue Auslöse- oder Freigabepolicy.
+4. Frage erst danach gezielt nach materiellen Lücken oder Widersprüchen. Bereits belegte Angaben werden nicht erneut abgefragt; eine allgemeine Auswahl zwischen Provider-Release und Registries entfällt. Fehlen Releases oder ist der Remotezugriff blockiert, benenne diese Evidenzlücke, werte fehlenden Zugriff nicht als fehlende Releases und nutze weiterhin lokale Nachweise. Erfrage nur die danach entscheidungsrelevante fehlende Angabe.
+
+Die Bestandsaufnahme autorisiert keine Installation, Konfigurationsänderung, Workflowauslösung, Tag-/Pushoperation oder Veröffentlichung; die bestehenden Freigabegrenzen bleiben bestehen.
+
 ## CI-Grenze
 
 Lies vorhandene CI-Konfigurationen, Trigger, Branch-/Tagfilter, Permissions, erforderliche Checks und Release-Skripte. Plattform-YAML darf plattformspezifisch bleiben; die eigentliche Projektprüfung soll möglichst vorhandene Taskdefinitionen aufrufen. Unterscheide Setup/Änderung der CI von deren Auslösung. Keine Workflowdatei ändern, starten oder remote veröffentlichen ohne jeweilige Freigabe.
 
 ## Releasebaseline und Release-PR-Automation
 
-Vor Paketierung klären: freigegebene Bump-Policy, Ausgangsversion, Basis-Commit, Zielbranch/Remote, Tagmuster, Releaseartefakte, Changelog-/Versionsquellen, Pflichtprüfungen, Paketquelle und wer die Veröffentlichung freigibt. Lies vorhandene Versionen, Tags und Toolkonfiguration. Nutze bei der Einrichtung die folgende 0.x-Empfehlung; wähle außerhalb einer freigegebenen Policy keine Version eigenmächtig. Eine ausdrücklich autorisierte policybasierte Berechnung darf jedoch einen Versionskandidaten und Release-PR erzeugen; das ist weder die Freigabe der Version durch den Agenten noch eine Publikationsfreigabe. Bei widersprüchlichen Quellen, Versionskollision oder nicht erklärbarer Berechnung stoppen.
+Vor Paketierung anhand der Bestandsaufnahme belegen und nur verbleibende Lücken klären: freigegebene Bump-Policy, Ausgangsversion, Basis-Commit, Zielbranch/Remote, Tagmuster, Releaseartefakte, Changelog-/Versionsquellen, Pflichtprüfungen, Paketquelle und wer die Veröffentlichung freigibt. Lies vorhandene Versionen, Tags und Toolkonfiguration. Nutze bei der Einrichtung die folgende 0.x-Empfehlung; wähle außerhalb einer freigegebenen Policy keine Version eigenmächtig. Eine ausdrücklich autorisierte policybasierte Berechnung darf jedoch einen Versionskandidaten und Release-PR erzeugen; das ist weder die Freigabe der Version durch den Agenten noch eine Publikationsfreigabe. Bei widersprüchlichen Quellen, Versionskollision oder nicht erklärbarer Berechnung stoppen.
 
 ### Empfohlene Versionsregel für 0.x
 

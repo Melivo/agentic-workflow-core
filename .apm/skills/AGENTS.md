@@ -39,6 +39,10 @@ ausdrückliche Installationsfreigabe. Der selektive Abgleich verwalteter
 (Core-Routing im Init-Skill, Serena/Gortex-Playbook im Konfigurator) und
 werden nicht dupliziert.
 
+Bei Releaseautomation gilt in `core-devops` die
+[Bestandsaufnahme vor Rückfragen](core-devops/references/ci-and-releases.md#releasebestand-vor-rückfragen-prüfen);
+belegte Releasekonventionen werden nicht erneut abgefragt.
+
 ## Verification
 
 `mise run check` aus der Repositorywurzel prüft die bestehenden Verträge;
