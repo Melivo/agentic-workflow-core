@@ -99,7 +99,9 @@ def validate_plan(data, agents=None, tools=None):
 
 def validate_catalog(data):
     require(data.get('catalog_version') == 1, 'Katalogversion')
-    require(data.get('max_automatic_review_repair_rounds') == 2, 'Reparaturlimit')
+    # G04: rigid repair-round limits are replaced by evidence-based continuation;
+    # the canonical catalog must not reintroduce a numeric stop.
+    require('max_automatic_review_repair_rounds' not in data, 'starres Reparaturlimit im Katalog')
     workflows = data.get('workflows', [])
     unique([w['id'] for w in workflows], 'workflows')
     by_id = {w['id']: w for w in workflows}
@@ -122,6 +124,7 @@ def validate_catalog(data):
     require('milestone/v1' in by_id['core-milestone'].get('input_schemas', []), 'Legacy milestone/v1 nicht mehr lesbar')
     for workflow in workflows:
         require('milestone/v1' not in workflow.get('output_schemas', []), 'Legacy milestone/v1 als Ausgabe erlaubt: ' + workflow['id'])
+        require('max_automatic_review_repair_rounds' not in workflow, 'starres Reparaturlimit im Katalog: ' + workflow['id'])
 
 def positive_int(value):
     # bool is an int subclass and 1.0 == 1; neither may pose as a version.
@@ -169,7 +172,7 @@ def validate_progression(data):
     """Ordered events: a replacement plan raises p; resume/review/repair keep the exact Run-ID."""
     require(positive_int(data['version']), 'gepinnte Version ist keine positive Ganzzahl: ' + repr(data['version']))
     pinned = (data['goal_id'], data['milestone_id'], data['version'])
-    numbers, runs, highest = [], {}, {}
+    numbers, runs, highest, bases = [], {}, {}, set()
     for event in data['events']:
         action = event['action']
         if action == 'plan':
@@ -189,8 +192,14 @@ def validate_progression(data):
             require(event['previous_run_path'] == event['run_path'] and run_id in runs, 'Resume/Reparatur verändert Run-ID')
             require(key[3] == numbers[-1], 'Resume auf abgelöstem Plan')
             if action == 'repair':
-                runs[run_id] += 1
-                require(runs[run_id] <= 2, 'dritte automatische Reparaturrunde')
+                # Evidence-based continuation, no numeric stop: the next attempt must
+                # name a new insight or a distinguishable testable hypothesis, and
+                # repeating the same justification is not a new attempt.
+                basis = event.get('basis')
+                require(isinstance(basis, str) and basis.strip(), 'Reparatur ohne neue Erkenntnis oder unterscheidbare prüfbare Hypothese')
+                # The modeled chain survives replacement plans and new runs.
+                require(basis not in bases, 'Reparatur wiederholt dieselbe Begründung ohne neue Erkenntnis')
+                bases.add(basis)
         else:
             raise ContractError('unbekannte Runaktion: ' + str(action))
 
@@ -363,6 +372,33 @@ def validate_scenario(data):
         require(data['schema'] == 'milestone/v1' and not data['mixed_formats'], 'Legacyformat vermischt')
         require(not data['automatic_migration'] and not data['automatic_rename'], 'automatische Legacy-Migration/Umbenennung')
         require(data['explicit_entry'], 'vermeintlich neueste Datei statt exaktem Einstieg')
+    elif kind == 'authorization':
+        # Z01/Z02: purpose-bound frame, technical alternatives vs. goal change,
+        # effort vs. additional money; fail closed on unclear impact or coverage.
+        require(data['frame_confirmed'], 'Erstplanung ohne bestätigten Rahmen bleibt bestätigungspflichtig')
+        require(not data['goal_changed'], 'geändertes Ziel benötigt Nutzerentscheidung')
+        if data['technical_change']:
+            require(data['within_frame'], 'technische Anpassung außerhalb des Rahmens')
+        require(data['coverage_known'], 'unbekannte Deckung vor kostenauslösender Aktion klären')
+        require(not data['extra_monetary_cost'] or data['consent_given'], 'zusätzliche monetäre Kosten ohne vorherige Zustimmung')
+        require(not data['uncovered_usage'], 'ungedeckte KI-/Harnessusage ohne Rücksprache')
+        if data['production_effect']:
+            require(data['impact_clear'] and data['recovery_safe'], 'ungedeckte oder unklare Produktionswirkung stoppt')
+    elif kind == 'safety':
+        # Z04: decisive assumption, indirect effects, evidence strength; no external duties.
+        require(data['assumption_named'] and data['indirect_effects_considered'], 'entscheidende Sicherheitsannahme oder indirekte Folgen unbenannt')
+        require(data['evidence_strength'] in ('belegt', 'widerlegt', 'offen'), 'Evidenzstärke nicht klassifiziert')
+        require(data['checked_or_marked_open'], 'Annahme weder geprüft noch offen markiert')
+        require(not data['external_skill_duty'], 'Blast-Radius-/Arena-/Modellanbieterpflicht')
+    elif kind == 'delegation':
+        # Z06: delegated tests stay with the agent; personal consent handed over.
+        require(not data['personal_repetition'] or data['requirement_confirmed'], 'persönliche Wiederholung ohne bestätigte Anforderung')
+        require(not data['personal_action'] or data['handed_over'], 'persönliche Anmeldung/Zustimmung/Abnahme nicht übergeben')
+        require(not data['sandbox_delegated'] or data['agent_operates'], 'delegierte Testbedienung zum Nutzer verlagert')
+        require(data['session_artifacts_exact'] and data['drift_checked'], 'Sitzungswechsel ohne exakte Artefakte oder Driftprüfung')
+        require(not data['new_start_formula'], 'neue Startformel statt bestehender Freigaben')
+        require(not data['auto_follow_up'], 'automatische Folgeetappe')
+        require(not data['time_budget_loop'], 'neue Zeitbudget-/Bereitschaftsschleife')
     elif kind == 'progression':
         validate_progression(data)
     elif kind == 'selection':
@@ -508,7 +544,7 @@ def check_completion_ref(entry, pinned, ref):
 POLICIES = {
     'milestones': [(r'bestätigt\w* Definition\w*[^.!\n]*(?:unveränder|nicht.*(?:überschreib|veränder))', 'unveränderliche Definition'), (r'(?:Versionsauswahl|Ersatzdefinition|Versionswechsel)[^.!\n]*Bestätigung', 'bestätigter Versionswechsel'), (r'(?:Abschluss|Nachweis)[^.!\n]*(?:nicht automatisch|keine automatische)', 'keine Erfolgsübertragung')],
     'shared': [(r'(?:Execute|core-execute)[^.!\n]*(?:persistiert|schreibt)[^.!\n]*read-only', 'Execute persistiert read-only Ergebnisse'), (r'(?:Versuch|attempt)[^.!\n]*unveränder|unveränder[^.!\n]*(?:Versuch|attempt)', 'unveränderliche Versuche'), (r'(?:referenz|angewiesen)[^.!\n]*(?:erhalten|aufbewahr)', 'referenzabhängige Aufbewahrung'),
-               (r'Dateiscope[^.!\n]*(?:keine|nicht)[^.!\n]*Verantwortlich', 'Dateiscope ist keine Funktionsfreigabe'), (r'kumulativ[^.!\n]*(?:ursprünglich|Original)', 'kumulativer Scope gegen Originalbezug'), (r'zweit\w*[^.!\n]*Ersatzplan[^.!\n]*ohne[^.!\n]*fachlich', 'Vereinfachungsstopp'), (r'Umbenennung[^.!\n]*nicht zurück', 'Umbenennung setzt nicht zurück'), (r'Planreview[^.!\n]*keinen Run', 'Planreview ohne Run'), (r'Planreview-pass[^.!\n]*nicht[^.!\n]*bestätigt', 'Planreview-pass ist keine Bestätigung'),
+               (r'Dateiscope[^.!\n]*(?:keine|nicht)[^.!\n]*Verantwortlich', 'Dateiscope ist keine Funktionsfreigabe'), (r'kumulativ[^.!\n]*(?:ursprünglich|Original)', 'kumulativer Scope gegen Originalbezug'), (r'Ersatzplanzyklus[^.!\n]*früh', 'Vereinfachungsstopp'), (r'Umbenennung[^.!\n]*nicht zurück', 'Umbenennung setzt nicht zurück'), (r'Planreview[^.!\n]*keinen Run', 'Planreview ohne Run'), (r'Planreview-pass[^.!\n]*nicht[^.!\n]*bestätigt', 'Planreview-pass ist keine Bestätigung'),
                (r'Eigenentwicklung[^.!\n]*belegte Lücke', 'Standard vor unbegründeter Eigenentwicklung'), (r'(?:keine|kein)[^.!\n]*präventiv', 'kein präventiver Zusatz'), (r'Übernommen\w* technisch\w* Voraussetzung\w*[^.!\n]*neu begründet', 'übernommene Voraussetzung neu begründen'), (r'(?:entfernt|vereinfach)[^.!\n]*nicht durch weitere Mechanismen', 'Vereinfachen statt kompensieren'),
                (r'beobachtbar\w* Verhalten[^.!\n]*Fehler\w*[^.!\n]*getrennt von technischen Entscheidungen', 'Verhalten getrennt von Lösung'), (r'technisch\w* Nutzerconstraints?[^.!\n]*verbindlich', 'Nutzerconstraint bleibt verbindlich'), (r'Agentenpräferenz[^.!\n]*nicht[^.!\n]*Nutzeranforderung', 'Agentenpräferenz keine Nutzeranforderung'), (r'Kleinfix[^.!\n]*nur[^.!\n]*Regressionstest', 'schlanker Kleinfix'),
                (r'(?:jede|alle) ursprünglich\w* Anforderung\w*[^.!\n]*Fehlerf', 'vollständige Originalabdeckung'), (r'Grün\w* selbst gewählt\w* Kriterien genügen nicht[^.!\n]*ursprünglich\w* Fehlerfall', 'grüne Eigenkriterien genügen nicht'), (r'Unbegründet\w* Zusätze entfallen', 'keine ungefragten Zusätze'), (r'keine zusätzlichen YAML-Felder', 'Abdeckung ohne neue Felder'),
@@ -516,13 +552,20 @@ POLICIES = {
                # DOX documentation contract (T02 of plan-dox-projektdokumentation).
                (r'Root-to-Target-Kette[^.!\n]*AGENTS\.md', 'DOX Root-to-Target-Dokumentation'), (r'nicht ohne erforderliche Dokumentationsaktualisierung abgeschlossen', 'kein Abschluss ohne Dokumentation'), (r'kein Guide-Edit nötig[^.!\n]*geprüfte Pfade[^.!\n]*Grund', 'begründeter DOX-Pass'),
                (r'Read-only-Arbeit[^.!\n]*harmlose Änderungen[^.!\n]*weder Schreib- noch Setup-Pflicht', 'read-only ohne DOX-Setuppflicht'), (r'Laufartefakte ersetzen keine Projektdokumentation', 'Laufartefakt ist keine Projektdokumentation'), (r'neue Dokumentationslücke[^.!\n]*bestätigt\w* Task[^.!\n]*Diff[^.!\n]*autoritativ', 'belegte neue Dokumentationslücke'),
-               (r'Erst Planbestätigung autorisiert[^.!\n]*Setupwirkung', 'DOX-Setup nur nach Planbestätigung'), (r'Fehlt es oder eine gültige Quelle[^.!\n]*blockiert', 'fehlende DOX-Setupfähigkeit blockiert'), (r'Secrets nennt nur[^.!\n]*Referenznamen[^.!\n]*weder Secretwerte', 'kein Secretwert in Dokumentation')],
+               (r'Erst Planbestätigung autorisiert[^.!\n]*Setupwirkung', 'DOX-Setup nur nach Planbestätigung'), (r'Fehlt es oder eine gültige Quelle[^.!\n]*blockiert', 'fehlende DOX-Setupfähigkeit blockiert'), (r'Secrets nennt nur[^.!\n]*Referenznamen[^.!\n]*weder Secretwerte', 'kein Secretwert in Dokumentation'),
+               # G04 Z01-Z06: purpose-bound authorization, effort vs. money, evidence-based attempts, decisive assumptions, delegation.
+               (r'Mehr Arbeitsaufwand[^.!\n]*keine erneute Rückfrage', 'Aufwand allein keine Rückfrage'), (r'materiell unklare oder ungedeckte Wirkung stoppt', 'unklare Wirkung stoppt'), (r'Zusätzliche monetäre Kosten[^.!\n]*brauchen vorherige Zustimmung', 'monetäre Kosten brauchen Zustimmung'),
+               (r'Der nächste Versuch benennt neue Erkenntnis[^.!\n]*unterscheidbare prüfbare Hypothese', 'evidenzbasierte Fortsetzung statt starrer Rundenzahl'), (r'ohne tragfähigen Korrekturansatz folgt die Nutzerentscheidung', 'Planreviewfortsetzung evidenzbasiert'),
+               (r'entscheidende Sicherheitsannahme', 'entscheidende Sicherheitsannahme'), (r'indirekte\w* Folgen jenseits direkter Aufrufer', 'indirekte Folgen jenseits Aufrufer'), (r'Evidenzstärke[^.!\n]*belegt, widerlegt oder offen', 'Evidenzstärke klassifizieren'),
+               (r'Delegierte Sandbox- und Testbedienung bleibt beim Agenten', 'delegierte Testbedienung beim Agenten'), (r'persönliche Wiederholung erfolgt nur nach bestätigter Anforderung', 'keine unbestätigte persönliche Wiederholung'), (r'ohne neue Startformel und ohne automatische Folgeetappe', 'keine neue Startformel'), (r'keine neuen Zeitbudget- oder Bereitschaftsschleifenregeln', 'keine Zeitbudget- oder Bereitschaftsschleifen')],
     'workflows': [(r'(?:Start|Resume)[^.!\n]*(?:Version|Auswahl|Definition)', 'Start/Resume Versionsprüfung'), (r'(?:Folgeetappe|nächste Etappe)[^.!\n]*(?:Freigabe|Bestätigung)', 'Folgefreigabe'), (r'(?:Review|core-review)[^.!\n]*(?:gepinnt|festgelegt|Definitionsversion)', 'Review gegen gepinnte Fassung'),
                   (r'Ausschließlich für das \[?Planreview\]?(?:\([^)\s]*\))?[^.!\n]*qa-reviewer', 'schmale Planreview-Dispatchausnahme'), (r'ohne historisch\w* Planreview[^.!\n]*Kompatibilitätsprüfung', 'Legacy-Kompatibilitätsprüfung'), (r'Bloat[^.!\n]*(?:Verwerfen|Rückbau)', 'Bloat verwerfen statt ausbauen'),
                   (r'Trenne Verhalten[^.!\n]*Anforderungsherkunft[^.!\n]*technischen Entscheidungen', 'Plan trennt Anforderung und Lösung'), (r'Alle ursprünglichen Anforderungen[^.!\n]*gedeckt[^.!\n]*unbegründete Zusätze fehlen', 'Plan prüft Originalabdeckung'),
-                  (r'DOX-Zustand[^.!\n]*vorhanden, fehlend, teilweise oder widersprüchlich', 'Plan prüft DOX-Zustand'), (r'Initialisierung oder Ergänzung darf nur ausgeführt werden, wenn konkrete Pfade[^.!\n]*bestätigten Task-Scope', 'Execute initialisiert nur gescopt'), (r'Laufprotokoll ist kein Ersatz für Projektdokumentation', 'Review prüft Projektdokumentation')],
+                  (r'DOX-Zustand[^.!\n]*vorhanden, fehlend, teilweise oder widersprüchlich', 'Plan prüft DOX-Zustand'), (r'Initialisierung oder Ergänzung darf nur ausgeführt werden, wenn konkrete Pfade[^.!\n]*bestätigten Task-Scope', 'Execute initialisiert nur gescopt'), (r'Laufprotokoll ist kein Ersatz für Projektdokumentation', 'Review prüft Projektdokumentation'),
+                  (r'nächste automatische `execute ↔ review`-Reparatur nur gemäß', 'evidenzbasierte Review-Reparatur')],
     'domains': [(r'(?:Bedarf|Übergabe)[^.!\n]*(?:Execute|core-execute)', 'vermittelter Domainbedarf'), (r'(?:fehlend\w* Task|fehlt[^.!\n]*Task|materiell\w* Vertragsänderung)[^.!\n]*(?:Plan|core-plan)', 'fehlender Task zurück an Plan'), (r'(?:Fachagent|Fachskill)[^.!\n]*(?:nicht|keine|weder)[^.!\n]*(?:Version|Ziel|Index)', 'Zielschutz'),
-                (r'widersprüchlich\w* Prosa[^.!\n]*Dokumentationslücke nicht erforderlich', 'neue belegte Lücke ohne Driftpflicht'), (r'Fehlt die Fähigkeit oder eine gültige Quelle, blockiere', 'Docs blockiert ohne DOX-Setupfähigkeit')],
+                (r'widersprüchlich\w* Prosa[^.!\n]*Dokumentationslücke nicht erforderlich', 'neue belegte Lücke ohne Driftpflicht'), (r'Fehlt die Fähigkeit oder eine gültige Quelle, blockiere', 'Docs blockiert ohne DOX-Setupfähigkeit'),
+                (r'zusätzliche monetäre Kosten brauchen vorherige Zustimmung', 'Domain-Kostenklausel')],
     'setup': [(r'(?:MCP|Provider)[^.!\n]*read-only|read-only[^.!\n]*(?:MCP|Provider)', 'read-only Providerprüfung'), (r'(?:keine|kein|nicht)[^.!\n]*(?:Installation|Installer|installiert)', 'kein Installer'), (r'(?:einzeln|beschädigt|doppelt)[^.!\n]*(?:block|stopp)', 'beschädigte Marker blockieren')],
     'docs': [(r'(?:einfache Vorhaben|ohne Milestones)[^.!\n]*(?:keine|nur|ohne)[^.!\n]*(?:Zielstruktur|Plan|Ziel)', 'einfacher Einstieg'), (r'Resume[^.!\n]*(?:dieselbe|gleichen|unverändert)[^.!\n]*Run', 'Resume behält Run'), (r'(?:Definition|Version)[^.!\n]*unveränder', 'unveränderliche Definition')],
 }
@@ -534,6 +577,7 @@ REQUIRED_COVERAGE = (
     'gueltige-neuanlage', 'legacy-einstieg', 'bestaetigter-ersatz', 'nicht-ausgewaehlte-neuere-datei', 'veralteter-plan-goal-prompt', 'laufender-run-versionswechsel', 'geaenderte-abhaengigkeit', 'fehlende-definition-designquelle', 'id-versionskonflikt', 'zyklischer-graph', 'teilweise-geschriebene-struktur', 'konkurrierende-aenderung', 'historische-abschlusszuordnung',
     'namenskollision', 'widerspruechliche-ids', 'falsche-versionszuordnung', 'ersatzplannummer', 'run-id-resume-review-reparatur', 'keine-automatische-umbenennung', 'kein-geerbter-abschluss', 'resume', 'review-ready', 'folgefreigabe', 'gesamtabschluss', 'unveraenderliches-ziel', 'hoechstens-eine-aktuelle-etappe',
     'S-dox-projektdokumentation',
+    'g04-authorization-rahmen', 'g04-kosten-aufwand-trennung', 'g04-reparatur-evidenzbasis', 'g04-blast-radius', 'g04-delegation-consent', 'g04-katalog-ohne-limit',
 )
 
 def check_coverage(fixture):
@@ -722,6 +766,71 @@ def check_execute_attempts(text):
             require('Legacy' in sentence and re.search(r'gelesen|lesen', sentence) and re.search(r'weder neu beschrieben|nicht neu beschrieben', sentence) and not re.search(r'\bVerlange\b', sentence), 'Execute schreibt Legacy-Taskpfad statt attempt-Pfad')
 
 
+# RV05: source-local clauses for the real replacement-plan path, not an authorization engine.
+REPLACEMENT_SOURCES = {
+    '.apm/skills/core-shared/references/workflow-contract.md': (
+        r'Für einen gedeckten technischen Ersatzplan[^.]*abgeleitete Freigabe[^.]*exakter Original- und Vorgängerpfade[^.]*unveränderter Ziel-/Meilensteinkriterien[^.]*Wirkungs-/Risikorahmens',
+        r'Nach statischer Validierung und unabhängigem Planreview-pass[^.]*ohne neue Nutzerbestätigung schreiben[^.]*bestehendem Ausführungsauftrag',
+        r'Ohne bestätigten Rahmen[^.]*neuen eigenständigen Zielen[^.]*Meilensteinänderungen[^.]*Ausschlüssen[^.]*materiell offenen Entscheidungen[^.]*unklaren oder ungedeckten Wirkungen[^.]*ungedeckten Geldkosten[^.]*vor Schreiben und Ausführung[^.]*Nutzerentscheidung',
+        r'Scopes blockieren[^.]*ausdrücklich oder abgeleitet freigegebenen neuen Plan',
+        r'abgeleitet freigegebener Ersatzplan[^.]*neuen Run[^.]*Vorgängerplan und -run',
+        r'Planreview-pass[^.]*erteilt selbst keine Freigabe',
+        r'Ausführung erfordert[^.]*abgeleitete Planfreigabe[^.]*Ausführungsauftrag',
+        r'Der bestätigte Plan bleibt während der Ausführung unverändert',
+    ),
+    '.apm/skills/core-plan/SKILL.md': (
+        r'Nutze anschließend Schritt 5[^.]*statische Validierung[^.]*unabhängige Planreview',
+        r'Prüfe danach die Freigabe[^\n]*abgeleitete Freigabe im Plantext[^.]*exakten Original-[^.]*Vorgängerpfaden[^.]*neue Nutzerbestätigung entfällt',
+        r'Andernfalls präsentiere[^.]*Nutzerentscheidung',
+        r'Schreibe erst mit ausdrücklicher oder belegter abgeleiteter Freigabe[^.]*## Planreview',
+        r'Bloße Planerstellung startet keine Ausführung[^.]*bestehender Ausführungsauftrag',
+        r'Prüfe vor Planreview, kanonischem Schreiben und einer gegebenenfalls noch erforderlichen Nutzerbestätigung',
+    ),
+    '.apm/skills/core-review/SKILL.md': (
+        r'Planentwurf vor kanonischem Schreiben sowie einer gegebenenfalls noch erforderlichen Nutzerbestätigung',
+        r'Planreview vor kanonischem Schreiben sowie einer gegebenenfalls noch erforderlichen Nutzerbestätigung',
+    ),
+    '.apm/skills/core-execute/SKILL.md': (
+        r'prüfe vor Annahme des Ersatzplans[^.]*abgeleitete Freigabe[^.]*statische Validierung und unabhängigen Planreview-pass',
+        r'gedeckter technischer Ersatzplan[^.]*bestehendem Ausführungsauftrag keine neue Nutzerbestätigung',
+    ),
+    '.apm/skills/core-milestone/SKILL.md': (
+        r'Etappenfreigabe erlauben die erste Detailplanung[^.]*starten aber keine Ausführung',
+        r'neue Plan- oder Ersatzplanpfade[^.]*statischer Validierung[^.]*unabhängigem Planreview[^.]*abgeleiteter Freigabe[^.]*ohne neue Einzelbestätigung',
+    ),
+    '.apm/skills/core-milestone/assets/goal-prompt.md': (
+        r'abgeleitet freigegebenen Plan und bestehenden Ausführungsauftrag[^.]*gedeckte technische Ersatzpläne verlangen keine neue Nutzerbestätigung',
+        r'Bloße Zieldefinition oder Planerstellung startet keine Ausführung',
+    ),
+    '.apm/skills/core-handoff/assets/start-prompt.md': (
+        r'abgeleitet freigegebenen Plan und bestehenden Ausführungsauftrag[^.]*gedeckte technische Ersatzpläne verlangen keine neue Nutzerbestätigung',
+        r'statische Validierung, unabhängiges Planreview[^.]*abgeleitete Freigabe gemäß Workflowvertrag bleiben erforderlich',
+        r'Bloße Zieldefinition oder Planerstellung startet keine Ausführung',
+    ),
+    'README.md': (
+        r'statischer Validierung[^.]*core-review[^.]*vor dem kanonischen Schreiben und einer noch erforderlichen Nutzerbestätigung',
+        r'belegte abgeleitete Freigabe[^.]*neue Nutzerbestätigung entfällt',
+        r'Ohne bestätigten Rahmen[^.]*neuen eigenständigen Zielen[^.]*Meilensteinänderungen[^.]*Ausschlüssen[^.]*materiell offenen Entscheidungen[^.]*unklaren oder ungedeckten Wirkungen[^.]*ungedeckten Geldkosten[^.]*Nutzerentscheidung vor Schreiben und Ausführung',
+        r'Umsetzung setzt stets eine ausdrückliche oder belegte abgeleitete Planfreigabe und einen bestehenden Ausführungsauftrag voraus',
+    ),
+    'DESIGN.md': (
+        r'Nach statischer Validierung und unabhängigem Planreview-pass[^.]*belegter abgeleiteter Freigabe ohne neue Nutzerbestätigung kanonisch geschrieben[^.]*bestehendem Ausführungsauftrag',
+        r'Ohne bestätigten Rahmen[^.]*neuen eigenständigen Zielen[^.]*Meilensteinänderungen[^.]*Ausschlüssen[^.]*materiell offenen Entscheidungen[^.]*unklaren oder ungedeckten Wirkungen[^.]*ungedeckten Geldkosten[^.]*Nutzerentscheidung vor Schreiben und Ausführung',
+        r'Planreview-pass erteilt selbst keine Freigabe[^.]*bloße Planerstellung startet keine Ausführung',
+        r'Nach vollständigem, statisch validiertem Entwurf und vor kanonischem Schreiben sowie einer noch erforderlichen Nutzerbestätigung',
+    ),
+}
+
+def check_replacement_sources(sources):
+    # Reject old unconditional gates even when a positive frame paragraph survives.
+    legacy = r'Erst nach ausdrücklicher Bestätigung wird der Ersatzplan geschrieben|Die bisherige Planfreigabe bestätigt keinen unbekannten Ersatzplan|bereits genau diesen Plan autorisiert|ohne Nutzerbestätigung wird nichts ausgeführt|die Bestätigung des Ersatzplans bleibt erforderlich|die Planbestätigung bleibt erforderlich|Ziel-/Definitionsbestätigung und aktuelle Etappenfreigabe sind weder Planbestätigung noch Ausführungsfreigabe|Der Nutzer aktiviert ihn erst nach Bestätigung des eigenen Plans|Ausführung beginnt erst nach Planbestätigung und ausdrücklicher Execute-Autorisierung|Execute beginnt erst nach bestätigtem Plan und ausdrücklicher Ausführungsautorisierung|erst nach deren Bestätigung verknüpft|Nutze anschließend denselben Validierungs-, Planreview- und Bestätigungsschritt wie bei Erstplanung|core-plan → core-execute \(erst nach Nutzerbestätigung\)|erst deine ausdrückliche Bestätigung erlaubt die Umsetzung|Planreview vor deiner Bestätigung|Planreview vor Nutzerbestätigung|Planreview; Textantwort vor Bestätigung|Nach vollständigem Entwurf und vor Nutzerbestätigung|unabhängiges Planreview vor Bestätigung|Entwurf vor deiner Bestätigung|→ Nutzerbestätigung → core-execute|→ deine Freigabe → core-execute|(?:Planreview|Planentwurf) vor (?:der |deiner )?(?:Nutzer)?Bestätigung|Prüfe vor der Bestätigung:'
+    for path, patterns in REPLACEMENT_SOURCES.items():
+        text = sources[path]
+        require(not re.search(legacy, text, re.I), 'RV05 widersprechendes Bestätigungsgate: ' + path)
+        for pattern in patterns:
+            require(re.search(pattern, text, re.I), 'RV05 Ersatzplan-Ablaufklausel fehlt: ' + path + ': ' + pattern)
+
+
 DOCS_EXCLUSIVE = re.compile(r'\b(?:ausschließlich|nur|einzig)\b', re.I)
 DOCS_ACTION = re.compile(r'\b(?:Ändere|Dokumentiere|dokumentiert|Bearbeite|bearbeitet|Korrigiere|korrigiert|ergänz\w*)\b', re.I)
 
@@ -741,6 +850,8 @@ def check_setup_source(front, text):
 
 def check_group(root, group, with_authoring=False, tool_root=None):
     paths = targets(root, group)
+    if group == 'workflows':
+        paths = list(dict.fromkeys([*paths, *(root / p for p in REPLACEMENT_SOURCES)]))
     def action():
         # Missing inputs take precedence over content findings in earlier targets.
         for path in paths:
@@ -770,6 +881,8 @@ def check_group(root, group, with_authoring=False, tool_root=None):
                     validate_catalog(value)
                 elif isinstance(value, dict) and 'schema' in value:
                     examples.append(value)
+        if group == 'workflows':
+            check_replacement_sources({str(p.relative_to(root)): t for p, t in zip(paths, texts)})
         joined = '\n'.join(texts)
         for pattern, label in POLICIES[group]:
             require(re.search(pattern, joined, re.I), 'semantische Klausel nicht belegt: ' + label)

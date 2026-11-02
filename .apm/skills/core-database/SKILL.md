@@ -52,7 +52,7 @@ Lade nur die für den konkreten Task erforderlichen Details; mehrere Referenzen 
 
 ## Autorisierungsgrenzen für Datenbankaktionen
 
-Dateien für Schema, Migration, Query oder Index dürfen nur im bestätigten Schreibscope erzeugt oder geändert werden. Das Erstellen einer Migrationsdatei autorisiert ihre Ausführung nicht.
+Dateien für Schema, Migration, Query oder Index dürfen nur im bestätigten Schreibscope erzeugt oder geändert werden. Das Erstellen einer Migrationsdatei autorisiert ihre Ausführung nicht. Zusätzlicher Arbeitsaufwand oder beherrschbare gedeckte Produktionswirkungen begründen allein keine erneute Rückfrage; materiell unklare oder ungedeckte Wirkung stoppt, und zusätzliche monetäre Kosten brauchen vorherige Zustimmung.
 
 Vor jeder Datenbankverbindung oder Ausführung klassifiziere Umgebung, Ziel, Identität, Wirkung und Reversibilität:
 

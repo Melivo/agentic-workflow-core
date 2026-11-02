@@ -53,7 +53,7 @@ Mehrere Referenzen dürfen gemeinsam geladen werden. Sicherheits- und Autorisier
 
 ## Autorisierungsgrenzen für Terraform und Infrastruktur
 
-Eine Dateifreigabe ist keine Laufzeitfreigabe. Klassifiziere vor jedem Toolaufruf Aktion, Umgebung, Ziel, Identität, Backend, Netzwerkzugriff, erwartete Wirkung, Kosten und Reversibilität.
+Eine Dateifreigabe ist keine Laufzeitfreigabe. Zusätzlicher Arbeitsaufwand oder beherrschbare gedeckte Produktionswirkungen begründen allein keine erneute Rückfrage; materiell unklare oder ungedeckte Wirkung stoppt, und zusätzliche monetäre Kosten brauchen vorherige Zustimmung. Klassifiziere vor jedem Toolaufruf Aktion, Umgebung, Ziel, Identität, Backend, Netzwerkzugriff, erwartete Wirkung, Kosten und Reversibilität.
 
 | Aktion | Ohne passende ausdrückliche Autorisierung | Erforderliche Freigabe |
 |---|---|---|

@@ -3,7 +3,7 @@
 **Status:** Final und verbindlich
 **Geltungsbereich:** öffentliches Microsoft-APM-Paket und dessen Workflow-Werkbank
 **Kanonische Paketquelle:** `.apm/`
-**Kernablauf:** `core-brainstorm? → core-plan → core-review (Planreview, Text) → Nutzerbestätigung → core-execute ↔ core-review (Umsetzungsreview)`
+**Kernablauf:** `core-brainstorm? → core-plan → core-review (Planreview, Text) → ausdrückliche/abgeleitete Planfreigabe + Ausführungsauftrag → core-execute ↔ core-review (Umsetzungsreview)`
 
 ## 1. Zweck und Autorität
 
@@ -16,7 +16,7 @@ In diesem Repository bezeichnet `DESIGN.md` das Systemdesign der Workflow-Werkba
 Das Paket soll:
 
 - wenige klar abgegrenzte Workflows bereitstellen, die ohne Parallelarchitektur ineinandergreifen,
-- Planung, Planreview vor Nutzerbestätigung und read-only Umsetzungsreview nach Execute durch frische Kontexte trennen,
+- Planung, Planreview vor kanonischem Schreiben und einer noch erforderlichen Nutzerbestätigung sowie read-only Umsetzungsreview nach Execute durch frische Kontexte trennen,
 - Fachagenten auf kleine, überprüfbare Aufgaben begrenzen,
 - Gortex als primäre Code-Intelligence verwenden und passende Gortex-Skills bedarfsgerecht einbinden,
 - Context7, YouTube Transcript und Serena nach klaren Recherchegrenzen einsetzen,
@@ -78,7 +78,7 @@ Nach bestandenem Review:
 | `core-brainstorm` | Absicht, Scope und Lösungsrichtung klären | nein | kompakter Decision-Handoff |
 | `core-plan` | Repositoryanalyse, Research, Entscheidungen, Taskgraph und eng begrenzter Planreview-Dispatch an `qa-reviewer`/`core-review` | nein | bestätigungsfähiger `plan/v1` |
 | `core-execute` | bestätigten Taskgraph ausführen und integrieren | ja | Run-Artefakte und Review-Handoff |
-| `core-review` | unabhängiges Planreview vor Bestätigung und read-only Umsetzungsreview nach Execute | nein | Texturteil im Planreview; `review/v1` im Umsetzungsreview |
+| `core-review` | unabhängiges Planreview vor kanonischem Schreiben und read-only Umsetzungsreview nach Execute | nein | Texturteil im Planreview; `review/v1` im Umsetzungsreview |
 
 ### Unterstützende Skills
 
@@ -194,7 +194,6 @@ Er enthält nur:
 - Ein- und Ausgabeschema,
 - Mutationsklasse,
 - Fresh-Context-Grenzen,
-- maximale automatische Review-Reparaturrunden,
 - bekannte Fachagenten- und Tool-IDs.
 
 Die ausführliche Methode bleibt in den jeweiligen `SKILL.md`-Dateien. Dadurch verhindert der Katalog tote Referenzen, ohne eine zweite Workflowbeschreibung zu werden.
@@ -203,15 +202,17 @@ Verbindliche Übergänge:
 
 ```text
 core-brainstorm → core-plan
-core-plan → core-review (Planreview; Textantwort vor Bestätigung)
-core-plan → core-execute (erst nach Nutzerbestätigung)
+core-plan → core-review (Planreview; Textantwort vor kanonischem Schreiben)
+core-plan → core-execute (ausdrückliche/abgeleitete Planfreigabe + bestehender Ausführungsauftrag)
 core-execute → core-review (Umsetzungsreview; review/v1)
 core-review.pass → completed
 core-review.changes_requested → core-execute
 core-review.material_scope_change → core-plan
 ```
 
-Automatische `execute ↔ review`-Runden sind auf zwei begrenzt.
+Nach statischer Validierung und unabhängigem Planreview-pass darf ein gedeckter technischer Ersatzplan oder die erste Detailplanung einer freigegebenen Etappe mit belegter abgeleiteter Freigabe ohne neue Nutzerbestätigung kanonisch geschrieben und bei bestehendem Ausführungsauftrag ausgeführt werden. Ohne bestätigten Rahmen sowie bei neuen eigenständigen Zielen, Meilensteinänderungen, ausdrücklichen Ausschlüssen, materiell offenen Entscheidungen, unklaren oder ungedeckten Wirkungen oder zusätzlichen ungedeckten Geldkosten bleibt die Nutzerentscheidung vor Schreiben und Ausführung erforderlich. Ein Planreview-pass erteilt selbst keine Freigabe; bloße Planerstellung startet keine Ausführung.
+
+Automatische `execute ↔ review`-Runden folgen der evidenzbasierten Fortsetzung von Versuchen: Der nächste Versuch benennt neue Erkenntnis oder eine unterscheidbare prüfbare Hypothese, die kleinste Prüfung, realistische Reparierbarkeit, Aufwand/Risiko/Restnutzen und sichere Abbruchbedingungen; ohne tragfähigen Ansatz stoppt der Lauf früh.
 
 ## 8. Shared Workflow Kernel
 
@@ -285,9 +286,9 @@ Standardoutput ist ein kompakter Decision-Handoff. Ein separates dauerhaftes Dok
 - materielle Designentscheidungen,
 - Taskgraph und Fachagentenzuweisung,
 - Akzeptanzkriterien und Checks,
-- statische Validierung und Nutzerbestätigung.
+- statische Validierung sowie ausdrückliche oder belegte abgeleitete Planfreigabe.
 
-`core-plan` implementiert nicht und verwaltet keinen Laufzustand. Ausschließlich für das Planreview vor Nutzerbestätigung darf es den `qa-reviewer` mit `core-review` in frischem Kontext beauftragen; dieser enge QA-Dispatch ist keine allgemeine Agentenkoordination.
+`core-plan` implementiert nicht und verwaltet keinen Laufzustand. Ausschließlich für das Planreview vor kanonischem Schreiben und einer noch erforderlichen Nutzerbestätigung darf es den `qa-reviewer` mit `core-review` in frischem Kontext beauftragen; dieser enge QA-Dispatch ist keine allgemeine Agentenkoordination.
 
 ### Research-Hierarchie
 
@@ -433,7 +434,7 @@ Exitcode 0 allein beweist keine fachliche Erfüllung. Pflichtchecks ohne aktuell
 
 `core-review` urteilt unabhängig und read-only in frischem Kontext. Es hat zwei getrennte Modi:
 
-- **Planreview:** Nach vollständigem Entwurf und vor Nutzerbestätigung. Es prüft Entwurf und Originalauftrag und gibt `pass`, `changes_requested` oder `blocked` als kurze Textantwort mit konkreten Stellen aus. Es entsteht kein Run und kein `review/v1`; pass bedeutet nur bestätigungsfähig. Materielle Entwurfsänderungen werden erneut geprüft.
+- **Planreview:** Nach vollständigem, statisch validiertem Entwurf und vor kanonischem Schreiben sowie einer noch erforderlichen Nutzerbestätigung. Es prüft Entwurf und Originalauftrag und gibt `pass`, `changes_requested` oder `blocked` als kurze Textantwort mit konkreten Stellen aus. Es entsteht kein Run und kein `review/v1`; pass bedeutet nur bestätigungsfähig und erteilt selbst keine Freigabe. Materielle Entwurfsänderungen werden erneut geprüft.
 - **Umsetzungsreview:** Nach `core-execute` prüft es die integrierte Gesamtänderung anhand des bestätigten Plans, aktuellen Gesamtdiffs, kompakten Handoffs, Task-/Checkevidenz und Einschränkungen. Dieser Modus verwendet das bestehende `review/v1`.
 
 In keinem Modus liest es die vollständige Implementierungsdiskussion oder implementiert Korrekturen. Im Umsetzungsreview empfiehlt es bei anhand von Originalziel, Kriterien, Nichtzielen und Diff belegtem Bloat ausdrücklich das Verwerfen beziehungsweise den kleinsten sicheren Rückbau statt zusätzlichen Ausbau. Unsichere Notwendigkeit wird als Evidenzlücke behandelt; notwendige Schutzmaßnahmen sowie fremde Änderungen bleiben erhalten. Die Empfehlung ist keine Mutationserlaubnis.
@@ -477,7 +478,7 @@ findings:
 - `core-execute` ordnet sie dem passenden Fachagenten zu und integriert die Korrektur.
 - Betroffene Checks und die Reviewprüfung werden auf dem aktuellen Stand wiederholt.
 - Jede Reviewrunde startet aus aktuellen Artefakten, nicht aus dem alten Gespräch.
-- Nach zwei automatischen Korrekturrunden stoppt der Lauf und informiert den Benutzer über verbleibende Findings.
+- Ohne tragfähigen, begründeten Versuch stoppt der Lauf und informiert den Benutzer über verbleibende Findings; mehr als zwei begründete Versuche sind möglich.
 
 ## 13. Fachagentenmodell
 

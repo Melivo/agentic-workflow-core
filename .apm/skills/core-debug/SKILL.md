@@ -62,6 +62,8 @@ Der `debug-investigator` startet **keinen Subagenten**. Fachagenten wählen kein
 5. Dokumentiere die bestätigte Ursache und die verworfenen materiellen Hypothesen knapp.
 6. Erst wenn diese lokale Hypothesen- und Repositoryanalyse ausgeschöpft ist und eine konkrete materielle Wissenslücke die nächste Diagnoseentscheidung blockiert, nutze `core-research` inline gemäß [Core Research](../core-research/SKILL.md). Formuliere eine enge Frage, das davon abhängige Diagnosekriterium und die Recherchegrenze. Überführe externe Befunde ausschließlich in überprüfbare Hypothesen; Ursache wird erst durch aktuelle lokale Evidenz bestätigt. Bleibt die Lücke offen oder ist die Recherchegrenze ausgeschöpft, melde `partial` oder `blocked` samt fehlender Evidenz an `core-execute`; recherchiere nicht weiter.
 
+Wiederholungen ohne neue Erkenntnis lösen eine Ursachen- und Vereinfachungsprüfung aus, keine endlose Fehlerverschleife.
+
 Prüfe insbesondere Null- oder Undefined-Zugriffe, Typ- und Vertragsabweichungen, veralteten Zustand, fehlende Fehlerbehandlung, Reihenfolge- oder Race-Probleme und inkonsistente Eingaben, ohne diese Liste als Diagnoseersatz zu verwenden.
 
 ### 3. Minimalen Fix bestimmen

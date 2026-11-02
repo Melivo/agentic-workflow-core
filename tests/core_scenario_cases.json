@@ -7019,7 +7019,8 @@
           {
             "action": "repair",
             "run_path": ".agentic-workflow/runs/run-G01-M02-v1-p01-r01/state.yaml",
-            "previous_run_path": ".agentic-workflow/runs/run-G01-M02-v1-p01-r01/state.yaml"
+            "previous_run_path": ".agentic-workflow/runs/run-G01-M02-v1-p01-r01/state.yaml",
+            "basis": "neue Erkenntnis A"
           },
           {
             "action": "review",
@@ -7029,7 +7030,8 @@
           {
             "action": "repair",
             "run_path": ".agentic-workflow/runs/run-G01-M02-v1-p01-r01/state.yaml",
-            "previous_run_path": ".agentic-workflow/runs/run-G01-M02-v1-p01-r01/state.yaml"
+            "previous_run_path": ".agentic-workflow/runs/run-G01-M02-v1-p01-r01/state.yaml",
+            "basis": "prüfbare Hypothese B"
           }
         ]
       },
@@ -7113,22 +7115,25 @@
           {
             "action": "repair",
             "run_path": ".agentic-workflow/runs/run-G01-M02-v1-p01-r01/state.yaml",
-            "previous_run_path": ".agentic-workflow/runs/run-G01-M02-v1-p01-r01/state.yaml"
+            "previous_run_path": ".agentic-workflow/runs/run-G01-M02-v1-p01-r01/state.yaml",
+            "basis": "neue Erkenntnis A"
           },
           {
             "action": "repair",
             "run_path": ".agentic-workflow/runs/run-G01-M02-v1-p01-r01/state.yaml",
-            "previous_run_path": ".agentic-workflow/runs/run-G01-M02-v1-p01-r01/state.yaml"
+            "previous_run_path": ".agentic-workflow/runs/run-G01-M02-v1-p01-r01/state.yaml",
+            "basis": "prüfbare Hypothese B"
           },
           {
             "action": "repair",
             "run_path": ".agentic-workflow/runs/run-G01-M02-v1-p01-r01/state.yaml",
-            "previous_run_path": ".agentic-workflow/runs/run-G01-M02-v1-p01-r01/state.yaml"
+            "previous_run_path": ".agentic-workflow/runs/run-G01-M02-v1-p01-r01/state.yaml",
+            "basis": "kleinste Prüfung C"
           }
         ]
       },
-      "expected": "fail",
-      "observation": "dritte automatische Reparaturrunde"
+      "expected": "pass",
+      "observation": "drei begründete, unterscheidbare Versuche erlaubt"
     },
     {
       "id": "t08-progression-replacement-plan",
@@ -13891,9 +13896,706 @@
       },
       "expected": "pass",
       "observation": "gültige Beziehungen akzeptiert"
+    },
+    {
+      "id": "g04-authorization-positive",
+      "group": "shared",
+      "source": ".apm/skills/core-shared/references/workflow-contract.md",
+      "input": {
+        "kind": "authorization",
+        "frame_confirmed": true,
+        "goal_changed": false,
+        "technical_change": true,
+        "within_frame": true,
+        "coverage_known": true,
+        "extra_monetary_cost": false,
+        "consent_given": false,
+        "uncovered_usage": false,
+        "production_effect": false,
+        "impact_clear": true,
+        "recovery_safe": true
+      },
+      "expected": "pass",
+      "observation": "gültige Beziehungen akzeptiert"
+    },
+    {
+      "id": "g04-authorization-effort-production",
+      "group": "shared",
+      "source": ".apm/skills/core-shared/references/workflow-contract.md",
+      "input": {
+        "kind": "authorization",
+        "frame_confirmed": true,
+        "goal_changed": false,
+        "technical_change": true,
+        "within_frame": true,
+        "coverage_known": true,
+        "extra_monetary_cost": false,
+        "consent_given": false,
+        "uncovered_usage": false,
+        "production_effect": true,
+        "impact_clear": true,
+        "recovery_safe": true
+      },
+      "expected": "pass",
+      "observation": "gedeckte klare Produktionswirkung ohne Rückfrage"
+    },
+    {
+      "id": "g04-authorization-first-plan-without-frame",
+      "group": "shared",
+      "source": ".apm/skills/core-shared/references/workflow-contract.md",
+      "input": {
+        "kind": "authorization",
+        "frame_confirmed": false,
+        "goal_changed": false,
+        "technical_change": true,
+        "within_frame": true,
+        "coverage_known": true,
+        "extra_monetary_cost": false,
+        "consent_given": false,
+        "uncovered_usage": false,
+        "production_effect": false,
+        "impact_clear": true,
+        "recovery_safe": true
+      },
+      "expected": "fail",
+      "observation": "bestätigungspflichtig"
+    },
+    {
+      "id": "g04-authorization-goal-change",
+      "group": "shared",
+      "source": ".apm/skills/core-shared/references/workflow-contract.md",
+      "input": {
+        "kind": "authorization",
+        "frame_confirmed": true,
+        "goal_changed": true,
+        "technical_change": true,
+        "within_frame": true,
+        "coverage_known": true,
+        "extra_monetary_cost": false,
+        "consent_given": false,
+        "uncovered_usage": false,
+        "production_effect": false,
+        "impact_clear": true,
+        "recovery_safe": true
+      },
+      "expected": "fail",
+      "observation": "Nutzerentscheidung"
+    },
+    {
+      "id": "g04-authorization-technical-outside-frame",
+      "group": "shared",
+      "source": ".apm/skills/core-shared/references/workflow-contract.md",
+      "input": {
+        "kind": "authorization",
+        "frame_confirmed": true,
+        "goal_changed": false,
+        "technical_change": true,
+        "within_frame": false,
+        "coverage_known": true,
+        "extra_monetary_cost": false,
+        "consent_given": false,
+        "uncovered_usage": false,
+        "production_effect": false,
+        "impact_clear": true,
+        "recovery_safe": true
+      },
+      "expected": "fail",
+      "observation": "außerhalb des Rahmens"
+    },
+    {
+      "id": "g04-authorization-extra-cost",
+      "group": "shared",
+      "source": ".apm/skills/core-shared/references/workflow-contract.md",
+      "input": {
+        "kind": "authorization",
+        "frame_confirmed": true,
+        "goal_changed": false,
+        "technical_change": true,
+        "within_frame": true,
+        "coverage_known": true,
+        "extra_monetary_cost": true,
+        "consent_given": false,
+        "uncovered_usage": false,
+        "production_effect": false,
+        "impact_clear": true,
+        "recovery_safe": true
+      },
+      "expected": "fail",
+      "observation": "vorherige Zustimmung"
+    },
+    {
+      "id": "g04-authorization-unknown-coverage",
+      "group": "shared",
+      "source": ".apm/skills/core-shared/references/workflow-contract.md",
+      "input": {
+        "kind": "authorization",
+        "frame_confirmed": true,
+        "goal_changed": false,
+        "technical_change": true,
+        "within_frame": true,
+        "coverage_known": false,
+        "extra_monetary_cost": false,
+        "consent_given": false,
+        "uncovered_usage": false,
+        "production_effect": false,
+        "impact_clear": true,
+        "recovery_safe": true
+      },
+      "expected": "fail",
+      "observation": "unbekannte Deckung"
+    },
+    {
+      "id": "g04-authorization-uncovered-usage",
+      "group": "shared",
+      "source": ".apm/skills/core-shared/references/workflow-contract.md",
+      "input": {
+        "kind": "authorization",
+        "frame_confirmed": true,
+        "goal_changed": false,
+        "technical_change": true,
+        "within_frame": true,
+        "coverage_known": true,
+        "extra_monetary_cost": false,
+        "consent_given": false,
+        "uncovered_usage": true,
+        "production_effect": false,
+        "impact_clear": true,
+        "recovery_safe": true
+      },
+      "expected": "fail",
+      "observation": "ungedeckte KI"
+    },
+    {
+      "id": "g04-authorization-unclear-production",
+      "group": "shared",
+      "source": ".apm/skills/core-shared/references/workflow-contract.md",
+      "input": {
+        "kind": "authorization",
+        "frame_confirmed": true,
+        "goal_changed": false,
+        "technical_change": true,
+        "within_frame": true,
+        "coverage_known": true,
+        "extra_monetary_cost": false,
+        "consent_given": false,
+        "uncovered_usage": false,
+        "production_effect": true,
+        "impact_clear": false,
+        "recovery_safe": true
+      },
+      "expected": "fail",
+      "observation": "Produktionswirkung stoppt"
+    },
+    {
+      "id": "g04-safety-positive",
+      "group": "shared",
+      "source": ".apm/skills/core-shared/references/workflow-contract.md",
+      "input": {
+        "kind": "safety",
+        "assumption_named": true,
+        "indirect_effects_considered": true,
+        "evidence_strength": "belegt",
+        "checked_or_marked_open": true,
+        "external_skill_duty": false
+      },
+      "expected": "pass",
+      "observation": "gültige Beziehungen akzeptiert"
+    },
+    {
+      "id": "g04-safety-open-marked",
+      "group": "shared",
+      "source": ".apm/skills/core-shared/references/workflow-contract.md",
+      "input": {
+        "kind": "safety",
+        "assumption_named": true,
+        "indirect_effects_considered": true,
+        "evidence_strength": "offen",
+        "checked_or_marked_open": true,
+        "external_skill_duty": false
+      },
+      "expected": "pass",
+      "observation": "offene Annahme markiert"
+    },
+    {
+      "id": "g04-safety-unnamed",
+      "group": "shared",
+      "source": ".apm/skills/core-shared/references/workflow-contract.md",
+      "input": {
+        "kind": "safety",
+        "assumption_named": false,
+        "indirect_effects_considered": true,
+        "evidence_strength": "belegt",
+        "checked_or_marked_open": true,
+        "external_skill_duty": false
+      },
+      "expected": "fail",
+      "observation": "unbenannt"
+    },
+    {
+      "id": "g04-safety-unknown-strength",
+      "group": "shared",
+      "source": ".apm/skills/core-shared/references/workflow-contract.md",
+      "input": {
+        "kind": "safety",
+        "assumption_named": true,
+        "indirect_effects_considered": true,
+        "evidence_strength": "vermutet",
+        "checked_or_marked_open": true,
+        "external_skill_duty": false
+      },
+      "expected": "fail",
+      "observation": "Evidenzstärke nicht klassifiziert"
+    },
+    {
+      "id": "g04-safety-unmarked",
+      "group": "shared",
+      "source": ".apm/skills/core-shared/references/workflow-contract.md",
+      "input": {
+        "kind": "safety",
+        "assumption_named": true,
+        "indirect_effects_considered": true,
+        "evidence_strength": "belegt",
+        "checked_or_marked_open": false,
+        "external_skill_duty": false
+      },
+      "expected": "fail",
+      "observation": "weder geprüft noch offen markiert"
+    },
+    {
+      "id": "g04-safety-external-duty",
+      "group": "shared",
+      "source": ".apm/skills/core-shared/references/workflow-contract.md",
+      "input": {
+        "kind": "safety",
+        "assumption_named": true,
+        "indirect_effects_considered": true,
+        "evidence_strength": "belegt",
+        "checked_or_marked_open": true,
+        "external_skill_duty": true
+      },
+      "expected": "fail",
+      "observation": "Blast-Radius"
+    },
+    {
+      "id": "g04-delegation-positive",
+      "group": "shared",
+      "source": ".apm/skills/core-shared/references/workflow-contract.md",
+      "input": {
+        "kind": "delegation",
+        "personal_repetition": false,
+        "requirement_confirmed": true,
+        "personal_action": true,
+        "handed_over": true,
+        "sandbox_delegated": true,
+        "agent_operates": true,
+        "session_artifacts_exact": true,
+        "drift_checked": true,
+        "new_start_formula": false,
+        "auto_follow_up": false,
+        "time_budget_loop": false
+      },
+      "expected": "pass",
+      "observation": "gültige Beziehungen akzeptiert"
+    },
+    {
+      "id": "g04-delegation-personal-repeat",
+      "group": "shared",
+      "source": ".apm/skills/core-shared/references/workflow-contract.md",
+      "input": {
+        "kind": "delegation",
+        "personal_repetition": true,
+        "requirement_confirmed": false,
+        "personal_action": true,
+        "handed_over": true,
+        "sandbox_delegated": true,
+        "agent_operates": true,
+        "session_artifacts_exact": true,
+        "drift_checked": true,
+        "new_start_formula": false,
+        "auto_follow_up": false,
+        "time_budget_loop": false
+      },
+      "expected": "fail",
+      "observation": "persönliche Wiederholung"
+    },
+    {
+      "id": "g04-delegation-consent-not-handed",
+      "group": "shared",
+      "source": ".apm/skills/core-shared/references/workflow-contract.md",
+      "input": {
+        "kind": "delegation",
+        "personal_repetition": false,
+        "requirement_confirmed": true,
+        "personal_action": true,
+        "handed_over": false,
+        "sandbox_delegated": true,
+        "agent_operates": true,
+        "session_artifacts_exact": true,
+        "drift_checked": true,
+        "new_start_formula": false,
+        "auto_follow_up": false,
+        "time_budget_loop": false
+      },
+      "expected": "fail",
+      "observation": "nicht übergeben"
+    },
+    {
+      "id": "g04-delegation-sandbox-back",
+      "group": "shared",
+      "source": ".apm/skills/core-shared/references/workflow-contract.md",
+      "input": {
+        "kind": "delegation",
+        "personal_repetition": false,
+        "requirement_confirmed": true,
+        "personal_action": true,
+        "handed_over": true,
+        "sandbox_delegated": true,
+        "agent_operates": false,
+        "session_artifacts_exact": true,
+        "drift_checked": true,
+        "new_start_formula": false,
+        "auto_follow_up": false,
+        "time_budget_loop": false
+      },
+      "expected": "fail",
+      "observation": "delegierte Testbedienung"
+    },
+    {
+      "id": "g04-delegation-no-drift-check",
+      "group": "shared",
+      "source": ".apm/skills/core-shared/references/workflow-contract.md",
+      "input": {
+        "kind": "delegation",
+        "personal_repetition": false,
+        "requirement_confirmed": true,
+        "personal_action": true,
+        "handed_over": true,
+        "sandbox_delegated": true,
+        "agent_operates": true,
+        "session_artifacts_exact": true,
+        "drift_checked": false,
+        "new_start_formula": false,
+        "auto_follow_up": false,
+        "time_budget_loop": false
+      },
+      "expected": "fail",
+      "observation": "Driftprüfung"
+    },
+    {
+      "id": "g04-delegation-start-formula",
+      "group": "shared",
+      "source": ".apm/skills/core-shared/references/workflow-contract.md",
+      "input": {
+        "kind": "delegation",
+        "personal_repetition": false,
+        "requirement_confirmed": true,
+        "personal_action": true,
+        "handed_over": true,
+        "sandbox_delegated": true,
+        "agent_operates": true,
+        "session_artifacts_exact": true,
+        "drift_checked": true,
+        "new_start_formula": true,
+        "auto_follow_up": false,
+        "time_budget_loop": false
+      },
+      "expected": "fail",
+      "observation": "Startformel"
+    },
+    {
+      "id": "g04-delegation-auto-follow",
+      "group": "shared",
+      "source": ".apm/skills/core-shared/references/workflow-contract.md",
+      "input": {
+        "kind": "delegation",
+        "personal_repetition": false,
+        "requirement_confirmed": true,
+        "personal_action": true,
+        "handed_over": true,
+        "sandbox_delegated": true,
+        "agent_operates": true,
+        "session_artifacts_exact": true,
+        "drift_checked": true,
+        "new_start_formula": false,
+        "auto_follow_up": true,
+        "time_budget_loop": false
+      },
+      "expected": "fail",
+      "observation": "automatische Folgeetappe"
+    },
+    {
+      "id": "g04-delegation-time-loop",
+      "group": "shared",
+      "source": ".apm/skills/core-shared/references/workflow-contract.md",
+      "input": {
+        "kind": "delegation",
+        "personal_repetition": false,
+        "requirement_confirmed": true,
+        "personal_action": true,
+        "handed_over": true,
+        "sandbox_delegated": true,
+        "agent_operates": true,
+        "session_artifacts_exact": true,
+        "drift_checked": true,
+        "new_start_formula": false,
+        "auto_follow_up": false,
+        "time_budget_loop": true
+      },
+      "expected": "fail",
+      "observation": "Bereitschaftsschleife"
+    },
+    {
+      "id": "g04-progression-repair-without-basis",
+      "group": "workflows",
+      "source": ".apm/skills/core-shared/references/artifact-contract.md",
+      "input": {
+        "kind": "progression",
+        "goal_id": "G01",
+        "milestone_id": "M02",
+        "version": 1,
+        "events": [
+          {
+            "action": "plan",
+            "plan_path": ".agentic-workflow/plans/plan-G01-M02-v1-p01.md"
+          },
+          {
+            "action": "new",
+            "run_path": ".agentic-workflow/runs/run-G01-M02-v1-p01-r01/state.yaml"
+          },
+          {
+            "action": "repair",
+            "run_path": ".agentic-workflow/runs/run-G01-M02-v1-p01-r01/state.yaml",
+            "previous_run_path": ".agentic-workflow/runs/run-G01-M02-v1-p01-r01/state.yaml"
+          }
+        ]
+      },
+      "expected": "fail",
+      "observation": "Reparatur ohne neue Erkenntnis"
+    },
+    {
+      "id": "g04-progression-repair-repeated-basis",
+      "group": "workflows",
+      "source": ".apm/skills/core-shared/references/artifact-contract.md",
+      "input": {
+        "kind": "progression",
+        "goal_id": "G01",
+        "milestone_id": "M02",
+        "version": 1,
+        "events": [
+          {
+            "action": "plan",
+            "plan_path": ".agentic-workflow/plans/plan-G01-M02-v1-p01.md"
+          },
+          {
+            "action": "new",
+            "run_path": ".agentic-workflow/runs/run-G01-M02-v1-p01-r01/state.yaml"
+          },
+          {
+            "action": "repair",
+            "run_path": ".agentic-workflow/runs/run-G01-M02-v1-p01-r01/state.yaml",
+            "previous_run_path": ".agentic-workflow/runs/run-G01-M02-v1-p01-r01/state.yaml",
+            "basis": "gleiche Begründung"
+          },
+          {
+            "action": "repair",
+            "run_path": ".agentic-workflow/runs/run-G01-M02-v1-p01-r01/state.yaml",
+            "previous_run_path": ".agentic-workflow/runs/run-G01-M02-v1-p01-r01/state.yaml",
+            "basis": "gleiche Begründung"
+          }
+        ]
+      },
+      "expected": "fail",
+      "observation": "Reparatur wiederholt dieselbe Begründung"
+    },
+    {
+      "id": "g04-progression-replacement-repeated-basis",
+      "group": "workflows",
+      "source": ".apm/skills/core-shared/references/artifact-contract.md",
+      "input": {
+        "kind": "progression",
+        "goal_id": "G01",
+        "milestone_id": "M02",
+        "version": 1,
+        "events": [
+          {
+            "action": "plan",
+            "plan_path": ".agentic-workflow/plans/plan-G01-M02-v1-p01.md"
+          },
+          {
+            "action": "new",
+            "run_path": ".agentic-workflow/runs/run-G01-M02-v1-p01-r01/state.yaml"
+          },
+          {
+            "action": "repair",
+            "run_path": ".agentic-workflow/runs/run-G01-M02-v1-p01-r01/state.yaml",
+            "previous_run_path": ".agentic-workflow/runs/run-G01-M02-v1-p01-r01/state.yaml",
+            "basis": "unveränderte Begründung ohne neue Erkenntnis"
+          },
+          {
+            "action": "plan",
+            "plan_path": ".agentic-workflow/plans/plan-G01-M02-v1-p02.md"
+          },
+          {
+            "action": "new",
+            "run_path": ".agentic-workflow/runs/run-G01-M02-v1-p02-r01/state.yaml"
+          },
+          {
+            "action": "repair",
+            "run_path": ".agentic-workflow/runs/run-G01-M02-v1-p02-r01/state.yaml",
+            "previous_run_path": ".agentic-workflow/runs/run-G01-M02-v1-p02-r01/state.yaml",
+            "basis": "unveränderte Begründung ohne neue Erkenntnis"
+          }
+        ]
+      },
+      "expected": "fail",
+      "observation": "Reparatur wiederholt dieselbe Begründung"
+    },
+    {
+      "id": "g04-progression-replacement-new-basis",
+      "group": "workflows",
+      "source": ".apm/skills/core-shared/references/artifact-contract.md",
+      "input": {
+        "kind": "progression",
+        "goal_id": "G01",
+        "milestone_id": "M02",
+        "version": 1,
+        "events": [
+          {
+            "action": "plan",
+            "plan_path": ".agentic-workflow/plans/plan-G01-M02-v1-p01.md"
+          },
+          {
+            "action": "new",
+            "run_path": ".agentic-workflow/runs/run-G01-M02-v1-p01-r01/state.yaml"
+          },
+          {
+            "action": "repair",
+            "run_path": ".agentic-workflow/runs/run-G01-M02-v1-p01-r01/state.yaml",
+            "previous_run_path": ".agentic-workflow/runs/run-G01-M02-v1-p01-r01/state.yaml",
+            "basis": "unveränderte Begründung ohne neue Erkenntnis"
+          },
+          {
+            "action": "plan",
+            "plan_path": ".agentic-workflow/plans/plan-G01-M02-v1-p02.md"
+          },
+          {
+            "action": "new",
+            "run_path": ".agentic-workflow/runs/run-G01-M02-v1-p02-r01/state.yaml"
+          },
+          {
+            "action": "repair",
+            "run_path": ".agentic-workflow/runs/run-G01-M02-v1-p02-r01/state.yaml",
+            "previous_run_path": ".agentic-workflow/runs/run-G01-M02-v1-p02-r01/state.yaml",
+            "basis": "neue Erkenntnis: Gegenprobe widerlegt Voraussetzung"
+          }
+        ]
+      },
+      "expected": "pass",
+      "observation": "Ersatzplan mit neuer unterscheidbarer Basis"
+    },
+    {
+      "id": "g04-progression-four-justified-repairs",
+      "group": "workflows",
+      "source": ".apm/skills/core-shared/references/artifact-contract.md",
+      "input": {
+        "kind": "progression",
+        "goal_id": "G01",
+        "milestone_id": "M02",
+        "version": 1,
+        "events": [
+          {
+            "action": "plan",
+            "plan_path": ".agentic-workflow/plans/plan-G01-M02-v1-p01.md"
+          },
+          {
+            "action": "new",
+            "run_path": ".agentic-workflow/runs/run-G01-M02-v1-p01-r01/state.yaml"
+          },
+          {
+            "action": "repair",
+            "run_path": ".agentic-workflow/runs/run-G01-M02-v1-p01-r01/state.yaml",
+            "previous_run_path": ".agentic-workflow/runs/run-G01-M02-v1-p01-r01/state.yaml",
+            "basis": "neue Erkenntnis A"
+          },
+          {
+            "action": "repair",
+            "run_path": ".agentic-workflow/runs/run-G01-M02-v1-p01-r01/state.yaml",
+            "previous_run_path": ".agentic-workflow/runs/run-G01-M02-v1-p01-r01/state.yaml",
+            "basis": "Hypothese B"
+          },
+          {
+            "action": "repair",
+            "run_path": ".agentic-workflow/runs/run-G01-M02-v1-p01-r01/state.yaml",
+            "previous_run_path": ".agentic-workflow/runs/run-G01-M02-v1-p01-r01/state.yaml",
+            "basis": "kleinste Prüfung C"
+          },
+          {
+            "action": "repair",
+            "run_path": ".agentic-workflow/runs/run-G01-M02-v1-p01-r01/state.yaml",
+            "previous_run_path": ".agentic-workflow/runs/run-G01-M02-v1-p01-r01/state.yaml",
+            "basis": "realistische Reparierbarkeit D"
+          }
+        ]
+      },
+      "expected": "pass",
+      "observation": "vier begründete unterscheidbare Versuche"
     }
   ],
   "coverage": {
+    "g04-authorization-rahmen": {
+    "cases": [
+      "g04-authorization-positive",
+      "g04-authorization-first-plan-without-frame",
+      "g04-authorization-goal-change",
+      "g04-authorization-technical-outside-frame"
+    ]
+  },
+    "g04-kosten-aufwand-trennung": {
+    "cases": [
+      "g04-authorization-effort-production",
+      "g04-authorization-extra-cost",
+      "g04-authorization-unknown-coverage",
+      "g04-authorization-uncovered-usage",
+      "g04-authorization-unclear-production"
+    ]
+  },
+    "g04-reparatur-evidenzbasis": {
+    "cases": [
+      "g04-progression-four-justified-repairs",
+      "g04-progression-repair-without-basis",
+      "g04-progression-repair-repeated-basis",
+      "g04-progression-replacement-repeated-basis",
+      "g04-progression-replacement-new-basis",
+      "t08-progression-third-repair"
+    ]
+  },
+    "g04-blast-radius": {
+    "cases": [
+      "g04-safety-positive",
+      "g04-safety-open-marked",
+      "g04-safety-unnamed",
+      "g04-safety-unknown-strength",
+      "g04-safety-unmarked",
+      "g04-safety-external-duty"
+    ]
+  },
+    "g04-delegation-consent": {
+    "cases": [
+      "g04-delegation-positive",
+      "g04-delegation-personal-repeat",
+      "g04-delegation-consent-not-handed",
+      "g04-delegation-sandbox-back",
+      "g04-delegation-no-drift-check",
+      "g04-delegation-start-formula",
+      "g04-delegation-auto-follow",
+      "g04-delegation-time-loop"
+    ]
+  },
+    "g04-katalog-ohne-limit": {
+    "cases": [],
+    "review_scenario": "tests/test_core_contracts.py::test_rv05_catalog_reads_but_never_outputs_legacy und test_catalog_edges_are_bidirectional_and_complete weisen ein wieder eingeführtes starres Reparaturlimit im Katalog fail-closed zurück; CLI-Gruppe shared validiert den echten Katalog"
+  },
+
     "K1-read-only-ergebnisbesitz": {
       "cases": [
         "result-positive",
