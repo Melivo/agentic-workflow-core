@@ -23,7 +23,7 @@ Die kanonische Paketquelle liegt unter `.apm/`. Verwende die passenden Skills au
 ## Core-Routing und Übergaben
 
 - **Einstieg:** Bei materiell unklarer Richtung `core-brainstorm`, bei klarem Vorhaben ohne Plan `core-plan`, für ausdrücklich gewünschte Ausführung oder Wiederaufnahme eines bestätigten Plans `core-execute`, bei Sitzungswechsel `core-handoff`. `core-milestone` nur für ausdrücklich gewählte Etappenplanung. Empfehlungen starten keinen Workflow und erteilen keine Freigabe.
-- **Autorisierte Arbeit:** Innerhalb bestehender Freigabe erforderliche Prüfungen und unabhängiges `core-review` in frischem Kontext durchführen; nicht bei „Implementierung fertig“ enden. Interne Übergänge brauchen keine erneute Bestätigung. Neue Ziele, Scopeänderungen, Folgeetappen und gesondert freigabepflichtige Aktionen benötigen eigene Autorisierung. Reparatur- und Stopgrenzen des zuständigen Skills gelten.
+- **Autorisierte Arbeit:** Innerhalb bestehender Freigabe erforderliche Prüfungen und unabhängiges `core-review` in frischem Kontext durchführen; nicht bei „Implementierung fertig“ enden. Interne Übergänge brauchen keine erneute Bestätigung. Neue Ziele, Scopeänderungen, Folgeetappen und gesondert freigabepflichtige Aktionen benötigen eigene Autorisierung. Evidenzbasierte Reparatur- und Stopgrenzen des zuständigen Skills statt starrer Rundenzahlen gelten.
 - **Etappenabschluss:** Nach Run-pass eine etwaige Milestone-Bindung prüfen. Zusätzliche Kriterienprüfung und Indexnachweise gehören ausschließlich `core-milestone` und benötigen bestehende Autorisierung. Run-pass ist kein Etappen- oder Gesamtzielabschluss. Nach verifiziertem Milestone-Abschluss zwingend `core-handoff` mit den exakten Originalartefakten ausführen und den kopierbaren Startprompt im Chat ausgeben. Danach vor Auswahl, Planung oder Start der Folgeetappe stoppen. Eine zusätzliche Handoff-Datei braucht einen separat bestätigten Zielpfad. Bei nachweislich erfülltem Gesamtziel stattdessen den belegten Abschluss ohne erfundene Folgearbeit ausgeben. Ohne Etappenbindung entfällt dieser Zusatzschritt.
 - **Fachmethoden:** Passende Methoden bedarfsabhängig innerhalb des autorisierten Workflows nutzen. Brainstorm und Plan verwenden Research, Architecture und Refactor-Safety-Net bei Bedarf inline. Ausschließlich Execute dispatcht Fachagenten und weist begrenztes Debugging zu. Für Backend, Frontend, Mobile, Datenbanken und Terraform die entsprechenden `core-*`-Methoden nutzen; Dokumentationsbedarf früh berücksichtigen. Keine pauschalen Agentenkaskaden.
 - **Wiedereinstieg:** Ausdrücklich referenzierte Originalartefakte und aktuellen Repositorystand neu lesen. Keine Auswahl anhand vermeintlich neuester Dateinummern. Bei Sitzungswechsel über den zuständigen Eigentümer einen sicheren Haltepunkt herstellen und `core-handoff` anbieten. Fehlende Pfade oder Freigaben klären, nicht aus Chat oder Memory rekonstruieren. Ein Handoff erteilt keine Start- oder Folgefreigabe.
@@ -137,6 +137,8 @@ relevant child AGENTS.md
 
 ### Child DOX Index
 
+- [Arbeitskontext](docs/AGENTS.md) — aufbewahrte Vorschläge und
+  Diskussionsgrundlagen; keine geltenden Skillverträge.
 - [Paketquelle](.apm/AGENTS.md) — kanonische Skills und native Fachagentenprofile.
 - [Werkzeuge](scripts/AGENTS.md) — Prüfungen, Toolchain, Paket- und Releasewerkzeuge.
 - [Tests](tests/AGENTS.md) — Vertrags-, Sicherheits- und Integrationstests.

@@ -1,6 +1,6 @@
 ---
 name: core-execute
-description: Führt einen eindeutig identifizierten, bestätigten plan/v1 aus, koordiniert Fachagenten, integriert Ergebnisse serialisiert und steuert höchstens zwei Review-Reparaturrunden. Verwenden für Implementierung, Ausführung oder Resume eines bestätigten Plans; nicht für Planung, unabhängiges Review oder SCM.
+description: Führt einen eindeutig identifizierten, bestätigten plan/v1 aus, koordiniert Fachagenten, integriert Ergebnisse serialisiert und steuert Review-Reparaturen evidenzbasiert statt nach starrer Rundenzahl. Verwenden für Implementierung, Ausführung oder Resume eines bestätigten Plans; nicht für Planung, unabhängiges Review oder SCM.
 ---
 
 # Core Execute
@@ -31,7 +31,7 @@ Lade vor dem Start:
 - den [Artefaktvertrag](../core-shared/references/artifact-contract.md) für `plan/v1`, Runzustand, `task-result/v1`, Handoff und `review/v1`,
 - das [Toolrouting](../core-shared/references/tool-routing.md) für Gortex und erlaubte Fallbacks,
 - den [Verifikationsvertrag](../core-shared/references/verification.md) für aktuelle Evidenz und autorisierungsabhängige Checks,
-- den [Workflowkatalog](../core-shared/assets/workflow-catalog.yaml) für bekannte Workflow-, Agenten- und Tool-IDs sowie das Limit der Reparaturrunden.
+- den [Workflowkatalog](../core-shared/assets/workflow-catalog.yaml) für bekannte Workflow-, Agenten-, Tool-IDs und Übergänge.
 
 Verwende die [Handoffvorlage](../core-shared/assets/handoff.md), wenn `core-review` oder ein Resume frischen Kontext erhält.
 
@@ -43,7 +43,7 @@ Verwende die [Handoffvorlage](../core-shared/assets/handoff.md), wenn `core-revi
 2. Validiere für jeden Task einen registrierten Fachagenten, getrennte `context_paths` und `scope`, bekannte erforderliche MCPs, einen azyklischen Abhängigkeitsgraphen sowie die vollständige Abdeckung aller Akzeptanzkriterien durch eindeutige Checks. Bei schreibenden strukturrelevanten Tasks (Code, Tools, Pakete, Einrichtung, Automation) prüfe zusätzlich direkt die [S00-Basis](../core-architecture/references/design-baseline.md) für die tatsächlich betroffenen Strukturen und Verträge, ohne unbetroffene Bereiche zu inventarisieren; stelle sicher, dass der Task diese kanonische Referenz in `context_paths` als Lesequelle enthält und die Akzeptanz-/Checkfelder ihre anwendbaren Ergebnisse überprüfbar abdecken.
 3. Behandle einen leeren `scope` als read-only. Ein Check mit Build-, Compile-, Bundle-, Package- oder Installationswirkung ist ohne passende ausdrückliche Autorisierung blockiert.
 4. Vergleiche Planannahmen, referenzierte Pfade, vorhandenen Diff und wiederverwendete Evidenz mit dem aktuellen Repositorystand. Drift macht betroffene Evidenz ungültig.
-5. Prüfe bei Start, Resume und jedem Taskresultat die Auslöser der [evidenzbasierten Ersatzplanung](../core-shared/references/workflow-contract.md#evidenzbasierte-ersatzplanung). Bei einem Auslöser stoppe die Produktarbeit, sichere Zustand und Evidenz und übergib automatisch an `core-plan`; die Bestätigung des Ersatzplans bleibt erforderlich. Bei kompatibler Drift aktualisiere nur Runzustand und neu zu erhebende Evidenz, niemals den Plan.
+5. Prüfe bei Start, Resume und jedem Taskresultat die Auslöser der [evidenzbasierten Ersatzplanung](../core-shared/references/workflow-contract.md#evidenzbasierte-ersatzplanung). Bei einem Auslöser stoppe die Produktarbeit, sichere Zustand und Evidenz und übergib automatisch an `core-plan`; prüfe vor Annahme des Ersatzplans dessen ausdrückliche oder belegte abgeleitete Freigabe gemäß Workflowvertrag sowie statische Validierung und unabhängigen Planreview-pass. Ein gedeckter technischer Ersatzplan benötigt bei bestehendem Ausführungsauftrag keine neue Nutzerbestätigung; ungedeckte oder unklare Wirkungen bleiben blockiert. Bei kompatibler Drift aktualisiere nur Runzustand und neu zu erhebende Evidenz, niemals den Plan.
 6. Prüfe bei schreibender Arbeit im tatsächlichen Änderungspfad die benötigte Dokumentationsabdeckung entlang der zuständigen `AGENTS.md`-Kette und den DOX-Zustand; eine einzelne vorhandene Guide-Datei belegt keinen vollständigen Baum. Initialisierung oder Ergänzung darf nur ausgeführt werden, wenn konkrete Pfade und Wirkungen im bestätigten Task-Scope stehen. Fehlende Setupfähigkeit oder ungültige Quelle blockiert abhängige Arbeit statt spontaner Installation oder eigener Ersatzregeln. Read-only und harmlose Änderungen ohne nötigen Guide-Edit lösen keine Setup-Pflicht aus.
 7. Prüfe den Abschnitt `## Planreview` der bestätigten Fassung gemäß [Planreview](../core-shared/references/workflow-contract.md#planreview). Fehlt er bei einem nach diesem Vertrag erstellten Plan, stoppe vor jeder Mutation und route zu `core-plan`. Für vorher bestätigte Pläne und Runs ohne historisches Planreview führe vor weiterer Mutation eine ausdrücklich so bezeichnete Kompatibilitätsprüfung gegen Originalziel und Scope durch, ohne Artefakte zu migrieren oder eine Freigabe zu erfinden; ein materieller Konflikt geht zur Ersatzplanung.
 
@@ -99,9 +99,9 @@ Ersetze `.agentic-workflow/runs/<run-id>/handoff.md` anhand der Shared-Vorlage. 
 
 - Bei `pass` schließe den Run ab.
 - Bei `changes_requested` ordne jedes innerhalb des bestätigten Scopes liegende Finding dem passenden Fachagenten zu, repariere es unter derselben `run_id`, integriere serialisiert und wiederhole betroffene Checks sowie das frische Review.
-- Bei einem Auslöser der Ersatzplanung nutze denselben oben verlinkten Übergang statt weiter zu reparieren. Übernimm bei Fortsetzung derselben offenen Findings die bereits verbrauchten Review-Reparaturrunden in den neuen Run; weder Ersatzplan noch Umbenennung eines Findings setzen das Limit zurück. Greift der Vereinfachungsstopp des Workflowvertrags, startet kein weiterer automatischer Zyklus.
+- Bei einem Auslöser der Ersatzplanung nutze denselben oben verlinkten Übergang statt weiter zu reparieren. Übernimm bei Fortsetzung derselben offenen Findings die bereits verwendeten Review-Reparaturrunden rein deskriptiv in den neuen Run; weder Ersatzplan noch Umbenennung eines Findings begründet einen neuen Versuch. Greift der Vereinfachungsstopp des Workflowvertrags, startet kein weiterer automatischer Zyklus.
 - Bei `blocked` dokumentiere den fehlenden Eingang, die Fähigkeit oder Autorisierung und stoppe die abhängige Arbeit.
-- Erlaube insgesamt höchstens **zwei** automatische `execute ↔ review`-Reparaturrunden. Nach der zweiten Runde stoppt der Lauf mit den verbleibenden Findings; eine dritte automatische Runde ist verboten.
+- Starte die nächste automatische `execute ↔ review`-Reparatur nur gemäß [evidenzbasierte Fortsetzung von Versuchen](../core-shared/references/workflow-contract.md#evidenzbasierte-fortsetzung-von-versuchen): Der nächste Versuch benennt neue Erkenntnis oder eine unterscheidbare prüfbare Hypothese, die kleinste Prüfung, realistische Reparierbarkeit, Aufwand/Risiko/Restnutzen und sichere Abbruchbedingungen. Mehr als zwei begründete Versuche sind möglich; ohne tragfähigen Ansatz stoppt der Lauf früh mit den verbleibenden Findings. Neue Namen oder Zähler sind keine neue Begründung.
 
 ## Debugging innerhalb der Ausführung
 

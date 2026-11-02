@@ -5,7 +5,7 @@ description: Unterstützt explizit beauftragte Git-/History-/Releaseoperationen 
 
 # Core DevOps
 
-`core-devops` ist ein unterstützender Skill, kein Implementierungsworkflow und kein Lebenszyklus- oder Dispatch-Eigentümer. Er ändert weder bestätigte Pläne noch delegiert Aufgaben. Ermittle zuerst die gewünschte Wirkung, den betroffenen Repositorybereich und die geltende Freigabe. Bei unklarer Freigabe bleibt jede Mutation aus.
+`core-devops` ist ein unterstützender Skill, kein Implementierungsworkflow und kein Lebenszyklus- oder Dispatch-Eigentümer. Er ändert weder bestätigte Pläne noch delegiert Aufgaben. Ermittle zuerst die gewünschte Wirkung, den betroffenen Repositorybereich und die geltende Freigabe. Bei unklarer Freigabe bleibt jede Mutation aus. Zusätzlicher Arbeitsaufwand begründet allein keine erneute Rückfrage; materiell unklare oder ungedeckte Wirkung stoppt, und zusätzliche monetäre Kosten brauchen vorherige Zustimmung.
 
 ## Eingang und verbindliche Grenzen
 

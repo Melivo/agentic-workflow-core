@@ -1,11 +1,11 @@
 ---
 name: core-review
-description: Prüft unabhängig in frischem Kontext entweder einen vollständigen Planentwurf vor der Nutzerbestätigung (Planreview, Textergebnis) oder die integrierte Gesamtänderung nach core-execute (Umsetzungsreview, review/v1) mit pass, changes_requested oder blocked. Verwenden auf Anforderung von core-plan oder nach core-execute; nicht für Implementierung, Fixes, Planung oder Nutzerfreigabe.
+description: Prüft unabhängig in frischem Kontext entweder einen vollständigen Planentwurf vor kanonischem Schreiben sowie einer gegebenenfalls noch erforderlichen Nutzerbestätigung (Planreview, Textergebnis) oder die integrierte Gesamtänderung nach core-execute (Umsetzungsreview, review/v1) mit pass, changes_requested oder blocked. Verwenden auf Anforderung von core-plan oder nach core-execute; nicht für Implementierung, Fixes, Planung oder Nutzerfreigabe.
 ---
 
 # Core Review
 
-`core-review` ist der unabhängige, read-only Prüfworkflow mit zwei getrennten Modi: Planreview vor der Nutzerbestätigung und Umsetzungsreview nach `core-execute`. Beide messen zuerst an der [Zielbindung](../core-shared/references/workflow-contract.md#zielbindung-und-funktionaler-scope), danach an technischer Korrektheit. Bei schreibenden Änderungen prüfen beide Modi die notwendige Dokumentationsabdeckung entlang der betroffenen `AGENTS.md`-Kette, Quellenverknüpfungen und Child-Indizes anhand des gemeinsamen [DOX-Vertrags](../core-shared/references/workflow-contract.md#projektdokumentation-und-dox); ein Laufprotokoll ist kein Ersatz für Projektdokumentation. Read-only und harmlose Änderungen ohne nötige Dokumentation begründen kein Finding wegen fehlender Docs. Die QA-Methode gehört intern dem `qa-reviewer`; sie bildet keinen zweiten öffentlichen QA-Lebenszyklus. `core-review` implementiert **keine Fixes**, erweitert keinen Scope, steuert keine Reparaturschleife und startet keine Subagenten.
+`core-review` ist der unabhängige, read-only Prüfworkflow mit zwei getrennten Modi: Planreview vor kanonischem Schreiben sowie einer gegebenenfalls noch erforderlichen Nutzerbestätigung, und Umsetzungsreview nach `core-execute`. Beide messen zuerst an der [Zielbindung](../core-shared/references/workflow-contract.md#zielbindung-und-funktionaler-scope), danach an technischer Korrektheit. Bei schreibenden Änderungen prüfen beide Modi die notwendige Dokumentationsabdeckung entlang der betroffenen `AGENTS.md`-Kette, Quellenverknüpfungen und Child-Indizes anhand des gemeinsamen [DOX-Vertrags](../core-shared/references/workflow-contract.md#projektdokumentation-und-dox); ein Laufprotokoll ist kein Ersatz für Projektdokumentation. Read-only und harmlose Änderungen ohne nötige Dokumentation begründen kein Finding wegen fehlender Docs. Die QA-Methode gehört intern dem `qa-reviewer`; sie bildet keinen zweiten öffentlichen QA-Lebenszyklus. `core-review` implementiert **keine Fixes**, erweitert keinen Scope, steuert keine Reparaturschleife und startet keine Subagenten.
 
 ## Situative Designmethoden
 
@@ -114,14 +114,14 @@ Bilde einen bestätigten CRITICAL-Befund als `blocking` ab; HIGH bleibt `high`. 
 ### 5. Urteil und Routing festlegen
 
 - `pass`: Scope, Akzeptanzkriterien und relevante Risiken des Plans sind auf dem aktuellen Stand belegt; `findings: []`. Bei Etappenplanung bedeutet das nur Run-/Plan-pass. Der nächste Übergang ist die separate Milestone-Prüfung der gepinnten Definition; ausschließlich `core-milestone` aktualisiert danach Abschlussreferenzen im Index.
-- `changes_requested`: Mindestens ein bestätigtes Finding, auch ein Bloat-Rückbau, ist innerhalb des bestätigten Ziels und Scopes durch `core-execute` behebbar.
+- `changes_requested`: Mindestens ein bestätigtes Finding, auch ein Bloat-Rückbau, ist innerhalb des bestätigten Ziels und Scopes durch `core-execute` behebbar. Bilde einen sinnvollen Reparaturversuch mit reproduzierbarem Finding, begründetem Ansatz in `expected_resolution` und entscheidbarer `verification` ab; ohne sicheren tragfähigen Versuch folgt `blocked`, dessen bestehende Felder Lücke, erforderliche Entscheidung und Routing an den Nutzer oder `core-plan` benennen.
 - `blocked`: Eine materielle Eingabe, Autorisierung, Fähigkeit oder Evidenzlücke verhindert ein belastbares Urteil oder eine zulässige Behebung.
 
 Verändert die erforderliche Lösung Ziel, Scope, Architektur oder Akzeptanzkriterien materiell, verwende kein neues Verdict und kein zusätzliches Schemafeld: urteile `blocked`, beschreibe die reproduzierbare Lücke im bestehenden Findingformat und route den nächsten zulässigen Übergang zu `core-plan`. Innerhalb des bestätigten Scopes geht `changes_requested` an `core-execute`; `core-review` weist keinen Reparaturagenten zu und zählt keine Reparaturrunden selbst.
 
 ## Wiederprüfung
 
-Jede neue Reviewrunde beginnt erneut in frischem Kontext aus aktuellen Artefakten und aktuellem Repositorystand. Prüfe behobene Findings mit ihrer angegebenen `verification`, führe betroffene Pflichtchecks erneut aus und untersuche den neuen Gesamtdiff auf Regressionen. Übernimm kein früheres Urteil ungeprüft. Die Grenze von höchstens zwei automatischen `execute ↔ review`-Reparaturrunden verwaltet `core-execute`.
+Jede neue Reviewrunde beginnt erneut in frischem Kontext aus aktuellen Artefakten und aktuellem Repositorystand. Prüfe behobene Findings mit ihrer angegebenen `verification`, führe betroffene Pflichtchecks erneut aus und untersuche den neuen Gesamtdiff auf Regressionen. Übernimm kein früheres Urteil ungeprüft. Die Fortsetzung automatischer `execute ↔ review`-Reparaturrunden verwaltet `core-execute` evidenzbasiert gemäß Workflowvertrag statt nach starrer Rundenzahl.
 
 ## Abschluss
 

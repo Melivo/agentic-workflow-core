@@ -66,7 +66,7 @@ class ContractTests(unittest.TestCase):
     def test_no_success_defaults(self):
         with self.assertRaises(checker.ContractError):
             checker.validate_scenario({})
-        for kind in ('marker', 'handoff', 'result_owner', 'provider', 'version', 'completion', 'name', 'graph', 'progression', 'selection', 'prompt', 'write_sequence', 'goal_change', 'artifacts', 'docs'):
+        for kind in ('marker', 'handoff', 'result_owner', 'provider', 'version', 'completion', 'name', 'graph', 'progression', 'selection', 'prompt', 'write_sequence', 'goal_change', 'artifacts', 'docs', 'authorization', 'safety', 'delegation'):
             with self.subTest(kind=kind), self.assertRaises((KeyError, checker.ContractError)):
                 checker.validate_scenario({'kind': kind})
 
@@ -360,6 +360,14 @@ class ContractTests(unittest.TestCase):
         next(w for w in bad['workflows'] if w['id'] == 'core-milestone')['input_schemas'].remove('milestone/v1')
         with self.assertRaisesRegex(checker.ContractError, 'nicht mehr lesbar'):
             checker.validate_catalog(bad)
+        bad = copy.deepcopy(catalog)
+        bad['max_automatic_review_repair_rounds'] = 2
+        with self.assertRaisesRegex(checker.ContractError, 'Reparaturlimit'):
+            checker.validate_catalog(bad)
+        bad = copy.deepcopy(catalog)
+        next(w for w in bad['workflows'] if w['id'] == 'core-execute')['max_automatic_review_repair_rounds'] = 2
+        with self.assertRaisesRegex(checker.ContractError, 'Reparaturlimit'):
+            checker.validate_catalog(bad)
 
     def test_coverage_registry_fails_closed(self):
         fixture = json.loads((ROOT / 'tests/core_scenario_cases.json').read_text())
@@ -381,11 +389,15 @@ class ContractTests(unittest.TestCase):
         run = '.agentic-workflow/runs/run-G01-M02-v1-p%s-r%s/state.yaml'
         plan = lambda p: dict(action='plan', plan_path='.agentic-workflow/plans/plan-G01-M02-v1-p%s.md' % p)
         same = lambda action, p='01', r='01': dict(action=action, run_path=run % (p, r), previous_run_path=run % (p, r))
-        data = dict(kind='progression', goal_id='G01', milestone_id='M02', version=1, events=[plan('01'), dict(action='new', run_path=run % ('01', '01')), same('resume'), same('review'), same('repair'), plan('02'), dict(action='new', run_path=run % ('02', '01')), same('repair', '02')])
+        repair = lambda p='01', r='01', b='': dict(action='repair', run_path=run % (p, r), previous_run_path=run % (p, r), basis=b)
+        data = dict(kind='progression', goal_id='G01', milestone_id='M02', version=1, events=[plan('01'), dict(action='new', run_path=run % ('01', '01')), same('resume'), same('review'), repair(b='neue Evidenz A'), plan('02'), dict(action='new', run_path=run % ('02', '01')), repair('02', '01', 'Hypothese B')])
         checker.validate_scenario(data)
-        # Repair rounds count per Run-ID; resume after a replacement plan is blocked.
+        # More than two justified, distinct attempts are allowed; unjustified or
+        # repeated repairs fail closed. Resume after a replacement plan is blocked.
+        checker.validate_scenario(dict(data, events=data['events'][:5] + [repair(b='Hypothese B'), repair(b='Hypothese C')]))
         for events, message in (
-            (data['events'][:5] + [same('repair')] * 2, 'dritte'),
+            (data['events'][:5] + [same('repair')], 'Reparatur ohne neue Erkenntnis'),
+            (data['events'][:5] + [repair(b='neue Evidenz A')], 'Reparatur wiederholt dieselbe Begründung'),
             (data['events'][:7] + [same('resume')], 'abgelöstem Plan'),
             (data['events'][:2] + [dict(same('resume'), run_path=run % ('01', '02'))], 'Run-ID'),
             (data['events'][:5] + [plan('01')], 'Ersatzplannummer'),
@@ -472,7 +484,7 @@ class ContractTests(unittest.TestCase):
         edges = [('core-plan', 'core-review'), ('core-review', 'core-plan'), ('core-plan', 'core-execute'), ('core-execute', 'core-review'), ('core-execute', 'core-milestone'), ('core-milestone', 'core-plan'), ('core-milestone', 'core-handoff')]
         ids = ['core-plan', 'core-execute', 'core-review', 'core-brainstorm', 'core-milestone', 'core-handoff']
         workflows = [dict(id=i, successors=[b for a, b in edges if a == i], predecessors=[a for a, b in edges if b == i], fresh_context_on_entry=i in ('core-execute', 'core-review'), input_schemas=['milestone/v1'] if i == 'core-milestone' else [], output_schemas=['text'] if i == 'core-review' else []) for i in ids]
-        catalog = dict(catalog_version=1, max_automatic_review_repair_rounds=2, workflows=workflows, transitions=[dict(**{'from': a, 'to': b}, outcome='conditional') for a, b in edges], known_agent_ids=['backend-engineer'], known_tool_ids=['gortex'])
+        catalog = dict(catalog_version=1, workflows=workflows, transitions=[dict(**{'from': a, 'to': b}, outcome='conditional') for a, b in edges], known_agent_ids=['backend-engineer'], known_tool_ids=['gortex'])
         checker.validate_catalog(catalog)
         bad = copy.deepcopy(catalog)
         bad['workflows'][4]['predecessors'] = []
@@ -482,13 +494,30 @@ class ContractTests(unittest.TestCase):
         bad['transitions'].pop()
         with self.assertRaisesRegex(checker.ContractError, 'Workflowübergänge'):
             checker.validate_catalog(bad)
+        bad = copy.deepcopy(catalog)
+        bad['max_automatic_review_repair_rounds'] = 2
+        with self.assertRaisesRegex(checker.ContractError, 'Reparaturlimit'):
+            checker.validate_catalog(bad)
 
     def test_scope_guardrail_clauses_accept_minimal_work_and_reject_violations(self):
         # Fixture sentences per clause; text matches show contract wording, not live model compliance.
         cases = {
             'Dateiscope ist keine Funktionsfreigabe': ('Ein Dateiscope autorisiert keine neuen Verantwortlichkeiten.', 'Ein neuer Harness im erlaubten Verzeichnis ist durch den Dateiscope gedeckt.'),
             'kumulativer Scope gegen Originalbezug': ('Ersatzpläne prüfen den kumulativen Scope gegen den ursprünglichen Auftrag.', 'Ersatzpläne prüfen nur den direkten Vorgänger.'),
-            'Vereinfachungsstopp': ('Beim zweiten Ersatzplan ohne neues fachliches Ergebnis stoppt der Zyklus.', 'Jeder Ersatzplan startet automatisch den nächsten.'),
+            'Vereinfachungsstopp': ('Ohne neue Erkenntnis oder neu belegtes fachliches Ergebnis stoppt der Ersatzplanzyklus früh.', 'Jeder Ersatzplan startet automatisch den nächsten.'),
+            'Aufwand allein keine Rückfrage': ('Mehr Arbeitsaufwand begründet allein keine erneute Rückfrage.', 'Mehr Aufwand erfordert stets eine neue Freigabe.'),
+            'unklare Wirkung stoppt': ('Materiell unklare oder ungedeckte Wirkung stoppt.', 'Ungedeckte Wirkung wird toleriert.'),
+            'monetäre Kosten brauchen Zustimmung': ('Zusätzliche monetäre Kosten brauchen vorherige Zustimmung.', 'Geringe KI-Kosten sind automatisch gedeckt.'),
+            'evidenzbasierte Fortsetzung statt starrer Rundenzahl': ('Der nächste Versuch benennt neue Erkenntnis oder eine unterscheidbare prüfbare Hypothese, kleinste Prüfung, realistische Reparierbarkeit, Aufwand/Risiko/Restnutzen und sichere Abbruchbedingungen.', 'Nach der zweiten Runde stoppt der Lauf starr.'),
+            'Planreviewfortsetzung evidenzbasiert': ('Ohne tragfähigen Korrekturansatz folgt die Nutzerentscheidung statt weiterer blinder Korrektur.', 'Ohne Korrekturansatz läuft die Schleife weiter.'),
+            'entscheidende Sicherheitsannahme': ('Benenne die entscheidende Sicherheitsannahme der Änderung.', 'Sicherheitsannahmen bleiben implizit.'),
+            'indirekte Folgen jenseits Aufrufer': ('Prüfe indirekte Folgen jenseits direkter Aufrufer.', 'Nur direkte Aufrufer zählen.'),
+            'Evidenzstärke klassifizieren': ('Trenne die Evidenzstärke in belegt, widerlegt oder offen.', 'Alle Risiken gelten gleich.'),
+            'delegierte Testbedienung beim Agenten': ('Delegierte Sandbox- und Testbedienung bleibt beim Agenten.', 'Delegierte Tests bedient wieder der Nutzer.'),
+            'keine unbestätigte persönliche Wiederholung': ('Eine persönliche Wiederholung erfolgt nur nach bestätigter Anforderung.', 'Der Nutzer wiederholt jeden Test persönlich.'),
+            'keine neue Startformel': ('Bestehende Freigaben bleiben erhalten, ohne neue Startformel und ohne automatische Folgeetappe.', 'Jede Sitzung verlangt eine neue Startformel.'),
+            'keine Zeitbudget- oder Bereitschaftsschleifen': ('Es entstehen keine neuen Zeitbudget- oder Bereitschaftsschleifenregeln.', 'Jeder Schritt wartet auf Bereitschaftsbestätigung.'),
+            'evidenzbasierte Review-Reparatur': ('Starte die nächste automatische `execute ↔ review`-Reparatur nur gemäß evidenzbasierte Fortsetzung.', 'Die dritte automatische Runde ist stets verboten.'),
             'Umbenennung setzt nicht zurück': ('Eine Umbenennung des Findings setzt die Zählung nicht zurück.', 'Ein neuer Findingname beginnt eine neue Zählung.'),
             'Planreview ohne Run': ('Das Planreview erzeugt keinen Run.', 'Das Planreview legt einen Run mit review.yaml an.'),
             'Planreview-pass ist keine Bestätigung': ('Ein Planreview-pass bedeutet nur bestätigungsfähig, nicht vom Nutzer bestätigt.', 'Ein Planreview-pass startet die Ausführung.'),
@@ -548,6 +577,149 @@ class ContractTests(unittest.TestCase):
                 return _text if Path(path) == plan else original_read(path, *args, **kwargs)
             with self.subTest(label=label), patch.object(Path, 'read_text', read_text), contextlib.redirect_stdout(io.StringIO()), self.assertRaisesRegex(checker.ContractError, label):
                 checker.check_group(ROOT, 'workflows')
+
+    def test_g04_authorization_safety_delegation_scenarios(self):
+        # Z01/Z02: technical scope adjustment in frame vs. goal change, money, unclear impact.
+        base = dict(kind='authorization', frame_confirmed=True, goal_changed=False, technical_change=True, within_frame=True, coverage_known=True, extra_monetary_cost=False, consent_given=False, uncovered_usage=False, production_effect=False, impact_clear=True, recovery_safe=True)
+        checker.validate_scenario(base)
+        checker.validate_scenario(dict(base, production_effect=True))
+        checker.validate_scenario(dict(base, extra_monetary_cost=True, consent_given=True))
+        for mutation, message in (
+            (dict(frame_confirmed=False), 'bestätigungspflichtig'),
+            (dict(goal_changed=True), 'Nutzerentscheidung'),
+            (dict(within_frame=False), 'außerhalb des Rahmens'),
+            (dict(extra_monetary_cost=True), 'vorherige Zustimmung'),
+            (dict(coverage_known=False), 'unbekannte Deckung'),
+            (dict(uncovered_usage=True), 'ungedeckte KI'),
+            (dict(production_effect=True, impact_clear=False), 'Produktionswirkung stoppt'),
+        ):
+            with self.subTest(message=message), self.assertRaisesRegex(checker.ContractError, message):
+                checker.validate_scenario(dict(base, **mutation))
+        # Z04: decisive assumption with explicit evidence strength, no external duty.
+        safety = dict(kind='safety', assumption_named=True, indirect_effects_considered=True, evidence_strength='belegt', checked_or_marked_open=True, external_skill_duty=False)
+        checker.validate_scenario(safety)
+        checker.validate_scenario(dict(safety, evidence_strength='offen'))
+        for mutation, message in (
+            (dict(assumption_named=False), 'unbenannt'),
+            (dict(evidence_strength='vermutet'), 'Evidenzstärke nicht klassifiziert'),
+            (dict(checked_or_marked_open=False), 'weder geprüft noch offen markiert'),
+            (dict(external_skill_duty=True), 'Blast-Radius'),
+        ):
+            with self.subTest(message=message), self.assertRaisesRegex(checker.ContractError, message):
+                checker.validate_scenario(dict(safety, **mutation))
+        # Z06: agent operates delegated tests; only personal consent is handed over.
+        delegation = dict(kind='delegation', personal_repetition=False, requirement_confirmed=True, personal_action=True, handed_over=True, sandbox_delegated=True, agent_operates=True, session_artifacts_exact=True, drift_checked=True, new_start_formula=False, auto_follow_up=False, time_budget_loop=False)
+        checker.validate_scenario(delegation)
+        for mutation, message in (
+            (dict(personal_repetition=True, requirement_confirmed=False), 'persönliche Wiederholung'),
+            (dict(handed_over=False), 'nicht übergeben'),
+            (dict(agent_operates=False), 'delegierte Testbedienung'),
+            (dict(drift_checked=False), 'Driftprüfung'),
+            (dict(new_start_formula=True), 'Startformel'),
+            (dict(auto_follow_up=True), 'automatische Folgeetappe'),
+            (dict(time_budget_loop=True), 'Bereitschaftsschleife'),
+        ):
+            with self.subTest(message=message), self.assertRaisesRegex(checker.ContractError, message):
+                checker.validate_scenario(dict(delegation, **mutation))
+        domain_pattern = next(p for p, l in checker.POLICIES['domains'] if l == 'Domain-Kostenklausel')
+        self.assertRegex('Zusätzliche monetäre Kosten brauchen vorherige Zustimmung.', '(?i)' + domain_pattern)
+        self.assertNotRegex('Kosten werden ohne Zustimmung akzeptiert.', '(?i)' + domain_pattern)
+
+    def test_rv05_replacement_chain_and_authorization_countercases(self):
+        sources = {p: (ROOT / p).read_text() for p in checker.REPLACEMENT_SOURCES}
+        checker.check_replacement_sources(sources)
+        cases = {c['id']: c for c in json.loads((ROOT / 'tests/core_scenario_cases.json').read_text())['cases']}
+        # Existing deterministic fixtures cover the frame boundary; source checks
+        # connect that boundary to the complete plan/review/execute/prompt path.
+        covered = cases['g04-authorization-positive']['input']
+        self.assertFalse(covered['consent_given'])
+        checker.validate_scenario(covered)
+        for case_id in ('g04-authorization-first-plan-without-frame', 'g04-authorization-goal-change', 'g04-authorization-extra-cost', 'g04-authorization-technical-outside-frame', 'g04-authorization-unknown-coverage'):
+            case = cases[case_id]
+            with self.subTest(case=case_id), self.assertRaisesRegex(checker.ContractError, case['observation']):
+                checker.validate_scenario(case['input'])
+        # Every source-local obligation is necessary, including derived evidence,
+        # independent review, new path/run, unchanged old plan and no implicit start.
+        for path, patterns in checker.REPLACEMENT_SOURCES.items():
+            for pattern in patterns:
+                mutated, count = re.subn(pattern, '', sources[path], count=1, flags=re.I)
+                self.assertEqual(count, 1, (path, pattern))
+                with self.subTest(path=path, clause=pattern), self.assertRaisesRegex(checker.ContractError, 'RV05 Ersatzplan-Ablaufklausel'):
+                    checker.check_replacement_sources(dict(sources, **{path: mutated}))
+
+    def test_rv07_situational_user_confirmation_stays_valid(self):
+        # RV07 rejects only blanket gates; situational confirmation remains allowed.
+        sources = {p: (ROOT / p).read_text() for p in checker.REPLACEMENT_SOURCES}
+        situational = '\nBei neuem Ziel, ungedeckten Geldkosten, ungedeckter Wirkung oder ohne bestätigten Rahmen bleibt eine Nutzerbestätigung vor Schreiben und Ausführung erforderlich.\n'
+        for path in ('.apm/skills/core-review/SKILL.md', '.apm/skills/core-plan/SKILL.md'):
+            with self.subTest(path=path):
+                checker.check_replacement_sources(dict(sources, **{path: sources[path] + situational}))
+
+    def test_rv05_reintroduced_gates_fail_in_real_workflow_group(self):
+        original_read = Path.read_text
+        old_gates = {
+            '.apm/skills/core-shared/references/workflow-contract.md': (
+                'Erst nach ausdrücklicher Bestätigung wird der Ersatzplan geschrieben.',
+                'Die bisherige Planfreigabe bestätigt keinen unbekannten Ersatzplan.',
+                'Ein Planreview-pass bedeutet nur bestätigungsfähig, nicht vom Nutzer bestätigt; ohne Nutzerbestätigung wird nichts ausgeführt.',
+            ),
+            '.apm/skills/core-plan/SKILL.md': ('Präsentiere den Entwurf zur Bestätigung, sofern die aktuelle Benutzeranweisung nicht bereits genau diesen Plan autorisiert.', 'Nutze anschließend denselben Validierungs-, Planreview- und Bestätigungsschritt wie bei Erstplanung.', 'Prüfe vor der Bestätigung:'),
+            '.apm/skills/core-execute/SKILL.md': ('die Bestätigung des Ersatzplans bleibt erforderlich.',),
+            '.apm/skills/core-review/SKILL.md': (
+                'Prüft einen vollständigen Planentwurf vor der Nutzerbestätigung (Planreview, Textergebnis).',
+                'Zwei Modi: Planreview vor der Nutzerbestätigung und Umsetzungsreview nach core-execute.',
+            ),
+            '.apm/skills/core-milestone/SKILL.md': ('Ziel-/Definitionsbestätigung und aktuelle Etappenfreigabe sind weder Planbestätigung noch Ausführungsfreigabe.', 'Der Nutzer aktiviert ihn erst nach Bestätigung des eigenen Plans, ab core-execute.'),
+            '.apm/skills/core-milestone/assets/goal-prompt.md': ('Ausführung beginnt erst nach Planbestätigung und ausdrücklicher Execute-Autorisierung.',),
+            '.apm/skills/core-handoff/assets/start-prompt.md': ('die Planbestätigung bleibt erforderlich.', 'Execute beginnt erst nach bestätigtem Plan und ausdrücklicher Ausführungsautorisierung.'),
+            'README.md': (
+                'Planreview vor deiner Bestätigung.',
+                'Ein unabhängiges Planreview prüft den Entwurf vor deiner Bestätigung.',
+                'Planreview → deine Freigabe → core-execute',
+                'erst deine ausdrückliche Bestätigung erlaubt die Umsetzung.',
+            ),
+            'DESIGN.md': (
+                'Planreview → Nutzerbestätigung → core-execute',
+                'Planung, Planreview vor Nutzerbestätigung und read-only Umsetzungsreview.',
+                'unabhängiges Planreview vor Bestätigung und read-only Umsetzungsreview.',
+                'core-plan → core-execute (erst nach Nutzerbestätigung)',
+                'core-plan → core-review (Planreview; Textantwort vor Bestätigung)',
+                'Nach vollständigem Entwurf und vor Nutzerbestätigung.',
+            ),
+        }
+        for relative, clauses in old_gates.items():
+            source = ROOT / relative
+            for clause in clauses:
+                # Keep every positive clause: the contradictory old gate alone must fail.
+                text = original_read(source) + '\n' + clause + '\n'
+                def read_text(path, *args, _source=source, _text=text, **kwargs):
+                    return _text if Path(path) == _source else original_read(path, *args, **kwargs)
+                with self.subTest(source=relative, clause=clause), patch.object(Path, 'read_text', read_text), contextlib.redirect_stdout(io.StringIO()), self.assertRaisesRegex(checker.ContractError, 'RV05 widersprechendes Bestätigungsgate'):
+                    checker.check_group(ROOT, 'workflows')
+
+    def test_g04_canonical_clause_removals_fail_closed(self):
+        # In-memory removal of the new G04 clauses; sources stay untouched.
+        original_read = Path.read_text
+        mutations = (
+            ('shared', '.apm/skills/core-shared/references/workflow-contract.md', r'- Mehr Arbeitsaufwand[^\n]*', 'Aufwand allein keine Rückfrage'),
+            ('shared', '.apm/skills/core-shared/references/workflow-contract.md', r'Der nächste Versuch benennt neue Erkenntnis[^\n]*', 'evidenzbasierte Fortsetzung statt starrer Rundenzahl'),
+            ('shared', '.apm/skills/core-shared/references/workflow-contract.md', r'- \*\*Entscheidende Sicherheitsannahmen:\*\*[^\n]*', 'entscheidende Sicherheitsannahme'),
+            ('shared', '.apm/skills/core-shared/references/workflow-contract.md', r'- Delegierte Sandbox- und Testbedienung[^\n]*', 'delegierte Testbedienung beim Agenten'),
+            ('workflows', '.apm/skills/core-execute/SKILL.md', r'- Starte die nächste automatische `execute ↔ review`-Reparatur[^\n]*', 'evidenzbasierte Review-Reparatur'),
+            ('domains', ('.apm/skills/core-database/SKILL.md', '.apm/skills/core-tf-infra/SKILL.md', '.apm/skills/core-devops/SKILL.md'), r'Zusätzlicher Arbeitsaufwand[^\n]*', 'Domain-Kostenklausel'),
+        )
+        for group, relative, pattern, label in mutations:
+            sources = (relative,) if isinstance(relative, str) else relative
+            rewritten = {}
+            for path_relative in sources:
+                source = ROOT / path_relative
+                text, count = re.subn(pattern, '', original_read(source, encoding='utf-8'))
+                self.assertEqual(count, 1, label)
+                rewritten[source] = text
+            def read_text(path, *args, **kwargs):
+                return rewritten.get(Path(path), original_read(path, *args, **kwargs))
+            with self.subTest(label=label), patch.object(Path, 'read_text', read_text), contextlib.redirect_stdout(io.StringIO()), self.assertRaisesRegex(checker.ContractError, label):
+                checker.check_group(ROOT, group)
 
     def test_dox_docs_relation_fails_closed_per_field(self):
         # Each modeled docs/DOX input is mandatory; a missing field is never a silent default.
@@ -634,6 +806,24 @@ class ContractTests(unittest.TestCase):
         for case_id in ('dox-new-gap-unconfirmed-task', 'dox-new-gap-no-diff', 'docs-unproven'):
             with self.subTest(case=case_id), self.assertRaises(checker.ContractError):
                 checker.validate_scenario(cases[case_id]['input'])
+
+    def test_repair_basis_survives_replacement_plan_and_new_run(self):
+        cases = {c['id']: c for c in json.loads((ROOT / 'tests/core_scenario_cases.json').read_text())['cases']}
+        repeated = cases['g04-progression-replacement-repeated-basis']['input']
+        self.assertEqual([e['plan_path'] for e in repeated['events'] if e['action'] == 'plan'], [
+            '.agentic-workflow/plans/plan-G01-M02-v1-p01.md',
+            '.agentic-workflow/plans/plan-G01-M02-v1-p02.md',
+        ])
+        self.assertEqual([e['run_path'] for e in repeated['events'] if e['action'] == 'new'], [
+            '.agentic-workflow/runs/run-G01-M02-v1-p01-r01/state.yaml',
+            '.agentic-workflow/runs/run-G01-M02-v1-p02-r01/state.yaml',
+        ])
+        with self.assertRaisesRegex(checker.ContractError, 'Reparatur wiederholt dieselbe Begründung'):
+            checker.validate_scenario(repeated)
+        fresh = cases['g04-progression-replacement-new-basis']['input']
+        checker.validate_scenario(fresh)
+        # A separate modeled chain has no shared global repair history.
+        checker.validate_scenario(fresh)
 
     def test_staged_targetsets(self):
         for group in checker.TARGET_GROUPS:

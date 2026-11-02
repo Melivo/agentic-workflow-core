@@ -1,6 +1,6 @@
 # Goal-Prompt
 
-Ersetze vor Ausgabe alle Platzhalter anhand geprüfter Artefakte. Nenne Ziel-ID und exakte `goal.md`, `index.yaml`, Definitionspfad samt Milestone-ID/Version, bestätigten Planpfad sowie vorhandene Run-, Review- und Tasknachweispfade. IDs, Inhalte und Namen müssen übereinstimmen. Gib den Text kopierbar aus. Der Prompt ist ein wiederholt injizierbarer Zielhinweis, kein Sitzungsstart, Statusspeicher oder zusätzliche Autorisierung. Er aktiviert keinen Plan; Ausführung beginnt erst nach Planbestätigung und ausdrücklicher Execute-Autorisierung.
+Ersetze vor Ausgabe alle Platzhalter anhand geprüfter Artefakte. Nenne Ziel-ID und exakte `goal.md`, `index.yaml`, Definitionspfad samt Milestone-ID/Version, bestätigten Planpfad sowie vorhandene Run-, Review- und Tasknachweispfade. IDs, Inhalte und Namen müssen übereinstimmen. Gib den Text kopierbar aus. Der Prompt ist ein wiederholt injizierbarer Zielhinweis, kein Sitzungsstart, Statusspeicher oder zusätzliche Autorisierung. Er aktiviert keinen Plan; Ausführung setzt einen ausdrücklich oder gemäß Workflowvertrag abgeleitet freigegebenen Plan und bestehenden Ausführungsauftrag voraus; gedeckte technische Ersatzpläne verlangen keine neue Nutzerbestätigung. Bloße Zieldefinition oder Planerstellung startet keine Ausführung.
 
 ```text
 Arbeite ausschließlich an der ausdrücklich freigegebenen Etappe <Milestone-ID> Version <Version> für Ziel <Goal-ID>.

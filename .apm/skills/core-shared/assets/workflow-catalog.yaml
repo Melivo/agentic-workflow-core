@@ -1,5 +1,4 @@
 catalog_version: 1
-max_automatic_review_repair_rounds: 2
 
 workflows:
   - id: core-brainstorm
@@ -37,7 +36,6 @@ workflows:
     output_schemas: [task-result/v1]
     mutation_class: repository-and-run-artifact-write
     fresh_context_on_entry: true
-    max_automatic_review_repair_rounds: 2
   - id: core-review
     predecessors: [core-plan, core-execute]
     successors: [core-execute, core-plan, completed]

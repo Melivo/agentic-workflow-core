@@ -23,8 +23,17 @@ Die Workflowverkabelung bleibt unter
   [DOX-Vertrag](../.apm/skills/core-shared/references/workflow-contract.md#projektdokumentation-und-dox)
   über Klauselmuster in den Gruppen `shared`, `workflows` und `domains` sowie
   über modellierte `kind: docs`-Beziehungen (Baumzustand, Setupfreigabe, Belege,
-  Secret- und Scopegrenzen). Das ist statische Konsistenz, kein Nachweis
-  tatsächlicher Agentenbefolgung oder der Qualität realer Guides.
+  Secret- und Scopegrenzen). Zusätzlich prüft er das Fehlen des starren
+  Reparaturlimits im Katalog und die evidenzbasierte Reparaturfortsetzung
+  (neue Erkenntnis oder unterscheidbare prüfbare Hypothese, keine starre
+  Rundenzahl) sowie die G04-Klauseln zu Aufwand/Geldkosten, Sicherheitsannahmen
+  und delegierter Testbedienung. Das ist statische Konsistenz, kein Nachweis
+  tatsächlicher Agentenbefolgung oder der Qualität realer Guides. Die Gruppe
+  `workflows` prüft die Ersatzplan-Ablaufklauseln quellengebunden vom gemeinsamen
+  Vertrag über Plan/Execute/Review bis Milestone und Goal-/Startprompt sowie die
+  öffentlichen Verbraucher README.md und DESIGN.md, einschließlich
+  widersprechender alter pauschaler Bestätigungsgates; situationsabhängige
+  Nutzerbestätigung bleibt zulässig.
 - Der Paketproducer prüft den kanonischen DOX-Skillindex und alle Skilldateien
   bytegenau sowie relative Links innerhalb der Installation. Repositorywerkzeuge
   werden aus portablen Guides über ihre Repositoryquellen referenziert.

@@ -53,7 +53,7 @@ Jeder Task hat genau einen registrierten Agenten. `context_paths` und `scope` bl
 
 ## Runzustand
 
-`.agentic-workflow/runs/<run-id>/state.yaml` darf nur die für Wiederaufnahme erforderliche aktuelle Sicht enthalten: `run_id`, exakten `plan_path`, aktuellen Laufzustand, integrierte beziehungsweise ausführbare Task-IDs und die Anzahl bereits verwendeter automatischer Review-Reparaturrunden. Es dupliziert weder Taskevidenz noch Findings oder Planinhalt und führt kein Ereignisjournal.
+`.agentic-workflow/runs/<run-id>/state.yaml` darf nur die für Wiederaufnahme erforderliche aktuelle Sicht enthalten: `run_id`, exakten `plan_path`, aktuellen Laufzustand, integrierte beziehungsweise ausführbare Task-IDs und die rein deskriptive Anzahl bereits verwendeter automatischer Review-Reparaturrunden; sie wird nicht operativ als Limit ausgewertet. Es dupliziert weder Taskevidenz noch Findings oder Planinhalt und führt kein Ereignisjournal.
 
 ## `task-result/v1`
 

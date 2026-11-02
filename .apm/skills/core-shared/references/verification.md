@@ -50,7 +50,7 @@ Tests, Hooks oder Validierungen dürfen nicht deaktiviert, übersprungen oder ab
 - `changes_requested`, wenn innerhalb des bestätigten Scopes behebbarer Änderungsbedarf besteht;
 - `blocked`, wenn ein belastbares Urteil oder eine erforderliche Behebung durch eine materielle Lücke verhindert wird.
 
-Findings verwenden `review/v1` und die Schweregrade `blocking | high | medium | low`. Eine materielle Änderung von Ziel, Scope, Architektur oder Akzeptanz geht zu `core-plan`; sie wird nicht als normale Reparatur eingeordnet. Nach höchstens zwei automatischen `execute ↔ review`-Korrekturrunden stoppt der Lauf mit sichtbaren verbleibenden Findings.
+Findings verwenden `review/v1` und die Schweregrade `blocking | high | medium | low`. Eine materielle Änderung von Ziel, Scope, Architektur oder Akzeptanz geht zu `core-plan`; sie wird nicht als normale Reparatur eingeordnet. Die Fortsetzung automatischer `execute ↔ review`-Korrekturrunden folgt der [evidenzbasierten Fortsetzung von Versuchen](workflow-contract.md#evidenzbasierte-fortsetzung-von-versuchen); ohne tragfähigen Ansatz stoppt der Lauf mit sichtbaren verbleibenden Findings.
 
 ## Blockierte Paketfreigabeprüfungen
 
