@@ -4,6 +4,13 @@
 
 - Ergänzt reproduzierbare lokale/CI-Prüfungen und eine standardmäßig deaktivierte, getrennte Release-PR- und Veröffentlichungskette. GitHub-Livebetrieb und App-Einrichtung sind nicht bestätigt.
 
+## [0.10.0](https://github.com/Melivo/agentic-workflow-core/compare/v0.9.0...v0.10.0) (2026-11-03)
+
+
+### Features
+
+* **core:** clarify conditional measurement comparisons ([#14](https://github.com/Melivo/agentic-workflow-core/issues/14)) ([3d5a6c9](https://github.com/Melivo/agentic-workflow-core/commit/3d5a6c995885ed7f4d6030bd39e3e7237d9071b2))
+
 ## [0.9.0](https://github.com/Melivo/agentic-workflow-core/compare/v0.8.1...v0.9.0) (2026-11-02)
 
 
