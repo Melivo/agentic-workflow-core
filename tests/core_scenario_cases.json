@@ -7,6 +7,7 @@
     "revalidation_path und decision_refs werden auf exakte Zuordnung bzw. Existenz geprüft; ob deren Inhalt die neue Fassung tatsächlich deckt, bleibt eine Grenze statischer Modelle und Aufgabe des Reviews.",
     "RV06: evidence_paths werden nur statisch als sichere projektrelative Pfadform mit Präfix des gepinnten Originalruns geprüft; Existenz und inhaltliche Beweiskraft illustrativer Fixturepfade werden nicht geprüft.",
     "RV07: Versionswerte an Definition, Indexeintrag, Abhängigkeit, Abschlussnachweis, Auswahl, Prompt und Planfolge müssen den Typ int (nicht bool) mit Wert > 0 haben; numerisch gleiche bool-, float- oder Stringwerte werden fail-closed abgewiesen. Geprüft wird nur der YAML-/JSON-Typ, nicht die Schreibweise im Quelltext.",
+    "Execute-Direkt-, Freigabevorrang- und Zusatzdelegationsfälle modellieren nur statische Eingangs-, Scope- und Rollenbeziehungen; sie belegen keine reale Agentenbefolgung.",
     "DOX-Docsfälle modellieren Plan-/Task-Beziehungen (Baumzustand, Setupfreigabe, Belege, Secret- und Scopegrenzen) als statische Eingaben; sie belegen weder tatsächliche Agentenbefolgung noch Inhalt oder Qualität realer Guides."
   ],
   "cases": [
@@ -14539,9 +14540,1012 @@
       },
       "expected": "pass",
       "observation": "vier begründete unterscheidbare Versuche"
+    },
+    {
+      "id": "execute-direct-positive",
+      "group": "workflows",
+      "source": ".apm/skills/core-execute/references/direct-mode.md",
+      "input": {
+        "kind": "execute_entry",
+        "mode": "direct",
+        "request_path": ".agentic-workflow/runs/direct-r01/request.md",
+        "plan_lost": false,
+        "bound_plan_or_milestone": false,
+        "explicit_change_order": true,
+        "needs_decomposition": false,
+        "material_decision": false,
+        "request_before_mutation": true,
+        "owner_count": 1,
+        "fake_plan": false,
+        "changed_paths": [
+          "src/api.py"
+        ],
+        "request_scope": [
+          "src/api.py"
+        ],
+        "resume_reads_exact_input": true,
+        "review_reads_exact_input": true
+      },
+      "expected": "pass",
+      "observation": "gültige Beziehungen akzeptiert"
+    },
+    {
+      "id": "execute-plan-positive",
+      "group": "workflows",
+      "source": ".apm/skills/core-execute/references/direct-mode.md",
+      "input": {
+        "kind": "execute_entry",
+        "mode": "plan",
+        "plan_path": ".agentic-workflow/plans/plan-a.md",
+        "plan_confirmed": true
+      },
+      "expected": "pass",
+      "observation": "gültige Beziehungen akzeptiert"
+    },
+    {
+      "id": "execute-legacy-plan-path",
+      "group": "workflows",
+      "source": ".apm/skills/core-execute/references/direct-mode.md",
+      "input": {
+        "kind": "execute_entry",
+        "plan_path": ".agentic-workflow/plans/plan-a.md",
+        "plan_confirmed": true
+      },
+      "expected": "pass",
+      "observation": "gültige Beziehungen akzeptiert"
+    },
+    {
+      "id": "execute-plan-unconfirmed",
+      "group": "workflows",
+      "source": ".apm/skills/core-execute/references/direct-mode.md",
+      "input": {
+        "kind": "execute_entry",
+        "mode": "plan",
+        "plan_path": ".agentic-workflow/plans/plan-a.md",
+        "plan_confirmed": false
+      },
+      "expected": "fail",
+      "observation": "Planmodus ohne bestätigten Plan"
+    },
+    {
+      "id": "execute-plan-mode-request-only",
+      "group": "workflows",
+      "source": ".apm/skills/core-execute/references/direct-mode.md",
+      "input": {
+        "kind": "execute_entry",
+        "mode": "plan",
+        "request_path": ".agentic-workflow/runs/direct-r01/request.md",
+        "plan_confirmed": true
+      },
+      "expected": "fail",
+      "observation": "Planmodus ohne bestätigten Plan"
+    },
+    {
+      "id": "execute-direct-lost-plan",
+      "group": "workflows",
+      "source": ".apm/skills/core-execute/references/direct-mode.md",
+      "input": {
+        "kind": "execute_entry",
+        "mode": "direct",
+        "request_path": ".agentic-workflow/runs/direct-r01/request.md",
+        "plan_lost": true,
+        "bound_plan_or_milestone": false,
+        "explicit_change_order": true,
+        "needs_decomposition": false,
+        "material_decision": false,
+        "request_before_mutation": true,
+        "owner_count": 1,
+        "fake_plan": false,
+        "changed_paths": [
+          "src/api.py"
+        ],
+        "request_scope": [
+          "src/api.py"
+        ],
+        "resume_reads_exact_input": true,
+        "review_reads_exact_input": true
+      },
+      "expected": "fail",
+      "observation": "Plan-/Etappenarbeit in Direktmodus umgedeutet"
+    },
+    {
+      "id": "execute-direct-bound-milestone",
+      "group": "workflows",
+      "source": ".apm/skills/core-execute/references/direct-mode.md",
+      "input": {
+        "kind": "execute_entry",
+        "mode": "direct",
+        "request_path": ".agentic-workflow/runs/direct-r01/request.md",
+        "plan_lost": false,
+        "bound_plan_or_milestone": true,
+        "explicit_change_order": true,
+        "needs_decomposition": false,
+        "material_decision": false,
+        "request_before_mutation": true,
+        "owner_count": 1,
+        "fake_plan": false,
+        "changed_paths": [
+          "src/api.py"
+        ],
+        "request_scope": [
+          "src/api.py"
+        ],
+        "resume_reads_exact_input": true,
+        "review_reads_exact_input": true
+      },
+      "expected": "fail",
+      "observation": "Plan-/Etappenarbeit in Direktmodus umgedeutet"
+    },
+    {
+      "id": "execute-direct-both-inputs",
+      "group": "workflows",
+      "source": ".apm/skills/core-execute/references/direct-mode.md",
+      "input": {
+        "kind": "execute_entry",
+        "mode": "direct",
+        "request_path": ".agentic-workflow/runs/direct-r01/request.md",
+        "plan_lost": false,
+        "bound_plan_or_milestone": false,
+        "explicit_change_order": true,
+        "needs_decomposition": false,
+        "material_decision": false,
+        "request_before_mutation": true,
+        "owner_count": 1,
+        "fake_plan": false,
+        "changed_paths": [
+          "src/api.py"
+        ],
+        "request_scope": [
+          "src/api.py"
+        ],
+        "resume_reads_exact_input": true,
+        "review_reads_exact_input": true,
+        "plan_path": ".agentic-workflow/plans/plan-a.md"
+      },
+      "expected": "fail",
+      "observation": "Execute-Eingang nicht exklusiv"
+    },
+    {
+      "id": "execute-direct-plan-path-only",
+      "group": "workflows",
+      "source": ".apm/skills/core-execute/references/direct-mode.md",
+      "input": {
+        "kind": "execute_entry",
+        "mode": "direct",
+        "plan_lost": false,
+        "bound_plan_or_milestone": false,
+        "explicit_change_order": true,
+        "needs_decomposition": false,
+        "material_decision": false,
+        "request_before_mutation": true,
+        "owner_count": 1,
+        "fake_plan": false,
+        "changed_paths": [
+          "src/api.py"
+        ],
+        "request_scope": [
+          "src/api.py"
+        ],
+        "resume_reads_exact_input": true,
+        "review_reads_exact_input": true,
+        "plan_path": ".agentic-workflow/plans/plan-a.md"
+      },
+      "expected": "fail",
+      "observation": "Direktlauf ohne request_path"
+    },
+    {
+      "id": "execute-request-without-mode",
+      "group": "workflows",
+      "source": ".apm/skills/core-execute/references/direct-mode.md",
+      "input": {
+        "kind": "execute_entry",
+        "request_path": ".agentic-workflow/runs/direct-r01/request.md",
+        "plan_lost": false,
+        "bound_plan_or_milestone": false,
+        "explicit_change_order": true,
+        "needs_decomposition": false,
+        "material_decision": false,
+        "request_before_mutation": true,
+        "owner_count": 1,
+        "fake_plan": false,
+        "changed_paths": [
+          "src/api.py"
+        ],
+        "request_scope": [
+          "src/api.py"
+        ],
+        "resume_reads_exact_input": true,
+        "review_reads_exact_input": true
+      },
+      "expected": "fail",
+      "observation": "unbestimmter Execute-Eingang"
+    },
+    {
+      "id": "execute-direct-no-change-order",
+      "group": "workflows",
+      "source": ".apm/skills/core-execute/references/direct-mode.md",
+      "input": {
+        "kind": "execute_entry",
+        "mode": "direct",
+        "request_path": ".agentic-workflow/runs/direct-r01/request.md",
+        "plan_lost": false,
+        "bound_plan_or_milestone": false,
+        "explicit_change_order": false,
+        "needs_decomposition": false,
+        "material_decision": false,
+        "request_before_mutation": true,
+        "owner_count": 1,
+        "fake_plan": false,
+        "changed_paths": [
+          "src/api.py"
+        ],
+        "request_scope": [
+          "src/api.py"
+        ],
+        "resume_reads_exact_input": true,
+        "review_reads_exact_input": true
+      },
+      "expected": "fail",
+      "observation": "Direktmodus ohne ausdrücklichen Änderungsauftrag"
+    },
+    {
+      "id": "execute-direct-decomposition",
+      "group": "workflows",
+      "source": ".apm/skills/core-execute/references/direct-mode.md",
+      "input": {
+        "kind": "execute_entry",
+        "mode": "direct",
+        "request_path": ".agentic-workflow/runs/direct-r01/request.md",
+        "plan_lost": false,
+        "bound_plan_or_milestone": false,
+        "explicit_change_order": true,
+        "needs_decomposition": true,
+        "material_decision": false,
+        "request_before_mutation": true,
+        "owner_count": 1,
+        "fake_plan": false,
+        "changed_paths": [
+          "src/api.py"
+        ],
+        "request_scope": [
+          "src/api.py"
+        ],
+        "resume_reads_exact_input": true,
+        "review_reads_exact_input": true
+      },
+      "expected": "fail",
+      "observation": "Direktgrenze überschritten"
+    },
+    {
+      "id": "execute-direct-material-decision",
+      "group": "workflows",
+      "source": ".apm/skills/core-execute/references/direct-mode.md",
+      "input": {
+        "kind": "execute_entry",
+        "mode": "direct",
+        "request_path": ".agentic-workflow/runs/direct-r01/request.md",
+        "plan_lost": false,
+        "bound_plan_or_milestone": false,
+        "explicit_change_order": true,
+        "needs_decomposition": false,
+        "material_decision": true,
+        "request_before_mutation": true,
+        "owner_count": 1,
+        "fake_plan": false,
+        "changed_paths": [
+          "src/api.py"
+        ],
+        "request_scope": [
+          "src/api.py"
+        ],
+        "resume_reads_exact_input": true,
+        "review_reads_exact_input": true
+      },
+      "expected": "fail",
+      "observation": "Direktgrenze überschritten"
+    },
+    {
+      "id": "execute-direct-mutation-before-request",
+      "group": "workflows",
+      "source": ".apm/skills/core-execute/references/direct-mode.md",
+      "input": {
+        "kind": "execute_entry",
+        "mode": "direct",
+        "request_path": ".agentic-workflow/runs/direct-r01/request.md",
+        "plan_lost": false,
+        "bound_plan_or_milestone": false,
+        "explicit_change_order": true,
+        "needs_decomposition": false,
+        "material_decision": false,
+        "request_before_mutation": false,
+        "owner_count": 1,
+        "fake_plan": false,
+        "changed_paths": [
+          "src/api.py"
+        ],
+        "request_scope": [
+          "src/api.py"
+        ],
+        "resume_reads_exact_input": true,
+        "review_reads_exact_input": true
+      },
+      "expected": "fail",
+      "observation": "Auftragsgrundlage oder eindeutiger Owner fehlt"
+    },
+    {
+      "id": "execute-direct-two-owners",
+      "group": "workflows",
+      "source": ".apm/skills/core-execute/references/direct-mode.md",
+      "input": {
+        "kind": "execute_entry",
+        "mode": "direct",
+        "request_path": ".agentic-workflow/runs/direct-r01/request.md",
+        "plan_lost": false,
+        "bound_plan_or_milestone": false,
+        "explicit_change_order": true,
+        "needs_decomposition": false,
+        "material_decision": false,
+        "request_before_mutation": true,
+        "owner_count": 2,
+        "fake_plan": false,
+        "changed_paths": [
+          "src/api.py"
+        ],
+        "request_scope": [
+          "src/api.py"
+        ],
+        "resume_reads_exact_input": true,
+        "review_reads_exact_input": true
+      },
+      "expected": "fail",
+      "observation": "Auftragsgrundlage oder eindeutiger Owner fehlt"
+    },
+    {
+      "id": "execute-direct-fake-plan",
+      "group": "workflows",
+      "source": ".apm/skills/core-execute/references/direct-mode.md",
+      "input": {
+        "kind": "execute_entry",
+        "mode": "direct",
+        "request_path": ".agentic-workflow/runs/direct-r01/request.md",
+        "plan_lost": false,
+        "bound_plan_or_milestone": false,
+        "explicit_change_order": true,
+        "needs_decomposition": false,
+        "material_decision": false,
+        "request_before_mutation": true,
+        "owner_count": 1,
+        "fake_plan": true,
+        "changed_paths": [
+          "src/api.py"
+        ],
+        "request_scope": [
+          "src/api.py"
+        ],
+        "resume_reads_exact_input": true,
+        "review_reads_exact_input": true
+      },
+      "expected": "fail",
+      "observation": "fingierter Plan im Direktmodus"
+    },
+    {
+      "id": "execute-direct-scope-bypass",
+      "group": "workflows",
+      "source": ".apm/skills/core-execute/references/direct-mode.md",
+      "input": {
+        "kind": "execute_entry",
+        "mode": "direct",
+        "request_path": ".agentic-workflow/runs/direct-r01/request.md",
+        "plan_lost": false,
+        "bound_plan_or_milestone": false,
+        "explicit_change_order": true,
+        "needs_decomposition": false,
+        "material_decision": false,
+        "request_before_mutation": true,
+        "owner_count": 1,
+        "fake_plan": false,
+        "changed_paths": [
+          "src/api.py",
+          "src/other.py"
+        ],
+        "request_scope": [
+          "src/api.py"
+        ],
+        "resume_reads_exact_input": true,
+        "review_reads_exact_input": true
+      },
+      "expected": "fail",
+      "observation": "Direktscope erweitert"
+    },
+    {
+      "id": "execute-direct-resume-guessed",
+      "group": "workflows",
+      "source": ".apm/skills/core-execute/references/direct-mode.md",
+      "input": {
+        "kind": "execute_entry",
+        "mode": "direct",
+        "request_path": ".agentic-workflow/runs/direct-r01/request.md",
+        "plan_lost": false,
+        "bound_plan_or_milestone": false,
+        "explicit_change_order": true,
+        "needs_decomposition": false,
+        "material_decision": false,
+        "request_before_mutation": true,
+        "owner_count": 1,
+        "fake_plan": false,
+        "changed_paths": [
+          "src/api.py"
+        ],
+        "request_scope": [
+          "src/api.py"
+        ],
+        "resume_reads_exact_input": false,
+        "review_reads_exact_input": true
+      },
+      "expected": "fail",
+      "observation": "Resume/Review ohne exakten Eingang"
+    },
+    {
+      "id": "execute-direct-review-without-request",
+      "group": "workflows",
+      "source": ".apm/skills/core-execute/references/direct-mode.md",
+      "input": {
+        "kind": "execute_entry",
+        "mode": "direct",
+        "request_path": ".agentic-workflow/runs/direct-r01/request.md",
+        "plan_lost": false,
+        "bound_plan_or_milestone": false,
+        "explicit_change_order": true,
+        "needs_decomposition": false,
+        "material_decision": false,
+        "request_before_mutation": true,
+        "owner_count": 1,
+        "fake_plan": false,
+        "changed_paths": [
+          "src/api.py"
+        ],
+        "request_scope": [
+          "src/api.py"
+        ],
+        "resume_reads_exact_input": true,
+        "review_reads_exact_input": false
+      },
+      "expected": "fail",
+      "observation": "Resume/Review ohne exakten Eingang"
+    },
+    {
+      "id": "approval-override-positive",
+      "group": "shared",
+      "source": ".apm/skills/core-shared/references/workflow-contract.md",
+      "input": {
+        "kind": "approval_override",
+        "gate_skipped": true,
+        "current_task_instruction": true,
+        "explicit_change_order": true,
+        "overrides_higher_priority": false,
+        "new_goal": false,
+        "uncovered_cost": false,
+        "uncovered_effect": false,
+        "preview_kept": true,
+        "drift_marker_checked": true,
+        "foreign_content_protected": true,
+        "preview_claimed_seen": false
+      },
+      "expected": "pass",
+      "observation": "gültige Beziehungen akzeptiert"
+    },
+    {
+      "id": "approval-regular-gate-kept",
+      "group": "shared",
+      "source": ".apm/skills/core-shared/references/workflow-contract.md",
+      "input": {
+        "kind": "approval_override",
+        "gate_skipped": false,
+        "current_task_instruction": false,
+        "explicit_change_order": false,
+        "overrides_higher_priority": false,
+        "new_goal": false,
+        "uncovered_cost": false,
+        "uncovered_effect": false,
+        "preview_kept": true,
+        "drift_marker_checked": true,
+        "foreign_content_protected": true,
+        "preview_claimed_seen": false
+      },
+      "expected": "pass",
+      "observation": "gültige Beziehungen akzeptiert"
+    },
+    {
+      "id": "approval-no-ask-without-order",
+      "group": "shared",
+      "source": ".apm/skills/core-shared/references/workflow-contract.md",
+      "input": {
+        "kind": "approval_override",
+        "gate_skipped": true,
+        "current_task_instruction": true,
+        "explicit_change_order": false,
+        "overrides_higher_priority": false,
+        "new_goal": false,
+        "uncovered_cost": false,
+        "uncovered_effect": false,
+        "preview_kept": true,
+        "drift_marker_checked": true,
+        "foreign_content_protected": true,
+        "preview_claimed_seen": false
+      },
+      "expected": "fail",
+      "observation": "Freigabehinweis ohne Änderungsauftrag"
+    },
+    {
+      "id": "approval-stale-instruction",
+      "group": "shared",
+      "source": ".apm/skills/core-shared/references/workflow-contract.md",
+      "input": {
+        "kind": "approval_override",
+        "gate_skipped": true,
+        "current_task_instruction": false,
+        "explicit_change_order": true,
+        "overrides_higher_priority": false,
+        "new_goal": false,
+        "uncovered_cost": false,
+        "uncovered_effect": false,
+        "preview_kept": true,
+        "drift_marker_checked": true,
+        "foreign_content_protected": true,
+        "preview_claimed_seen": false
+      },
+      "expected": "fail",
+      "observation": "Freigabehinweis ohne Änderungsauftrag"
+    },
+    {
+      "id": "approval-higher-priority",
+      "group": "shared",
+      "source": ".apm/skills/core-shared/references/workflow-contract.md",
+      "input": {
+        "kind": "approval_override",
+        "gate_skipped": true,
+        "current_task_instruction": true,
+        "explicit_change_order": true,
+        "overrides_higher_priority": true,
+        "new_goal": false,
+        "uncovered_cost": false,
+        "uncovered_effect": false,
+        "preview_kept": true,
+        "drift_marker_checked": true,
+        "foreign_content_protected": true,
+        "preview_claimed_seen": false
+      },
+      "expected": "fail",
+      "observation": "höherrangige Grenze überstimmt"
+    },
+    {
+      "id": "approval-new-goal",
+      "group": "shared",
+      "source": ".apm/skills/core-shared/references/workflow-contract.md",
+      "input": {
+        "kind": "approval_override",
+        "gate_skipped": true,
+        "current_task_instruction": true,
+        "explicit_change_order": true,
+        "overrides_higher_priority": false,
+        "new_goal": true,
+        "uncovered_cost": false,
+        "uncovered_effect": false,
+        "preview_kept": true,
+        "drift_marker_checked": true,
+        "foreign_content_protected": true,
+        "preview_claimed_seen": false
+      },
+      "expected": "fail",
+      "observation": "Freigaberahmen überschritten"
+    },
+    {
+      "id": "approval-uncovered-cost",
+      "group": "shared",
+      "source": ".apm/skills/core-shared/references/workflow-contract.md",
+      "input": {
+        "kind": "approval_override",
+        "gate_skipped": true,
+        "current_task_instruction": true,
+        "explicit_change_order": true,
+        "overrides_higher_priority": false,
+        "new_goal": false,
+        "uncovered_cost": true,
+        "uncovered_effect": false,
+        "preview_kept": true,
+        "drift_marker_checked": true,
+        "foreign_content_protected": true,
+        "preview_claimed_seen": false
+      },
+      "expected": "fail",
+      "observation": "Freigaberahmen überschritten"
+    },
+    {
+      "id": "approval-preview-dropped",
+      "group": "shared",
+      "source": ".apm/skills/core-shared/references/workflow-contract.md",
+      "input": {
+        "kind": "approval_override",
+        "gate_skipped": true,
+        "current_task_instruction": true,
+        "explicit_change_order": true,
+        "overrides_higher_priority": false,
+        "new_goal": false,
+        "uncovered_cost": false,
+        "uncovered_effect": false,
+        "preview_kept": false,
+        "drift_marker_checked": true,
+        "foreign_content_protected": true,
+        "preview_claimed_seen": false
+      },
+      "expected": "fail",
+      "observation": "Vorschau/Drift/Marker/Fremdschutz entfallen"
+    },
+    {
+      "id": "approval-drift-marker-dropped",
+      "group": "shared",
+      "source": ".apm/skills/core-shared/references/workflow-contract.md",
+      "input": {
+        "kind": "approval_override",
+        "gate_skipped": true,
+        "current_task_instruction": true,
+        "explicit_change_order": true,
+        "overrides_higher_priority": false,
+        "new_goal": false,
+        "uncovered_cost": false,
+        "uncovered_effect": false,
+        "preview_kept": true,
+        "drift_marker_checked": false,
+        "foreign_content_protected": true,
+        "preview_claimed_seen": false
+      },
+      "expected": "fail",
+      "observation": "Vorschau/Drift/Marker/Fremdschutz entfallen"
+    },
+    {
+      "id": "approval-preview-claimed-seen",
+      "group": "shared",
+      "source": ".apm/skills/core-shared/references/workflow-contract.md",
+      "input": {
+        "kind": "approval_override",
+        "gate_skipped": true,
+        "current_task_instruction": true,
+        "explicit_change_order": true,
+        "overrides_higher_priority": false,
+        "new_goal": false,
+        "uncovered_cost": false,
+        "uncovered_effect": false,
+        "preview_kept": true,
+        "drift_marker_checked": true,
+        "foreign_content_protected": true,
+        "preview_claimed_seen": true
+      },
+      "expected": "fail",
+      "observation": "Vorschau als gesehen dargestellt"
+    },
+    {
+      "id": "support-delegation-positive",
+      "group": "workflows",
+      "source": ".apm/skills/core-execute/SKILL.md",
+      "input": {
+        "kind": "support_delegation",
+        "dispatcher": "core-execute",
+        "integrator": "core-execute",
+        "owner_before": "backend-engineer",
+        "owner_after": "backend-engineer",
+        "within_task_goal": true,
+        "support_paths": [
+          "tests/test_api.py"
+        ],
+        "task_scope": [
+          "src/api.py",
+          "tests/test_api.py"
+        ],
+        "nested_delegation": false,
+        "parallel_same_scope_write": false,
+        "plan_mutated": false,
+        "new_plan_task": false,
+        "recorded_in_run": true
+      },
+      "expected": "pass",
+      "observation": "gültige Beziehungen akzeptiert"
+    },
+    {
+      "id": "support-delegation-agent-dispatches",
+      "group": "workflows",
+      "source": ".apm/skills/core-execute/SKILL.md",
+      "input": {
+        "kind": "support_delegation",
+        "dispatcher": "backend-engineer",
+        "integrator": "core-execute",
+        "owner_before": "backend-engineer",
+        "owner_after": "backend-engineer",
+        "within_task_goal": true,
+        "support_paths": [
+          "tests/test_api.py"
+        ],
+        "task_scope": [
+          "src/api.py",
+          "tests/test_api.py"
+        ],
+        "nested_delegation": false,
+        "parallel_same_scope_write": false,
+        "plan_mutated": false,
+        "new_plan_task": false,
+        "recorded_in_run": true
+      },
+      "expected": "fail",
+      "observation": "Zusatzdelegation nicht durch Execute"
+    },
+    {
+      "id": "support-delegation-owner-switch",
+      "group": "workflows",
+      "source": ".apm/skills/core-execute/SKILL.md",
+      "input": {
+        "kind": "support_delegation",
+        "dispatcher": "core-execute",
+        "integrator": "core-execute",
+        "owner_before": "backend-engineer",
+        "owner_after": "docs-curator",
+        "within_task_goal": true,
+        "support_paths": [
+          "tests/test_api.py"
+        ],
+        "task_scope": [
+          "src/api.py",
+          "tests/test_api.py"
+        ],
+        "nested_delegation": false,
+        "parallel_same_scope_write": false,
+        "plan_mutated": false,
+        "new_plan_task": false,
+        "recorded_in_run": true
+      },
+      "expected": "fail",
+      "observation": "Taskowner gewechselt"
+    },
+    {
+      "id": "support-delegation-scope-exceeded",
+      "group": "workflows",
+      "source": ".apm/skills/core-execute/SKILL.md",
+      "input": {
+        "kind": "support_delegation",
+        "dispatcher": "core-execute",
+        "integrator": "core-execute",
+        "owner_before": "backend-engineer",
+        "owner_after": "backend-engineer",
+        "within_task_goal": true,
+        "support_paths": [
+          "README.md"
+        ],
+        "task_scope": [
+          "src/api.py",
+          "tests/test_api.py"
+        ],
+        "nested_delegation": false,
+        "parallel_same_scope_write": false,
+        "plan_mutated": false,
+        "new_plan_task": false,
+        "recorded_in_run": true
+      },
+      "expected": "fail",
+      "observation": "Zusatzdelegation außerhalb Taskziel/-scope"
+    },
+    {
+      "id": "support-delegation-goal-exceeded",
+      "group": "workflows",
+      "source": ".apm/skills/core-execute/SKILL.md",
+      "input": {
+        "kind": "support_delegation",
+        "dispatcher": "core-execute",
+        "integrator": "core-execute",
+        "owner_before": "backend-engineer",
+        "owner_after": "backend-engineer",
+        "within_task_goal": false,
+        "support_paths": [
+          "tests/test_api.py"
+        ],
+        "task_scope": [
+          "src/api.py",
+          "tests/test_api.py"
+        ],
+        "nested_delegation": false,
+        "parallel_same_scope_write": false,
+        "plan_mutated": false,
+        "new_plan_task": false,
+        "recorded_in_run": true
+      },
+      "expected": "fail",
+      "observation": "Zusatzdelegation außerhalb Taskziel/-scope"
+    },
+    {
+      "id": "support-delegation-nested",
+      "group": "workflows",
+      "source": ".apm/skills/core-execute/SKILL.md",
+      "input": {
+        "kind": "support_delegation",
+        "dispatcher": "core-execute",
+        "integrator": "core-execute",
+        "owner_before": "backend-engineer",
+        "owner_after": "backend-engineer",
+        "within_task_goal": true,
+        "support_paths": [
+          "tests/test_api.py"
+        ],
+        "task_scope": [
+          "src/api.py",
+          "tests/test_api.py"
+        ],
+        "nested_delegation": true,
+        "parallel_same_scope_write": false,
+        "plan_mutated": false,
+        "new_plan_task": false,
+        "recorded_in_run": true
+      },
+      "expected": "fail",
+      "observation": "Unterstützer delegiert weiter"
+    },
+    {
+      "id": "support-delegation-parallel-same-scope",
+      "group": "workflows",
+      "source": ".apm/skills/core-execute/SKILL.md",
+      "input": {
+        "kind": "support_delegation",
+        "dispatcher": "core-execute",
+        "integrator": "core-execute",
+        "owner_before": "backend-engineer",
+        "owner_after": "backend-engineer",
+        "within_task_goal": true,
+        "support_paths": [
+          "tests/test_api.py"
+        ],
+        "task_scope": [
+          "src/api.py",
+          "tests/test_api.py"
+        ],
+        "nested_delegation": false,
+        "parallel_same_scope_write": true,
+        "plan_mutated": false,
+        "new_plan_task": false,
+        "recorded_in_run": true
+      },
+      "expected": "fail",
+      "observation": "gleicher Schreibscope parallel"
+    },
+    {
+      "id": "support-delegation-plan-mutated",
+      "group": "workflows",
+      "source": ".apm/skills/core-execute/SKILL.md",
+      "input": {
+        "kind": "support_delegation",
+        "dispatcher": "core-execute",
+        "integrator": "core-execute",
+        "owner_before": "backend-engineer",
+        "owner_after": "backend-engineer",
+        "within_task_goal": true,
+        "support_paths": [
+          "tests/test_api.py"
+        ],
+        "task_scope": [
+          "src/api.py",
+          "tests/test_api.py"
+        ],
+        "nested_delegation": false,
+        "parallel_same_scope_write": false,
+        "plan_mutated": true,
+        "new_plan_task": false,
+        "recorded_in_run": true
+      },
+      "expected": "fail",
+      "observation": "Planmutation durch Zusatzdelegation"
+    },
+    {
+      "id": "support-delegation-new-plan-task",
+      "group": "workflows",
+      "source": ".apm/skills/core-execute/SKILL.md",
+      "input": {
+        "kind": "support_delegation",
+        "dispatcher": "core-execute",
+        "integrator": "core-execute",
+        "owner_before": "backend-engineer",
+        "owner_after": "backend-engineer",
+        "within_task_goal": true,
+        "support_paths": [
+          "tests/test_api.py"
+        ],
+        "task_scope": [
+          "src/api.py",
+          "tests/test_api.py"
+        ],
+        "nested_delegation": false,
+        "parallel_same_scope_write": false,
+        "plan_mutated": false,
+        "new_plan_task": true,
+        "recorded_in_run": true
+      },
+      "expected": "fail",
+      "observation": "Planmutation durch Zusatzdelegation"
+    },
+    {
+      "id": "support-delegation-unrecorded",
+      "group": "workflows",
+      "source": ".apm/skills/core-execute/SKILL.md",
+      "input": {
+        "kind": "support_delegation",
+        "dispatcher": "core-execute",
+        "integrator": "core-execute",
+        "owner_before": "backend-engineer",
+        "owner_after": "backend-engineer",
+        "within_task_goal": true,
+        "support_paths": [
+          "tests/test_api.py"
+        ],
+        "task_scope": [
+          "src/api.py",
+          "tests/test_api.py"
+        ],
+        "nested_delegation": false,
+        "parallel_same_scope_write": false,
+        "plan_mutated": false,
+        "new_plan_task": false,
+        "recorded_in_run": false
+      },
+      "expected": "fail",
+      "observation": "Zusatzdelegation nicht im Run belegt"
     }
   ],
   "coverage": {
+    "execute-direkt-eingang": {
+      "cases": [
+        "execute-direct-positive",
+        "execute-plan-positive",
+        "execute-legacy-plan-path",
+        "execute-plan-unconfirmed",
+        "execute-plan-mode-request-only",
+        "execute-direct-lost-plan",
+        "execute-direct-bound-milestone",
+        "execute-direct-both-inputs",
+        "execute-direct-plan-path-only",
+        "execute-request-without-mode",
+        "execute-direct-no-change-order",
+        "execute-direct-decomposition",
+        "execute-direct-material-decision",
+        "execute-direct-mutation-before-request",
+        "execute-direct-two-owners",
+        "execute-direct-fake-plan",
+        "execute-direct-scope-bypass",
+        "execute-direct-resume-guessed",
+        "execute-direct-review-without-request"
+      ]
+    },
+    "execute-freigabevorrang": {
+      "cases": [
+        "approval-override-positive",
+        "approval-regular-gate-kept",
+        "approval-no-ask-without-order",
+        "approval-stale-instruction",
+        "approval-higher-priority",
+        "approval-new-goal",
+        "approval-uncovered-cost",
+        "approval-preview-dropped",
+        "approval-drift-marker-dropped",
+        "approval-preview-claimed-seen"
+      ]
+    },
+    "execute-zusatzdelegation": {
+      "cases": [
+        "support-delegation-positive",
+        "support-delegation-agent-dispatches",
+        "support-delegation-owner-switch",
+        "support-delegation-scope-exceeded",
+        "support-delegation-goal-exceeded",
+        "support-delegation-nested",
+        "support-delegation-parallel-same-scope",
+        "support-delegation-plan-mutated",
+        "support-delegation-new-plan-task",
+        "support-delegation-unrecorded"
+      ]
+    },
     "g04-authorization-rahmen": {
     "cases": [
       "g04-authorization-positive",

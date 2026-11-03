@@ -1,11 +1,11 @@
 ---
 name: core-brainstorm
-description: "Klärt optional ein materiell unklares Vorhaben, vergleicht unterschiedliche Lösungsrichtungen und übergibt ausschließlich bestätigte Designentscheidungen an core-plan oder die ausdrücklich gewählte Etappenplanung mit core-milestone."
+description: "Klärt optional ein materiell unklares Vorhaben, vergleicht unterschiedliche Lösungsrichtungen und übergibt bestätigte Entscheidungen an core-plan oder, wenn eng und ausdrücklich zur direkten Umsetzung freigegeben, core-execute; Etappenentscheidungen gehen an core-milestone."
 ---
 
 # Core Brainstorm
 
-Nutze diesen optionalen Workflow, wenn Ziel, Nutzerproblem, Geltungsbereich oder Lösungsrichtung materiell unklar ist oder eine schwer reversible Entscheidung bevorsteht. Die Größe eines Vorhabens allein aktiviert ihn nicht.
+Nutze diesen optionalen Workflow, wenn Ziel, Nutzerproblem, Geltungsbereich oder Lösungsrichtung materiell unklar ist oder eine schwer reversible Entscheidung bevorsteht. Die Größe eines Vorhabens allein aktiviert ihn nicht. Nach bestätigter Klärung geht eine größere Zerlegung oder materielle Richtungsentscheidung an `core-plan`; nur ein danach klarer, enger und ausdrücklich zur unmittelbaren Umsetzung freigegebener Auftrag kann an `core-execute` im Direktmodus gehen.
 
 `core-brainstorm` plant und implementiert nicht. Ist das Vorhaben bereits ausreichend bestimmt, überspringe Brainstorming: Übergib den unveränderten Auftrag direkt an `core-plan` oder bei ausdrücklich gewählter Etappenplanung an [`core-milestone`](../core-milestone/SKILL.md). Für die Ausführung eines bestätigten `plan/v1` ist ausschließlich `core-execute` zuständig; unabhängige Prüfung gehört zu `core-review`.
 
@@ -44,7 +44,7 @@ Architekturperspektive ist nur bei materiellen Architekturfolgen erforderlich. F
 ## Entscheidungsübergabe
 
 ```text
-Nächster Workflow: <core-plan oder ausdrücklich gewähltes core-milestone>
+Nächster Workflow: <core-plan | ausdrücklich autorisiertes core-execute (Direktmodus) | ausdrücklich gewähltes core-milestone>
 Problem: <bestätigtes Nutzerproblem>
 Ergebnis: <bestätigtes beobachtbares Ergebnis>
 Geltungsbereich: <bestätigte Grenzen>
@@ -58,7 +58,7 @@ Evidenz:
 - <Repositorypfad oder belastbare Quelle und entscheidungsrelevanter Befund>
 ```
 
-Füge keine offenen Annahmen, Taskzerlegung, Prioritätsstufen, Runstatuswerte oder unbestätigten Researchbefunde ein. Ohne Etappenplanung übernimmt `core-plan` die bestätigten Entscheidungen in genau einen kanonischen `plan/v1`. Bei ausdrücklich gewählter Etappenplanung übergibt Brainstorm die bestätigten gemeinsamen Entscheidungen an `core-milestone`; dieser Eigentümer hält sie einmalig in `.agentic-workflow/goals/<goal-id>/goal.md` (`goal/v1`) fest und verknüpft bestätigte Designquellen als `decision_refs`. Dazu gehören Ziel-ID und exakter Zielpfad; Definitionen und Auswahl/Nachweise bleiben getrennt in [Definitionsformat](../core-milestone/references/milestone-format.md) und [Indexformat](../core-milestone/references/milestone-index-format.md). Jede freigegebene Etappe erhält ihren eigenen Plan. Ein separates Design-Dokument ist nicht erforderlich, sofern keine ausdrücklich referenzierte Quelle langlebig gebraucht wird. Vor einem Sitzungswechsel müssen die Entscheidungen am autorisierten Artefaktpfad schriftlich vorliegen; eine Chatübergabe genügt nicht.
+Füge keine offenen Annahmen, Taskzerlegung, Prioritätsstufen, Runstatuswerte oder unbestätigten Researchbefunde ein. Ohne Etappenplanung übernimmt `core-plan` die bestätigten Entscheidungen in genau einen kanonischen `plan/v1`, außer der aktuelle Nutzerauftrag autorisiert ausdrücklich die sofortige Umsetzung eines bereits klaren engen Auftrags ohne größere Zerlegung oder materielle Richtungsentscheidung; dann kann die Übergabe direkt an `core-execute` im Direktmodus erfolgen. Bei ausdrücklich gewählter Etappenplanung übergibt Brainstorm die bestätigten gemeinsamen Entscheidungen an `core-milestone`; dieser Eigentümer hält sie einmalig in `.agentic-workflow/goals/<goal-id>/goal.md` (`goal/v1`) fest und verknüpft bestätigte Designquellen als `decision_refs`. Dazu gehören Ziel-ID und exakter Zielpfad; Definitionen und Auswahl/Nachweise bleiben getrennt in [Definitionsformat](../core-milestone/references/milestone-format.md) und [Indexformat](../core-milestone/references/milestone-index-format.md). Jede freigegebene Etappe erhält ihren eigenen Plan. Ein separates Design-Dokument ist nicht erforderlich, sofern keine ausdrücklich referenzierte Quelle langlebig gebraucht wird. Vor einem Sitzungswechsel müssen die Entscheidungen am autorisierten Artefaktpfad schriftlich vorliegen; eine Chatübergabe genügt nicht.
 
 ## Abschluss und Fehlerfälle
 

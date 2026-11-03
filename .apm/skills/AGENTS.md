@@ -13,7 +13,9 @@ Dieser Bereich besitzt die `core-*`-Bundles und den mitgelieferten
 Konfigurator. Jeder Skill behält Ablauf, Scope und Fachmethodik in seiner
 `SKILL.md`. Referenzen und Assets bleiben beim fachlich verantwortlichen Bundle.
 Gemeinsame Verträge, Konfigurator und ausführbares Feedbackpaket haben die
-unten verlinkten eigenen Guides.
+unten verlinkten eigenen Guides. `core-execute` lädt Direktmodusdetails bedingt aus
+`core-execute/references/direct-mode.md`; der gemeinsame Direktvertrag bleibt in
+`core-shared`.
 
 ## Local Contracts
 

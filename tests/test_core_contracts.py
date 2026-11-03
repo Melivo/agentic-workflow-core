@@ -298,20 +298,23 @@ class ContractTests(unittest.TestCase):
         activation = text.split("## Aktivierung und Eingaben", 1)[1].split("## Verbindliche Verträge", 1)[0]
         # Static instruction regression, not evidence of live model behavior.
         for requirement in (
-            "Planpfad dient der Identifikation, nicht einer zusätzlichen Bestätigung",
+            "Plan- und Direktmodus sind exklusiv",
+            "ein Direktlauf wird ausschließlich über `mode: direct` und `request_path` wiederaufgenommen",
+            "Legacy-Zustände mit `plan_path` ohne `mode` bleiben Planmodus",
             "aktuell vom Benutzer genannten Pfad",
             "Kontext der laufenden Sitzung eindeutig zugeordneten aktiven Planpfad",
             "auch wenn du ihn selbst erstellt hast",
             "frisch gelesenes `state.yaml` den `plan_path`",
             "verlange weder die erneute Nennung des Pfads noch eine Bestätigungsformel",
             "nicht das Alter der Sitzung",
-            "nach Kontextverlust",
-            "neuen Sitzung ohne exakte Übergabe",
+            "Fehlt im Planmodus eine eindeutige Zuordnung",
+            "fehlende/verlorene Planartefakte werden nicht in Direktmodus umgedeutet",
+            "Ein aktiver gebundener Plan, eine gepinnte Etappe oder Milestone-Arbeit bleibt im Planweg",
             "mehrere Pläne beziehungsweise Runs",
-            "frage gezielt nach dem gemeinten Plan oder Run",
+            "frage gezielt nach dem Plan oder Run",
             "Suche niemals nach dem vermeintlich neuesten Plan",
             "nicht anhand von Dateidatum, Versionsnummer oder Provider-Memory",
-            "`status: Confirmed` nicht validierbar, stoppe vor jeder Produktmutation",
+            "`status: Confirmed` nicht validierbar, stoppe Produktmutationen",
             "Route die Erweiterung zu `core-plan`",
             "nur den bestätigten Ersatzplan",
             "den exakt identifizierten Plan",
@@ -319,11 +322,11 @@ class ContractTests(unittest.TestCase):
             with self.subTest(requirement=requirement):
                 self.assertIn(requirement, activation)
         self.assertNotIn("expliziten Pfad", activation)
-        self.assertIn("eindeutig identifizierten, bestätigten plan/v1", text.split("---", 2)[1])
+        self.assertIn("eindeutig identifizierten bestätigten plan/v1", text.split("---", 2)[1])
         self.assertIn("Ein Chatverlauf oder Provider-Memory ersetzt kein Run-Artefakt.", text)
         shared = (ROOT / ".apm/skills/core-shared/references/workflow-contract.md").read_text(encoding="utf-8")
         self.assertIn("../../core-execute/SKILL.md#aktivierung-und-eingaben", shared)
-        self.assertIn("ersetzt aber weder das frisch gelesene Artefakt noch dessen Freigabe, Laufzustand oder Evidenz", shared)
+        self.assertIn("ersetzt aber weder frisch gelesene Artefakte noch Freigabe, Runzustand oder Evidenz", shared)
 
     def test_rv01_execute_writes_immutable_attempts_not_legacy(self):
         source = ROOT / '.apm/skills/core-execute/SKILL.md'
@@ -481,9 +484,9 @@ class ContractTests(unittest.TestCase):
                 checker.check_setup_source(front, text + '\n' + instruction)
 
     def test_catalog_edges_are_bidirectional_and_complete(self):
-        edges = [('core-plan', 'core-review'), ('core-review', 'core-plan'), ('core-plan', 'core-execute'), ('core-execute', 'core-review'), ('core-execute', 'core-milestone'), ('core-milestone', 'core-plan'), ('core-milestone', 'core-handoff')]
+        edges = [('core-plan', 'core-review'), ('core-review', 'core-plan'), ('core-plan', 'core-execute'), ('core-execute', 'core-review'), ('core-execute', 'core-plan'), ('core-execute', 'core-milestone'), ('core-milestone', 'core-plan'), ('core-milestone', 'core-handoff')]
         ids = ['core-plan', 'core-execute', 'core-review', 'core-brainstorm', 'core-milestone', 'core-handoff']
-        workflows = [dict(id=i, successors=[b for a, b in edges if a == i], predecessors=[a for a, b in edges if b == i], fresh_context_on_entry=i in ('core-execute', 'core-review'), input_schemas=['milestone/v1'] if i == 'core-milestone' else [], output_schemas=['text'] if i == 'core-review' else []) for i in ids]
+        workflows = [dict(id=i, successors=[b for a, b in edges if a == i], predecessors=[a for a, b in edges if b == i], fresh_context_on_entry=i in ('core-execute', 'core-review'), input_schemas={'core-milestone': ['milestone/v1'], 'core-execute': ['text', 'plan/v1']}.get(i, []), output_schemas=['text'] if i == 'core-review' else []) for i in ids]
         catalog = dict(catalog_version=1, workflows=workflows, transitions=[dict(**{'from': a, 'to': b}, outcome='conditional') for a, b in edges], known_agent_ids=['backend-engineer'], known_tool_ids=['gortex'])
         checker.validate_catalog(catalog)
         bad = copy.deepcopy(catalog)
@@ -696,6 +699,70 @@ class ContractTests(unittest.TestCase):
                     return _text if Path(path) == _source else original_read(path, *args, **kwargs)
                 with self.subTest(source=relative, clause=clause), patch.object(Path, 'read_text', read_text), contextlib.redirect_stdout(io.StringIO()), self.assertRaisesRegex(checker.ContractError, 'RV05 widersprechendes Bestätigungsgate'):
                     checker.check_group(ROOT, 'workflows')
+
+    def test_direct_mode_clause_removals_and_widenings_fail_in_real_workflow_group(self):
+        # Static source clauses and in-memory mutations only; this is not evidence of live agent behavior.
+        original_read = Path.read_text
+        def run_group(source, text):
+            def read_text(path, *args, **kwargs):
+                return text if Path(path) == source else original_read(path, *args, **kwargs)
+            with patch.object(Path, 'read_text', read_text), contextlib.redirect_stdout(io.StringIO()):
+                checker.check_group(ROOT, 'workflows')
+        with contextlib.redirect_stdout(io.StringIO()):
+            checker.check_group(ROOT, 'workflows')
+        for relative, patterns in checker.DIRECT_SOURCES.items():
+            source = ROOT / relative
+            for pattern in patterns:
+                text, count = re.subn(pattern, '', original_read(source, encoding='utf-8'), count=1)
+                with self.subTest(source=relative, removed=pattern):
+                    self.assertEqual(count, 1)
+                    with self.assertRaises(checker.ContractError) as caught:
+                        run_group(source, text)
+                    self.assertIn('Direktmodus-Klausel fehlt: ' + relative + ': ' + pattern, str(caught.exception))
+        widenings = {
+            '.apm/skills/core-execute/references/direct-mode.md': ('Fehlende Planartefakte werden im Direktmodus fortgesetzt.', 'Unterstützer dürfen weiter delegieren.'),
+            '.apm/skills/core-execute/SKILL.md': ('Bei verlorenem Plan wird als Direktauftrag behandelt.', 'Für Direktläufe automatische Scopefreigabe gilt.'),
+            '.apm/skills/core-shared/references/workflow-contract.md': ('Die Nutzerfreigabe ersetzt die Vorschau.', 'Sie ersetzt Markerprüfung.', 'Die bloße Aussage, eine Freigabe sei nicht nötig, autorisiert die Ausführung.', 'Wer sagt, es solle nicht erneut gefragt werden, erlaubt damit die Umsetzung.'),
+        }
+        for relative, clauses in widenings.items():
+            source = ROOT / relative
+            for clause in clauses:
+                # Positive clauses stay intact; only the added widening must fail.
+                with self.subTest(source=relative, widening=clause), self.assertRaisesRegex(checker.ContractError, 'Direktmodus-Ausweitung: ' + re.escape(relative)):
+                    run_group(source, original_read(source, encoding='utf-8') + '\n' + clause + '\n')
+        # Inverting the canonical negative clause in place (condition dropped) must fail as well.
+        source = ROOT / '.apm/skills/core-shared/references/workflow-contract.md'
+        text, count = re.subn(r'autorisiert ohne ausdrücklichen Änderungsauftrag keine Ausführung', 'autorisiert die Ausführung', original_read(source, encoding='utf-8'))
+        self.assertEqual(count, 1)
+        with self.assertRaisesRegex(checker.ContractError, 'Direktmodus-'):
+            run_group(source, text)
+
+    def test_habit_core_snapshot_links_close_without_sdk(self):
+        # Source-only producer link check; never main/package/stage, no SDK or TypeScript.
+        spec = importlib.util.spec_from_file_location('habit_producer_links_tested', ROOT / 'scripts/check_habit_feedback.py')
+        producer = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(producer)
+        files = {'core/' + name: producer.source_bytes(ROOT, name) for name in producer.CORE_FILES}
+        producer.check_links(files)
+        missing = 'core/.apm/skills/core-execute/references/direct-mode.md'
+        self.assertIn(missing, files)
+        with self.assertRaisesRegex(producer.CheckError, r'unresolved Core snapshot link: .* -> [^ ]*direct-mode\.md'):
+            producer.check_links({k: v for k, v in files.items() if k != missing})
+
+    def test_catalog_execute_entries_and_escalation(self):
+        catalog = checker.load_yaml((ROOT / '.apm/skills/core-shared/assets/workflow-catalog.yaml').read_text(encoding='utf-8'))
+        checker.validate_catalog(catalog)
+        mutations = (
+            ('input_schemas', lambda w: w['input_schemas'].remove('text')),
+            ('input_schemas', lambda w: w['input_schemas'].remove('plan/v1')),
+            ('output_schemas', lambda w: w['output_schemas'].append('plan/v1')),
+            ('successors', lambda w: w['successors'].remove('core-plan')),
+        )
+        for field, mutate in mutations:
+            data = copy.deepcopy(catalog)
+            mutate(next(w for w in data['workflows'] if w['id'] == 'core-execute'))
+            with self.subTest(field=field), self.assertRaisesRegex(checker.ContractError, 'Execute-Plan-/Direkteingang oder Eskalation fehlt'):
+                checker.validate_catalog(data)
 
     def test_g04_canonical_clause_removals_fail_closed(self):
         # In-memory removal of the new G04 clauses; sources stay untouched.

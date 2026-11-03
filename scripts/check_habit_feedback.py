@@ -57,6 +57,7 @@ CORE_FILES = (
  '.apm/skills/core-devops/references/habit-feedback.md',
  '.apm/skills/core-devops/references/tooling-profiles.md',
  '.apm/skills/core-execute/SKILL.md',
+ '.apm/skills/core-execute/references/direct-mode.md',
  '.apm/skills/core-plan/SKILL.md',
  '.apm/skills/core-review/SKILL.md',
  '.apm/skills/core-milestone/references/goal-format.md',

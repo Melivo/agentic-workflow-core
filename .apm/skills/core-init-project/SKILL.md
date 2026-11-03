@@ -102,7 +102,7 @@ Zeige den `.gitignore`-Diff mit absolutem Zielpfad zusammen mit der Projektblock
 1. Lies das Projektziel und erfasse den Inhalt außerhalb des eigenen Markerpaares bytegenau.
 2. Blockiere bei doppelten, verschachtelten, ungepaarten oder beschädigten eigenen Markern; repariere sie nicht heuristisch.
 3. Erzeuge den vollständigen geplanten Diff und zeige den absoluten Zielpfad.
-4. Warte auf eine separate ausdrückliche Bestätigung genau dieses Diffs. Schweigen, eine frühere allgemeine Zustimmung oder eine veränderte Vorschau genügen nicht.
+4. Prüfe, ob eine aktuelle ausdrückliche auftragsbezogene Nutzeranweisung genau diese Änderung samt Ausführung autorisiert. Ist das belegt, gilt sie gemäß [Benutzeranweisungsvertrag](../core-shared/references/user-instructions-contract.md) statt eines separaten Bestätigungsgates; Vorschau, Drift-/Markerprüfung und Schutz manueller Inhalte bleiben Pflicht, und die Vorschau gilt nicht als vom Nutzer gesehen. Andernfalls warte auf separate ausdrückliche Bestätigung des Diffs.
 5. Verwirf die Vorschau, wenn sich Ziel oder Evidenz vor dem Schreiben ändern.
 6. Ersetze bei bestätigter Aktualisierung ausschließlich den Inhalt zwischen einem gültigen Markerpaar; fehlen beide Marker vollständig, füge genau einen vollständigen Block hinzu.
 7. Lies die Datei erneut und verifiziere Marker, Zielbereich und bytegenau unveränderte Außenbereiche.
@@ -123,7 +123,7 @@ Ablauf:
 
 1. Erzeuge mit `preview` den vollständigen read-only Bericht: je gültigem Block Status `current`, `drift` oder `missing` plus getrennter Unified Diff und ein Bestätigungstoken. Defekte Marker beenden bereits die Vorschau mit einem Fehler statt eines anwendbaren Tokens.
 2. Biete genau die vier Auswahlen an: nur Core, nur Serena/Gortex, beide oder keiner. Fehlende Blöcke werden mit Anlage-Diff vorgeschlagen; unmarkierte Außeninhalte werden nicht migriert.
-3. Zeige den absoluten Zielpfad, beide absoluten Vorlagenpfade, alle Diffs der Auswahl und das Token; verlange eine separate ausdrückliche Bestätigung genau dieser Fassung.
+3. Zeige den absoluten Zielpfad, beide absoluten Vorlagenpfade, alle Diffs der Auswahl und das Token. Eine aktuelle ausdrückliche auftragsbezogene Nutzeranweisung kann das separate Bestätigungsgate ersetzen, wenn sie genau diese Änderung und Ausführung autorisiert; andernfalls bestätige genau diese Fassung separat. In beiden Fällen bleiben Vorschau, Token-/Driftprüfung und Schutz fremder Inhalte bestehen; die Vorschau wird nicht als gesehen oder bestätigt ausgegeben.
 4. Schreibe mit `apply`, `--select` und dem Bestätigungstoken. Ein falsches Token, ein verändertes Ziel oder eine veränderte Auswahl bricht den Schreibversuch ab; beschädigte, doppelte, verschachtelte oder ungepaarte Marker blockieren jede Anwendung.
 5. Verifiziere nach dem Schreiben Markerlage und bytegleiche Außenbereiche; führe `preview` erneut aus: der zweite Lauf muss diff-frei (`current`) sein.
 

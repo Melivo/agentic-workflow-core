@@ -118,6 +118,9 @@ def validate_catalog(data):
     # Plan review runs before confirmation, returns text and never creates a run.
     require({('core-plan', 'core-review'), ('core-review', 'core-plan')} <= edges and 'text' in by_id['core-review'].get('output_schemas', []), 'Planreviewübergang fehlt')
     require(by_id['core-review'].get('fresh_context_on_entry') is True and by_id['core-execute'].get('fresh_context_on_entry') is True, 'Fresh-Context-Grenze')
+    # Direct entry: `text` names the request basis (no new schema); execute escalates to core-plan, never writes plans.
+    execute = by_id['core-execute']
+    require({'text', 'plan/v1'} <= set(execute.get('input_schemas', [])) and 'plan/v1' not in execute.get('output_schemas', []) and 'core-plan' in execute.get('successors', []), 'Execute-Plan-/Direkteingang oder Eskalation fehlt')
     unique(data.get('known_agent_ids'), 'agents')
     unique(data.get('known_tool_ids'), 'tools')
     # milestone/v1 is a read-only legacy entry: readable, never a new output.
@@ -321,6 +324,23 @@ def validate_artifacts(documents):
         check_format(document['schema'], document)
     check_example_relations(documents)
 
+def validate_execute_entry(data):
+    """Plan and direct entries are exclusive; lost or bound plan work never becomes direct."""
+    mode = data.get('mode') or ('plan' if data.get('plan_path') else None)  # legacy plan_path without mode
+    require(mode in ('plan', 'direct'), 'unbestimmter Execute-Eingang')
+    require(bool(data.get('plan_path')) != bool(data.get('request_path')), 'Execute-Eingang nicht exklusiv')
+    if mode == 'plan':
+        require(data.get('plan_path') and data['plan_confirmed'], 'Planmodus ohne bestätigten Plan')
+        return
+    require(data.get('request_path'), 'Direktlauf ohne request_path')
+    require(not data['plan_lost'] and not data['bound_plan_or_milestone'], 'Plan-/Etappenarbeit in Direktmodus umgedeutet')
+    require(data['explicit_change_order'], 'Direktmodus ohne ausdrücklichen Änderungsauftrag')
+    require(not data['needs_decomposition'] and not data['material_decision'], 'Direktgrenze überschritten')
+    require(data['request_before_mutation'] and data['owner_count'] == 1, 'Auftragsgrundlage oder eindeutiger Owner fehlt')
+    require(not data['fake_plan'], 'fingierter Plan im Direktmodus')
+    require(set(data['changed_paths']) <= set(data['request_scope']), 'Direktscope erweitert')
+    require(data['resume_reads_exact_input'] and data['review_reads_exact_input'], 'Resume/Review ohne exakten Eingang')
+
 def validate_scenario(data):
     """Explicit inputs and observed relationships; unknown kinds fail closed."""
     kind = data.get('kind')
@@ -399,6 +419,24 @@ def validate_scenario(data):
         require(not data['new_start_formula'], 'neue Startformel statt bestehender Freigaben')
         require(not data['auto_follow_up'], 'automatische Folgeetappe')
         require(not data['time_budget_loop'], 'neue Zeitbudget-/Bereitschaftsschleife')
+    elif kind == 'execute_entry':
+        validate_execute_entry(data)
+    elif kind == 'approval_override':
+        # A current task-bound order replaces lower-priority confirmation gates, nothing more.
+        if data['gate_skipped']:
+            require(data['current_task_instruction'] and data['explicit_change_order'], 'Freigabehinweis ohne Änderungsauftrag')
+            require(not data['overrides_higher_priority'], 'höherrangige Grenze überstimmt')
+            require(not (data['new_goal'] or data['uncovered_cost'] or data['uncovered_effect']), 'Freigaberahmen überschritten')
+        require(data['preview_kept'] and data['drift_marker_checked'] and data['foreign_content_protected'], 'Vorschau/Drift/Marker/Fremdschutz entfallen')
+        require(not data['preview_claimed_seen'], 'Vorschau als gesehen dargestellt')
+    elif kind == 'support_delegation':
+        require(data['dispatcher'] == 'core-execute' == data['integrator'], 'Zusatzdelegation nicht durch Execute')
+        require(data['owner_after'] == data['owner_before'], 'Taskowner gewechselt')
+        require(data['within_task_goal'] and set(data['support_paths']) <= set(data['task_scope']), 'Zusatzdelegation außerhalb Taskziel/-scope')
+        require(not data['nested_delegation'], 'Unterstützer delegiert weiter')
+        require(not data['parallel_same_scope_write'], 'gleicher Schreibscope parallel')
+        require(not data['plan_mutated'] and not data['new_plan_task'], 'Planmutation durch Zusatzdelegation')
+        require(data['recorded_in_run'], 'Zusatzdelegation nicht im Run belegt')
     elif kind == 'progression':
         validate_progression(data)
     elif kind == 'selection':
@@ -590,6 +628,7 @@ REQUIRED_COVERAGE = (
     'namenskollision', 'widerspruechliche-ids', 'falsche-versionszuordnung', 'ersatzplannummer', 'run-id-resume-review-reparatur', 'keine-automatische-umbenennung', 'kein-geerbter-abschluss', 'resume', 'review-ready', 'folgefreigabe', 'gesamtabschluss', 'unveraenderliches-ziel', 'hoechstens-eine-aktuelle-etappe',
     'S-dox-projektdokumentation',
     'g04-authorization-rahmen', 'g04-kosten-aufwand-trennung', 'g04-reparatur-evidenzbasis', 'g04-blast-radius', 'g04-delegation-consent', 'g04-katalog-ohne-limit',
+    'execute-direkt-eingang', 'execute-freigabevorrang', 'execute-zusatzdelegation',
 )
 
 def check_coverage(fixture):
@@ -833,6 +872,73 @@ REPLACEMENT_SOURCES = {
     ),
 }
 
+# Execute direct mode, task-bound support and task-bound approval precedence (static source clauses only).
+DIRECT_SOURCES = {
+    '.apm/skills/core-execute/references/direct-mode.md': (
+        r'erfindet keinen Plan, `Confirmed`-Status, Taskgraphen oder `plan/v1`',
+        r'Aktive Planbindung, gepinnte Etappe/Milestone-Arbeit, fehlende/verlorene Planartefakte[^.]*niemals als Direktauftrag umgedeutet',
+        r'vor jeder Produktmutation in `\.agentic-workflow/runs/<run-id>/request\.md`[^.]*genau einen verantwortlichen registrierten Fachagenten',
+        r'`mode: direct` und `request_path`, nicht `plan_path`',
+        r'Execute bleibt einziger Dispatcher und Integrator',
+        r'Unterstützer delegieren nicht weiter',
+        r'Fehlender oder driftender Eingang blockiert Resume und Review',
+        r'Ein fehlender Pfad wird nicht geraten',
+        r'Direktmodus hat keine Etappenbindung; gebundene Etappenarbeit bleibt im Planmodus',
+        r'ausschließlich Execute integriert Ergebnisse',
+        r'Auftrag, eingesetzter Agent, Elterntask, abgegrenzter Teilscope, Ergebnis und Checks werden dem bestehenden Taskversuch',
+        r'stoppe betroffene Produktmutationen und route zu `core-plan`',
+    ),
+    '.apm/skills/core-execute/SKILL.md': (
+        r'Plan- und Direktmodus sind exklusiv',
+        r'fehlende/verlorene Planartefakte werden nicht in Direktmodus umgedeutet',
+        r'Ein aktiver gebundener Plan, eine gepinnte Etappe oder Milestone-Arbeit bleibt im Planweg',
+        r'Legacy-Zustände mit `plan_path` ohne `mode` bleiben Planmodus',
+        r'erforderliche Vorschau, Verifikation, Scope-/Drift-/Markerprüfung und Schutz fremder Inhalte bleiben bestehen',
+        r'Execute allein formuliert und dispatcht zusätzliche, eng begrenzte Unterstützungsaufträge; der ursprüngliche Taskowner bleibt für Ergebnis und Belege verantwortlich, während ausschließlich `core-execute` Ergebnisse integriert',
+        r'Halte Auftrag, eingesetzten Agenten, Elterntask, abgegrenzten Teilscope, Ergebnis und Checks dem bestehenden Taskversuch zugeordnet',
+        r'S00-Referenz\]\([^)]*\) im selben Dispatchauftrag',
+    ),
+    '.apm/skills/core-review/SKILL.md': (
+        r'im Direktmodus `request_path` mit `request\.md` statt eines Planartefakts',
+        r'fehlende Pfade blockieren, sie werden nicht geraten',
+        r'Legacy-Zustand ohne `mode`, aber mit `plan_path`, behandle den Lauf wie im Planmodus',
+    ),
+    '.apm/skills/core-shared/references/workflow-contract.md': (
+        r'ein fehlender/verlorener Plan, aktive Plan-/Milestone-Arbeit oder ein mehrdeutiger Eingang wird nie als Direktauftrag umgedeutet',
+        r'Vorrang vor separaten Bestätigungs- oder Diff-Gates niedriger priorisierter Skills und AGENTS\.md',
+        r'read-only Vorschau, Scope-/Drift-/Markerprüfung und Schutz fremder Inhalte bleiben bestehen',
+        r'erzeugt weder neue Ziele noch ungedeckte Kosten, Sonderwirkungen oder höherrangige Erlaubnis',
+        r'Fachagenten delegieren nicht weiter',
+        r'Die bloße Aussage, eine Freigabe sei nicht nötig oder es solle nicht erneut gefragt werden, autorisiert ohne ausdrücklichen Änderungsauftrag keine Ausführung',
+        r'Unterstützung außerhalb des Taskziels/-scopes[^.]*geht an `core-plan`',
+    ),
+    '.apm/skills/core-shared/references/artifact-contract.md': (
+        r'Planruns referenzieren `plan_path`; Direktläufe referenzieren `request_path` und kein `plan_path`',
+        r'Bestehende Runs mit `plan_path` bleiben als Planmodus lesbar',
+        r'`task-result/v1` und `review/v1` bleiben unverändert',
+    ),
+    '.apm/skills/core-shared/assets/handoff.md': (
+        r'Fülle exakt einen Eingangspfad entsprechend dem Ausführungsmodus',
+    ),
+    '.apm/skills/core-shared/references/user-instructions-contract.md': (
+        r'Sie ersetzt nicht die read-only Vorschau, genaue Scope-/Drift-/Markerprüfung oder den Schutz fremder Inhalte',
+    ),
+}
+# Reintroduced widening: lost plans continued directly, nested support, automatic scope release, replaced safety checks.
+DIRECT_WIDENING = r'(?:fehlende|verlorene)[^.\n]*Plan\w*[^.\n]*(?:im|als|in den) Direkt\w* (?:fort\w*setz|aus\w*führ|behandel|um\w*deut)\w*|Unterstützer (?:dürfen|darf) weiter delegieren|automatische Scopefreigabe gilt|ersetzt (?:die )?(?:Vorschau|Drift-|Markerprüfung)'
+
+def check_direct_sources(sources):
+    for path, patterns in DIRECT_SOURCES.items():
+        text = sources[path]
+        # Negated sentences ("niemals als Direktauftrag umgedeutet") are the contract itself, not a widening.
+        widened = [s for s in re.split(r'(?<=[.!?])\s+|\n', text) if re.search(DIRECT_WIDENING, s, re.I) and not re.search(r'\b(?:nicht|niemals|nie|kein\w*)\b', s, re.I)]
+        # A bare "no approval needed" sentence must keep its change-order condition despite containing "nicht".
+        widened += [s for s in re.split(r'(?<=[.!?])\s+|\n', text) if re.search(r'Freigabe sei nicht nötig|nicht erneut gefragt', s) and re.search(r'autorisier|erlaub|genügt', s) and 'ohne ausdrücklichen Änderungsauftrag keine Ausführung' not in s]
+        require(not widened, 'Direktmodus-Ausweitung: ' + path)
+        for pattern in patterns:
+            require(re.search(pattern, text), 'Direktmodus-Klausel fehlt: ' + path + ': ' + pattern)
+
+
 def check_replacement_sources(sources):
     # Reject old unconditional gates even when a positive frame paragraph survives.
     legacy = r'Erst nach ausdrücklicher Bestätigung wird der Ersatzplan geschrieben|Die bisherige Planfreigabe bestätigt keinen unbekannten Ersatzplan|bereits genau diesen Plan autorisiert|ohne Nutzerbestätigung wird nichts ausgeführt|die Bestätigung des Ersatzplans bleibt erforderlich|die Planbestätigung bleibt erforderlich|Ziel-/Definitionsbestätigung und aktuelle Etappenfreigabe sind weder Planbestätigung noch Ausführungsfreigabe|Der Nutzer aktiviert ihn erst nach Bestätigung des eigenen Plans|Ausführung beginnt erst nach Planbestätigung und ausdrücklicher Execute-Autorisierung|Execute beginnt erst nach bestätigtem Plan und ausdrücklicher Ausführungsautorisierung|erst nach deren Bestätigung verknüpft|Nutze anschließend denselben Validierungs-, Planreview- und Bestätigungsschritt wie bei Erstplanung|core-plan → core-execute \(erst nach Nutzerbestätigung\)|erst deine ausdrückliche Bestätigung erlaubt die Umsetzung|Planreview vor deiner Bestätigung|Planreview vor Nutzerbestätigung|Planreview; Textantwort vor Bestätigung|Nach vollständigem Entwurf und vor Nutzerbestätigung|unabhängiges Planreview vor Bestätigung|Entwurf vor deiner Bestätigung|→ Nutzerbestätigung → core-execute|→ deine Freigabe → core-execute|(?:Planreview|Planentwurf) vor (?:der |deiner )?(?:Nutzer)?Bestätigung|Prüfe vor der Bestätigung:'
@@ -863,7 +969,7 @@ def check_setup_source(front, text):
 def check_group(root, group, with_authoring=False, tool_root=None):
     paths = targets(root, group)
     if group == 'workflows':
-        paths = list(dict.fromkeys([*paths, *(root / p for p in REPLACEMENT_SOURCES)]))
+        paths = list(dict.fromkeys([*paths, *(root / p for p in (*REPLACEMENT_SOURCES, *DIRECT_SOURCES))]))
     def action():
         # Missing inputs take precedence over content findings in earlier targets.
         for path in paths:
@@ -894,7 +1000,9 @@ def check_group(root, group, with_authoring=False, tool_root=None):
                 elif isinstance(value, dict) and 'schema' in value:
                     examples.append(value)
         if group == 'workflows':
-            check_replacement_sources({str(p.relative_to(root)): t for p, t in zip(paths, texts)})
+            sources = {str(p.relative_to(root)): t for p, t in zip(paths, texts)}
+            check_replacement_sources(sources)
+            check_direct_sources(sources)
         joined = '\n'.join(texts)
         for pattern, label in POLICIES[group]:
             require(re.search(pattern, joined, re.I), 'semantische Klausel nicht belegt: ' + label)

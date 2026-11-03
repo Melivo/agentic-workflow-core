@@ -9,7 +9,7 @@ description: Pflegt im bestätigten Scope durch Task, aktuellen Diff und autorit
 
 ## Eingaben und verbindliche Verträge
 
-Erwarte einen bestätigten Task mit Dokumentationsscope, relevanter Änderung oder Diff, `context_paths`, Akzeptanzkriterien und gepinnten Checks. Fehlt eine konkrete Änderungsevidenz, bleibt die vermutete Anpassung offen; allgemeine Aufräumarbeiten werden nicht abgeleitet.
+Erwarte einen bestätigten Plantask oder einen ausdrücklich autorisierten `core-execute`-Direktauftrag mit Dokumentationsscope, relevanter Änderung oder Diff, erforderlichen Lesequellen, Akzeptanzkriterien und Checks. Direktmodus verwendet die unveränderliche `request.md` statt eines fingierten bestätigten Plans. Fehlt eine konkrete Änderungsevidenz, bleibt die vermutete Anpassung offen; allgemeine Aufräumarbeiten werden nicht abgeleitet.
 
 Lade bei mutierender Arbeit den [Workflowvertrag](../core-shared/references/workflow-contract.md) für Autorisierung und Scope sowie den [Verifikationsvertrag](../core-shared/references/verification.md) für Impact, Post-edit-Prüfung und aktuelle Evidenz. Nutze das [Toolrouting](../core-shared/references/tool-routing.md), wenn Repositoryevidenz oder aktuelle externe Produktdokumentation erforderlich ist. Der bestätigte Plan und Runstatus werden nicht verändert.
 
@@ -17,10 +17,12 @@ Lade bei mutierender Arbeit den [Workflowvertrag](../core-shared/references/work
 
 Eine Dokumentationsänderung ist nur zulässig, wenn alle folgenden Punkte belegt sind:
 
-1. Die Aussage oder notwendige neue Dokumentation liegt im Schreibscope des Tasks.
+1. Die Aussage oder notwendige neue Dokumentation liegt im Schreibscope des bestätigten Tasks oder der unveränderlichen direkten Auftragsgrundlage.
 2. Aktueller Code, Konfiguration, Vertrag, Test, bestätigte Entscheidung oder Diff belegt die Drift beziehungsweise eine echte Dokumentationslücke.
 3. Die kleinste notwendige Korrektur lässt sich aus dieser Evidenz ableiten.
 4. Betroffene manuelle Inhalte außerhalb des Scopes bleiben unverändert.
+
+Eine aktuelle ausdrückliche auftragsbezogene Nutzeranweisung, die konkrete Arbeit einschließlich Ausführung freigibt, ersetzt separate niedrigpriorisierte Bestätigungs-/Diff-Gates aus Skills oder AGENTS.md; erforderliche Vorschau, Scope-/Drift-/Markerprüfung und Schutz fremder Inhalte bleiben bestehen, und eine Vorschau wird nicht als vom Nutzer gesehen oder bestätigt ausgegeben.
 
 Eine vorhandene widersprüchliche Prosa ist für eine neue, durch Task, Diff und autoritative Quelle belegte Dokumentationslücke nicht erforderlich. Unbelegte Ergänzungen und unabhängige Altlasten bleiben ausgeschlossen. Bei einem fehlenden oder teilweisen DOX-Baum wird nur die ausdrücklich bestätigte, konkret gescopte Initialisierung bearbeitet; nutze dafür `dox-setup` und befolge dessen Hierarchie-, Quellen-, Lizenz- und Konfliktregeln. Fehlt die Fähigkeit oder eine gültige Quelle, blockiere statt still zu installieren oder eigene Setupregeln zu erfinden. Read-only und harmlose Änderungen ohne Dokumentationsbedarf erfordern keinen Guide-Edit; dokumentiere den DOX-Pass mit geprüften Pfaden und Grund.
 `context_paths` erlauben Lesen, nicht Schreiben. Ähnliche Formulierungen in anderen Dokumenten sind kein Beleg dafür, dass sie ebenfalls geändert werden dürfen. Unabhängige Altlasten, Stilwünsche und nicht taskbezogene defekte Referenzen werden als offene Drift gemeldet, nicht nebenbei korrigiert.

@@ -44,13 +44,13 @@ Verwende für selektiv übernommene Anweisungen genau ein eigenes Markerpaar im 
 3. Blockiere bei fehlender eindeutiger Herkunft sowie bei doppelten, verschachtelten, ungepaarten oder beschädigten eigenen Markern; repariere Marker nicht heuristisch.
 4. Bestimme die manuellen Kandidaten und zeige für jeden, warum er eingeschlossen oder ausgeschlossen wird.
 5. Erzeuge den **vollständigen exakten Diff** für das Projektziel und zeige beide absoluten Pfade.
-6. Fordere eine separate ausdrückliche **Bestätigung genau dieses Diffs** an. Schweigen, eine frühere allgemeine Zustimmung, eine Bestätigung nur der Absicht oder eine Auswahl ohne finalen Diff autorisiert keinen Schreibzugriff.
+6. Prüfe, ob eine aktuelle ausdrückliche auftragsbezogene Nutzeranweisung genau diese Änderung und Ausführung autorisiert. Falls ja, ersetzt sie das separate Bestätigungsgate; falls nicht, fordere die ausdrückliche **Bestätigung genau dieses Diffs** an. In beiden Fällen bleiben Vorschau, Pfad-/Drift-/Markerprüfung und Erhaltung fremder Inhalte Pflicht. Stelle den Diff niemals als vom Nutzer gesehen oder bestätigt dar, wenn das nicht geschehen ist. Schweigen, frühere allgemeine Zustimmung oder eine bloße Absicht autorisieren nicht.
 7. Lies Quelle und Ziel unmittelbar vor der Mutation erneut. Bei jeder Abweichung ist die Bestätigung verbraucht: Verwirf die Vorschau, erzeuge einen neuen exakten Diff und fordere eine neue Bestätigung an.
 8. Schreibe ausschließlich den bestätigten Zielbereich. Fehlen beide Marker vollständig, darf nach der Bestätigung des exakten Diffs genau ein vollständiger Block angelegt werden; sind Marker einzeln vorhanden oder doppelt, verschachtelt oder beschädigt, blockiere ohne Reparatur. Bei einem gültigen Paar ersetze nur den Inhalt dazwischen.
 9. Lies das Ergebnis erneut und verifiziere Marker, bestätigten Zielinhalt sowie bytegenau unveränderte Außenbereiche.
 10. Prüfe die Idempotenz read-only: Dieselbe Quelle und Auswahl müssen gegen das Ergebnis einen leeren Diff erzeugen; eine Wiederholung erzeugt keine weitere Änderung.
 
-Eine Bestätigung ist an Inhalt und beide Pfade der Vorschau gebunden. Sie darf nicht auf weitere Kandidaten, spätere Änderungen oder einen anderen Zielpfad übertragen werden.
+Eine Bestätigung ist an Inhalt und beide Pfade der Vorschau gebunden. Sie darf nicht auf weitere Kandidaten, spätere Änderungen oder einen anderen Zielpfad übertragen werden. Eine aktuelle ausdrückliche auftragsbezogene Nutzeranweisung kann dieses Skill-Gate nur für die konkret autorisierte selektive Änderung und Ausführung ersetzen; die Vorschau, sichere Pfad-/Marker-/Driftprüfung und Erhaltung fremder Inhalte bleiben verpflichtend. Sie ist keine Bestätigung eines nicht gezeigten Diffs.
 
 ## Gewarnte vollständige Dateiübernahme
 

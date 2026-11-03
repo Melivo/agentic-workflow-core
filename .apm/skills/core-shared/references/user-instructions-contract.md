@@ -31,7 +31,7 @@ Der projektspezifische verwaltete Block enthält nur belegte Projektinvarianten,
 5. Nur den bestätigten Zielabschnitt schreiben; Inhalte außerhalb davon bytegenau erhalten.
 6. Marker, Zielbereich und unveränderte Außenbereiche erneut lesen und verifizieren.
 
-Eine Bestätigung gilt nur für die gezeigte Fassung. Ändert sich Quelle oder Ziel vor dem Schreiben, wird die Vorschau verworfen und neu erzeugt. Schweigen oder eine frühere allgemeine Zustimmung reicht nicht.
+Eine Bestätigung gilt nur für die gezeigte Fassung. Ändert sich Quelle oder Ziel vor dem Schreiben, wird die Vorschau verworfen und neu erzeugt. Schweigen oder eine frühere allgemeine Zustimmung reicht nicht. Eine aktuelle ausdrückliche auftragsbezogene Nutzeranweisung, die genau die betreffende Änderung und unmittelbare Ausführung autorisiert, hat jedoch Vorrang vor einem separaten Bestätigungs-/Diff-Gate dieses Skills oder anderer niedriger priorisierter Skills/AGENTS.md. Sie ersetzt nicht die read-only Vorschau, genaue Scope-/Drift-/Markerprüfung oder den Schutz fremder Inhalte; der Diff darf nicht als gesehen oder persönlich bestätigt ausgegeben werden. Die Freigabe wirkt nur innerhalb des genannten Zwecks und Rahmens und erzeugt keine neuen Ziele, ungedeckten Kosten oder höherrangigen Erlaubnisse.
 
 ## Marker und Idempotenz
 

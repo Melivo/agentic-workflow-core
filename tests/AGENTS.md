@@ -33,7 +33,17 @@ Ablehnung fehlender oder verkürzter `core-shared/THIRD_PARTY_NOTICES.md`-Notice
 samt Report-Lizinventar ab, ohne realen Paketbau. Satzbasierte Positiv-/Negativfälle
 und In-Memory-Mutationen sichern die kanonischen Messvergleichsklauseln (Auslöser,
 gleiche Methode/Daten/Umgebung, Rauschen, fehlende Evidenz, unabhängige Grenzen)
-statisch, ohne neuen Szenario- oder Orakelmechanismus.
+statisch, ohne neuen Szenario- oder Orakelmechanismus. Die Abdeckungen
+`execute-direkt-eingang`, `execute-freigabevorrang` und `execute-zusatzdelegation`
+modellieren exklusive Plan-/Direkteingänge samt Legacy-`plan_path`, verlorene oder
+gebundene Planarbeit, Scopegrenzen, Resume-/Reviewgrundlage, Freigabe ohne
+Änderungsauftrag sowie Owner-/Dispatchgrenzen; In-Memory-Mutationen entfernen die
+Direktklauseln, fügen Ausweitungen ein oder kehren die Negativklausel zur
+Freigabe ohne Änderungsauftrag um. Das belegt statische Konsistenz,
+keine reale Agentenbefolgung. `test_core_contracts.py` lädt zusätzlich den
+Habit-Producer pfadbezogen (ohne main/package/stage) und prüft dessen
+bestehendes `check_links` auf der `CORE_FILES`-Snapshotmenge im Speicher,
+positiv und mit entferntem `direct-mode.md`; das ist SDK-/TypeScript-unabhängig.
 
 ## Work Guidance
 

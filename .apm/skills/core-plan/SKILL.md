@@ -7,7 +7,7 @@ description: "Analysiert bestätigte Vorhaben und aktuellen Repositorykontext, e
 
 Nutze diesen Workflow, um einen klaren Auftrag oder die bestätigte Entscheidungsübergabe aus `core-brainstorm` beziehungsweise genau eine freigegebene Etappe aus `core-milestone` in einen ausführbaren Taskgraphen zu überführen. `core-plan` besitzt Anforderungsrahmen, Repositoryanalyse, bedingte Recherche, materielle Planentscheidungen, Taskzerlegung, Akzeptanzkriterien, Checks und Nutzerbestätigung.
 
-`core-plan` implementiert nicht, dispatcht keine Implementierungsagenten und verwaltet keinen Runstatus. Ausschließlich für das [Planreview](../core-shared/references/workflow-contract.md#planreview) darf `core-plan` einen `qa-reviewer` mit `core-review` in frischem Kontext beauftragen. Ausführung gehört ausschließlich zu `core-execute`; eine [evidenzbasierte Ersatzplanung](../core-shared/references/workflow-contract.md#evidenzbasierte-ersatzplanung) beginnt einen neuen Planlauf, auch während der Ausführung.
+`core-plan` implementiert nicht, dispatcht keine Implementierungsagenten und verwaltet keinen Runstatus. Ausschließlich für das [Planreview](../core-shared/references/workflow-contract.md#planreview) darf `core-plan` einen `qa-reviewer` mit `core-review` in frischem Kontext beauftragen. Ausführung gehört ausschließlich zu `core-execute`, das neben bestätigten Plänen einen engen ausdrücklich autorisierten Direktmodus anbietet; `core-plan` bleibt für größere Zerlegung, materielle Richtungsentscheidungen und Ersatzplanung zuständig. Eine [evidenzbasierte Ersatzplanung](../core-shared/references/workflow-contract.md#evidenzbasierte-ersatzplanung) beginnt einen neuen Planlauf, auch während der Ausführung.
 
 ## Eingaben und Ausgabe
 

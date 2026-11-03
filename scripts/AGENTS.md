@@ -33,7 +33,17 @@ Die Workflowverkabelung bleibt unter
   Vertrag über Plan/Execute/Review bis Milestone und Goal-/Startprompt sowie die
   öffentlichen Verbraucher README.md und DESIGN.md, einschließlich
   widersprechender alter pauschaler Bestätigungsgates; situationsabhängige
-  Nutzerbestätigung bleibt zulässig.
+  Nutzerbestätigung bleibt zulässig. `DIRECT_SOURCES` bindet zusätzlich die
+  Direktmodus-, Freigabevorrang- und Zusatzdelegationsklauseln an Execute,
+  `direct-mode.md`, Review, Workflow-/Artefakt-/Benutzeranweisungsvertrag und
+  Handoff, einschließlich der quellengebundenen Negativklausel, dass bloßes
+  „keine Freigabe nötig“ ohne Änderungsauftrag keine Ausführung autorisiert, und
+  weist unverneinte Ausweitungen zurück; der Katalog muss für
+  `core-execute` Plan- und `text`-Eingang ohne Planausgabe sowie die Eskalation
+  an `core-plan` führen.
+- `check_habit_feedback.py` führt in `CORE_FILES` die geschlossene transitive
+  Markdown-Linkmenge des Core-Snapshots; neu verlinkte Quellen wie
+  `core-execute/references/direct-mode.md` gehören als exakter Eintrag hinein.
 - Der Paketproducer prüft den kanonischen DOX-Skillindex und alle Skilldateien
   bytegenau sowie relative Links innerhalb der Installation. Die Lizenzprüfung
   bindet `core-shared/LICENSE` und die Third-Party-Notices (`core-architecture`

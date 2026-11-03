@@ -3,7 +3,8 @@
 **Status:** Final und verbindlich
 **Geltungsbereich:** öffentliches Microsoft-APM-Paket und dessen Workflow-Werkbank
 **Kanonische Paketquelle:** `.apm/`
-**Kernablauf:** `core-brainstorm? → core-plan → core-review (Planreview, Text) → ausdrückliche/abgeleitete Planfreigabe + Ausführungsauftrag → core-execute ↔ core-review (Umsetzungsreview)`
+**Kernablauf (Planmodus):** `core-brainstorm? → core-plan → core-review (Planreview, Text) → ausdrückliche/abgeleitete Planfreigabe + Ausführungsauftrag → core-execute ↔ core-review (Umsetzungsreview)`
+**Direktmodus:** `klarer, eng umrissener, ausdrücklich freigegebener Änderungsauftrag → core-execute (unveränderliche request.md statt Plan) ↔ core-review (Umsetzungsreview über request_path)`
 
 ## 1. Zweck und Autorität
 
@@ -77,7 +78,7 @@ Nach bestandenem Review:
 | --- | --- | ---: | --- |
 | `core-brainstorm` | Absicht, Scope und Lösungsrichtung klären | nein | kompakter Decision-Handoff |
 | `core-plan` | Repositoryanalyse, Research, Entscheidungen, Taskgraph und eng begrenzter Planreview-Dispatch an `qa-reviewer`/`core-review` | nein | bestätigungsfähiger `plan/v1` |
-| `core-execute` | bestätigten Taskgraph ausführen und integrieren | ja | Run-Artefakte und Review-Handoff |
+| `core-execute` | bestätigten Taskgraph oder ausdrücklich freigegebenen Direktauftrag ausführen und integrieren | ja | Run-Artefakte und Review-Handoff |
 | `core-review` | unabhängiges Planreview vor kanonischem Schreiben und read-only Umsetzungsreview nach Execute | nein | Texturteil im Planreview; `review/v1` im Umsetzungsreview |
 
 ### Unterstützende Skills
@@ -204,7 +205,8 @@ Verbindliche Übergänge:
 core-brainstorm → core-plan
 core-plan → core-review (Planreview; Textantwort vor kanonischem Schreiben)
 core-plan → core-execute (ausdrückliche/abgeleitete Planfreigabe + bestehender Ausführungsauftrag)
-core-execute → core-review (Umsetzungsreview; review/v1)
+ausdrücklicher Direktauftrag → core-execute (Direktmodus; request.md statt Plan)
+core-execute → core-review (Umsetzungsreview; review/v1; Planmodus über plan_path, Direktmodus über request_path)
 core-review.pass → completed
 core-review.changes_requested → core-execute
 core-review.material_scope_change → core-plan
@@ -369,9 +371,15 @@ Constraints: relevante Planabschnitte
 
 Er plant nicht neu, urteilt nicht unabhängig über seine eigene Gesamtänderung und führt keine SCM- oder Deploymentoperation aus.
 
+### Eingänge und Zusatzdelegation
+
+- Zwei Eingänge sind exklusiv: Im Planmodus führt `core-execute` einen eindeutig gebundenen, bestätigten `plan/v1` aus oder setzt dessen Run fort (`plan_path`). Im Direktmodus setzt er einen klaren, engen, ausdrücklich freigegebenen Änderungsauftrag ohne nötige Zerlegung oder materielle Entscheidung um; vor der ersten Mutation entsteht die unveränderliche `request.md` (`request_path`), kein Plan und kein `Confirmed`-Status.
+- Fehlende oder verlorene Planartefakte sowie aktive Plan- oder Etappenarbeit werden nicht in den Direktmodus umgedeutet. Überschreitet die Arbeit die Direktgrenze, stoppt Execute Produktmutationen und übergibt an `core-plan`.
+- Zusatzdelegation bleibt innerhalb von Ziel und Scope eines Tasks beziehungsweise des Direktauftrags. Nur Execute formuliert und dispatcht begrenzte Unterstützungsaufträge und wählt den Fachagenten. Der Taskowner bleibt für Ergebnis und Belege verantwortlich; nur Execute integriert. Unterstützer delegieren nicht weiter, gleiche schreibende Scopes laufen seriell. Auftrag, Ergebnis und Checks werden dem bestehenden Taskversuch zugeordnet; Planmutation oder neue Plantasks entstehen dadurch nicht.
+
 ### Ablauf des Execute-Workflows
 
-1. bestätigten Plan und Projektpreflight laden,
+1. bestätigten Plan beziehungsweise im Direktmodus die unveränderliche `request.md` und den Projektpreflight laden,
 2. Schema, Agenten, MCPs, Scopes, Abhängigkeiten und Checks validieren; bei Coding-Tasks S00 direkt auf die betroffenen Strukturen und Verträge anwenden,
 3. Repositorydrift prüfen,
 4. Run anlegen oder fortsetzen,
@@ -435,7 +443,7 @@ Exitcode 0 allein beweist keine fachliche Erfüllung. Pflichtchecks ohne aktuell
 `core-review` urteilt unabhängig und read-only in frischem Kontext. Es hat zwei getrennte Modi:
 
 - **Planreview:** Nach vollständigem, statisch validiertem Entwurf und vor kanonischem Schreiben sowie einer noch erforderlichen Nutzerbestätigung. Es prüft Entwurf und Originalauftrag und gibt `pass`, `changes_requested` oder `blocked` als kurze Textantwort mit konkreten Stellen aus. Es entsteht kein Run und kein `review/v1`; pass bedeutet nur bestätigungsfähig und erteilt selbst keine Freigabe. Materielle Entwurfsänderungen werden erneut geprüft.
-- **Umsetzungsreview:** Nach `core-execute` prüft es die integrierte Gesamtänderung anhand des bestätigten Plans, aktuellen Gesamtdiffs, kompakten Handoffs, Task-/Checkevidenz und Einschränkungen. Dieser Modus verwendet das bestehende `review/v1`.
+- **Umsetzungsreview:** Nach `core-execute` prüft es die integrierte Gesamtänderung anhand des bestätigten Plans (Planmodus, `plan_path`) beziehungsweise der unveränderlichen `request.md` (Direktmodus, `request_path`), aktuellen Gesamtdiffs, kompakten Handoffs, Task-/Checkevidenz und Einschränkungen. Dieser Modus verwendet das bestehende `review/v1`.
 
 In keinem Modus liest es die vollständige Implementierungsdiskussion oder implementiert Korrekturen. Im Umsetzungsreview empfiehlt es bei anhand von Originalziel, Kriterien, Nichtzielen und Diff belegtem Bloat ausdrücklich das Verwerfen beziehungsweise den kleinsten sicheren Rückbau statt zusätzlichen Ausbau. Unsichere Notwendigkeit wird als Evidenzlücke behandelt; notwendige Schutzmaßnahmen sowie fremde Änderungen bleiben erhalten. Die Empfehlung ist keine Mutationserlaubnis.
 
@@ -730,6 +738,8 @@ Eine vollständige Dateiübernahme ist eine gewarnte Ausnahme und verlangt die a
 5. zuständiger Fachskill und passende Referenz
 6. importierte globale Präferenz
 7. generischer Paketdefault
+
+Eine aktuelle, eindeutige auftragsbezogene Freigabe (Stufe 2) ersetzt separate niedriger priorisierte Bestätigungs- oder Diff-Gates aus Skills und AGENTS.md. Vorschau, Scope-/Drift-/Markerprüfung und Schutz fremder Inhalte bleiben bestehen; Stufe 1 bleibt unberührt und erteilt keine neuen Ziele, ungedeckten Kosten oder Sonderwirkungen.
 
 ## 18. MCP-Prüfung und APM
 

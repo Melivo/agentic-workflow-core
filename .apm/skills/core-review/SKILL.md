@@ -1,6 +1,6 @@
 ---
 name: core-review
-description: Prüft unabhängig in frischem Kontext entweder einen vollständigen Planentwurf vor kanonischem Schreiben sowie einer gegebenenfalls noch erforderlichen Nutzerbestätigung (Planreview, Textergebnis) oder die integrierte Gesamtänderung nach core-execute (Umsetzungsreview, review/v1) mit pass, changes_requested oder blocked. Verwenden auf Anforderung von core-plan oder nach core-execute; nicht für Implementierung, Fixes, Planung oder Nutzerfreigabe.
+description: Prüft unabhängig in frischem Kontext entweder einen vollständigen Planentwurf vor kanonischem Schreiben sowie einer gegebenenfalls noch erforderlichen Nutzerbestätigung (Planreview) oder die integrierte Gesamtänderung eines Plan- oder Direktlaufs nach core-execute (Umsetzungsreview, review/v1). Verwenden auf Anforderung von core-plan oder nach core-execute; nicht für Implementierung, Fixes, Planung oder Nutzerfreigabe.
 ---
 
 # Core Review
@@ -26,7 +26,7 @@ Beginne immer in frischem Kontext und bestimme genau einen Modus:
 - **Planreview:** für einen vollständigen, noch unbestätigten Entwurf, den `core-plan` oder eine ausdrückliche Übergabe vorlegt. Lade nur die im [Planreview](../core-shared/references/workflow-contract.md#planreview) genannten Eingaben und folge dem [Planreview-Modus](#planreview-modus).
 - **Umsetzungsreview:** nur für einen konkreten Run, dessen integrierter Stand durch `core-execute` zur Prüfung übergeben wurde. Lade ausschließlich:
 
-- den exakten bestätigten Plan mit `plan/v1`,
+- im Planmodus den exakten bestätigten Plan mit `plan/v1`; im Direktmodus stattdessen die exakte unveränderliche `request.md`-Auftragsgrundlage gemäß `state.yaml.request_path`, ohne einen Plan zu fingieren,
 - den aktuellen Gesamtdiff und Repositorystand,
 - `.agentic-workflow/runs/<run-id>/handoff.md`,
 - die aktuellen `task-result/v1`- und Checkevidenzen,
@@ -58,7 +58,7 @@ Schreibe das kanonische Ergebnis des Umsetzungsreviews nach `.agentic-workflow/r
 
 ### 1. Prüfgrundlage validieren
 
-1. Prüfe, dass der Plan bestätigt ist und Run-ID, Planpfad, Handoff, Gesamtdiff und Taskresultate zusammengehören. Bei Etappenarbeit lade die exakt gepinnten Ziel-, Index- und Definitionspfade neu und prüfe enthaltene IDs, Version sowie Planbindung gegen die ausdrückliche Indexauswahl; keine neueste Datei ableiten. Review urteilt gegen diese gepinnte Fassung, ändert weder Auswahl noch Index und erklärt Run-pass nicht zum Etappenabschluss. Bei veralteter Auswahl/Definition oder altem Prompt keine Fortsetzung autorisieren; route zur Klärung an `core-milestone` und bei Planabweichung an `core-plan`. `milestone/v1` bleibt ausschließlich lesbar.
+1. Prüfe anhand `state.yaml` genau einen Eingang: im Planmodus den bestätigten Plan und `plan_path`, im Direktmodus `request_path` mit `request.md` statt eines Planartefakts. Bei einem Legacy-Zustand ohne `mode`, aber mit `plan_path`, behandle den Lauf wie im Planmodus. Prüfe, dass Run-ID, Eingangspfad, Handoff, Gesamtdiff und Taskresultate zusammengehören; fehlende Pfade blockieren, sie werden nicht geraten. Bei Etappenarbeit lade die exakt gepinnten Ziel-, Index- und Definitionspfade neu und prüfe enthaltene IDs, Version sowie Planbindung gegen die ausdrückliche Indexauswahl; keine neueste Datei ableiten. Review urteilt gegen diese gepinnte Fassung, ändert weder Auswahl noch Index und erklärt Run-pass nicht zum Etappenabschluss. Bei veralteter Auswahl/Definition oder altem Prompt keine Fortsetzung autorisieren; route zur Klärung an `core-milestone` und bei Planabweichung an `core-plan`. `milestone/v1` bleibt ausschließlich lesbar.
 2. Vergleiche tatsächliche Änderungen mit den bestätigten Scopes. Berücksichtige auch unversionierte, gelöschte und generierte relevante Dateien.
 3. Prüfe Freshness und Vollständigkeit der Checkevidenz. Ein Exitcode 0, eine Agentenbehauptung oder ein Bericht allein beweist keine fachliche Erfüllung.
 4. Validiere, dass der verwendete Gortex-View zum aktuellen Checkout oder Worktree gehört. Ein Fallback- oder inaktiver Ref-View bleibt read-only und wird als Evidenzgrenze sichtbar.
@@ -113,7 +113,7 @@ Bilde einen bestätigten CRITICAL-Befund als `blocking` ab; HIGH bleibt `high`. 
 
 ### 5. Urteil und Routing festlegen
 
-- `pass`: Scope, Akzeptanzkriterien und relevante Risiken des Plans sind auf dem aktuellen Stand belegt; `findings: []`. Bei Etappenplanung bedeutet das nur Run-/Plan-pass. Der nächste Übergang ist die separate Milestone-Prüfung der gepinnten Definition; ausschließlich `core-milestone` aktualisiert danach Abschlussreferenzen im Index.
+- `pass`: Im Planmodus sind Plan-Scope, Akzeptanzkriterien und relevante Risiken, im Direktmodus die exakte Auftragsgrundlage, ihr Scope, Akzeptanzkriterien und relevante Risiken auf dem aktuellen Stand belegt; `findings: []`. Bei Etappenplanung bedeutet das nur Run-/Plan-pass. Der nächste Übergang ist die separate Milestone-Prüfung der gepinnten Definition; ausschließlich `core-milestone` aktualisiert danach Abschlussreferenzen im Index.
 - `changes_requested`: Mindestens ein bestätigtes Finding, auch ein Bloat-Rückbau, ist innerhalb des bestätigten Ziels und Scopes durch `core-execute` behebbar. Bilde einen sinnvollen Reparaturversuch mit reproduzierbarem Finding, begründetem Ansatz in `expected_resolution` und entscheidbarer `verification` ab; ohne sicheren tragfähigen Versuch folgt `blocked`, dessen bestehende Felder Lücke, erforderliche Entscheidung und Routing an den Nutzer oder `core-plan` benennen.
 - `blocked`: Eine materielle Eingabe, Autorisierung, Fähigkeit oder Evidenzlücke verhindert ein belastbares Urteil oder eine zulässige Behebung.
 
@@ -125,7 +125,7 @@ Jede neue Reviewrunde beginnt erneut in frischem Kontext aus aktuellen Artefakte
 
 ## Abschluss
 
-Ein Planreview ist mit seiner Textantwort abgeschlossen. Ein Umsetzungsreview ist abgeschlossen, wenn `.agentic-workflow/runs/<run-id>/review.yaml` dem unveränderten `review/v1` entspricht, jedes Finding reproduzierbar ist, das Urteil aus aktueller Evidenz folgt und der nächste Übergang eindeutig ist. Berichte zusätzlich knapp:
+Ein Planreview ist mit seiner Textantwort abgeschlossen. Ein Umsetzungsreview ist abgeschlossen, wenn der Run-Eingang exakt aus `state.yaml` und Handoff aufgelöst und geprüft ist (`plan_path` im Planmodus, `request_path` im Direktmodus) und `.agentic-workflow/runs/<run-id>/review.yaml` dem unveränderten `review/v1` entspricht, jedes Finding reproduzierbar ist, das Urteil aus aktueller Evidenz folgt und der nächste Übergang eindeutig ist. Berichte zusätzlich knapp:
 
 - geprüfte Risiken und bewusst nicht aktivierte Prüfdimensionen,
 - ausgeführte und blockierte Checks mit Grund,

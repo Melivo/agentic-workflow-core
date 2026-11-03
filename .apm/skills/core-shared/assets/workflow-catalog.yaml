@@ -3,7 +3,7 @@ catalog_version: 1
 workflows:
   - id: core-brainstorm
     predecessors: []
-    successors: [core-plan, core-milestone]
+    successors: [core-plan, core-milestone, core-execute]
     input_schemas: [text]
     output_schemas: [text]
     mutation_class: no-product-write
@@ -30,9 +30,10 @@ workflows:
     mutation_class: plan-artifact-write
     fresh_context_on_entry: false
   - id: core-execute
-    predecessors: [core-plan, core-review]
-    successors: [core-review, core-milestone]
-    input_schemas: [plan/v1, review/v1]
+    predecessors: [core-plan, core-review, core-brainstorm]
+    successors: [core-review, core-milestone, core-plan]
+    input_schemas: [text, plan/v1, review/v1, task-result/v1]
+    # text also permits explicit direct user entry; request.md is a run artifact, not a new schema.
     output_schemas: [task-result/v1]
     mutation_class: repository-and-run-artifact-write
     fresh_context_on_entry: true
@@ -48,6 +49,9 @@ transitions:
   - from: core-brainstorm
     outcome: completed
     to: core-plan
+  - from: core-brainstorm
+    outcome: direct_request_authorized
+    to: core-execute
   - from: core-brainstorm
     outcome: milestone_selected
     to: core-milestone

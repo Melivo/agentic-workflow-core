@@ -13,7 +13,7 @@ Core ist keine zusätzliche Orchestrierungs-CLI und kein autonomer Releasebot. E
 
 ## Was Core bietet
 
-- **Einen durchgängigen Ablauf:** optionales Brainstorming, Planreview vor kanonischem Schreiben, ausdrückliche oder belegte abgeleitete Planfreigabe, Umsetzung und unabhängiges Umsetzungsreview.
+- **Zwei Ausführungswege:** Für größere oder unklare Vorhaben ein Planablauf: optionales Brainstorming, Planreview vor kanonischem Schreiben, ausdrückliche oder belegte abgeleitete Planfreigabe, Umsetzung und unabhängiges Umsetzungsreview. Für eine klare, eng umrissene und ausdrücklich freigegebene Änderung der Direktmodus ohne Plan: `core-execute` arbeitet mit einer unveränderlichen Auftragsgrundlage und lässt die Umsetzung ebenfalls unabhängig prüfen.
 - **Passende Fachmethoden:** Architektur, Backend, Frontend, Mobile, Datenbanken, Terraform, Debugging und Refactoring.
 - **Überprüfbare Übergaben:** Pläne, Task-Ergebnisse und Reviews mit festen Formaten.
 - **Wiederaufnahme:** Arbeit anhand ihrer Artefakte in einer neuen Sitzung fortsetzen.
@@ -70,17 +70,20 @@ Dieser Modus integriert auch die vorgesehenen Agentendefinitionen und kann Harne
 
 ## Erste Verwendung
 
-Der normale Implementierungsablauf:
+Die beiden Ablaufwege:
 
 ```text
-core-brainstorm? → core-plan → Planreview → ausdrückliche/abgeleitete Planfreigabe + Ausführungsauftrag → core-execute ↔ Umsetzungsreview → Abschluss
+Planmodus:   core-brainstorm? → core-plan → Planreview → ausdrückliche/abgeleitete Planfreigabe + Ausführungsauftrag → core-execute ↔ Umsetzungsreview → Abschluss
+Direktmodus: klarer, eng umrissener, ausdrücklich freigegebener Auftrag → core-execute (request.md statt Plan) ↔ Umsetzungsreview → Abschluss
 ```
+
+Der Direktmodus ist für kleine, klare Änderungen ohne nötige Zerlegung oder materielle Entscheidung gedacht. Verlangt die Arbeit mehr, stoppt Execute Produktmutationen und übergibt an `core-plan`.
 
 1. **Projekt prüfen:** `core-init-project` prüft Repository und Code-Intelligence-Bereitschaft. Änderungen an Providerkonfiguration oder `AGENTS.md` brauchen ihre eigene Freigabe.
 2. **Ziel beschreiben:** gewünschtes Verhalten, betroffene Bereiche und Grenzen nennen. Bei materiellen Unklarheiten hilft `core-brainstorm`.
-3. **Planreview und Freigabe:** `core-plan` erstellt einen `plan/v1` mit Aufgaben, Abhängigkeiten, Akzeptanzkriterien und Checks. Nach statischer Validierung prüft `core-review` den Entwurf in frischem Kontext als kurze Textantwort vor dem kanonischen Schreiben und einer noch erforderlichen Nutzerbestätigung – ohne Run oder `review/v1`. Ein Review-pass erteilt selbst keine Freigabe. Bei einem gedeckten technischen Ersatzplan oder der ersten Detailplanung einer freigegebenen Etappe genügt die im Plantext belegte abgeleitete Freigabe; eine neue Nutzerbestätigung entfällt. Ohne bestätigten Rahmen sowie bei neuen eigenständigen Zielen, Meilensteinänderungen, ausdrücklichen Ausschlüssen, materiell offenen Entscheidungen, unklaren oder ungedeckten Wirkungen oder zusätzlichen ungedeckten Geldkosten bleibt die Nutzerentscheidung vor Schreiben und Ausführung erforderlich. Die Umsetzung setzt stets eine ausdrückliche oder belegte abgeleitete Planfreigabe und einen bestehenden Ausführungsauftrag voraus.
-4. **Umsetzen:** `core-execute` arbeitet den eindeutig identifizierten, bestätigten Plan ab und koordiniert passende Fachagenten.
-5. **Unabhängig prüfen:** Danach bewertet `core-review` in frischem Kontext die integrierte Gesamtänderung. Das Umsetzungsreview bleibt read-only; Korrekturen gehören zurück in die Umsetzung, nicht in das Review.
+3. **Planreview und Freigabe:** `core-plan` erstellt einen `plan/v1` mit Aufgaben, Abhängigkeiten, Akzeptanzkriterien und Checks. Nach statischer Validierung prüft `core-review` den Entwurf in frischem Kontext als kurze Textantwort vor dem kanonischen Schreiben und einer noch erforderlichen Nutzerbestätigung – ohne Run oder `review/v1`. Ein Review-pass erteilt selbst keine Freigabe. Bei einem gedeckten technischen Ersatzplan oder der ersten Detailplanung einer freigegebenen Etappe genügt die im Plantext belegte abgeleitete Freigabe; eine neue Nutzerbestätigung entfällt. Ohne bestätigten Rahmen sowie bei neuen eigenständigen Zielen, Meilensteinänderungen, ausdrücklichen Ausschlüssen, materiell offenen Entscheidungen, unklaren oder ungedeckten Wirkungen oder zusätzlichen ungedeckten Geldkosten bleibt die Nutzerentscheidung vor Schreiben und Ausführung erforderlich. Für den Planmodus gilt: Umsetzung setzt stets eine ausdrückliche oder belegte abgeleitete Planfreigabe und einen bestehenden Ausführungsauftrag voraus.
+4. **Umsetzen:** `core-execute` arbeitet den eindeutig identifizierten, bestätigten Plan ab – im Direktmodus den ausdrücklich freigegebenen Auftrag aus `request.md` – und koordiniert passende Fachagenten. Execute kann innerhalb eines Tasks eng begrenzte Zusatzunterstützung delegieren; der Taskowner bleibt verantwortlich, Unterstützer delegieren nicht weiter.
+5. **Unabhängig prüfen:** Danach bewertet `core-review` in frischem Kontext die integrierte Gesamtänderung. Reviewbasis ist der bestätigte Plan (`plan_path`) oder im Direktmodus die unveränderliche `request.md` (`request_path`). Das Umsetzungsreview bleibt read-only; Korrekturen gehören zurück in die Umsetzung, nicht in das Review.
 
 Du kannst Skills in normaler Sprache anfordern; die Auswahl- oder Aufrufoberfläche hängt vom Harness ab. Beispiele:
 
@@ -88,11 +91,11 @@ Du kannst Skills in normaler Sprache anfordern; die Auswahl- oder Aufrufoberflä
 > Der Plan unter dem genannten Pfad ist bestätigt. Nutze core-execute, um ihn innerhalb seines Scopes auszuführen.
 > Nutze core-review für eine unabhängige Prüfung. Implementiere dabei keine Korrekturen.
 
-**Scope und Freigabe:** Ein erlaubter Dateipfad ist keine Freigabe für beliebige zusätzliche Funktionen. Plan und Umsetzung bleiben am ursprünglichen Ziel und dessen Kriterien; Folgearbeit berücksichtigt den kumulativen Umfang. Bevorzugt wird die kleinste hinreichende Lösung. Build, Compile, Bundle, Packaging, Installation, Commit, Push, Tag, Release, Deployment und destruktive Aktionen benötigen jeweils eine passende ausdrückliche Autorisierung. Fachagenten arbeiten innerhalb ihres Taskscopes und starten keine eigenen Subagenten.
+**Scope und Freigabe:** Ein erlaubter Dateipfad ist keine Freigabe für beliebige zusätzliche Funktionen. Plan und Umsetzung bleiben am ursprünglichen Ziel und dessen Kriterien; Folgearbeit berücksichtigt den kumulativen Umfang. Bevorzugt wird die kleinste hinreichende Lösung. Build, Compile, Bundle, Packaging, Installation, Commit, Push, Tag, Release, Deployment und destruktive Aktionen benötigen jeweils eine passende ausdrückliche Autorisierung. Fachagenten arbeiten innerhalb ihres Taskscopes und starten keine eigenen Subagenten. Eine aktuelle, eindeutige auftragsbezogene Nutzeranweisung kann separate Bestätigungsgates aus Skills oder AGENTS.md ersetzen; Vorschau, Scopeprüfung und Schutz fremder Inhalte bleiben bestehen.
 
 ### Größere Vorhaben und Sitzungswechsel
 
-Für einfache Vorhaben ist **keine zusätzliche Zielstruktur** nötig: Ein bestätigter Plan genügt. Nur bei ausdrücklich gewählter Etappenplanung verwaltet `core-milestone` Gesamtziel und Meilensteine; `core-handoff` erstellt den Übergabeprompt für eine neue Sitzung.
+Für einfache Vorhaben ist **keine zusätzliche Zielstruktur** nötig: Ein bestätigter Plan oder ein klarer Direktauftrag genügt. Nur bei ausdrücklich gewählter Etappenplanung verwaltet `core-milestone` Gesamtziel und Meilensteine; `core-handoff` erstellt den Übergabeprompt für eine neue Sitzung.
 
 Definitionen sind versioniert und nach Bestätigung unveränderlich. Resume behält dieselbe Run-ID. Versionswechsel übernehmen weder alte Freigaben noch Abschlussnachweise automatisch. Details: [Artefaktvertrag](.apm/skills/core-shared/references/artifact-contract.md).
 

@@ -13,7 +13,7 @@ Fachmethodik bleiben bei den konsumierenden Skills.
 ## Local Contracts
 
 - [Workflowvertrag](references/workflow-contract.md): Freigaben und Scope.
-- [Artefaktvertrag](references/artifact-contract.md): Formate und Eigentümer.
+- [Artefaktvertrag](references/artifact-contract.md): Formate und Eigentümer, einschließlich request.md und unterscheidbarer Run-Eingangsreferenzen.
 - [Toolrouting](references/tool-routing.md): Provider- und Fallbackgrenzen.
 - [Verifikation](references/verification.md): Nachweise, Reviewgrenzen und bedarfsabhängige
   Messvergleich-Klarstellung.

@@ -5,19 +5,20 @@ Repositorydateien übertragen den Workflowkontext. Dieses Dokument definiert Eig
 ## Kanonische Pfade und Eigentümer
 
 | Information | Kanonische Source of Truth | Eigentümer |
-|---|---|---|
+| --- | --- | --- |
 | Systemdesign des Pakets | `DESIGN.md` | Architekturentscheidung |
 | Gesamtziel und gemeinsame bestätigte Entscheidungen | `.agentic-workflow/goals/<goal-id>/goal.md` mit `goal/v1` | `core-milestone` |
 | Unveränderliche Etappendefinition und Version | `.agentic-workflow/goals/<goal-id>/milestones/<milestone-id>-v<version>.yaml` mit `milestone-definition/v1` | `core-milestone` |
 | Versionsauswahl, aktuelle Etappe und Nachweisreferenzen | `.agentic-workflow/goals/<goal-id>/index.yaml` mit `milestone-index/v1` | `core-milestone` |
 | Ziel, Scope und Taskgraph | `.agentic-workflow/plans/<plan-name>.md` mit `plan/v1` | `core-plan` |
+| unveränderliche Auftragsgrundlage eines Direktlaufs | `.agentic-workflow/runs/<run-id>/request.md` | `core-execute` |
 | aktueller Resume-Zustand | `.agentic-workflow/runs/<run-id>/state.yaml` | `core-execute` |
 | Task- und Checkevidenz | neue Versuche: `.agentic-workflow/runs/<run-id>/tasks/<task-id>/attempt-<nn>.yaml` mit `task-result/v1`; bestehende `.agentic-workflow/runs/<run-id>/tasks/<task-id>.yaml` bleiben lesbarer Legacy-Pfad | `core-execute` persistiert die Ergebnisse read-only Agenten; ein ausdrücklich schreibender Agent darf ausschließlich seine Ergebnisdatei gemäß Taskresultatausnahme ändern |
 | Kontext für Review oder Resume | `.agentic-workflow/runs/<run-id>/handoff.md` | `core-execute` |
 | Urteil und Findings | `.agentic-workflow/runs/<run-id>/review.yaml` mit `review/v1` | `core-review` |
 | Produktstand | Repository und aktueller Git-Diff | Repository |
 
-Der bestätigte Plan bleibt unverändert. `state.yaml` enthält nur den aktuellen Resume-Zustand, keine Eventhistorie. `handoff.md` wird ersetzt statt angehängt. Honcho und Tool-Memories sind keine Sources of Truth. Ziel, Definition, Index, bestätigter Plan, Runzustand, Taskversuche und Review bleiben getrennte Artefakte mit den unten ausgewiesenen Eigentümern; Task-/Reviewstatus wird nicht in Ziel oder Definition kopiert. Einfache Vorhaben ohne Etappenstruktur benötigen weder Ziel noch Index.
+Der bestätigte Plan bleibt unverändert. Direktläufe schreiben keinen Plan und führen keinen fingierten `Confirmed`-/`plan/v1`-Status. `request.md` hält den Originalauftrag und die ausdrückliche Freigabe, Ziel/Nichtziele, erlaubte Pfade, genau einen verantwortlichen registrierten Fachagenten, Akzeptanz und Checks unveränderlich fest. `state.yaml` enthält nur den aktuellen Resume-Zustand, keine Eventhistorie. `handoff.md` wird ersetzt statt angehängt. Honcho und Tool-Memories sind keine Sources of Truth. Ziel, Definition, Index, bestätigter Plan, Runzustand, Taskversuche und Review bleiben getrennte Artefakte mit den unten ausgewiesenen Eigentümern; Task-/Reviewstatus wird nicht in Ziel oder Definition kopiert. Einfache Vorhaben ohne Etappenstruktur benötigen weder Ziel noch Index.
 
 Für eine Etappenplanung sind die kanonischen Formate [goal/v1](../../core-milestone/references/goal-format.md), [milestone-definition/v1](../../core-milestone/references/milestone-format.md) und [milestone-index/v1](../../core-milestone/references/milestone-index-format.md). Diese Quellen sind maßgeblich; dieser Vertrag fasst Eigentum und Workflowbezüge zusammen. `milestone/v1` ist nur Legacy-Leseformat.
 
@@ -53,7 +54,11 @@ Jeder Task hat genau einen registrierten Agenten. `context_paths` und `scope` bl
 
 ## Runzustand
 
-`.agentic-workflow/runs/<run-id>/state.yaml` darf nur die für Wiederaufnahme erforderliche aktuelle Sicht enthalten: `run_id`, exakten `plan_path`, aktuellen Laufzustand, integrierte beziehungsweise ausführbare Task-IDs und die rein deskriptive Anzahl bereits verwendeter automatischer Review-Reparaturrunden; sie wird nicht operativ als Limit ausgewertet. Es dupliziert weder Taskevidenz noch Findings oder Planinhalt und führt kein Ereignisjournal.
+`.agentic-workflow/runs/<run-id>/state.yaml` darf nur die für Wiederaufnahme erforderliche aktuelle Sicht enthalten: `run_id`, `mode` (`plan` oder `direct`), den exakt passenden Eingang (`plan_path` oder `request_path`, nicht beide), aktuellen Laufzustand, integrierte beziehungsweise ausführbare Task-IDs und die rein deskriptive Anzahl bereits verwendeter automatischer Review-Reparaturrunden; sie wird nicht operativ als Limit ausgewertet. Planruns referenzieren `plan_path`; Direktläufe referenzieren `request_path` und kein `plan_path`. Bestehende Runs mit `plan_path` bleiben als Planmodus lesbar. Es dupliziert weder Taskevidenz noch Findings oder Planinhalt und führt kein Ereignisjournal.
+
+## Direktauftrag und Runreferenzen
+
+`request.md` ist kein neues Plan-/Statusschema, sondern die unveränderliche, knappe Auftragsgrundlage für einen Direktlauf. Sie enthält den wörtlichen Originalauftrag und die explizite Freigabe, Ziel/Nichtziele, exakte erlaubte Pfade, genau einen verantwortlichen registrierten Fachagenten, beobachtbare Akzeptanzkriterien und exakte Checks. Resume und Umsetzungsreview lesen genau `request_path`; fehlende Eingaben werden weder erraten noch aus Chat/Memories ersetzt. `task-result/v1` und `review/v1` bleiben unverändert; sie belegen Ergebnis und unabhängiges Review in beiden Modi.
 
 ## `task-result/v1`
 
@@ -77,7 +82,7 @@ checks:
 limitations: []
 ```
 
-`changed_paths` entspricht den tatsächlichen Änderungen. Ein Exitcode ersetzt keine fachliche Beobachtung. Fehlende aktuelle Pflichtcheckevidenz führt zu `partial` oder `blocked`. `core-execute` persistiert die Rückgabe eines read-only Agenten in dessen Taskresultat; der Agent selbst erhält dadurch keine Schreibrechte an Produkt- oder Runartefakten. Ist der zugewiesene Agent ausdrücklich für Änderungen vorgesehen, darf er als eng begrenzte Ausnahme nur genau seine eigene Ergebnisdatei schreiben, nicht Plan, Runstatus, Handoff oder Review.
+`task_id` bleibt ein Pflichtfeld. Im Direktmodus verwendet das einzelne requestgebundene Ausführungsstück darin den Wert `direct`; die vorhandene Pflichtfeldsemantik von `task-result/v1` bleibt unverändert, und der Eintrag erzeugt weder Plan-Taskgraph noch Schemafelder. `changed_paths` entspricht den tatsächlichen Änderungen. Ein Exitcode ersetzt keine fachliche Beobachtung. Fehlende aktuelle Pflichtcheckevidenz führt zu `partial` oder `blocked`. `core-execute` persistiert die Rückgabe eines read-only Agenten in dessen Taskresultat; der Agent selbst erhält dadurch keine Schreibrechte an Produkt- oder Runartefakten. Ist der zugewiesene Agent ausdrücklich für Änderungen vorgesehen, darf er als eng begrenzte Ausnahme nur genau seine eigene Ergebnisdatei schreiben, nicht Plan, Runstatus, Handoff oder Review.
 
 Ein neuer Versuch wird als neue, unveränderliche Datei unter `tasks/<task-id>/attempt-<nn>.yaml` abgelegt (`nn` mindestens zweistellig, fortlaufend und innerhalb dieses Runs/Tasks eindeutig). Frühere Versuche bleiben erhalten; ein Retry darf sie nicht überschreiben oder umdeuten. `attempt` im `task-result/v1` beschreibt dieselbe fortlaufende Kennung. Bestehende `tasks/<task-id>.yaml` werden als Legacy-Ergebnis weiter gelesen; es gibt keine automatische Umbenennung oder Migration. Fehlende, doppelte oder widersprüchliche Versuchsbezüge blockieren Wiederverwendung.
 
