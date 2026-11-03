@@ -35,7 +35,10 @@ Die Workflowverkabelung bleibt unter
   widersprechender alter pauschaler Bestätigungsgates; situationsabhängige
   Nutzerbestätigung bleibt zulässig.
 - Der Paketproducer prüft den kanonischen DOX-Skillindex und alle Skilldateien
-  bytegenau sowie relative Links innerhalb der Installation. Repositorywerkzeuge
+  bytegenau sowie relative Links innerhalb der Installation. Die Lizenzprüfung
+  bindet `core-shared/LICENSE` und die Third-Party-Notices (`core-architecture`
+  sowie `core-shared` mit vollständigem OMA-MIT-Hinweis) an die Quellen und weist
+  sie im Paketreport unter `licenses` aus. Repositorywerkzeuge
   werden aus portablen Guides über ihre Repositoryquellen referenziert.
 - Releaseentscheidungen liegen in `release_guard.py` und `publish_release.py`,
   nicht in einer zweiten Implementierung im Workflow.

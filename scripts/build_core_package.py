@@ -36,6 +36,8 @@ PRODUCER_COMMANDS = (
 )
 BUNDLED_SKILL = release_guard.BUNDLED_SKILL
 SKILL_INDEX = 'AGENTS.md'
+# License and third-party notice files carried into the package report.
+REPORT_LICENSES = ('core-shared/LICENSE', 'core-shared/THIRD_PARTY_NOTICES.md', 'core-architecture/THIRD_PARTY_NOTICES.md', BUNDLED_SKILL + '/LICENSE')
 FORBIDDEN_PARTS = {'.agentic-workflow', '.git', 'apm_modules', 'node_modules', '__pycache__', '.agents', '.opencode', '.codex'}
 FORBIDDEN_NAME = re.compile(r'(\.env(\..+)?|\.npmrc|\.pypirc|id_rsa|id_ed25519|.*\.(pem|key|p12|pfx|pyc))$')
 SECRET = re.compile(rb'-----BEGIN [A-Z ]*PRIVATE KEY-----|gh[pousr]_[A-Za-z0-9]{36}|github_pat_[A-Za-z0-9_]{40,}|AKIA[0-9A-Z]{16}|xox[abprs]-[A-Za-z0-9-]{10,}')
@@ -143,6 +145,9 @@ def licenses(files, prefix, sources):
     violations = []
     if files.get(prefix + 'core-shared/LICENSE') != sources.get('LICENSE'):
         violations.append(prefix + 'core-shared/LICENSE fehlt oder weicht von LICENSE ab')
+    notice = files.get(prefix + 'core-shared/THIRD_PARTY_NOTICES.md', b'')
+    if b'MIT License' not in notice or b'Copyright (c) 2026 Eunkwang Shin, Gahyun Kim' not in notice:
+        violations.append(prefix + 'core-shared/THIRD_PARTY_NOTICES.md fehlt oder ohne vollständigen OMA-MIT-Hinweis')
     if b'MIT' not in files.get(prefix + 'core-architecture/THIRD_PARTY_NOTICES.md', b''):
         violations.append(prefix + 'core-architecture/THIRD_PARTY_NOTICES.md fehlt oder ohne MIT-Hinweis')
     if files.get(prefix + BUNDLED_SKILL + '/LICENSE') != sources.get('LICENSE'):
@@ -284,7 +289,7 @@ def verify(output=None):
         'internal_links': install_summary['internal_links'], 'archive_files': archive_summary.get('archive_files'),
         'bundled_skills': [BUNDLED_SKILL],
         'external_dependencies': [],
-        'licenses': ['core-shared/LICENSE', 'core-architecture/THIRD_PARTY_NOTICES.md', BUNDLED_SKILL + '/LICENSE'],
+        'licenses': list(REPORT_LICENSES),
         'inventory': {k: sha256(v) for k, v in sorted(entries.items())},
         'violations': violations, 'commands': log, 'scratch': str(scratch),
     }

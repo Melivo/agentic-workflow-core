@@ -17,6 +17,10 @@ Aktuelle Evidenz umfasst:
 
 Ein alternativer Befehl, ein anderes Arbeitsverzeichnis oder eine ältere Ausführung ersetzt keinen gepinnten Pflichtcheck.
 
+## Bedarfsabhängige Messvergleiche
+
+Nur ein konkreter Auftrag mit tatsächlich benötigtem Vorher-/Nachher-Messvergleich aktiviert die Vergleichbarkeitsregeln: benannte Metrik mit Einheit und Richtung, gleiche Methode und gleicher Befehl, gleiche Daten und gleiche Umgebung vor und nach der Änderung, aktuelle Originalbelege mit Runbezug sowie die relevante fachliche Akzeptanz. Bei rauschenden Metriken gilt die vorhandene projektspezifische Stichproben- oder Toleranzmethode; eine einzelne Timingprobe beweist keine Regression. Fehlende oder nicht vergleichbare Messungen bleiben als fehlende Evidenz offen und werden nicht als Verbesserung ausgegeben. Gewöhnliche Tests und Lint aktivieren keine Mess- oder Scoringphase; Pflichtkriterien, Korrektheit sowie Sicherheits- und Freigabegrenzen bleiben unabhängig vom Messergebnis, und Geschwindigkeitsgewinn kompensiert keine Verletzung.
+
 ## Autorisierungsgrenzen
 
 Build, Compile, Bundle, Package, Installation, Commit, Push, Tag, Release, Deployment sowie produktive oder destruktive Infrastruktur- und Datenbankaktionen werden nur bei passender ausdrücklicher Autorisierung ausgeführt. Preview, Dry-run oder Scratch-Installation gelten weiterhin als Installation beziehungsweise paketbezogene Prüfung, wenn der bestätigte Plan sie so begrenzt.
