@@ -721,6 +721,69 @@ class ContractTests(unittest.TestCase):
             with self.subTest(label=label), patch.object(Path, 'read_text', read_text), contextlib.redirect_stdout(io.StringIO()), self.assertRaisesRegex(checker.ContractError, label):
                 checker.check_group(ROOT, group)
 
+    def test_measurement_comparison_clauses_and_canonical_mutations(self):
+        # Baseline group check also rejects externally mutated canonical clauses.
+        with contextlib.redirect_stdout(io.StringIO()):
+            checker.check_group(ROOT, 'shared')
+        # Conditional noise wording protects project prose, not a runtime noise gate.
+        cases = {
+            'Messvergleich nur bei Auftragsbedarf': ('Nur ein konkreter Auftrag mit tatsächlich benötigtem Vorher-/Nachher-Messvergleich aktiviert die Vergleichbarkeitsregeln:', 'Jeder Vorher-/Nachher-Messvergleich aktiviert ohne Auftragsbedarf die Vergleichbarkeitsregeln:'),
+            'Messvergleich mit Metrik, Einheit und Richtung': ('benannte Metrik mit Einheit und Richtung', 'beliebige Zahl ohne Einheit oder Richtung'),
+            'Messvergleich mit gleichem Befehl': ('gleiche Methode und gleicher Befehl, gleiche Daten und gleiche Umgebung', 'gleiche Methode und anderer Befehl, gleiche Daten und gleiche Umgebung'),
+            'Messvergleich mit aktuellen Belegen und Akzeptanz': ('aktuelle Originalbelege mit Runbezug sowie die relevante fachliche Akzeptanz', 'beliebige alte Schätzungen ohne Runbezug'),
+            'Projektmethode nur bei Rauschen': ('Bei rauschenden Metriken gilt die vorhandene projektspezifische Stichproben- oder Toleranzmethode;', 'Bei allen Vergleichen gilt immer eine beliebige Toleranzmethode;'),
+            'unabhängige Pflicht- und Freigabegrenzen': ('Pflichtkriterien, Korrektheit sowie Sicherheits- und Freigabegrenzen bleiben unabhängig vom Messergebnis', 'Pflichtkriterien, Korrektheit sowie Sicherheits- und Freigabegrenzen hängen vom Messergebnis ab'),
+            'Messvergleich mit gleicher Methode, Daten und Umgebung': ('Der benötigte Vorher-/Nachher-Messvergleich nutzt gleiche Methode und gleicher Befehl, gleiche Daten und gleiche Umgebung.', 'Der Vorher-/Nachher-Vergleich nutzt diesmal einen anderen Befehl mit anderen Daten.'),
+            'Einzelprobe beweist keine Regression': ('Eine einzelne Timingprobe beweist keine Regression.', 'Eine einzelne Timingprobe genügt als Regressionsnachweis.'),
+            'fehlende Messung ist keine Verbesserung': ('Fehlende Messungen bleiben als fehlende Evidenz offen und werden nicht als Verbesserung ausgegeben.', 'Fehlende Messungen zählen als Verbesserung.'),
+            'gewöhnliche Checks lösen keine Messphase aus': ('Gewöhnliche Tests und Lint aktivieren keine Mess- oder Scoringphase.', 'Jeder Testlauf startet automatisch eine Scoringphase.'),
+            'Messergebnis kompensiert keine Grenzverletzung': ('Geschwindigkeitsgewinn kompensiert keine Verletzung.', 'Geschwindigkeitsgewinn gleicht eine Sicherheitsverletzung aus.'),
+        }
+        policies = {label: pattern for pattern, label in checker.POLICIES['shared']}
+        self.assertLessEqual(set(cases), set(policies))
+        for label, (allowed, violated) in cases.items():
+            with self.subTest(label=label):
+                self.assertRegex(allowed, '(?i)' + policies[label])
+                self.assertNotRegex(violated, '(?i)' + policies[label])
+        # Each new condition is removed and contradicted independently in memory.
+        original_read = Path.read_text
+        contract = ROOT / '.apm/skills/core-shared/references/verification.md'
+        original = original_read(contract, encoding='utf-8')
+        for label, (allowed, violated) in list(cases.items())[:6]:
+            self.assertEqual(original.count(allowed), 1, label)
+            for replacement in ('', violated):
+                changed = original.replace(allowed, replacement)
+                def read_text(path, *args, _text=changed, **kwargs):
+                    return _text if Path(path) == contract else original_read(path, *args, **kwargs)
+                with self.subTest(label=label, replacement=replacement), patch.object(Path, 'read_text', read_text), contextlib.redirect_stdout(io.StringIO()), self.assertRaisesRegex(checker.ContractError, label):
+                    checker.check_group(ROOT, 'shared')
+        # Individual constituents cannot disappear behind a surviving compound phrase.
+        for fragment in ('benannte Metrik', 'mit Einheit', 'und Richtung', 'gleiche Methode', 'gleicher Befehl', 'gleiche Daten', 'gleiche Umgebung', 'aktuelle Originalbelege', 'mit Runbezug', 'relevante fachliche Akzeptanz', 'Bei rauschenden Metriken', 'vorhandene projektspezifische', 'Stichproben- oder Toleranzmethode', 'Pflichtkriterien, Korrektheit', 'Sicherheits- und Freigabegrenzen'):
+            self.assertEqual(original.count(fragment), 1, fragment)
+            for replacement in ('', 'abweichend'):
+                changed = original.replace(fragment, replacement)
+                def read_text(path, *args, _text=changed, **kwargs):
+                    return _text if Path(path) == contract else original_read(path, *args, **kwargs)
+                with self.subTest(fragment=fragment, replacement=replacement), patch.object(Path, 'read_text', read_text), contextlib.redirect_stdout(io.StringIO()), self.assertRaises(checker.ContractError):
+                    checker.check_group(ROOT, 'shared')
+        # Existing canonical clause removals remain covered.
+        original_read = Path.read_text
+        contract = ROOT / '.apm/skills/core-shared/references/verification.md'
+        removals = (
+            (r'gleiche Methode und gleicher Befehl, gleiche Daten und gleiche Umgebung', 'Messvergleich mit gleichem Befehl|Messvergleich mit gleicher Methode, Daten und Umgebung'),
+            (r'eine einzelne Timingprobe beweist keine Regression', 'Einzelprobe beweist keine Regression'),
+            (r'nicht als Verbesserung ausgegeben', 'fehlende Messung ist keine Verbesserung'),
+            (r'Gewöhnliche Tests und Lint aktivieren keine Mess- oder Scoringphase', 'gewöhnliche Checks lösen keine Messphase aus'),
+            (r'Geschwindigkeitsgewinn kompensiert keine Verletzung', 'Messergebnis kompensiert keine Grenzverletzung'),
+        )
+        for pattern, label in removals:
+            text, count = re.subn(pattern, '', original_read(contract, encoding='utf-8'))
+            self.assertEqual(count, 1, label)
+            def read_text(path, *args, _text=text, **kwargs):
+                return _text if Path(path) == contract else original_read(path, *args, **kwargs)
+            with self.subTest(label=label), patch.object(Path, 'read_text', read_text), contextlib.redirect_stdout(io.StringIO()), self.assertRaisesRegex(checker.ContractError, label):
+                checker.check_group(ROOT, 'shared')
+
     def test_dox_docs_relation_fails_closed_per_field(self):
         # Each modeled docs/DOX input is mandatory; a missing field is never a silent default.
         base = next(c['input'] for c in json.loads((ROOT / 'tests/core_scenario_cases.json').read_text())['cases'] if c['id'] == 'docs-positive')

@@ -27,7 +27,13 @@ die vorhandenen Rahmen-/Ziel-/Kosten-/Wirkungsfixtures mit den konkreten
 Ablaufquellen und weisen die Wiedereinfügung alter zwingender
 Bestätigungsklauseln auch bei erhaltener positiver Rahmenprosa zurück. Pakettests verlangen den
 quellengebundenen DOX-Skillindex, prüfen seine Links und weisen fehlende,
-veränderte oder nicht aus den Quellen stammende Indexdateien zurück.
+veränderte oder nicht aus den Quellen stammende Indexdateien zurück; die
+synthetischen Archiv-/Installationsfixtures decken zusätzlich Aufnahme und
+Ablehnung fehlender oder verkürzter `core-shared/THIRD_PARTY_NOTICES.md`-Notice
+samt Report-Lizinventar ab, ohne realen Paketbau. Satzbasierte Positiv-/Negativfälle
+und In-Memory-Mutationen sichern die kanonischen Messvergleichsklauseln (Auslöser,
+gleiche Methode/Daten/Umgebung, Rauschen, fehlende Evidenz, unabhängige Grenzen)
+statisch, ohne neuen Szenario- oder Orakelmechanismus.
 
 ## Work Guidance
 
