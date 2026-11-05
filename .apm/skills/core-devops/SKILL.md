@@ -30,6 +30,7 @@ Bei jeder Mutation gelten der [Workflowvertrag](../core-shared/references/workfl
 | lokale Prüfungen, Commit-Hooks oder vorgeschaltete Validierung | [Checks und Hooks](references/checks-and-hooks.md) | prüfen, einrichten und auslösen als getrennte Schritte |
 | CI-Konfiguration, Paketbildung, Versionierung und Veröffentlichung | [CI und Releases](references/ci-and-releases.md) | vorhandene CI aufrufen; Releasewirkung separat autorisieren |
 | fehlgeschlagene Aufgaben, Hooks, CI oder unsichere Historyoperationen | [Failure Recovery](references/failure-recovery.md) | Ursache eingrenzen, sichere Wiederaufnahme oder Stopp bestimmen |
+| Skill-Erstellung, Pflegeaufträge oder Evaluationsfragen zu übernommenen Methoden | Erhaltungsindex im gemeinsamen Core-Index `core-shared` (Abschnitt „Bedingt nutzbare Autoren- und Pflegemethoden“); Autorisierung nach [Autorisierung und Rückfragen](../core-shared/references/workflow-contract.md#autorisierung-und-ruckfragen) | nur bei ausdrücklichem Autorenauftrag; keine Ausführung übernommener Originalworkflows |
 
 ## Optionale Habit-Feedback-Integration
 

@@ -12,7 +12,8 @@ Die Fachmethodik bleibt beim jeweils im Profil genannten Skill unter
 
 ## Local Contracts
 
-- Profile verweisen auf ihren Eigentümer-Skill statt dessen Methodik zu kopieren.
+- Profile verweisen auf ihren Eigentümer-Skill; ergänzende Fachmethoden
+  folgen der [gemeinsamen Auswahlregel][method-choice].
 - `docs-curator` nutzt für dauerhafte Dokumentation den gemeinsamen
   [DOX-Vertrag](../skills/core-shared/references/workflow-contract.md#projektdokumentation-und-dox)
   und die vorhandene Guide-Hierarchie; das Profil ergänzt keine zweite Methode.
@@ -35,3 +36,5 @@ Repositorywurzel geprüft; Einstieg:
 ## Child DOX Index
 
 - No child DOX guides.
+
+[method-choice]: ../skills/core-shared/references/tool-routing.md

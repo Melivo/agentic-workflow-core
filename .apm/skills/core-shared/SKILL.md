@@ -18,9 +18,15 @@ Dieses Bundle ist ein interner Index. Es führt keinen Workflow aus, dispatcht k
 
 - [Workflowvertrag](references/workflow-contract.md) — Autorisierung, Abbruch, Wiederaufnahme und Fresh-Context-Übergaben.
 - [Artefaktvertrag](references/artifact-contract.md) — Eigentümer, Namens-/ID-Integrität, Aufbewahrung und Formate von Ziel, Definition, Index, Plan, Run, Handoff, Taskversuch, Taskresultat und Review.
-- [Toolrouting](references/tool-routing.md) — Capability-basierte Providerauswahl und Fallbackgrenzen.
+- [Toolrouting](references/tool-routing.md) — Capability-basierte
+  Providerauswahl, Fallbackgrenzen und ergänzende Auswahl von Fachmethoden
+  durch Fachagenten.
 - [Verifikation](references/verification.md) — Evidenz, Pflichtchecks, blockierte Prüfungen und Reviewurteile.
 - [Benutzeranweisungen](references/user-instructions-contract.md) — sichere Synchronisierung manueller `AGENTS.md`-Inhalte.
+
+## Erhaltung übernommener Methoden
+
+- [Methodenerhalt](references/method-preservation.md) — bedingter Referenzindex für Core-Verfahren, Autoren-/Pflegegrenzen und bewusste Nichtübernahmen; keine Fachmethodik und keine Autorität.
 
 ## Fachhintergrund (nur Index)
 

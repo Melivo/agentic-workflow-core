@@ -19,10 +19,13 @@ unten verlinkten eigenen Guides. `core-execute` lädt Direktmodusdetails bedingt
 
 ## Local Contracts
 
-- [core-shared](core-shared/SKILL.md) verlinkt die gemeinsamen Verträge.
+- [core-shared](core-shared/SKILL.md) verlinkt die gemeinsamen Verträge; die
+  verbindliche [Auswahlregel für ergänzende Fachmethoden](core-shared/references/tool-routing.md#fachmethoden-erganzend-auswahlen)
+  gilt für Fachagenten neben ihrem Eigentümer-Skill.
 - Verzeichnisname und Frontmatter-`name` eines Skills stimmen überein.
 - Kanonische Quellen nicht durch Änderungen installierter Harnesskopien ersetzen.
 - Herkunfts- und Lizenznachweise bei übernommenen Ressourcen erhalten.
+- [Methodenerhalt](core-shared/references/method-preservation.md): bedingter Referenzindex für übernommene Fremdmethoden; keine zentrale Fachmethodik.
 
 ## Work Guidance
 

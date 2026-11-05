@@ -44,6 +44,19 @@ keine reale Agentenbefolgung. `test_core_contracts.py` lädt zusätzlich den
 Habit-Producer pfadbezogen (ohne main/package/stage) und prüft dessen
 bestehendes `check_links` auf der `CORE_FILES`-Snapshotmenge im Speicher,
 positiv und mit entferntem `direct-mode.md`; das ist SDK-/TypeScript-unabhängig.
+Der M02-Methodenerhaltstest nutzt `link_findings` aus
+`check_design_principles.py` für Ziele und Anker von `method-preservation.md`
+samt direktem bedingtem Einstieg aus `core-shared/SKILL.md`; `workflow-contract.md`
+und `core-devops/SKILL.md` brauchen nur ihre Geltungs-/Autorenbedingungen, keine
+eigene Linkkante. In-Memory-Mutationen brechen Anker, Ziele außerhalb `core-*`,
+private Laufzeitpfade, Einstieg, Einstiegsbedingungen sowie Autoritäts- und
+Rechteklauseln. Das ist statische Konsistenz, keine M05-Abnahme.
+
+Die M04-Auswahltests sichern den gemeinsamen Zusatzmethodenvertrag mit
+Positiv-/Negativklauseln und In-Memory-Mutationen sowie alle zwölf Profilowner,
+Shared-Einstiege und lokale Link-/Ankerziele über vorhandene Prüfhelpers ab.
+Externe Lesegrenzen werden nur als Vertragstext geprüft; weder echte
+Methodenverfügbarkeit noch Modellbefolgung oder M05-Praxisabnahme folgen daraus.
 
 ## Work Guidance
 

@@ -16,6 +16,15 @@ Es gilt folgende Rangfolge:
 
 Ein Workflow lädt sein exakt identifiziertes Eingabeartefakt und den aktuellen Repositorystand. `core-execute` hat zwei exklusive Eingänge: Planmodus mit einem eindeutig gebundenen bestätigten `plan/v1` samt Run bei Resume oder Direktmodus mit einem klaren, engen ausdrücklichen Änderungsauftrag. Die Wahl ist am vorhandenen Runzustand und den exakt benannten Eingaben festzumachen; ein fehlender/verlorener Plan, aktive Plan-/Milestone-Arbeit oder ein mehrdeutiger Eingang wird nie als Direktauftrag umgedeutet. Für Planidentifikation gilt [Aktivierung und Eingaben](../../core-execute/SKILL.md#aktivierung-und-eingaben). Gesprächskontext kann den Pfad benennen, ersetzt aber weder frisch gelesene Artefakte noch Freigabe, Runzustand oder Evidenz. Suche nie nach dem vermeintlich neuesten Plan und ersetze fehlende Eingaben nicht durch Honcho oder Provider-Memories. Direktmodusdetails stehen bedingt in [direct-mode.md](../../core-execute/references/direct-mode.md).
 
+Erhaltene oder übernommene Fremdmethoden gehören nicht zu dieser Rangfolge. Ihre Zuordnung und Nichtimportgrenzen stehen bedingt im Erhaltungsindex des gemeinsamen Core-Index `core-shared` und begründen weder Autorität noch Freigabe.
+
+Fachagenten müssen zusätzlich zum verbindlichen Eigentümer-Skill
+passende installierte Fachmethoden inline nach Aufgabe und Domäne auswählen,
+sofern sie tatsächlich verfügbar und mit diesem Vertrag vereinbar sind.
+Maßgeblich sind ausschließlich die [gemeinsame Auswahlregel](tool-routing.md#fachmethoden-erganzend-auswahlen); manuelle Aufrufgrenzen,
+fehlende Voraussetzungen und Statushoheit bleiben bindend. Diese Ergänzung
+begründet weder Whitelist noch neuen Dispatch oder Workflow.
+
 ## Autorisierung und Rückfragen
 
 - Eine aktuelle, eindeutige und auftragsbezogene Nutzeranweisung autorisiert die darin benannte Arbeit einschließlich unmittelbarer Ausführung, wenn sie dies klar sagt (etwa „plane und direkt umsetzen, keine weitere Freigabe“). Sie hat Vorrang vor separaten Bestätigungs- oder Diff-Gates niedriger priorisierter Skills und AGENTS.md. Solche Gates begründen keine zweite Freigaberunde; notwendige read-only Vorschau, Scope-/Drift-/Markerprüfung und Schutz fremder Inhalte bleiben bestehen. Eine Vorschau wird dadurch nicht als vom Nutzer gesehen oder bestätigt dargestellt. Die Anweisung deckt nur den ausdrücklich genannten Zweck, Ziel-/Scope- und Wirkungsrahmen; sie erzeugt weder neue Ziele noch ungedeckte Kosten, Sonderwirkungen oder höherrangige Erlaubnis.

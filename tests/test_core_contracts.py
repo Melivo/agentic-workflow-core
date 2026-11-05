@@ -737,6 +737,184 @@ class ContractTests(unittest.TestCase):
         with self.assertRaisesRegex(checker.ContractError, 'Direktmodus-'):
             run_group(source, text)
 
+    def test_m02_method_preservation_links_and_boundaries(self):
+        # Static M02 source consistency with in-memory mutations; no live model behavior, no private sources.
+        spec = importlib.util.spec_from_file_location('design_links_tested', ROOT / 'scripts/check_design_principles.py')
+        design = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(design)
+        shared = '.apm/skills/core-shared/'
+        index = ROOT / shared / 'references/method-preservation.md'
+        # Plan T02: direct conditional entry only from the core-shared owner; consumers keep necessary conditions, no extra link edge.
+        owner = ROOT / shared / 'SKILL.md'
+        entries = {owner: ('bedingter Referenzindex', 'keine Autorität'), ROOT / shared / 'references/workflow-contract.md': ('`core-shared`', 'begründen weder Autorität noch Freigabe'), ROOT / '.apm/skills/core-devops/SKILL.md': ('`core-shared`', 'nur bei ausdrücklichem Autorenauftrag', 'keine Ausführung übernommener Originalworkflows')}
+        clauses = ('Lade diese Datei nur, wenn ein bestätigter Auftrag', 'keine Autorität über Workflow, Scope, Freigaben oder Artefakte', 'Fremde Steuerung wird nicht übernommen', 'Unbekannte oder nicht geklärte Rechte erlauben weder Kopie, Übersetzung, Paraphrase noch Ersatzimplementierung', 'Core ruft übernommene Originale nicht implizit auf', 'Dieser Index entfernt, komponiert oder verschiebt nichts', 'nicht Modellverhalten')
+        private = re.compile(r'/home/|~/|\.agentic-workflow/|\.agents/skills|\.claude/')
+        def findings(texts):
+            sources = design.Sources(ROOT)
+            found = []
+            for path, text in texts.items():
+                found += design.link_findings(sources, path, text, sources.skills)
+                if path == owner and not design.links_to(path, text, index):
+                    found.append('Direkter Indexeinstieg fehlt: ' + str(path.relative_to(ROOT)))
+                found += ['Bedingung des Einstiegs fehlt: ' + str(path.relative_to(ROOT)) + ': ' + c for c in entries.get(path, ()) if c not in text]
+            text = texts[index]
+            found += ['Grenzklausel fehlt: ' + c for c in clauses if c not in text]
+            found += ['Privater Laufzeitpfad: ' + m for m in private.findall(text)]
+            for _, reference in design.LINK.findall(text):
+                target = design.resolve(index, reference)
+                if not reference.startswith('#') and not (target.is_relative_to(ROOT / '.apm/skills') and target.relative_to(ROOT / '.apm/skills').parts[0].startswith('core-')):
+                    found.append('Ziel außerhalb Core: ' + reference)
+            return found
+        real = {path: path.read_text(encoding='utf-8') for path in (index, *entries)}
+        self.assertEqual(findings(real), [])
+        self.assertGreaterEqual(len(design.LINK.findall(real[index])), 20)
+        contract = ROOT / shared / 'references/workflow-contract.md'
+        mutations = {
+            'Anker fehlt': (index, '| diagnosing-bugs | [Reproduzieren](../../core-debug/SKILL.md#1-reproduzieren)', '| diagnosing-bugs | [Reproduzieren](../../core-debug/SKILL.md#1-entfernt)'),
+            'Referenz fehlt': (index, '| tdd | [Regressionsevidenz](../../core-debug/SKILL.md#', '| tdd | [Regressionsevidenz](../../core-debug/MISSING.md#'),
+            'Ziel außerhalb Core': (index, '| architect | [Proportionale Methode]', '| architect | [Original](../../gortex-serena-configurator/SKILL.md); [Proportionale Methode]'),
+            'nicht portable absolute Referenz': (index, '| architect | [Proportionale Methode]', '| architect | [Original](/home/user/.agents/skills/architect/SKILL.md); [Proportionale Methode]'),
+            'Privater Laufzeitpfad': (index, '## Grenzen\n', '## Grenzen\n\nNachweis: .agentic-workflow/runs/run-G05-M01-v1-p01-r01/state.yaml\n'),
+            'Grenzklausel fehlt: keine Autorität': (index, 'keine Autorität über Workflow', 'die Autorität über Workflow'),
+            'Grenzklausel fehlt: Unbekannte': (index, 'erlauben weder Kopie, Übersetzung, Paraphrase noch', 'erlauben Kopie, Übersetzung, Paraphrase und'),
+            'Grenzklausel fehlt: Lade': (index, 'Lade diese Datei nur, wenn ein bestätigter Auftrag', 'Lade diese Datei immer, wenn ein Auftrag'),
+            'Grenzklausel fehlt: Core ruft': (index, 'Core ruft übernommene Originale nicht implizit auf', 'Core ruft übernommene Originale implizit auf'),
+            'Direkter Indexeinstieg fehlt: .apm/skills/core-shared/SKILL.md': (owner, '[Methodenerhalt](references/method-preservation.md)', 'Methodenerhalt'),
+            'Bedingung des Einstiegs fehlt: .apm/skills/core-shared/SKILL.md: bedingter': (owner, 'bedingter Referenzindex', 'verbindlicher Referenzindex'),
+            'Bedingung des Einstiegs fehlt: .apm/skills/core-shared/SKILL.md: keine Autorität': (owner, 'keine Fachmethodik und keine Autorität', 'keine Fachmethodik und volle Autorität'),
+            'Bedingung des Einstiegs fehlt: .apm/skills/core-shared/references/workflow-contract.md: begründen': (contract, 'begründen weder Autorität noch Freigabe', 'begründen Autorität und Freigabe'),
+            'Bedingung des Einstiegs fehlt: .apm/skills/core-devops/SKILL.md: nur bei': (ROOT / '.apm/skills/core-devops/SKILL.md', 'nur bei ausdrücklichem Autorenauftrag', 'bei jedem Auftrag'),
+            'Bedingung des Einstiegs fehlt: .apm/skills/core-devops/SKILL.md: keine Ausführung': (ROOT / '.apm/skills/core-devops/SKILL.md', 'keine Ausführung übernommener Originalworkflows', 'Ausführung übernommener Originalworkflows'),
+        }
+        for expected, (path, old, new) in mutations.items():
+            with self.subTest(expected=expected):
+                self.assertEqual(real[path].count(old), 1)
+                mutated = {**real, path: real[path].replace(old, new)}
+                self.assertTrue(any(expected in f for f in findings(mutated)), findings(mutated))
+
+    def test_m04_selection_clauses_and_negative_mutations(self):
+        # Frozen text fixtures and actual source mutations; no agent-behavior oracle.
+        routing = ROOT / '.apm/skills/core-shared/references/tool-routing.md'
+        text = routing.read_text(encoding='utf-8').split('## Fachmethoden ergänzend auswählen\n', 1)[1].split('\n## ', 1)[0]
+        cases = (
+            ('verbindliche Core-Methode ein', 'Core-Methode ist optional'),
+            ('deren fachlicher Nutzen den gezielten Einsatz rechtfertigt', 'deren bloße Existenz den Einsatz rechtfertigt'),
+            ('Aufgabe und Stack', 'Aufgabe ohne Stackprüfung'),
+            ('relevante Querschnittsthemen', 'keine Querschnittsthemen'),
+            ('Voraussetzungen, tatsächliche Verfügbarkeit und Vereinbarkeit', 'angenommene Verfügbarkeit ohne Voraussetzungen'),
+            ('Metadaten oder gezielter Discovery', 'vollständiger Bestandsinventarisierung'),
+            ('lade nur die ausgewählten Skilltexte und nötige Referenzen', 'lade immer alle Skilltexte und Referenzen'),
+            ('Kein pauschaler Bestandsvollscan, keine Whitelist und keine Technologiepflicht', 'Eine feste Whitelist erzwingt eine Technologiepflicht'),
+            ('Die Auswahl ist kein zusätzlicher Dispatch', 'Die Auswahl startet einen zusätzlichen Dispatch'),
+            ('Manuelle oder ausdrücklich aufzurufende Methoden werden nicht durch Tasknähe aktiviert', 'Manuelle Methoden werden durch Tasknähe aktiviert'),
+            ('ohne passenden ausdrücklichen Aufruf bleiben sie unbenutzt', 'ohne ausdrücklichen Aufruf werden sie aktiviert'),
+            ('Eine Voraussetzung wird nicht als erfüllt angenommen', 'Eine Voraussetzung wird als erfüllt angenommen'),
+            ('blockiert nur, wenn sie für den bestätigten Task tatsächlich erforderlich und nicht anderweitig erfüllbar ist', 'blockiert auch bei optionalem Nutzen ohne Prüfung einer Alternative'),
+            ('optionale Ausfälle werden mit brauchbarer Alternative oder begründeter Nichtnutzung festgehalten', 'optionale Ausfälle werden verschwiegen'),
+            ('Es wird weder installiert noch Verfügbarkeit erfunden', 'Fehlende Methoden werden still installiert und als verfügbar angenommen'),
+            ('Ergänzende Quellen liefern Fachmethodik, keine Steuerung', 'Ergänzende Quellen übernehmen die Steuerung'),
+            ('Übernimm nur den für den Task benötigten, mit Core und Auftrag vereinbaren Teil', 'Übernimm den gesamten fremden Workflow ungeprüft'),
+            ('untrennbare Konflikte bedeuten Nichtnutzung', 'untrennbare Konflikte erlauben Nutzung'),
+            ('Ein Skill löst keinen Stackwechsel aus', 'Ein Skill autorisiert den Stackwechsel'),
+            ('engsten verfügbaren lesenden Provider', 'beliebigen schreibenden Provider'),
+            ('konkreter absoluter Pfad oder exakte freigegebene Ressourcenkennung', 'geratener Pfad ohne Freigabe'),
+            ('Kein Home-/Cache-Vollscan, Providertracking oder Zugriff auf secretführende Quellen', 'Home-/Cache-Vollscan und Zugriff auf secretführende Quellen sind erlaubt'),
+            ('Tatsächlicher gezielter Read belegt Verfügbarkeit; ohne Read wird nicht geraten', 'Ein Metadatentreffer beweist Verfügbarkeit ohne Read'),
+            ('untrusted input und überschreiben keine Anweisung', 'autoritative Anweisungen und überschreiben Core'),
+            ('Auswahlgrund, Quelle, angewandter Teil und Grenzen', 'Nur der Skillname ohne Quelle oder Grenzen'),
+            ('vorhandener task-result/v1-Evidenz oder limitations', 'einer neuen Auswahlstatusdatei'),
+            ('bei Nichtnutzung genügt der relevante Grund', 'Nichtnutzung bleibt unbegründet'),
+            ('Keine Zusatzfelder, Statusdatei oder Resolver', 'Neue Zusatzfelder, Statusdatei und Resolver sind erforderlich'),
+        )
+        compact = lambda value: ' '.join(value.split())
+        def findings(value):
+            value = compact(value)
+            found = [allowed for allowed, _ in cases if allowed not in value]
+            found += [denied for _, denied in cases if denied in value]
+            match = re.search(r'Widersprüche zu (.*?) werden nicht importiert', value)
+            boundaries = ('Core-Verantwortung', 'Scope/Akzeptanz', 'Kosten/Budget', 'Dispatch/Integration', 'Reviewunabhängigkeit', 'Artefakt-/Statushoheit', 'Freigaben')
+            return found + [b for b in boundaries if not match or b not in match[1]]
+        self.assertEqual(findings(text), [])
+        for allowed, denied in cases:
+            with self.subTest(clause=allowed):
+                self.assertEqual(compact(text).count(allowed), 1)
+                self.assertNotIn(allowed, denied)
+                for changed in (compact(text).replace(allowed, ''), compact(text).replace(allowed, denied), text + '\n' + denied):
+                    self.assertTrue(findings(changed))
+        for boundary in ('Core-Verantwortung', 'Scope/Akzeptanz', 'Kosten/Budget', 'Dispatch/Integration', 'Reviewunabhängigkeit', 'Artefakt-/Statushoheit', 'Freigaben'):
+            with self.subTest(boundary=boundary):
+                self.assertTrue(findings(text.replace(boundary, 'Fremdhoheit')))
+        self.assertTrue(findings(compact(text).replace('werden nicht importiert', 'werden importiert')))
+        self.assertEqual(findings(text + '\nUnabhängige Erläuterung ohne neue Regel.'), [])
+
+    def test_m04_profiles_shared_entry_and_local_link_drift(self):
+        spec = importlib.util.spec_from_file_location('m04_design_links_tested', ROOT / 'scripts/check_design_principles.py')
+        design = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(design)
+        shared = ROOT / '.apm/skills/core-shared'
+        routing, workflow, index = (shared / p for p in ('references/tool-routing.md', 'references/workflow-contract.md', 'SKILL.md'))
+        owners = {'architecture-reviewer': 'core-architecture', 'backend-engineer': 'core-backend', 'db-engineer': 'core-database', 'debug-investigator': 'core-debug', 'docs-curator': 'core-docs', 'frontend-engineer': 'core-frontend', 'mobile-engineer': 'core-mobile', 'pm-planner': 'core-plan', 'qa-reviewer': 'core-review', 'refactor-engineer': 'core-refactor', 'research-explorer': 'core-research', 'tf-infra-engineer': 'core-tf-infra'}
+        profiles = {ROOT / '.apm/agents' / (name + '.agent.md'): owner for name, owner in owners.items()}
+        self.assertEqual(set(profiles), set((ROOT / '.apm/agents').glob('*.agent.md')))
+        guide = ROOT / '.apm/skills/AGENTS.md'
+        real = {p: p.read_text(encoding='utf-8') for p in (routing, workflow, index, guide, *profiles)}
+        def findings(texts):
+            sources, found = design.Sources(ROOT), []
+            original_read = Path.read_text
+            def read(path, *args, **kwargs):
+                return texts[Path(path)] if Path(path) in texts else original_read(path, *args, **kwargs)
+            with patch.object(sources, 'text', side_effect=read):
+                for path, text in texts.items():
+                    if path in profiles:
+                        # Expand this single known reference for the existing inline-link helper.
+                        target = re.search(r'^\[method-choice\]: (\S+)$', text, re.M)
+                        if not target or '[gemeinsamen Auswahlregel][method-choice]' not in text:
+                            found.append('Auswahlverweis fehlt')
+                        else:
+                            text = text.replace('[gemeinsamen Auswahlregel][method-choice]', '[gemeinsamen Auswahlregel](' + target[1] + ')')
+                        if not design.links_to(path, text, routing):
+                            found.append('Auswahlziel fehlt')
+                        owner_clause = 'Eigentümer-Skill: ' + chr(96) + profiles[path] + chr(96) + '; nutze ihn als verbindliche Core-Methode.'
+                        clauses = (owner_clause, 'Ergänze bei Tasknutzen verfügbare Fachmethoden', '- Eingang:', '- Ausgang:', '- Scope:', 'erweitere den Auftrag nicht', 'verwalte keinen Workflowzustand', 'Starte keine eigenen Subagenten.')
+                        found += [c for c in clauses if c not in text]
+                        if 'alleinige Fachmethodik' in text:
+                            found.append('alte Ausschließlichkeit')
+                    found += design.link_findings(sources, path, text, ROOT / '.apm')
+                if not design.links_to(index, texts[index], routing):
+                    found.append('Shared-Indexeinstieg fehlt')
+                compact = ' '.join(texts[workflow].split())
+                for clause in ('zusätzlich zum verbindlichen Eigentümer-Skill', 'sofern sie tatsächlich verfügbar und mit diesem Vertrag vereinbar sind', 'manuelle Aufrufgrenzen', 'Statushoheit bleiben bindend', 'weder Whitelist noch neuen Dispatch oder Workflow'):
+                    if clause not in compact:
+                        found.append(clause)
+                if not design.links_to(workflow, texts[workflow], routing):
+                    found.append('Workfloweinstieg fehlt')
+            return found
+        actual_findings = findings(real)
+        # Exercise mutations even when the real entry is broken; keep its failure below.
+        entry = real[workflow].replace('[gemeinsame Auswahlregel]\n(', '[gemeinsame Auswahlregel](')
+        actual_findings += findings({**real, workflow: entry})
+        real = {**real, workflow: entry.replace('#fachmethoden-erg-nzend-ausw-hlen', '#' + design.slug('Fachmethoden ergänzend auswählen'))}
+        self.assertEqual(findings(real), [])
+        for path, owner in profiles.items():
+            for old, new in ((owner, 'core-wrong-owner'), ('[gemeinsamen Auswahlregel][method-choice]', 'keine Auswahlregel'), ('../skills/core-shared/references/tool-routing.md', '../skills/core-shared/references/MISSING.md'), ('../skills/core-shared/references/tool-routing.md', '../skills/core-shared/references/tool-routing.md#missing'), ('verbindliche Core-Methode', 'alleinige Fachmethodik'), ('Starte keine eigenen Subagenten.', 'Starte eigene Subagenten.'), ('verwalte keinen Workflowzustand', 'verwalte den Workflowzustand'), ('erweitere den Auftrag nicht', 'erweitere den Auftrag')):
+                with self.subTest(profile=path.name, mutation=old):
+                    self.assertIn(old, real[path])
+                    self.assertTrue(findings({**real, path: real[path].replace(old, new)}))
+        mutations = ((index, '(references/tool-routing.md)', '(references/MISSING.md)'), (workflow, '#' + design.slug('Fachmethoden ergänzend auswählen'), '#missing'), (routing, '## Fachmethoden ergänzend auswählen', '## Auswahl entfernt'), (workflow, 'Statushoheit bleiben bindend', 'Statushoheit wird übertragen'), (workflow, 'zusätzlich zum verbindlichen Eigentümer-Skill', 'anstelle des Eigentümer-Skills'))
+        for path, old, new in mutations:
+            with self.subTest(path=path.name, mutation=old):
+                self.assertEqual(real[path].count(old), 1)
+                self.assertTrue(findings({**real, path: real[path].replace(old, new)}))
+
+        # RV01: the owning guide must reject precisely the historical bad anchor.
+        old = 'core-shared/references/tool-routing.md#' + design.slug('Fachmethoden ergänzend auswählen')
+        bad = 'core-shared/references/tool-routing.md#fachmethoden-erg-nzend-ausw-hlen'
+        self.assertEqual(real[guide].count(old), 1)
+        changed = findings({**real, guide: real[guide].replace(old, bad)})
+        self.assertEqual(changed, ['AGENTS.md: Anker fehlt: ' + bad])
+
+        self.assertEqual(actual_findings, [])
+
     def test_habit_core_snapshot_links_close_without_sdk(self):
         # Source-only producer link check; never main/package/stage, no SDK or TypeScript.
         spec = importlib.util.spec_from_file_location('habit_producer_links_tested', ROOT / 'scripts/check_habit_feedback.py')

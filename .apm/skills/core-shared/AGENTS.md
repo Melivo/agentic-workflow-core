@@ -14,13 +14,17 @@ Fachmethodik bleiben bei den konsumierenden Skills.
 
 - [Workflowvertrag](references/workflow-contract.md): Freigaben und Scope.
 - [Artefaktvertrag](references/artifact-contract.md): Formate und Eigentümer, einschließlich request.md und unterscheidbarer Run-Eingangsreferenzen.
-- [Toolrouting](references/tool-routing.md): Provider- und Fallbackgrenzen.
+- [Toolrouting](references/tool-routing.md): Provider- und
+  Fallbackgrenzen sowie die gemeinsame Auswahlregel für ergänzende
+  Fachmethoden.
 - [Verifikation](references/verification.md): Nachweise, Reviewgrenzen und bedarfsabhängige
   Messvergleich-Klarstellung.
 - [Third-Party-Notices](THIRD_PARTY_NOTICES.md): gepinnte fremde Quellen und vollständige
   Lizenztexte der Vertragsübernahmen, derzeit die OMA-Messvergleich-Adaption.
 - [Benutzeranweisungen](references/user-instructions-contract.md): sichere
   Änderungen an manuellen Anweisungen.
+- [Methodenerhalt](references/method-preservation.md): bedingter Referenzindex
+  für übernommene Methoden, Rechtegrenzen und Nichtübernahmen.
 - [Projektdokumentation und DOX](references/workflow-contract.md#projektdokumentation-und-dox):
   gemeinsame Dokumentationsabdeckung, Baumprüfung und Setupgrenzen.
 
