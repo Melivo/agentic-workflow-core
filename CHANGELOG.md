@@ -4,6 +4,14 @@
 
 - Ergänzt reproduzierbare lokale/CI-Prüfungen und eine standardmäßig deaktivierte, getrennte Release-PR- und Veröffentlichungskette. GitHub-Livebetrieb und App-Einrichtung sind nicht bestätigt.
 
+## [0.11.0](https://github.com/Melivo/agentic-workflow-core/compare/v0.10.0...v0.11.0) (2026-11-05)
+
+
+### Features
+
+* **core:** add direct execution and task-bound delegation ([2d29983](https://github.com/Melivo/agentic-workflow-core/commit/2d299833a6d7f2cff3dc9ad8f866cdf06f90f890))
+* **core:** add method selection and preservation index ([a6b70a7](https://github.com/Melivo/agentic-workflow-core/commit/a6b70a7233671c8a520a9f5ca9b67a99d5f3a397))
+
 ## [0.10.0](https://github.com/Melivo/agentic-workflow-core/compare/v0.9.0...v0.10.0) (2026-11-03)
 
 
