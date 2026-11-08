@@ -49,7 +49,9 @@
       ".apm/skills/core-init-mcps/SKILL.md",
       ".apm/skills/core-init-project/SKILL.md",
       ".apm/skills/core-user2agent-instructions/SKILL.md",
-      ".apm/skills/core-init-project/assets/core-routing.md"
+      ".apm/skills/core-init-project/assets/core-routing.md",
+      ".apm/skills/core-init-project/references/provider-setup.md",
+      ".apm/skills/core-init-project/references/configuration-precedence.md"
     ],
     "docs": [
       "README.md",

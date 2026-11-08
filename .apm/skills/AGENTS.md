@@ -4,16 +4,15 @@
 
 Die Core-Workflows, Fachmethoden und ihre unmittelbar benötigten Ressourcen
 als portable Skill-Bundles bereitstellen. Dieser Guide gilt ausschließlich für
-die `core-*`-Skills und `gortex-serena-configurator` dieses Pakets, nicht für
-andere daneben installierte Skills.
+die `core-*`-Skills dieses Pakets, nicht für andere daneben installierte Skills.
 
 ## Ownership
 
-Dieser Bereich besitzt die `core-*`-Bundles und den mitgelieferten
-Konfigurator. Jeder Skill behält Ablauf, Scope und Fachmethodik in seiner
-`SKILL.md`. Referenzen und Assets bleiben beim fachlich verantwortlichen Bundle.
-Gemeinsame Verträge, Konfigurator und ausführbares Feedbackpaket haben die
-unten verlinkten eigenen Guides. `core-execute` lädt Direktmodusdetails bedingt aus
+Dieser Bereich besitzt die `core-*`-Bundles. Jeder Skill behält Ablauf, Scope
+und Fachmethodik in seiner `SKILL.md`. Referenzen und Assets bleiben beim
+fachlich verantwortlichen Bundle. Gemeinsame Verträge und ausführbares
+Feedbackpaket haben die unten verlinkten eigenen Guides; Provider- und
+Runtimeintegration ist eine interne Referenz von `core-init-project`. `core-execute` lädt Direktmodusdetails bedingt aus
 `core-execute/references/direct-mode.md`; der gemeinsame Direktvertrag bleibt in
 `core-shared`.
 
@@ -36,13 +35,12 @@ ohne unautorisierte Folgeworkflows zu starten. Dauerhafte Projektdokumentation
 folgt der zuständigen Root-to-Target-AGENTS-Kette und dem gemeinsamen
 [DOX-Vertrag](core-shared/references/workflow-contract.md#projektdokumentation-und-dox);
 die einzelnen Skills beschreiben nur ihre jeweiligen Arbeitsschritte.
-`core-init-project` prüft vor dem Konfigurator-Audit dessen deklarierte
-Python-Laufzeitabhängigkeiten; eine isolierte Einrichtung benötigt eine eigene
-ausdrückliche Installationsfreigabe. Der selektive Abgleich verwalteter
-`AGENTS.md`-Blöcke läuft über den deterministischen Helper im
-`core-init-project`-Bundle; die Vorlagen bleiben bei ihren Eigentümern
-(Core-Routing im Init-Skill, Serena/Gortex-Playbook im Konfigurator) und
-werden nicht dupliziert.
+`core-init-project` lädt seine Provider- und Runtime-Methodik bei Bedarf aus
+`core-init-project/references/provider-setup.md`; eine isolierte Einrichtung
+benötigt eine passende ausdrückliche Installationsfreigabe. Der selektive
+Abgleich verwalteter `AGENTS.md`-Blöcke läuft über den deterministischen Helper
+im selben Bundle; Core-Routing und Serena/Gortex-Playbook bleiben bei ihren
+Eigentümern und werden nicht dupliziert.
 
 Bei Releaseautomation gilt in `core-devops` die
 [Bestandsaufnahme vor Rückfragen](core-devops/references/ci-and-releases.md#releasebestand-zuerst-ermitteln);
@@ -59,7 +57,7 @@ Installierte Verbraucher führen diese Repositoryprüfungen nicht automatisch au
 ## Child DOX Index
 
 - [core-shared](core-shared/AGENTS.md) — gemeinsame Verträge und Vorlagen.
-- [Konfigurator](gortex-serena-configurator/AGENTS.md) — Provider-Preflight und
-  ausdrücklich ausgewählte Einrichtung.
+- [core-init-project](core-init-project/AGENTS.md) — Repository-Preflight,
+  verwaltete Projektanweisungen und interne Providerintegration.
 - [Habit Feedback](core-devops/assets/opencode-habit-feedback/AGENTS.md) —
   eigenständiges OpenCode-Plugin mit Adapter, Hook und Mapper-Guides.

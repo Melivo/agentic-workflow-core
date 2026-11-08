@@ -51,9 +51,9 @@ This environment is separate from `--tool-timeout` and the MCP client timeout. A
 
 ## Global Metadata Language Servers
 
-`<home>/.serena/serena_config.yml` is Serena's global configuration, not a project language list. Do not add `languages` to it and do not disable its valid `language_backend: LSP` setting globally.
+`<home>/.serena/serena_config.yml` is Serena's global configuration, not a project language list. Do not add `language_servers` or `languages` to it and do not disable its valid `language_backend: LSP` setting globally.
 
-If Serena has registered its own configuration directory as a project, its effective configuration is `<home>/.serena/.serena/project.local.yml` when that file defines `languages`; otherwise it is `<home>/.serena/.serena/project.yml`. Keep the effective list at `languages: []` so the global metadata directory never starts an LSP. Real project language servers remain configured only in their own `.serena/project.yml` or winning `project.local.yml`.
+If Serena has registered its own configuration directory as a project, its effective configuration is `<home>/.serena/.serena/project.local.yml` when that file defines a language key (`language_servers` or the legacy `languages`); otherwise it is `<home>/.serena/.serena/project.yml`. Keep the effective list empty (`language_servers: []`, or legacy `languages: []`) so the global metadata directory never starts an LSP. The same key-form and conflict rules as for projects apply below. Real project language servers remain configured only in their own `.serena/project.yml` or winning `project.local.yml`.
 
 ## Source, Projection, and Candidate Ownership
 
@@ -110,7 +110,15 @@ Audit both `<home>/AGENTS.md` and `<cwd>/AGENTS.md`. User-home Serena safety bel
 
 ## Project Language Servers
 
-Serena reads project languages from `<cwd>/.serena/project.yml`. If `<cwd>/.serena/project.local.yml` defines `languages`, that local value overrides the base project value. Update only the winning file.
+Serena 1.7 reads the project language list from `language_servers` in `<cwd>/.serena/project.yml`; projects created before 1.7 use `languages`, and the oldest form is a single `language`. Serena normalizes every file on its own: `languages` is read as `language_servers` unless `language_servers` exists in the same file, and `language` counts only when neither list key exists. A `project.local.yml` that defines any of these keys overrides the base list (either key form may override the other). Update only the winning file and keep the key form already present there; add `language_servers` only where no language key exists, and convert a lone legacy `language` to `language_servers`.
+
+Deterministic edge rules:
+
+- Both list keys in one file with the same value are valid; `language_servers` is effective and apply writes both so they stay equal.
+- Both list keys with different values are status `conflicting-language-keys`: Serena 1.7 would silently ignore `languages`, so neither key is preferred. Audit reports it, a selected language apply refuses before any write, and the user reconciles the file. A conflict in the non-winning file also blocks.
+- Null, non-list, or non-string values are `parse-error` naming the failing file; nothing is written.
+- `languages-key-missing` means none of the three keys exists in the effective project file (the status name is kept for stability). Apply then adds `language_servers`.
+- `language_servers: []` is valid and `current` when no meaningful source language exists. The audit does not invent a language for a project without source code.
 
 Select languages from meaningful project source files:
 
@@ -125,13 +133,14 @@ Select languages from meaningful project source files:
 
 The threshold prevents isolated helpers from starting extra language servers. For example, two documentation-generator Python scripts in a repository with 89 TypeScript files are reported as low signal and do not enable Python. A small project with two TypeScript and one Python source file keeps both because Python represents one-third of recognized source files.
 
-If no meaningful source language exists, use `languages: []` in an already valid Serena project config. Do not write `languages:` with a null value and do not invent a fallback language. Restart Serena after changing the language list because language servers are selected during project initialization.
+If no meaningful source language exists, use an empty list (`language_servers: []`, or the existing legacy key) in an already valid Serena project config. Do not write a language key with a null value and do not invent a fallback language. Restart Serena after changing the language list because language servers are selected during project initialization.
 
 ## Source Evidence
 
 The behavior above is grounded in current Serena source:
 
 - `serena/config/serena_config.py`: `SerenaConfig.tool_timeout`, global config path resolution, and `ProjectConfig` fields.
-- `serena/config/serena_config.py`: `project.local.yml` overrides supported project keys, including `languages`, from `project.yml`.
+- `serena/config/serena_config.py`: `project.local.yml` overrides supported project keys, including the language list, from `project.yml`.
+- `serena/config/serena_config.py`: `ProjectConfig.language_servers` is the field; `RENAMED_FIELDS` maps `languages` to it per file only when `language_servers` is absent there, and a lone `language` is converted likewise (Serena 1.7.0).
 - `serena/cli.py`: `--tool-timeout` is documented as an override and passed to the MCP factory.
 - `serena/mcp.py`: a non-null CLI timeout is assigned after loading the default/global config.

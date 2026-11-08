@@ -44,7 +44,7 @@ CHARACTERIZED['domains'] += ['core-devops/SKILL.md', 'development-automation.md'
 # Handoff display and activation sources from the integrated contract change.
 CHARACTERIZED['shared'] += ['tool-routing.md']
 CHARACTERIZED['workflows'] += ['AGENTS.md']
-CHARACTERIZED['setup'] += ['core-routing.md']
+CHARACTERIZED['setup'] += ['core-routing.md', 'provider-setup.md', 'configuration-precedence.md']
 
 
 def source_files():

@@ -136,12 +136,12 @@ class ArchiveInspection(unittest.TestCase):
         entries[TOP + 'plugin.json'] = json.dumps({'name': 'agentic-workflow-core', 'version': VERSION, 'x': 1}).encode()
         self.assertFlags(entries, 'eingebettetes Inventar')
 
-    def test_license_notices_and_bundled_configurator_required(self):
+    def test_license_notices_and_integrated_provider_license_required(self):
         files = {k[len(TOP):]: v for k, v in archive_entries().items()}
         files['skills/core-shared/LICENSE'] = b'other'
         self.assertFlags(with_inventory(files), 'core-shared/LICENSE')
-        files = {k[len(TOP):]: v for k, v in archive_entries().items() if 'gortex-serena-configurator' not in k}
-        self.assertFlags(with_inventory(files), 'Begleitskill-Datei fehlt')
+        files = {k[len(TOP):]: v for k, v in archive_entries().items() if not k.endswith('skills/core-init-project/LICENSE')}
+        self.assertFlags(with_inventory(files), 'core-init-project/LICENSE')
 
     def test_shared_oma_notice_is_required_and_source_bound(self):
         for replacement in (None, b'# notices\n\nMIT License\n\nCopyright (c) 2026 Somebody Else\n'):
@@ -158,7 +158,7 @@ class ArchiveInspection(unittest.TestCase):
         source_notice = SOURCES['.apm/skills/core-shared/THIRD_PARTY_NOTICES.md']
         base = {'core-shared/LICENSE': SOURCES['LICENSE'],
                 'core-architecture/THIRD_PARTY_NOTICES.md': SOURCES['.apm/skills/core-architecture/THIRD_PARTY_NOTICES.md'],
-                release_guard.BUNDLED_SKILL + '/LICENSE': SOURCES['LICENSE'],
+                'core-init-project/LICENSE': SOURCES['LICENSE'],
                 'core-shared/THIRD_PARTY_NOTICES.md': source_notice}
         self.assertEqual(package.licenses(base, '', SOURCES), [])
         for change in (None, b'# notices\n', source_notice.replace(b'Eunkwang Shin, Gahyun Kim', b'Somebody Else')):
@@ -170,12 +170,25 @@ class ArchiveInspection(unittest.TestCase):
                     files['core-shared/THIRD_PARTY_NOTICES.md'] = change
                 self.assertTrue(any('OMA-MIT-Hinweis' in v for v in package.licenses(files, '', SOURCES)))
 
-    def test_migrated_scripts_and_license_are_source_bound(self):
-        for rel in ('scripts/serena_safety.py', 'scripts/test_serena_safety.py', 'LICENSE'):
-            files = {k[len(TOP):]: v for k, v in archive_entries().items()}
-            key = 'skills/gortex-serena-configurator/' + rel
-            files[key] += b'changed'
-            self.assertFlags(with_inventory(files), 'Begleitskill-Datei verändert')
+    def test_integrated_provider_files_and_license_are_source_bound(self):
+        for rel in ('scripts/serena_safety.py', 'scripts/test_serena_safety.py',
+                    'scripts/requirements.txt', 'references/provider-setup.md',
+                    'references/configuration-precedence.md', 'REQUIREMENTS.md',
+                    'PROVENANCE.md', 'LICENSE'):
+            with self.subTest(file=rel):
+                files = {k[len(TOP):]: v for k, v in archive_entries().items()}
+                key = 'skills/core-init-project/' + rel
+                files[key] += b'changed'
+                self.assertFlags(with_inventory(files), 'Core-Datei verändert')
+
+    def test_retired_standalone_provider_payload_is_rejected(self):
+        files = {k[len(TOP):]: v for k, v in archive_entries().items()}
+        files['skills/gortex-serena-configurator/SKILL.md'] = b'old standalone payload'
+        self.assertFlags(with_inventory(files), 'verbotener Standalone-Skill')
+        installed = installation()
+        installed['.agents/skills/gortex-serena-configurator/SKILL.md'] = b'old standalone payload'
+        _, violations = package.inspect_installation(installed, SOURCES)
+        self.assertTrue(any('verbotener Standalone-Skill' in v for v in violations), violations)
 
 
 class InstallationInspection(unittest.TestCase):
@@ -244,7 +257,7 @@ class InstallationInspection(unittest.TestCase):
 class ReportBinding(unittest.TestCase):
     def report(self, **change):
         report = {'schema': 'core-package-report/v1', 'verified': True, 'version': '0.3.0', 'source_commit': 'c' * 40,
-                  'source_clean': True, 'core_bundles': 22, 'bundled_skills': [release_guard.BUNDLED_SKILL], 'archive': {'name': 'agentic-workflow-core-0.3.0.zip', 'sha256': 'd' * 64}}
+                  'source_clean': True, 'core_bundles': 22, 'bundled_skills': [], 'archive': {'name': 'agentic-workflow-core-0.3.0.zip', 'sha256': 'd' * 64}}
         report.update(change)
         return release_guard.package_report(report, '0.3.0', 'c' * 40, 'd' * 64)
 
@@ -254,11 +267,11 @@ class ReportBinding(unittest.TestCase):
     def test_report_license_inventory_names_shared_oma_notice(self):
         self.assertEqual(package.REPORT_LICENSES, (
             'core-shared/LICENSE', 'core-shared/THIRD_PARTY_NOTICES.md',
-            'core-architecture/THIRD_PARTY_NOTICES.md', release_guard.BUNDLED_SKILL + '/LICENSE'))
+            'core-architecture/THIRD_PARTY_NOTICES.md', 'core-init-project/LICENSE'))
 
     def test_wrongly_bound_or_unverified_package_blocks(self):
         for change in ({'verified': False}, {'version': '0.2.9'}, {'source_commit': 'e' * 40}, {'source_clean': False},
-                       {'core_bundles': 21}, {'bundled_skills': []}, {'archive': {'name': 'agentic-workflow-core-0.3.0.zip', 'sha256': 'f' * 64}},
+                       {'core_bundles': 21}, {'bundled_skills': [release_guard.BUNDLED_SKILL]}, {'archive': {'name': 'agentic-workflow-core-0.3.0.zip', 'sha256': 'f' * 64}},
                        {'archive': {'name': 'other.zip', 'sha256': 'd' * 64}}, {'schema': 'x'}):
             with self.subTest(change=change):
                 self.assertNotEqual(self.report(**change), [])

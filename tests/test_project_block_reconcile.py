@@ -14,7 +14,7 @@ import unittest
 
 ROOT = Path(__file__).resolve().parents[1]
 HELPER = ROOT / '.apm/skills/core-init-project/scripts/reconcile_blocks.py'
-SERENA_SAFETY = ROOT / '.apm/skills/gortex-serena-configurator/scripts/serena_safety.py'
+SERENA_SAFETY = ROOT / '.apm/skills/core-init-project/scripts/serena_safety.py'
 
 CORE_NAME = 'CORE-INIT-PROJECT'
 SERENA_NAME = 'SERENA-GORTEX-PROJECT'

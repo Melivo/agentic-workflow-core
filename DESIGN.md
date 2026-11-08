@@ -87,7 +87,7 @@ Nach bestandenem Review:
 - `core-init-mcps`: read-only Bereitschaftsprüfung bereits vorhandener Toolprovider; keine Installation oder Konfiguration
 - `core-milestone`: Ziel, unveränderliche Etappendefinitionen und aktualisierbarer Auswahl-/Nachweisindex ausschließlich für ausdrücklich mehrstufige Vorhaben
 - `core-handoff`: autorisierte Sitzungs- und Etappenübergabe anhand exakter Artefaktpfade, ohne Statusverwaltung
-- `gortex-serena-configurator`: mitgelieferte, inline verwendete Readiness- und Konfigurationsmethode für Gortex und den projektspezifischen Serena-Fallback
+- `core-init-project`: öffentliche Repositoryinitialisierung mit bedingt geladener interner Provider- und Laufzeitreferenz für Gortex und projektspezifisches Serena
 - `core-user2agent-instructions`: kontrollierte Pflege globaler und lokaler Benutzeranweisungen
 - `core-repo-audit`: read-only Repositoryhygiene und Public-Readiness
 - `core-devops`: eigenständige, klar benannte Git-/Releaseaufträge nach ausdrücklicher Freigabe (ohne Implementierungsplan); geplante Automationseinrichtung dagegen über bestätigte Tasks mit `core-plan`/`core-execute`; Releases nach Codeänderungen erst nach bestandenem Review
@@ -151,7 +151,7 @@ apm.yml
 
 Jedes neu erstellte paketeigene Skillverzeichnis verwendet das Präfix `core-` und ist ein gültiges APM-Skillbundle mit `SKILL.md`; Verzeichnisname und Frontmatter-`name` sind identisch. `core-shared` ist ein intern referenziertes Bundle und kein fünfter Workflow. Seine `SKILL.md` ist ein kurzer Index; Verträge und Vorlagen liegen in `references/` beziehungsweise `assets/`.
 
-Die Paketquelle enthält aktuell 22 paketeigene `core-*`-Skillbundles einschließlich des internen `core-shared`; der mitgelieferte Begleitskill `gortex-serena-configurator` ergänzt diese 22 Bundles, ohne selbst ein Kernworkflow zu sein.
+Die Paketquelle enthält aktuell genau 22 paketeigene `core-*`-Skillbundles einschließlich des internen `core-shared`. Die Provider-/Runtimeintegration ist Bestandteil des `core-init-project`-Bundles und erzeugt keinen zusätzlichen öffentlichen Einstieg oder separates Bundle.
 
 APM projiziert `.apm/` in die Zielharnesses. Generierte `.agents/`, `.opencode/` oder `.codex/`-Kopien sind keine kanonischen Quellen und werden nicht manuell gepflegt.
 
@@ -159,7 +159,7 @@ Optionale Slash-Command-Adapter dürfen unter `.apm/prompts/` angeboten werden. 
 
 ### Mitgelieferte Code-Intelligence-Methode
 
-[`gortex-serena-configurator`](.apm/skills/gortex-serena-configurator/SKILL.md) liegt vollständig in der kanonischen Paketquelle. Die ursprüngliche Skill-ID, englischen Instruktionen und ausführbaren Quellen bleiben bei der Migration unverändert; Herkunft und die ausdrückliche MIT-Freigabe sind in seinem `PROVENANCE.md` dokumentiert. Die übrige private Sammlung wurde nicht übernommen oder neu lizenziert.
+Die Providerintegration liegt als interne, bei Bedarf geladene Referenz und ausführbare Quellen im [Bundle `core-init-project`](.apm/skills/core-init-project/SKILL.md); sie ist kein eigenständiges Skillbundle. [Provenienz](.apm/skills/core-init-project/PROVENANCE.md), [Requirements](.apm/skills/core-init-project/REQUIREMENTS.md) und [MIT-Lizenz](.apm/skills/core-init-project/LICENSE) bleiben dort gemeinsam mit den übernommenen Quellen. Es gibt keine private Paketabhängigkeit.
 
 ```yaml
 dependencies:
@@ -689,22 +689,13 @@ Der verwaltete Projektabschnitt enthält nur belegte Fakten:
 
 Ausführliche Domainhandbücher gehören in Fachskills, nicht in `AGENTS.md`. Dateiglobs sind nur Signale und werden mit Taskabsicht, Stack und Pfadkontext kombiniert.
 
-### Code-Intelligence-Readiness mit `gortex-serena-configurator`
+### Interne Provider- und Laufzeitintegration
 
-Nach Repository- und Stackinventur, aber vor dem Schreiben des verwalteten `AGENTS.md`-Blocks, lädt `core-init-project` den mitgelieferten `gortex-serena-configurator` inline. Er wird nicht als Subagent dispatcht und erzeugt keinen eigenen Workflowzustand.
+`core-init-project` lädt seine [Provider- und Laufzeitreferenz](.apm/skills/core-init-project/references/provider-setup.md) nur für Provider-Readiness, Interpreterauflösung oder ausdrücklich ausgewählte Provideraktionen. Der normale Projekt-Preflight bleibt der einzige öffentliche Einstieg; die interne Methode erzeugt weder einen separaten Skill noch eigenen Workflowzustand. Der reine verwaltete `AGENTS.md`-Blockabgleich bleibt providerunabhängig.
 
-Der Integrationsablauf ist:
+Bei Provider-Readiness werden Gortex-Gesundheit und Tracking sowie Serena-Verfügbarkeit, projektspezifische Initialisierung, effektive Sprachen und autoritative MCP-Quelle read-only geprüft. Nur konkret ausgewählte Aktionen dürfen den betreffenden Projektanbieter oder das Gortex-Tracking ändern; danach werden die beteiligten Provider erneut geprüft und getrennt berichtet. Die Laufzeitreferenz begrenzt Interpreter, Version und Import auf vorhandene Kandidaten und deaktiviert automatische Installationen ausschließlich für Read-only-Probes. Eine isolierte Einrichtung benötigt eine passende ausdrückliche Freigabe.
 
-1. konkrete Repositorywurzel bestimmen und Benutzer-Home sowie Dateisystemroot ablehnen,
-2. Gortex-Gesundheit und vorhandenes Tracking read-only prüfen,
-3. Serena-Verfügbarkeit, projektspezifische Initialisierung, effektive Sprachen und autoritative MCP-Quelle read-only prüfen,
-4. nur tatsächlich notwendige Aktionen gemeinsam zur Auswahl stellen,
-5. ausschließlich bestätigte Serena-Einrichtung, Sprachabgleiche oder Gortex-Tracking-Aktionen ausführen,
-6. Provider erneut auditieren und Bereitschaft getrennt für Gortex, Serena und native Fallbacks berichten.
-
-Gortex-Tracking benötigt immer eine ausdrückliche Auswahl. Serena wird ausschließlich auf das konkrete Projekt begrenzt; Benutzer-Home, Dateisystemroot, Abhängigkeiten, Caches und generierte Bäume werden nicht als Serena-Projekt oder breiter Suchraum aktiviert.
-
-Innerhalb von `core-init-project` bleibt `--apply-agents` beziehungsweise die entsprechende AGENTS-Schreiboption des Configurators deaktiviert. Der Configurator liefert nur seinen Readiness-Befund; `core-init-project` bleibt alleiniger Eigentümer des projektspezifischen verwalteten `AGENTS.md`-Blocks und schreibt dort die stabile Providerreihenfolge:
+Gortex-Tracking benötigt immer eine ausdrückliche Auswahl. Serena wird ausschließlich auf das konkrete Projekt begrenzt; Benutzer-Home, Dateisystemroot, Abhängigkeiten, Caches und generierte Bäume werden nicht als Serena-Projekt oder breiter Suchraum aktiviert. Globale Benutzeranweisungen bleiben bei `core-user2agent-instructions`; der Merge erweitert weder globale Schreibrechte noch den Eigentum des Init-Skills am Projektblock. Der Providerhelfer liefert Befunde und führt nur autorisierte Provideraktionen aus; `core-init-project` bleibt alleiniger Eigentümer des projektspezifischen verwalteten `AGENTS.md`-Blocks und schreibt dort die stabile Providerreihenfolge:
 
 ```text
 Gortex, wenn gesund und Repository getrackt
@@ -826,9 +817,9 @@ Das Design gilt als umgesetzt, wenn:
 12. `.apm/` die einzige Paketquelle ist und alle generierten Projektionen reproduzierbar sind,
 13. kein Paketdefault Builds, SCM, Deployment oder destruktive Aktionen implizit autorisiert,
 14. APM-Validierung keine toten Workflow-, Agenten-, Skill- oder MCP-Referenzen findet,
-15. `gortex-serena-configurator` vollständig aus `.apm/skills/` mitgeliefert, quellgebunden geprüft und ohne private Paketabhängigkeit installiert wird,
-16. `core-init-project` den `gortex-serena-configurator` inline und ohne konkurrierenden `AGENTS.md`-Schreiber verwendet,
-17. alle neu verfassten paketeigenen Markdown-Dateien von Skills und Workflows auf Deutsch verfasst sind; die quelltreue englische Konfigurator-Migration bleibt als dokumentierte Ausnahme erhalten,
+15. genau 22 Core-Bundles bestehen und `core-init-project` der einzige öffentliche Init-Einstieg mit interner, bedingt geladener Provider-/Runtimeintegration ist,
+16. Providerquellen, Originaltests, Requirements, Herkunfts- und Lizenznachweise im Init-Bundle quellgebunden geprüft werden und frühere Standalone-Payloads abgewiesen werden,
+17. alle neu verfassten paketeigenen Markdown-Dateien von Skills und Workflows auf Deutsch verfasst sind,
 18. jeder neu erstellte oder materiell geänderte Skill mit `skill-creator` erstellt beziehungsweise revidiert und anschließend mit `context-debloater` geprüft wurde.
 
 ## 23. Provenienz und aktuelle Referenzen

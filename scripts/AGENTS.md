@@ -52,7 +52,10 @@ Die Workflowverkabelung bleibt unter
   `user-confirmed`-Aktivierungen bleiben; `check_index` verlangt für
   `goal-covered` einen verknüpften Plan. `validate_plan` bleibt ausschließlich
   für ausführbare Confirmed-Pläne. Die Prüfung zeigt keine Pläne an und erteilt
-  keine Autorisierung.
+  keine Autorisierung. Die `workflows`-Gruppe prüft zusätzlich quellenlokale
+  Freigaberahmen-Klauseln (Reichweite, Klärung vor dem Schreiben, Einschränkungen)
+  und den Stopgrund `planning_only`; Mutationen weisen unzulässige Erweiterung
+  und unbegründete Verengung zurück. Das bleibt statische Konsistenz.
 - `check_habit_feedback.py` führt in `CORE_FILES` die geschlossene transitive
   Markdown-Linkmenge des Core-Snapshots; neu verlinkte Quellen wie
   `core-execute/references/direct-mode.md` gehören als exakter Eintrag hinein.

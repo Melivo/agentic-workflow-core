@@ -15,12 +15,12 @@ Core ist keine zusätzliche Orchestrierungs-CLI und kein autonomer Releasebot. E
 
 - **Zwei Ausführungswege:** Für größere oder unklare Vorhaben ein Planablauf: optionales Brainstorming, Planreview (regulär vor dem Schreiben; beim Erstplan einer Etappe mit Gesamtfreigabe oder aus einem Handoff nach genau einer Draft-Datei), ausdrückliche oder belegte abgeleitete Planfreigabe, Umsetzung und unabhängiges Umsetzungsreview. Für eine klare, eng umrissene und ausdrücklich freigegebene Änderung der Direktmodus ohne Plan: `core-execute` arbeitet mit einer unveränderlichen Auftragsgrundlage und lässt die Umsetzung ebenfalls unabhängig prüfen.
 - **Passende Fachmethoden:** Architektur, Backend, Frontend, Mobile, Datenbanken, Terraform, Debugging und Refactoring.
-- **Überprüfbare Übergaben:** Pläne, Task-Ergebnisse und Reviews mit festen Formaten. Ein ausdrücklich beauftragter Handoff kann nur die Planung einer exakt ausgewählten und bestätigten Folgeetappe aktivieren. Ihr vollständiger Erstplan wird nach unabhängigem Review sichtbar gezeigt und erst nach belegter Gesamtdeckung oder neuer ausdrücklicher Nutzerfreigabe ausführbar. Eine Gesamtfreigabe mit begrenztem Ausführungsrahmen kann die Umsetzung einer bestätigten Etappe innerhalb dieses Rahmens decken.
+- **Überprüfbare Übergaben:** Pläne, Task-Ergebnisse und Reviews mit festen Formaten. Ein ausdrücklich beauftragter Handoff kann nur die Planung einer exakt ausgewählten und bestätigten Folgeetappe aktivieren. Ihr vollständiger Erstplan wird nach unabhängigem Review sichtbar gezeigt und erst nach belegter Gesamtdeckung oder neuer ausdrücklicher Nutzerfreigabe ausführbar. Eine Gesamtfreigabe mit begrenztem Ausführungsrahmen kann die Umsetzung einer bestätigten Etappe innerhalb dieses Rahmens decken; die erste Indexauswahl verengt den bestätigten Gesamtrahmen nicht, und der Rahmen wählt keine weitere Etappe automatisch aus.
 - **Wiederaufnahme:** Arbeit anhand ihrer Artefakte in einer neuen Sitzung fortsetzen.
 - **Klare Grenzen:** keine ungeplanten Umbauten, stillen Installationen oder automatisch freigegebenen Veröffentlichungen.
 - **Gemeinsame Skills:** einmal installieren statt unnötiger Kopien für jedes Repository oder Harness.
 
-Die kanonische Paketquelle liegt unter `.apm/`. Sie enthält **22 Core-Bundles** und den mitgelieferten `gortex-serena-configurator`. Es gibt **keine externe APM-Skillabhängigkeit und keinen erforderlichen Zugriff auf eine private Skillsammlung**.
+Die kanonische Paketquelle liegt unter `.apm/` und enthält **22 Core-Bundles**. Die Provider-/Runtimeintegration gehört intern zu `core-init-project`; es gibt keinen zusätzlichen öffentlichen Provider-Skill. Es gibt **keine externe APM-Skillabhängigkeit und keinen erforderlichen Zugriff auf eine private Skillsammlung**.
 
 ## Installation
 
@@ -106,12 +106,11 @@ Definitionen sind versioniert und nach Bestätigung unveränderlich. Resume beh�
 | Kernworkflow | [core-brainstorm](.apm/skills/core-brainstorm/SKILL.md), [core-plan](.apm/skills/core-plan/SKILL.md), [core-execute](.apm/skills/core-execute/SKILL.md), [core-review](.apm/skills/core-review/SKILL.md) |
 | Fachliche Umsetzung | [Architektur](.apm/skills/core-architecture/SKILL.md), [Backend](.apm/skills/core-backend/SKILL.md), [Frontend](.apm/skills/core-frontend/SKILL.md), [Mobile](.apm/skills/core-mobile/SKILL.md), [Datenbanken](.apm/skills/core-database/SKILL.md), [Terraform](.apm/skills/core-tf-infra/SKILL.md) |
 | Untersuchung und Pflege | [Research](.apm/skills/core-research/SKILL.md), [Debugging](.apm/skills/core-debug/SKILL.md), [Refactoring](.apm/skills/core-refactor/SKILL.md), [Repo-Audit](.apm/skills/core-repo-audit/SKILL.md), [Dokumentation](.apm/skills/core-docs/SKILL.md), [DevOps/SCM](.apm/skills/core-devops/SKILL.md) |
-| Einrichtung | [core-init-project](.apm/skills/core-init-project/SKILL.md), [core-init-mcps](.apm/skills/core-init-mcps/SKILL.md), [core-user2agent-instructions](.apm/skills/core-user2agent-instructions/SKILL.md) |
+| Einrichtung | [core-init-project](.apm/skills/core-init-project/SKILL.md) (inklusive interner Providerintegration), [core-init-mcps](.apm/skills/core-init-mcps/SKILL.md), [core-user2agent-instructions](.apm/skills/core-user2agent-instructions/SKILL.md) |
 | Etappen und Übergaben | [core-milestone](.apm/skills/core-milestone/SKILL.md), [core-handoff](.apm/skills/core-handoff/SKILL.md) |
 | Gemeinsame Verträge | [core-shared](.apm/skills/core-shared/SKILL.md): interner Vertragsindex, kein zusätzlicher öffentlicher Workflow |
-| Code-Intelligence | [gortex-serena-configurator](.apm/skills/gortex-serena-configurator/SKILL.md): Gortex zuerst, projektspezifisches Serena als Fallback, danach erlaubte native Werkzeuge |
 
-Der Konfigurator enthält seine Skripte, Originaltests und MIT-Lizenz. Seine Skill-ID bleibt erhalten; ein globaler Serena-MCP wird nicht eingerichtet. Das optionale Konfigurationsskript benötigt Python und `ruamel.yaml` gemäß seinen [Anforderungen](.apm/skills/gortex-serena-configurator/REQUIREMENTS.md).
+Die Provider-/Runtime-Methodik wird bei Bedarf aus der internen [Provider- und Laufzeitreferenz](.apm/skills/core-init-project/references/provider-setup.md) geladen. Ein globaler Serena-MCP wird nicht eingerichtet. Herkunft, Anforderungen und Lizenz der integrierten Quellen sind im [Provenienznachweis](.apm/skills/core-init-project/PROVENANCE.md), den [Requirements](.apm/skills/core-init-project/REQUIREMENTS.md) und der [MIT-Lizenz](.apm/skills/core-init-project/LICENSE) dokumentiert.
 
 Die [SWE-Basis](.apm/skills/core-architecture/references/design-baseline.md) beschreibt den verbindlichen Sollzustand für Softwaredesign: klare Verantwortlichkeiten, hohe Kohäsion, Abstraktion und Information Hiding, stabile Verträge und begründete Kopplung. Die [Hintergrundreferenz](.apm/skills/core-architecture/references/principles-background.md) erläutert Herkunft und Grenzen. Vorhandene Projektarchitektur und begründete Ausnahmen bleiben maßgeblich; Core verlangt weder künstliche Abstraktionen noch ungeplante Umbauten.
 
@@ -142,7 +141,7 @@ tests/            Vertrags-, Sicherheits- und Integrationstests
 DESIGN.md         Detaillierte Architektur und Workflowverträge
 ```
 
-Core-Skills liegen unter `.apm/skills/core-<name>/`; der quelltreu migrierte Begleitskill unter `.apm/skills/gortex-serena-configurator/`. Ordnername und Frontmatter-`name` stimmen überein. `.agentic-workflow/` enthält lokale Pläne und Run-Artefakte und wird in diesem Repository von Git ignoriert. Bestätigte Pläne werden nicht mit Laufstatus überschrieben.
+Core-Skills liegen unter `.apm/skills/core-<name>/`; `core-init-project` führt die Providerintegration als interne Komponente mit. Ordnername und Frontmatter-`name` stimmen überein. `.agentic-workflow/` enthält lokale Pläne und Run-Artefakte und wird in diesem Repository von Git ignoriert. Bestätigte Pläne werden nicht mit Laufstatus überschrieben.
 
 ### Lokale Prüfungen und Paketabnahme
 
@@ -209,4 +208,4 @@ Versionsregel für 0.x: Fehlerkorrektur → Patch; neue Funktion oder inkompatib
 
 ## Lizenz
 
-[MIT](LICENSE). Der Konfigurator enthält seine eigene [MIT-Lizenz](.apm/skills/gortex-serena-configurator/LICENSE) und [Herkunftsdokumentation](.apm/skills/gortex-serena-configurator/PROVENANCE.md). Hinweise auf adaptierte Architekturmethoden stehen in [THIRD_PARTY_NOTICES.md](.apm/skills/core-architecture/THIRD_PARTY_NOTICES.md).
+[MIT](LICENSE). Die integrierte Providerkomponente enthält ihren [MIT-Lizenznachweis](.apm/skills/core-init-project/LICENSE) und ihre [Herkunftsdokumentation](.apm/skills/core-init-project/PROVENANCE.md). Hinweise auf adaptierte Architekturmethoden stehen in [THIRD_PARTY_NOTICES.md](.apm/skills/core-architecture/THIRD_PARTY_NOTICES.md).

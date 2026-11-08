@@ -31,6 +31,13 @@ is retained as historical evidence and is not presented as a current inventory.
   Gortex-first provider policy after transfer; the inventory below identifies
   the original Serena-focused source snapshot and is intentionally unchanged.
 
+## Integration note
+
+On 2026-11-08 the provider methodology, helper, original tests, requirements,
+license and provenance records were integrated into `core-init-project`. The
+former standalone skill entry and UI metadata were retired; the historical
+inventory below remains unchanged.
+
 ## Source inventory (SHA-256)
 
 ```text

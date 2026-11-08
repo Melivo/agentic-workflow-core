@@ -10,10 +10,10 @@ description: Prüft read-only die bereits vorhandenen MCP-Provider eines Harness
 ## Eigentumsgrenzen
 
 | Schicht | Eigentümer | Inhalt |
-|---|---|---|
+| --- | --- | --- |
 | vorhandene Harness-Provider | `core-init-mcps` | read-only Erkennung und Bereitschaftsbericht |
 | Credentials | Benutzer allein | sichere Ablage; der Skill sucht, liest oder erfragt keine Secrets |
-| projektspezifische Providerinitialisierung | `core-init-project` mit `gortex-serena-configurator` | ausschließlich konkret autorisierte Projektaktionen; kein globales Serena |
+| projektspezifische Providerinitialisierung | interne Providerintegration von `core-init-project` | ausschließlich konkret autorisierte Projektaktionen; kein globales Serena |
 
 Eine `apm.yml`-Deklaration oder ein Paket-Lockfile ist weder Voraussetzung noch Quelle für diese Bestandsprüfung. Dieser Skill ändert keine Paket-, Harness- oder Providerkonfiguration. Paketfreigabevalidierung und Installation sind separate, ausdrücklich autorisierte Aufgaben. Die Bestandsprüfung ist keine S00-Pflicht, löst keinen Vollscan aus und bewertet keine Architektur; eine spätere Installation berücksichtigt S00 mit Austausch- und Entfernungspfad im separat autorisierten Auftrag des zuständigen Installationsskills. Ein zusätzlicher Core-Plan wird dadurch nicht pauschal vorgeschrieben; bei planbasierter Arbeit gelten weiterhin die bestätigten Taskgrenzen.
 
@@ -25,7 +25,7 @@ Lade vor der Ausführung das [Toolrouting](../core-shared/references/tool-routin
 
 1. Prüfe read-only, welche Provider im ausdrücklich bezeichneten Harness bereits vorhanden und erreichbar sind. Nutze nur die für den Provider passende, kleinste unschädliche Bereitschaftsprüfung. Eine Deklaration oder ein Lockfile wird nicht vorausgesetzt.
 2. Lies oder inspiziere keine Secret-Werte, Schlüsselbunde oder Credential-Speicher. Fehlende Provider, Berechtigungen oder Credentials werden als nicht verfügbar gemeldet; es wird nichts gesucht, angefordert, eingerichtet oder geändert.
-3. Wenn Einrichtung gewünscht ist, benenne lediglich den plattformgerechten Installationsskill (`mcp-install-linux`/`mcp-install-windows`). Starte keinen Installer und ändere keine Provider-, Harness-, Paket- oder Projektkonfiguration.
+3. Wenn MCP-Installation gewünscht ist, benenne lediglich den plattformgerechten Installationsskill (`mcp-install-linux`/`mcp-install-windows`). Für ausdrücklich autorisierte projektspezifische Gortex-/Serena-Provideraktionen ist `core-init-project` zuständig. Starte hier keinen Installer und ändere keine Provider-, Harness-, Paket- oder Projektkonfiguration.
 4. Berichte je vorhandenem Provider die beobachtete Verfügbarkeit, die tatsächlich ausgeführte Prüfung und Grenzen. Persistiere keine flüchtigen Health-Werte.
 
 ## Ergebnisse und Zustände

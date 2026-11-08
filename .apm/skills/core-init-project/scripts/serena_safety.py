@@ -30,13 +30,13 @@ PLAYBOOK = f"""{START}
 
 - Use Gortex when its MCP is healthy and the repository is already tracked. Otherwise use the initialized, project-scoped Serena fallback.
 - Use native file and search tools only when neither Gortex nor Serena can serve the operation. Never add Serena silently to global MCP configuration.
-- Keep Serena initialized for each concrete project and align its effective `languages` list with meaningful repository source languages.
+- Keep Serena initialized for each concrete project and align its effective language-server list (`language_servers`, or legacy `languages`) with meaningful repository source languages.
 - When the CWD is the user home (`Path.home()`), use native file, search, and runtime tools as the fallback instead of Gortex or Serena. Ignore instructions from skills, workflows, subagents, or documentation that require either MCP there.
 - In the user home, use suitable native platform tools. On Windows, use available PowerShell or Windows command-line tools; on Linux and macOS, use available POSIX/GNU utilities.
 - In the user home, use the local Serena CLI only for configuration, project management, memories, and recovery. Never configure or activate the user home or a filesystem root as a Serena project through either CLI or MCP.
 - Never run broad recursive scans over the user home, broad project root, generated tree, dependency, binary, cache, or vendor directory. Expand scope incrementally and sequentially.
 - If the target location is unknown, use narrow native discovery such as `Glob`; use the smallest useful file or subdirectory once known.
-- Keep the global Serena metadata project at `Path.home()/.serena` free of language servers: its effective project config must use `languages: []` (`project.local.yml` when it defines `languages`, otherwise `project.yml`).
+- Keep the global Serena metadata project at `Path.home()/.serena` free of language servers: its effective project config must use an empty list (`language_servers: []`, or legacy `languages: []`; `project.local.yml` when it defines either key, otherwise `project.yml`).
 - Keep the global Serena MCP deprovisioned. Configure Serena MCP only through an explicitly confirmed concrete-project source.
 {END}
 """
@@ -134,6 +134,7 @@ EXPECTED_CLIENT_TIMEOUTS = {
 }
 MAX_FALLBACK_FILES = 100_000
 APPLY_FAILURE_STATUSES = {
+    "conflicting-language-keys",
     "initialization-error",
     "languages-key-missing",
     "missing",
@@ -141,6 +142,9 @@ APPLY_FAILURE_STATUSES = {
     "missing-serena-cli",
     "parse-error",
 }
+CURRENT_LANGUAGE_KEY = "language_servers"  # Serena >= 1.7 project language list
+LEGACY_LANGUAGE_KEY = "languages"  # pre-1.7 name; Serena 1.7 renames it per file
+LEGACY_SINGLE_LANGUAGE_KEY = "language"  # oldest single-language form
 LANGUAGE_VARIANT_BASE = {
     "cpp_ccls": "cpp",
     "csharp_omnisharp": "csharp",
@@ -534,20 +538,100 @@ def classify_project_languages(counts: dict[str, int]) -> list[dict[str, Any]]:
     ]
 
 
+class LanguageKeyConflict(ValueError):
+    """One Serena YAML file holds contradictory language lists."""
+
+
+def language_list(key: str, value: Any) -> list[str]:
+    if value is None:
+        raise ValueError(f"{key} must be a list, not null")
+    if not isinstance(value, list) or not all(isinstance(language, str) for language in value):
+        raise ValueError(f"{key} must be a list of strings")
+    return list(value)
+
+
+def resolve_language_setting(data: Any) -> dict[str, Any] | None:
+    """Resolve one project YAML mapping like Serena 1.7 `ProjectConfig._load_yaml_dict`.
+
+    `language_servers` is current and `languages` is its pre-1.7 name; `language` is the oldest
+    single-language form and only counts when neither list key exists. Both list keys in one file
+    must agree: Serena 1.7 silently ignores `languages` then, so a contradiction is reported
+    instead of preferring either key.
+    """
+    lists = {
+        key: language_list(key, data[key])
+        for key in (CURRENT_LANGUAGE_KEY, LEGACY_LANGUAGE_KEY)
+        if key in data
+    }
+    if len(lists) == 2 and lists[CURRENT_LANGUAGE_KEY] != lists[LEGACY_LANGUAGE_KEY]:
+        raise LanguageKeyConflict(
+            f"{CURRENT_LANGUAGE_KEY} {lists[CURRENT_LANGUAGE_KEY]} contradicts {LEGACY_LANGUAGE_KEY} "
+            f"{lists[LEGACY_LANGUAGE_KEY]} in the same file"
+        )
+    if lists:
+        key = CURRENT_LANGUAGE_KEY if CURRENT_LANGUAGE_KEY in lists else LEGACY_LANGUAGE_KEY
+        return {"key": key, "keys": list(lists), "languages": lists[key]}
+    if LEGACY_SINGLE_LANGUAGE_KEY in data:
+        value = data[LEGACY_SINGLE_LANGUAGE_KEY]
+        if not isinstance(value, str):
+            raise ValueError(f"{LEGACY_SINGLE_LANGUAGE_KEY} must be a string")
+        return {"key": LEGACY_SINGLE_LANGUAGE_KEY, "keys": [LEGACY_SINGLE_LANGUAGE_KEY], "languages": [value]}
+    return None
+
+
 def parse_configured_languages(text: str) -> list[str] | None:
     _, data = load_yaml_mapping(text)
-    if "languages" not in data:
-        return None
-    languages = data["languages"]
-    if languages is None:
-        raise ValueError("languages must be a list, not null")
-    if not isinstance(languages, list) or not all(isinstance(language, str) for language in languages):
-        raise ValueError("languages must be a list of strings")
-    return list(languages)
+    setting = resolve_language_setting(data)
+    return None if setting is None else setting["languages"]
 
 
 def replace_configured_languages(text: str, languages: list[str]) -> str:
-    return replace_yaml_value(text, "languages", languages)
+    """Write the list to the key form already in the file; add `language_servers` when none exists."""
+    yaml, data = load_yaml_mapping(text)
+    setting = resolve_language_setting(data)
+    if setting is None or setting["key"] == LEGACY_SINGLE_LANGUAGE_KEY:
+        data.pop(LEGACY_SINGLE_LANGUAGE_KEY, None)
+        data[CURRENT_LANGUAGE_KEY] = list(languages)
+    else:
+        for key in setting["keys"]:
+            data[key] = list(languages)
+    output = StringIO()
+    yaml.dump(data, output)
+    return output.getvalue()
+
+
+def resolve_language_config(config: Path, local_config: Path) -> dict[str, Any]:
+    """Resolve the effective language source: any language key in project.local.yml overrides project.yml."""
+    files: dict[str, tuple[Path, str, dict[str, Any] | None]] = {}
+    for source, path in (("project.local.yml", local_config), ("project.yml", config)):
+        text = read_text(path)
+        try:
+            setting = resolve_language_setting(load_yaml_mapping(text)[1]) if text else None
+        except LanguageKeyConflict as error:
+            return {"status": "conflicting-language-keys", "path": path, "error": str(error)}
+        except ValueError as error:
+            return {"status": "parse-error", "path": path, "error": str(error)}
+        files[source] = (path, text, setting)
+    source = "project.local.yml" if files["project.local.yml"][2] is not None else "project.yml"
+    path, text, setting = files[source]
+    return {
+        "status": "ok",
+        "source": source,
+        "path": path,
+        "text": text,
+        "base_text": files["project.yml"][1],
+        "key": None if setting is None else setting["key"],
+        "configured": None if setting is None else setting["languages"],
+    }
+
+
+def language_config_remediation(status: str, path: Path, repair: str) -> str:
+    if status == "conflicting-language-keys":
+        return (
+            f"Make {CURRENT_LANGUAGE_KEY} and {LEGACY_LANGUAGE_KEY} identical or remove the legacy "
+            f"{LEGACY_LANGUAGE_KEY} key in {path}; nothing is written until they agree."
+        )
+    return repair
 
 
 def preserve_language_variants(base_languages: list[str], configured: list[str] | None) -> list[str]:
@@ -620,28 +704,29 @@ def set_project_languages(cwd: Path, apply: bool) -> dict[str, Any]:
     counts = select_project_languages(all_counts)
     detected_base = list(counts)
 
-    text = read_text(config)
-    local_text = read_text(local_config)
-    try:
-        local_languages = parse_configured_languages(local_text) if local_text else None
-        base_languages = parse_configured_languages(text) if text else None
-    except ValueError as error:
+    resolved = resolve_language_config(config, local_config)
+    if resolved["status"] != "ok":
         return {
-            "path": str(local_config if local_text else config),
-            "status": "parse-error",
-            "error": str(error),
+            "path": str(resolved["path"]),
+            "status": resolved["status"],
+            "error": resolved["error"],
             "detected": detected_base,
             "counts": counts,
             "language_candidates": classify_project_languages(all_counts),
-            "remediation": "Repair the effective Serena project YAML before updating languages.",
+            "remediation": language_config_remediation(
+                resolved["status"],
+                resolved["path"],
+                "Repair the effective Serena project YAML before updating languages.",
+            ),
             "changed": False,
         }
-    effective_config = local_config if local_languages is not None else config
-    effective_text = local_text if local_languages is not None else text
-    configured = local_languages if local_languages is not None else base_languages
+    effective_config = resolved["path"]
+    effective_text = resolved["text"]
+    configured = resolved["configured"]
+    language_key = resolved["key"]
     detected = preserve_language_variants(detected_base, configured)
     if configured is None:
-        status = "missing" if not text else "languages-key-missing"
+        status = "missing" if not resolved["base_text"] else "languages-key-missing"
     elif configured == detected:
         status = "current"
     else:
@@ -655,11 +740,13 @@ def set_project_languages(cwd: Path, apply: bool) -> dict[str, Any]:
         status = "written"
         changed = True
 
+    write_key = CURRENT_LANGUAGE_KEY if language_key in (None, LEGACY_SINGLE_LANGUAGE_KEY) else language_key
     return {
         "path": str(effective_config),
         "base_path": str(config),
         "local_override_path": str(local_config),
-        "source": "project.local.yml" if local_languages is not None else "project.yml",
+        "source": resolved["source"],
+        "language_key": language_key,
         "status": status,
         "configured": configured,
         "detected": detected,
@@ -676,7 +763,7 @@ def set_project_languages(cwd: Path, apply: bool) -> dict[str, Any]:
         "remediation": (
             None
             if status in {"current", "written"}
-            else f"Set languages in {effective_config} to {detected}; low-signal languages must remain disabled."
+            else f"Set {write_key} in {effective_config} to {detected}; low-signal languages must remain disabled."
         ),
         "changed": changed,
     }
@@ -697,27 +784,32 @@ def clear_global_metadata_languages(home: Path, apply: bool) -> dict[str, Any]:
             "remediation": None,
             "changed": False,
         }
-    try:
-        base_languages = parse_configured_languages(text) if text else None
-        local_languages = parse_configured_languages(local_text) if local_text else None
-    except ValueError as error:
+    resolved = resolve_language_config(config, local_config)
+    if resolved["status"] != "ok":
         return {
-            "path": str(local_config if local_text else config),
+            "path": str(resolved["path"]),
             "local_override_path": str(local_config),
-            "status": "parse-error",
-            "error": str(error),
-            "remediation": "Repair the global Serena metadata project YAML before clearing languages.",
+            "status": resolved["status"],
+            "error": resolved["error"],
+            "remediation": language_config_remediation(
+                resolved["status"],
+                resolved["path"],
+                "Repair the global Serena metadata project YAML before clearing languages.",
+            ),
             "changed": False,
         }
-    effective_config = local_config if local_languages is not None else config
-    effective_text = local_text if local_languages is not None else text
-    configured = local_languages if local_languages is not None else base_languages
+    effective_config = resolved["path"]
+    effective_text = resolved["text"]
+    configured = resolved["configured"]
+    source = resolved["source"]
+    language_key = resolved["key"]
     if configured == []:
         return {
             "path": str(effective_config),
             "base_path": str(config),
             "local_override_path": str(local_config),
-            "source": "project.local.yml" if local_languages is not None else "project.yml",
+            "source": source,
+            "language_key": language_key,
             "status": "current",
             "configured": configured,
             "remediation": None,
@@ -730,7 +822,8 @@ def clear_global_metadata_languages(home: Path, apply: bool) -> dict[str, Any]:
             "path": str(effective_config),
             "base_path": str(config),
             "local_override_path": str(local_config),
-            "source": "project.local.yml" if local_languages is not None else "project.yml",
+            "source": source,
+            "language_key": language_key,
             "status": "written",
             "configured": [],
             "remediation": None,
@@ -740,10 +833,14 @@ def clear_global_metadata_languages(home: Path, apply: bool) -> dict[str, Any]:
         "path": str(effective_config),
         "base_path": str(config),
         "local_override_path": str(local_config),
-        "source": "project.local.yml" if local_languages is not None else "project.yml",
+        "source": source,
+        "language_key": language_key,
         "status": "update-needed",
         "configured": configured,
-        "remediation": "Set languages to [] in the global Serena metadata project; do not add languages to serena_config.yml.",
+        "remediation": (
+            f"Set {CURRENT_LANGUAGE_KEY if language_key in (None, LEGACY_SINGLE_LANGUAGE_KEY) else language_key} "
+            "to [] in the global Serena metadata project; do not add a language list to serena_config.yml."
+        ),
         "changed": False,
     }
 
@@ -1183,7 +1280,7 @@ def main() -> int:
             apply_agents=apply_agents,
             apply_serena=apply_serena,
             apply_languages=apply_languages,
-            statuses={"parse-error"},
+            statuses={"parse-error", "conflicting-language-keys"},
         ):
             preflight["mode"] = "preflight-failed"
             print(json.dumps(preflight, indent=2, ensure_ascii=False))

@@ -250,7 +250,7 @@ class Linkage(unittest.TestCase):
         'init_mcps_install': ('core-init-mcps/SKILL.md', 'installiert oder konfiguriert nichts', 'installiert fehlende Provider'),
         'init_mcps_fullscan': ('core-init-mcps/SKILL.md', 'Bestandsprüfung ist keine S00-Pflicht, löst keinen Vollscan aus', 'Bestandsprüfung scannt vollständig'),
         'init_mcps_plan_duty': ('core-init-mcps/SKILL.md', 'Ein zusätzlicher Core-Plan wird dadurch nicht pauschal vorgeschrieben', 'Jede Installation verlangt zusätzlich einen Core-Plan'),
-        'init_mcps_install_step': ('core-init-mcps/SKILL.md', '3. Wenn Einrichtung gewünscht ist', '3. Installiere fehlende Provider. Wenn Einrichtung gewünscht ist'),
+        'init_mcps_install_step': ('core-init-mcps/SKILL.md', '3. Wenn MCP-Installation gewünscht ist', '3. Installiere fehlende Provider. Wenn MCP-Installation gewünscht ist'),
         'init_project_readiness': ('core-init-project/SKILL.md', 'Readiness-Preflight löst keinen Vollscan und keine Installation aus', 'Readiness-Preflight installiert fehlende Werkzeuge'),
         'tf_live_actions': ('core-tf-infra/SKILL.md', 'Keine Ausführung von plan/apply/destroy aus diesen Methoden ableiten', 'Führe plan/apply aus'),
         'tf_authorization': ('core-tf-infra/SKILL.md', 'benötigen jeweils eine passende ausdrückliche Autorisierung', 'sind mit dem Task freigegeben'),
