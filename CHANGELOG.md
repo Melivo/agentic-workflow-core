@@ -4,6 +4,13 @@
 
 - Ergänzt reproduzierbare lokale/CI-Prüfungen und eine standardmäßig deaktivierte, getrennte Release-PR- und Veröffentlichungskette. GitHub-Livebetrieb und App-Einrichtung sind nicht bestätigt.
 
+## [0.12.0](https://github.com/Melivo/agentic-workflow-core/compare/v0.11.0...v0.12.0) (2026-11-08)
+
+
+### Features
+
+* **core:** prepare handoff plans with visible approval gate ([#17](https://github.com/Melivo/agentic-workflow-core/issues/17)) ([be7c0b5](https://github.com/Melivo/agentic-workflow-core/commit/be7c0b5c0df58c83bc773b15002393f4942d4470))
+
 ## [0.11.0](https://github.com/Melivo/agentic-workflow-core/compare/v0.10.0...v0.11.0) (2026-11-05)
 
 
