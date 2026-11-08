@@ -650,6 +650,83 @@ class ContractTests(unittest.TestCase):
                 with self.subTest(path=path, clause=pattern), self.assertRaisesRegex(checker.ContractError, 'RV05 Ersatzplan-Ablaufklausel'):
                     checker.check_replacement_sources(dict(sources, **{path: mutated}))
 
+    def test_handoff_first_plan_clauses_and_in_memory_mutations(self):
+        sources = {p: (ROOT / p).read_text(encoding='utf-8') for p in checker.HANDOFF_SOURCES}
+        checker.check_handoff_sources(sources)
+        original_read = Path.read_text
+        def run_group(relative, text):
+            def read_text(path, *args, **kwargs):
+                return text if Path(path) == ROOT / relative else original_read(path, *args, **kwargs)
+            with patch.object(Path, 'read_text', read_text), contextlib.redirect_stdout(io.StringIO()):
+                checker.check_group(ROOT, 'workflows')
+        mutations = 0
+        for relative, patterns in checker.HANDOFF_SOURCES.items():
+            for pattern in patterns:
+                text, count = re.subn(pattern, '', sources[relative])
+                with self.subTest(source=relative, clause=pattern):
+                    self.assertGreater(count, 0)
+                    with self.assertRaisesRegex(checker.ContractError, 'Handoff-Klausel fehlt'):
+                        checker.check_handoff_sources(dict(sources, **{relative: text}))
+                    with self.assertRaises(checker.ContractError):
+                        run_group(relative, text)
+                mutations += 1
+        widenings = ('Handoff erlaubt sofortige Ausführung.', 'Draft ist ausführbar.',
+                     'handoff-planning ersetzt selection_approval.', 'Anzeige gilt als Nutzerfreigabe.',
+                     'Ein Dateipfad genügt als vollständige Anzeige.',
+                     'Handoff-Sperre gilt auch für technische Ersatzpläne.')
+        for relative in sources:
+            for clause in widenings:
+                with self.subTest(source=relative, widening=clause), self.assertRaisesRegex(checker.ContractError, 'Handoff-Ausweitung'):
+                    run_group(relative, sources[relative] + '\n' + clause)
+                mutations += 1
+        print('HANDOFF source mutations:', mutations, 'rejected; static evidence only')
+
+    def test_handoff_draft_keeps_execute_gate_and_task_validation(self):
+        cases = {c['id']: c['input'] for c in json.loads((ROOT / 'tests/core_scenario_cases.json').read_text())['cases']}
+        data = cases['handoff-draft-native']
+        before = copy.deepcopy(data)
+        checker.validate_prompt(data)
+        self.assertEqual(data, before, 'static Draft validation must not confirm the input')
+        with self.assertRaisesRegex(checker.ContractError, 'Plan nicht bestätigt'):
+            checker.validate_plan(data['draft'])
+        # Index syntax accepts the planning marker, but a normal execution/resume prompt does not.
+        checker.check_index(data['index'])
+        resume = dict(data, purpose='resume')
+        with self.assertRaisesRegex(checker.ContractError, 'keine freigegebene aktuelle Etappe'):
+            checker.validate_prompt(resume)
+        for change in ({'tasks': []}, {'tasks': [dict(data['draft']['tasks'][0], dependencies=['T99'])]},
+                       {'tasks': [dict(data['draft']['tasks'][0], checks=[])]}):
+            invalid = copy.deepcopy(data)
+            invalid['draft'].update(change)
+            with self.subTest(change=change), self.assertRaises(checker.ContractError):
+                checker.validate_prompt(invalid)
+        # Missing observed facts must fail, never acquire success defaults.
+        for field in data:
+            invalid = copy.deepcopy(data)
+            del invalid[field]
+            if field in ('kind', 'purpose', 'approval_after_display', 'execution_order', 'link_owner'):
+                continue
+            with self.subTest(missing=field), self.assertRaises((checker.ContractError, KeyError)):
+                checker.validate_handoff_first_plan(invalid)
+
+    def test_handoff_coverage_and_display_paths_use_existing_scenarios(self):
+        fixture = json.loads((ROOT / 'tests/core_scenario_cases.json').read_text())
+        checker.check_coverage(fixture)
+        for key in ('handoff-planungsbefugnis', 'handoff-erstplan-halt', 'handoff-sichtbare-anzeige'):
+            ids = fixture['coverage'][key]['cases']
+            self.assertTrue({'pass', 'fail'} <= {c['expected'] for c in fixture['cases'] if c['id'] in ids})
+            missing = copy.deepcopy(fixture)
+            del missing['coverage'][key]
+            with self.assertRaisesRegex(checker.ContractError, 'Regressionsabdeckung fehlt'):
+                checker.check_coverage(missing)
+        # A foreign harness takes the same capability route without installing a viewer.
+        by_id = {c['id']: c for c in fixture['cases']}
+        for name in ('draft-native', 'draft-other-harness', 'draft-os-fallback', 'draft-headless', 'draft-display-failure', 'confirmed-same-version', 'execute-after-new-order'):
+            checker.validate_scenario(by_id['handoff-' + name]['input'])
+        # Existing independent replacement-plan controls must still pass without a new personal approval.
+        checker.check_replacement_sources({p: (ROOT / p).read_text() for p in checker.REPLACEMENT_SOURCES})
+        checker.validate_scenario(by_id['g04-authorization-positive']['input'])
+
     def test_rv07_situational_user_confirmation_stays_valid(self):
         # RV07 rejects only blanket gates; situational confirmation remains allowed.
         sources = {p: (ROOT / p).read_text() for p in checker.REPLACEMENT_SOURCES}

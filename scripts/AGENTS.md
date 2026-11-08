@@ -41,6 +41,11 @@ Die Workflowverkabelung bleibt unter
   weist unverneinte Ausweitungen zurück; der Katalog muss für
   `core-execute` Plan- und `text`-Eingang ohne Planausgabe sowie die Eskalation
   an `core-plan` führen.
+- `HANDOFF_SOURCES` bindet die Erstplanregeln an Workflow-, Index-, Plan-,
+  Review-, Prompt-, Anzeige- und Routingquellen. `kind: prompt` modelliert
+  die begrenzte Planungsaktivierung und dieselbe Draft-Datei bis zur neuen
+  Freigabe; `validate_plan` bleibt ausschließlich für ausführbare Confirmed-Pläne.
+  Die Prüfung zeigt keine Pläne an und erteilt keine Autorisierung.
 - `check_habit_feedback.py` führt in `CORE_FILES` die geschlossene transitive
   Markdown-Linkmenge des Core-Snapshots; neu verlinkte Quellen wie
   `core-execute/references/direct-mode.md` gehören als exakter Eintrag hinein.

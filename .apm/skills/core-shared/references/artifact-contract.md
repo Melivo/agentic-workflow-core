@@ -10,7 +10,7 @@ Repositorydateien übertragen den Workflowkontext. Dieses Dokument definiert Eig
 | Gesamtziel und gemeinsame bestätigte Entscheidungen | `.agentic-workflow/goals/<goal-id>/goal.md` mit `goal/v1` | `core-milestone` |
 | Unveränderliche Etappendefinition und Version | `.agentic-workflow/goals/<goal-id>/milestones/<milestone-id>-v<version>.yaml` mit `milestone-definition/v1` | `core-milestone` |
 | Versionsauswahl, aktuelle Etappe und Nachweisreferenzen | `.agentic-workflow/goals/<goal-id>/index.yaml` mit `milestone-index/v1` | `core-milestone` |
-| Ziel, Scope und Taskgraph | `.agentic-workflow/plans/<plan-name>.md` mit `plan/v1` | `core-plan` |
+| Ziel, Scope und Taskgraph | `.agentic-workflow/plans/<plan-name>.md` mit `plan/v1`; ein Handoff-abgeleiteter Erstplan darf dort bis zur ausdrücklichen Freigabe einmalig als `Draft` stehen | `core-plan` |
 | unveränderliche Auftragsgrundlage eines Direktlaufs | `.agentic-workflow/runs/<run-id>/request.md` | `core-execute` |
 | aktueller Resume-Zustand | `.agentic-workflow/runs/<run-id>/state.yaml` | `core-execute` |
 | Task- und Checkevidenz | neue Versuche: `.agentic-workflow/runs/<run-id>/tasks/<task-id>/attempt-<nn>.yaml` mit `task-result/v1`; bestehende `.agentic-workflow/runs/<run-id>/tasks/<task-id>.yaml` bleiben lesbarer Legacy-Pfad | `core-execute` persistiert die Ergebnisse read-only Agenten; ein ausdrücklich schreibender Agent darf ausschließlich seine Ergebnisdatei gemäß Taskresultatausnahme ändern |
@@ -50,7 +50,7 @@ tasks:
         pass: "Exitcode 0 und erwartete fachliche Beobachtung"
 ```
 
-Jeder Task hat genau einen registrierten Agenten. `context_paths` und `scope` bleiben getrennt; leeres `scope` bedeutet read-only. Abhängigkeiten sind der einzige Ordnungsmechanismus. Jedes Akzeptanzkriterium wird durch mindestens einen Check gedeckt. Materielle Unsicherheit verhindert `Confirmed`. Task-Kriterium-Zuordnung und der Abschnitt `## Planreview` stehen im Markdowntext um den Graphen; das Kernformat erhält dafür keine Felder, und ein Planreview erzeugt weder Run noch `review/v1` ([Planreview](workflow-contract.md#planreview)).
+Jeder Task hat genau einen registrierten Agenten. `context_paths` und `scope` bleiben getrennt; leeres `scope` bedeutet read-only. Abhängigkeiten sind der einzige Ordnungsmechanismus. Jedes Akzeptanzkriterium wird durch mindestens einen Check gedeckt. Materielle Unsicherheit verhindert `Confirmed`. Task-Kriterium-Zuordnung und der Abschnitt `## Planreview` stehen im Markdowntext um den Graphen; das Kernformat erhält dafür keine Felder, und ein Planreview erzeugt weder Run noch `review/v1` ([Planreview](workflow-contract.md#planreview)). Nur der Handoff-abgeleitete Erstplan darf nach statischer Validierung vor dem unabhängigen Planreview als Draft am einen vorgesehenen Pfad geschrieben werden; `core-plan` besitzt die Datei und `core-review` schreibt keine. Draft ist nicht ausführbar, kein bestätigter Plan und nicht in `plan_paths`; nach Review, vollständiger tatsächlicher Anzeige und neuer ausdrücklicher Freigabe wird dieselbe Datei Confirmed, worauf ausschließlich `core-milestone` dieselbe aktuelle ID-Version aktualisiert und sie in `plan_paths` verknüpft. Technische Ersatzplanung bleibt unberührt.
 
 ## Runzustand
 

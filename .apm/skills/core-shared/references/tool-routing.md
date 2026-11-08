@@ -58,6 +58,10 @@ Auswahlgrund, Quelle, angewandter Teil und Grenzen werden knapp in vorhandener
 task-result/v1-Evidenz oder limitations festgehalten; bei Nichtnutzung genügt
 der relevante Grund. Keine Zusatzfelder, Statusdatei oder Resolver.
 
+## Sichtbare Plananzeige
+
+Für einen vollständigen, zur Freigabe vorgelegten Plan nutze zuerst eine tatsächlich verfügbare native Plan-/Dateianzeige des aktuellen Harnesses (OpenChamber ist nur ein Beispiel). Fehlt diese Fähigkeit, öffne den exakten lokalen Markdownpfad mit der OS-Standardanwendung. Bei Headless-Betrieb oder fehlgeschlagener Anzeige nenne die Einschränkung und stelle den vollständigen Planinhalt im Chat dar; ein Pfad oder eine Zusammenfassung genügt nicht. Behaupte weder Öffnung noch Lesen oder Freigabe ohne Nachweis. Anzeige ist keine Lesebestätigung oder Autorisierung. Keine Viewermechanik, Providerinstallation oder neue Abhängigkeit einführen.
+
 ## Capability-Matrix
 
 | Bedarf | Bevorzugter Provider | Erlaubte Grenze oder Fallback |

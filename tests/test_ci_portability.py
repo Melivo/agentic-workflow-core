@@ -41,6 +41,10 @@ CHARACTERIZED = {
 # G03/M01: explicit Markdown sources appended after the characterized entries (no PNG).
 CHARACTERIZED['workflows'] += ['design-baseline.md', 'principles-background.md']
 CHARACTERIZED['domains'] += ['core-devops/SKILL.md', 'development-automation.md']
+# Handoff display and activation sources from the integrated contract change.
+CHARACTERIZED['shared'] += ['tool-routing.md']
+CHARACTERIZED['workflows'] += ['AGENTS.md']
+CHARACTERIZED['setup'] += ['core-routing.md']
 
 
 def source_files():

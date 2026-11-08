@@ -229,6 +229,9 @@ def validate_selection(data):
 
 def validate_prompt(data):
     """A start/goal prompt is stale unless it matches the current index selection."""
+    if data.get('purpose') == 'handoff-first-plan':
+        validate_handoff_first_plan(data)
+        return
     selected_entries(data['index'])
     current = [e for e in data['index']['milestones'] if e['current']]
     require(len(current) == 1, 'keine freigegebene aktuelle Etappe')
@@ -243,6 +246,65 @@ def validate_prompt(data):
     require(entry['plan_paths'] and prompt['plan_path'] == entry['plan_paths'][-1], 'veralteter Start-/Goal-Prompt: Plan abgelöst')
     if prompt.get('run_path'):
         require(prompt['run_path'] in entry['run_paths'] and run_key(prompt['run_path'])[1] == plan_key(prompt['plan_path']), 'veralteter Start-/Goal-Prompt: Run nicht an Plan gebunden')
+
+def validate_handoff_first_plan(data):
+    """Static prompt/index/plan relationships, never an authorization or display service."""
+    require(data['current_user_order'] and not data['quoted_handoff'], 'Handoff ist kein aktueller Arbeitsauftrag')
+    require(data['originals_read'] and data['original_paths'] and all(safe_relative(p) for p in data['original_paths']), 'exakte Originalprüfung fehlt')
+    require(not data['aborted'] and not data['concurrent_change'], 'Abbruch/konkurrierende Indexänderung')
+    require(not data['active_plan_or_run'], 'aktive Arbeit bleibt Resume')
+    require(not data['goal_completed'], 'Gesamtabschluss ohne Folgearbeit')
+    require(data['activation_owner'] == 'core-milestone', 'Planungsaktivierung durch falschen Owner')
+    require(data['authority'] == 'handoff-planning' and not data['personal_approval_claim'], 'Planungsbefugnis ist keine persönliche Einzelgenehmigung')
+    documents = data['documents']
+    validate_artifacts(documents)
+    before = next(d for d in documents if d['schema'] == 'milestone-index/v1')
+    activated = data['index']
+    check_index(activated)
+    entries = [e for e in activated['milestones'] if e['current']]
+    require(len(entries) == 1, 'genau eine Planungsaktivierung erforderlich')
+    entry = entries[0]
+    require(entry['current_approval'] == 'handoff-planning', 'Planungsaktivierung ist keine Erstplanfreigabe')
+    require(not any(e['current'] for e in before['milestones']), 'aktive Arbeit bleibt Resume')
+    old = next((e for e in before['milestones'] if (e['id'], e['version']) == (entry['id'], entry['version'])), None)
+    require(old is not None and old['selected'] and old['selection_approval'] == CONFIRMED, 'keine bestätigte ausgewählte Version')
+    expected = dict(before, revision=before['revision'] + 1, milestones=[dict(e, current=True, current_approval='handoff-planning') if e == old else e for e in before['milestones']])
+    require(activated == expected and data['conditional_atomic_write'], 'Auswahl/Definition/Index unzulässig verändert')
+    # Reuse the complete artifact validator for selected dependency versions and evidence.
+    validate_artifacts([activated if d is before else d for d in documents])
+    prompt = data['prompt']
+    require(prompt == data['handoff_binding'], 'Handoff/Promptbindung widerspricht Originalen')
+    require({prompt['goal_path'], prompt['index_path'], prompt['definition_path'], data['handoff_path']} <= set(data['original_paths']), 'exakte Originalprüfung fehlt')
+    require((prompt['goal_path'], prompt['index_path']) == (before['goal_path'], before['goal_path'].removesuffix('goal.md') + 'index.yaml'), 'Handoff-Ziel/Indexbindung')
+    require((prompt['milestone_id'], prompt['version'], prompt['definition_path']) == (entry['id'], entry['version'], entry['definition_path']), 'Handoff-Versions-/Auswahlkonflikt')
+    require(positive_int(prompt['version']) and plan_key(prompt['plan_path'])[:3] == (parse_path(GOAL_RE, prompt['goal_path'], 'Prompt-Ziel')[1], entry['id'], entry['version']), 'Handoff-Planbindung')
+    require(data['draft_path'] == prompt['plan_path'] == data['final_path'] and data['plan_file_count'] == 1, 'kein gleicher einzelner Planpfad')
+    draft = data['draft']
+    require(draft['status'] == 'Draft', 'statischer Erstplan ist kein Draft')
+    # Validate every existing task invariant on a copy; validate_plan itself still rejects Draft.
+    validate_plan(dict(draft, status='Confirmed'))
+    require(data['plan_owner'] == 'core-plan' and not data['review_writes'], 'Draft-/Review-Dateibesitz')
+    require(data['static_before_write'] and data['independent_review'] and data['review_pass'], 'statische Validierung/unabhängiges Planreview fehlt')
+    display = data['display']
+    route = 'native' if display['native_available'] else 'os' if display['gui_available'] else 'chat'
+    if route != 'chat' and not display['success']:
+        route = 'chat'
+    require(display['route'] == route, 'Anzeige ignoriert Harness-/OS-Fallback')
+    require(display['full_content'] and display['actual'] and display['after_review'], 'vollständige tatsächliche Anzeige nach Review fehlt')
+    require(route != 'chat' or display['limitation_reported'], 'Anzeigeausfall/Headless verschwiegen')
+    require(not display['read_claim'] and not display['approval_claim'] and not display['installs'], 'Anzeige ist keine Lese-/Freigabeevidenz oder Installation')
+    if not data['new_user_approval']:
+        require(data['final_plan'] == draft and data['final_index'] == activated and not data['execute'], 'Erstplan-Halt vor neuer Freigabe verletzt')
+    else:
+        require(data['approval_after_display'], 'Erstplanfreigabe vor vollständiger Anzeige')
+        require(data['final_plan'] == dict(draft, status='Confirmed'), 'bestätigte Datei/Inhalt verändert')
+        require(data['link_owner'] == 'core-milestone', 'Confirmed-Verknüpfung durch falschen Owner')
+        linked = dict(entry, current_approval=CONFIRMED, plan_paths=[prompt['plan_path']])
+        expected = dict(activated, revision=activated['revision'] + 1, milestones=[linked if e == entry else e for e in activated['milestones']])
+        require(data['final_index'] == expected, 'Confirmed-Link verändert ID-Version/Auswahl')
+        validate_plan(data['final_plan'])
+        require(not data['execute'] or data['execution_order'], 'Planfreigabe ist kein Ausführungsauftrag')
+
 
 def validate_write_sequence(data):
     """New files at free paths, index last, conditional on revision and content."""
@@ -539,7 +601,10 @@ def check_index(data):
     selected = selected_entries(data)
     current = [m for m in entries if m['current']]
     require(len(current) <= 1, 'mehrere aktuelle Etappen')
-    require(all(m.get('current_approval') == CONFIRMED for m in current), 'aktuelle Etappe ohne Freigabe')
+    require(all(m.get('current_approval') in (CONFIRMED, 'handoff-planning') for m in current), 'aktuelle Etappe ohne Freigabe')
+    for entry in current:
+        if entry['current_approval'] == 'handoff-planning':
+            require(not entry['plan_paths'] and not entry['run_paths'] and not entry['completion_refs'], 'Planungsaktivierung enthält bestätigten Plan/Run/Abschluss')
     require(set(selected) == {m['id'] for m in entries}, 'M-ID ohne ausgewählte Version')
     for entry in entries:
         pinned = (goal, entry['id'], entry['version'])
@@ -582,7 +647,7 @@ def check_completion_ref(entry, pinned, ref):
 POLICIES = {
     'milestones': [(r'bestätigt\w* Definition\w*[^.!\n]*(?:unveränder|nicht.*(?:überschreib|veränder))', 'unveränderliche Definition'), (r'(?:Versionsauswahl|Ersatzdefinition|Versionswechsel)[^.!\n]*Bestätigung', 'bestätigter Versionswechsel'), (r'(?:Abschluss|Nachweis)[^.!\n]*(?:nicht automatisch|keine automatische)', 'keine Erfolgsübertragung')],
     'shared': [(r'(?:Execute|core-execute)[^.!\n]*(?:persistiert|schreibt)[^.!\n]*read-only', 'Execute persistiert read-only Ergebnisse'), (r'(?:Versuch|attempt)[^.!\n]*unveränder|unveränder[^.!\n]*(?:Versuch|attempt)', 'unveränderliche Versuche'), (r'(?:referenz|angewiesen)[^.!\n]*(?:erhalten|aufbewahr)', 'referenzabhängige Aufbewahrung'),
-               (r'Dateiscope[^.!\n]*(?:keine|nicht)[^.!\n]*Verantwortlich', 'Dateiscope ist keine Funktionsfreigabe'), (r'kumulativ[^.!\n]*(?:ursprünglich|Original)', 'kumulativer Scope gegen Originalbezug'), (r'Ersatzplanzyklus[^.!\n]*früh', 'Vereinfachungsstopp'), (r'Umbenennung[^.!\n]*nicht zurück', 'Umbenennung setzt nicht zurück'), (r'Planreview[^.!\n]*keinen Run', 'Planreview ohne Run'), (r'Planreview-pass[^.!\n]*nicht[^.!\n]*bestätigt', 'Planreview-pass ist keine Bestätigung'),
+               (r'Dateiscope[^.!\n]*(?:keine|nicht)[^.!\n]*Verantwortlich', 'Dateiscope ist keine Funktionsfreigabe'), (r'kumulativ[^.!\n]*(?:ursprünglich|Original)', 'kumulativer Scope gegen Originalbezug'), (r'Ersatzplanzyklus[^.!\n]*früh', 'Vereinfachungsstopp'), (r'Umbenennung[^.!\n]*nicht zurück', 'Umbenennung setzt nicht zurück'), (r'Planreview[^.!\n]*keinen Run', 'Planreview ohne Run'), (r'(?:Planreview-pass[^.!\n]*nicht[^.!\n]*bestätigt|Review-pass bedeutet nur prüffähig, niemals Nutzerbestätigung)', 'Planreview-pass ist keine Bestätigung'),
                (r'Eigenentwicklung[^.!\n]*belegte Lücke', 'Standard vor unbegründeter Eigenentwicklung'), (r'(?:keine|kein)[^.!\n]*präventiv', 'kein präventiver Zusatz'), (r'Übernommen\w* technisch\w* Voraussetzung\w*[^.!\n]*neu begründet', 'übernommene Voraussetzung neu begründen'), (r'(?:entfernt|vereinfach)[^.!\n]*nicht durch weitere Mechanismen', 'Vereinfachen statt kompensieren'),
                (r'beobachtbar\w* Verhalten[^.!\n]*Fehler\w*[^.!\n]*getrennt von technischen Entscheidungen', 'Verhalten getrennt von Lösung'), (r'technisch\w* Nutzerconstraints?[^.!\n]*verbindlich', 'Nutzerconstraint bleibt verbindlich'), (r'Agentenpräferenz[^.!\n]*nicht[^.!\n]*Nutzeranforderung', 'Agentenpräferenz keine Nutzeranforderung'), (r'Kleinfix[^.!\n]*nur[^.!\n]*Regressionstest', 'schlanker Kleinfix'),
                (r'(?:jede|alle) ursprünglich\w* Anforderung\w*[^.!\n]*Fehlerf', 'vollständige Originalabdeckung'), (r'Grün\w* selbst gewählt\w* Kriterien genügen nicht[^.!\n]*ursprünglich\w* Fehlerfall', 'grüne Eigenkriterien genügen nicht'), (r'Unbegründet\w* Zusätze entfallen', 'keine ungefragten Zusätze'), (r'keine zusätzlichen YAML-Felder', 'Abdeckung ohne neue Felder'),
@@ -629,6 +694,7 @@ REQUIRED_COVERAGE = (
     'S-dox-projektdokumentation',
     'g04-authorization-rahmen', 'g04-kosten-aufwand-trennung', 'g04-reparatur-evidenzbasis', 'g04-blast-radius', 'g04-delegation-consent', 'g04-katalog-ohne-limit',
     'execute-direkt-eingang', 'execute-freigabevorrang', 'execute-zusatzdelegation',
+    'handoff-planungsbefugnis', 'handoff-erstplan-halt', 'handoff-sichtbare-anzeige',
 )
 
 def check_coverage(fixture):
@@ -825,21 +891,22 @@ REPLACEMENT_SOURCES = {
         r'Ohne bestätigten Rahmen[^.]*neuen eigenständigen Zielen[^.]*Meilensteinänderungen[^.]*Ausschlüssen[^.]*materiell offenen Entscheidungen[^.]*unklaren oder ungedeckten Wirkungen[^.]*ungedeckten Geldkosten[^.]*vor Schreiben und Ausführung[^.]*Nutzerentscheidung',
         r'Scopes blockieren[^.]*ausdrücklich oder abgeleitet freigegebenen neuen Plan',
         r'abgeleitet freigegebener Ersatzplan[^.]*neuen Run[^.]*Vorgängerplan und -run',
-        r'Planreview-pass[^.]*erteilt selbst keine Freigabe',
-        r'Ausführung erfordert[^.]*abgeleitete Planfreigabe[^.]*Ausführungsauftrag',
+        r'Review-pass bedeutet nur prüffähig, niemals Nutzerbestätigung',
+        r'abgeleitet freigegebener Ersatzplan[^.]*bestehendem Ausführungsauftrag[^.]*neuen Run',
         r'Der bestätigte Plan bleibt während der Ausführung unverändert',
     ),
     '.apm/skills/core-plan/SKILL.md': (
         r'Nutze anschließend Schritt 5[^.]*statische Validierung[^.]*unabhängige Planreview',
-        r'Prüfe danach die Freigabe[^\n]*abgeleitete Freigabe im Plantext[^.]*exakten Original-[^.]*Vorgängerpfaden[^.]*neue Nutzerbestätigung entfällt',
-        r'Andernfalls präsentiere[^.]*Nutzerentscheidung',
-        r'Schreibe erst mit ausdrücklicher oder belegter abgeleiteter Freigabe[^.]*## Planreview',
-        r'Bloße Planerstellung startet keine Ausführung[^.]*bestehender Ausführungsauftrag',
-        r'Prüfe vor Planreview, kanonischem Schreiben und einer gegebenenfalls noch erforderlichen Nutzerbestätigung',
+        r'technische Ersatzpläne[^.]*innerhalb des freigegebenen Rahmens benötigen keine erneute Nutzerentscheidung[^.]*abgeleitete Planfreigabe[^.]*exakte Original- und Vorgängerpfade',
+        r'Eine offene Unsicherheit[^.]*Ziel, Sicherheit, Architektur, Scope oder Akzeptanz[^.]*verhindert `Confirmed`',
+        r'Reguläre und technische Ersatzpläne behalten[^.]*status: Confirmed',
+        r'Technische Ersatzplanung und reguläre ausdrücklich freigegebene Erstplanung folgen unverändert ihren bisherigen Regeln[^.]*Handoff-Sperre wird nicht auf Ersatzpläne übertragen',
+        r'Bloße Planerstellung startet keine Ausführung',
+        r'Eine gegebenenfalls noch erforderliche Nutzerbestätigung erfolgt erst nach dem Review',
     ),
     '.apm/skills/core-review/SKILL.md': (
-        r'Planentwurf vor kanonischem Schreiben sowie einer gegebenenfalls noch erforderlichen Nutzerbestätigung',
-        r'Planreview vor kanonischem Schreiben sowie einer gegebenenfalls noch erforderlichen Nutzerbestätigung',
+        r'Planentwurf \(regulär vor kanonischem Schreiben, Handoff-Draft nach dessen Schreiben\) vor einer gegebenenfalls noch erforderlichen Nutzerbestätigung',
+        r'reguläres Planreview vor kanonischem Schreiben[^.]*Handoff-Draft-Review[^.]*jeweils vor einer gegebenenfalls noch erforderlichen Nutzerbestätigung',
     ),
     '.apm/skills/core-execute/SKILL.md': (
         r'prüfe vor Annahme des Ersatzplans[^.]*abgeleitete Freigabe[^.]*statische Validierung und unabhängigen Planreview-pass',
@@ -871,6 +938,86 @@ REPLACEMENT_SOURCES = {
         r'Nach vollständigem, statisch validiertem Entwurf und vor kanonischem Schreiben sowie einer noch erforderlichen Nutzerbestätigung',
     ),
 }
+
+# Handoff first-plan clauses stay source-local; these are bounded textual contracts,
+# not a natural-language oracle or a live harness/display test.
+HANDOFF_SOURCES = {
+    '.apm/skills/core-shared/references/workflow-contract.md': (
+        r'Nur wenn die aktuelle Nutzeranweisung[^.]*Handoff ausdrücklich als Arbeitsauftrag[^.]*Originalprüfung genau eine[^.]*bereits ausgewählte und bestätigte Definitionsversion mit belegten Abhängigkeiten ausschließlich zur Planung aktivieren',
+        r'current_approval: handoff-planning[^.]*unverändertem \x60selected\x60, \x60selection_approval\x60 und Definition[^.]*kein Ausführungsrecht',
+        r'Ein Handoff als Zitat oder Kontext aktiviert nichts',
+        r'keine persönliche Einzelgenehmigung[^.]*kein Ersatz für Auswahl/Bestätigung der Definition[^.]*keine Ausführungsfreigabe',
+        r'Fehlende/widersprüchliche Pfade[^.]*Abhängigkeiten, Abbruch, aktive wiederaufnehmbare Plan-/Runarbeit oder konkurrierende Indexänderung stoppen die Neuplanung; Resume bleibt Resume',
+        r'Nach ausdrücklicher Freigabe des Erstplans aktualisiert ausschließlich \x60core-milestone\x60 dieselbe aktuelle ID-Version[^.]*user-confirmed[^.]*Confirmed-Plan',
+        r'Erst eine neue ausdrückliche Nutzerfreigabe macht dieselbe Datei \x60Confirmed\x60; bis dahin ist sie nicht ausführbar und nicht in \x60plan_paths\x60',
+        r'Review-pass, Anzeige, Schweigen, alte Ausführungsfreigabe und abgeleitete Planungsbefugnis sind keine Bestätigung',
+        r'Diese Sperre gilt nicht für technische Ersatzplanung und beschränkt keinen aktuellen ausdrücklichen Direktauftrag',
+    ),
+    '.apm/skills/core-milestone/references/milestone-index-format.md': (
+        r'current_approval: handoff-planning[^.]*aktuelle Nutzerauftrag[^.]*ausdrücklich als Arbeitsauftrag[^.]*Originalprüfung[^.]*bereits ausgewählte und bestätigte ID-Version samt Abhängigkeiten',
+        r'Nach ausdrücklicher Freigabe des vollständigen Erstplans darf ausschließlich \x60core-milestone\x60 bei derselben aktuellen ID-Version[^.]*user-confirmed[^.]*Confirmed-Plan in \x60plan_paths\x60[^.]*selected[^.]*selection_approval[^.]*Definition bleiben unverändert',
+        r'plan_paths\x60 enthält ausschließlich bestätigte Pläne für genau diese Definitionsversion',
+        r'Ein Zähler allein erkennt keine fremden Änderungen[^.]*Inhalt[^.]*bedingte atomare Schreiboperation',
+    ),
+    '.apm/skills/core-plan/SKILL.md': (
+        r'Ausschließlich beim Handoff-abgeleiteten Erstplan[^.]*nach vollständiger statischer Validierung[^.]*status: Draft[^.]*vorgesehenen Planpfad',
+        r'Danach prüft \x60core-review\x60 genau diese Datei unabhängig und schreibt keine Datei',
+        r'Draft ist nicht ausführbar und wird nicht in \x60plan_paths\x60 geführt\. Keine Entwurfsduplikate',
+        r'Alte Etappenausführungsfreigabe, abgeleitete Planungsbefugnis, Review-pass, Anzeige oder Schweigen geben den Plan nicht frei',
+        r'Handoff-Sperre wird nicht auf Ersatzpläne übertragen',
+    ),
+    '.apm/skills/core-review/SKILL.md': (
+        r'Beim Handoff-abgeleiteten Erstplan prüfe den statisch validierten Draft unabhängig',
+        r'vollständige Inhalt tatsächlich sichtbar präsentiert[^.]*ausdrückliche neue Nutzerfreigabe warten[^.]*dieselbe Datei Confirmed',
+        r'Diese Sonderregel gilt nicht für technische Ersatzpläne',
+    ),
+    '.apm/skills/core-milestone/SKILL.md': (
+        r'current_approval: handoff-planning[^.]*ausschließlich zur Planung aktivieren[^.]*keine persönliche Einzelgenehmigung und kein Ausführungsrecht',
+        r'Nach ausdrücklicher Freigabe des vollständigen Erstplans aktualisiert ausschließlich \x60core-milestone\x60 dieselbe ID-Version[^.]*user-confirmed[^.]*denselben Confirmed-Plan',
+    ),
+    '.apm/skills/core-handoff/assets/start-prompt.md': (
+        r'Handoff aktiviert Planung nur, wenn die aktuelle Nutzeranweisung ihn ausdrücklich als Arbeitsauftrag übergibt[^.]*Originalprüfung[^.]*bereits ausgewählte und bestätigte Definitionsversion samt belegten Abhängigkeiten',
+        r'abgeleitete Planungsbefugnis anhand exakter Originalpfade, nicht als persönliche Einzelgenehmigung',
+        r'vollständige Erstplan[^.]*unabhängigem Review tatsächlich sichtbar gezeigt[^.]*ausdrücklichen neuen Nutzerfreigabe Draft, nicht in \x60plan_paths\x60 und nicht ausführbar',
+        r'Bei Abbruch, Resume, Konkurrenz-, Abhängigkeits-, Versions- oder Auswahlfehler stoppe',
+    ),
+    '.apm/skills/core-milestone/assets/goal-prompt.md': (
+        r'Nur wenn die aktuelle Nutzeranweisung[^.]*Handoff ausdrücklich als Arbeitsauftrag[^.]*Originalprüfung[^.]*bereits ausgewählte/bestätigte Folgeversion mit belegten Abhängigkeiten zur Planung aktivieren',
+        r'vollständiger unabhängig geprüfter Erstplan wird tatsächlich sichtbar gezeigt[^.]*ausdrücklichen neuen Nutzerfreigabe Draft und nicht ausführbar',
+        r'Ist das Gesamtziel belegt abgeschlossen, gib den Gesamtabschluss mit Originalnachweisen aus\. Keine automatische Folgefreigabe, kein Folgedispatch',
+    ),
+    '.apm/skills/core-shared/references/artifact-contract.md': (
+        r'Nur der Handoff-abgeleitete Erstplan darf nach statischer Validierung vor dem unabhängigen Planreview als Draft am einen vorgesehenen Pfad geschrieben werden',
+        r'Draft ist nicht ausführbar, kein bestätigter Plan und nicht in \x60plan_paths\x60',
+        r'nach Review, vollständiger tatsächlicher Anzeige und neuer ausdrücklicher Freigabe wird dieselbe Datei Confirmed[^.]*ausschließlich \x60core-milestone\x60 dieselbe aktuelle ID-Version',
+        r'Technische Ersatzplanung bleibt unberührt',
+    ),
+    '.apm/skills/core-shared/references/tool-routing.md': (
+        r'zuerst eine tatsächlich verfügbare native Plan-/Dateianzeige des aktuellen Harnesses \(OpenChamber ist nur ein Beispiel\)',
+        r'Fehlt diese Fähigkeit, öffne den exakten lokalen Markdownpfad mit der OS-Standardanwendung',
+        r'Bei Headless-Betrieb oder fehlgeschlagener Anzeige nenne die Einschränkung[^.]*vollständigen Planinhalt im Chat[^.]*ein Pfad oder eine Zusammenfassung genügt nicht',
+        r'Behaupte weder Öffnung noch Lesen oder Freigabe ohne Nachweis',
+        r'Anzeige ist keine Lesebestätigung oder Autorisierung\. Keine Viewermechanik, Providerinstallation oder neue Abhängigkeit',
+    ),
+    '.apm/skills/core-init-project/assets/core-routing.md': (
+        r'ausdrücklich als Arbeitsauftrag übergebener Handoff aktiviert nach Originalprüfung nur die Planung genau einer[^.]*bereits ausgewählten und bestätigten Etappendefinition mit belegten Abhängigkeiten',
+        r'Der unabhängig geprüfte Erstplan wird vollständig tatsächlich sichtbar gezeigt[^.]*ausdrücklichen neuen Freigabe Draft und nicht ausführbar',
+    ),
+    'AGENTS.md': (
+        r'abgeleitete Planungsbefugnis, nicht als persönliche Einzelgenehmigung',
+        r'Planungsbefugnis bestätigt keinen Erstplan',
+    ),
+}
+HANDOFF_WIDENING = r'Handoff erlaubt sofortige Ausführung|Draft ist ausführbar|handoff-planning ersetzt selection_approval|Anzeige gilt als Nutzerfreigabe|Ein Dateipfad genügt als vollständige Anzeige|Handoff-Sperre gilt auch für technische Ersatzpläne'
+
+
+def check_handoff_sources(sources):
+    for path, patterns in HANDOFF_SOURCES.items():
+        text = sources[path]
+        require(not re.search(HANDOFF_WIDENING, text), 'Handoff-Ausweitung: ' + path)
+        for pattern in patterns:
+            require(re.search(pattern, text), 'Handoff-Klausel fehlt: ' + path + ': ' + pattern)
+
 
 # Execute direct mode, task-bound support and task-bound approval precedence (static source clauses only).
 DIRECT_SOURCES = {
@@ -969,7 +1116,7 @@ def check_setup_source(front, text):
 def check_group(root, group, with_authoring=False, tool_root=None):
     paths = targets(root, group)
     if group == 'workflows':
-        paths = list(dict.fromkeys([*paths, *(root / p for p in (*REPLACEMENT_SOURCES, *DIRECT_SOURCES))]))
+        paths = list(dict.fromkeys([*paths, *(root / p for p in (*REPLACEMENT_SOURCES, *DIRECT_SOURCES, *HANDOFF_SOURCES))]))
     def action():
         # Missing inputs take precedence over content findings in earlier targets.
         for path in paths:
@@ -1003,6 +1150,7 @@ def check_group(root, group, with_authoring=False, tool_root=None):
             sources = {str(p.relative_to(root)): t for p, t in zip(paths, texts)}
             check_replacement_sources(sources)
             check_direct_sources(sources)
+            check_handoff_sources(sources)
         joined = '\n'.join(texts)
         for pattern, label in POLICIES[group]:
             require(re.search(pattern, joined, re.I), 'semantische Klausel nicht belegt: ' + label)
