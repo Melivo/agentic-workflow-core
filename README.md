@@ -5,7 +5,7 @@
 
 **Planen, kontrolliert umsetzen, unabhängig prüfen.**
 
-Agentic Workflow Core ist ein portables Paket aus Agent-Skills für KI-gestützte Softwareentwicklung mit OpenCode und Codex. Ein unabhängiges Planreview prüft den statisch validierten Entwurf vor dem kanonischen Schreiben und einer noch erforderlichen Nutzerbestätigung; nach der Umsetzung prüft ein getrenntes Umsetzungsreview die integrierte Änderung. Entscheidungen, Fortschritt und Nachweise bleiben in nachvollziehbaren Dateien erhalten – nicht ausschließlich im Chatverlauf.
+Agentic Workflow Core ist ein portables Paket aus Agent-Skills für KI-gestützte Softwareentwicklung mit OpenCode und Codex. Ein unabhängiges Planreview prüft den statisch validierten Entwurf grundsätzlich vor dem kanonischen Schreiben; nur beim Erstplan einer Etappe mit Gesamtfreigabe oder aus einem Handoff entsteht vorher genau eine Draft-Datei. Nach der Umsetzung prüft ein getrenntes Umsetzungsreview die integrierte Änderung. Entscheidungen, Fortschritt und Nachweise bleiben in nachvollziehbaren Dateien erhalten – nicht ausschließlich im Chatverlauf.
 
 Core ist keine zusätzliche Orchestrierungs-CLI und kein autonomer Releasebot. Es nutzt die Fähigkeiten des jeweiligen Agent-Harnesses, also der Umgebung, in der der KI-Agent arbeitet. Du entscheidest über Ziel, Umfang und freizugebende Aktionen.
 
@@ -13,7 +13,7 @@ Core ist keine zusätzliche Orchestrierungs-CLI und kein autonomer Releasebot. E
 
 ## Was Core bietet
 
-- **Zwei Ausführungswege:** Für größere oder unklare Vorhaben ein Planablauf: optionales Brainstorming, Planreview vor kanonischem Schreiben, ausdrückliche oder belegte abgeleitete Planfreigabe, Umsetzung und unabhängiges Umsetzungsreview. Für eine klare, eng umrissene und ausdrücklich freigegebene Änderung der Direktmodus ohne Plan: `core-execute` arbeitet mit einer unveränderlichen Auftragsgrundlage und lässt die Umsetzung ebenfalls unabhängig prüfen.
+- **Zwei Ausführungswege:** Für größere oder unklare Vorhaben ein Planablauf: optionales Brainstorming, Planreview (regulär vor dem Schreiben; beim Erstplan einer Etappe mit Gesamtfreigabe oder aus einem Handoff nach genau einer Draft-Datei), ausdrückliche oder belegte abgeleitete Planfreigabe, Umsetzung und unabhängiges Umsetzungsreview. Für eine klare, eng umrissene und ausdrücklich freigegebene Änderung der Direktmodus ohne Plan: `core-execute` arbeitet mit einer unveränderlichen Auftragsgrundlage und lässt die Umsetzung ebenfalls unabhängig prüfen.
 - **Passende Fachmethoden:** Architektur, Backend, Frontend, Mobile, Datenbanken, Terraform, Debugging und Refactoring.
 - **Überprüfbare Übergaben:** Pläne, Task-Ergebnisse und Reviews mit festen Formaten. Ein ausdrücklich beauftragter Handoff kann nur die Planung einer exakt ausgewählten und bestätigten Folgeetappe aktivieren. Ihr vollständiger Erstplan wird nach unabhängigem Review sichtbar gezeigt und erst nach belegter Gesamtdeckung oder neuer ausdrücklicher Nutzerfreigabe ausführbar. Eine Gesamtfreigabe mit begrenztem Ausführungsrahmen kann die Umsetzung einer bestätigten Etappe innerhalb dieses Rahmens decken.
 - **Wiederaufnahme:** Arbeit anhand ihrer Artefakte in einer neuen Sitzung fortsetzen.
@@ -81,7 +81,7 @@ Der Direktmodus ist für kleine, klare Änderungen ohne nötige Zerlegung oder m
 
 1. **Projekt prüfen:** `core-init-project` prüft Repository und Code-Intelligence-Bereitschaft. Änderungen an Providerkonfiguration oder `AGENTS.md` brauchen ihre eigene Freigabe.
 2. **Ziel beschreiben:** gewünschtes Verhalten, betroffene Bereiche und Grenzen nennen. Bei materiellen Unklarheiten hilft `core-brainstorm`.
-3. **Planreview und Freigabe:** `core-plan` erstellt einen `plan/v1` mit Aufgaben, Abhängigkeiten, Akzeptanzkriterien und Checks. Nach statischer Validierung prüft `core-review` den Entwurf in frischem Kontext als kurze Textantwort vor dem kanonischen Schreiben und einer noch erforderlichen Nutzerbestätigung – ohne Run oder `review/v1`. Ein Review-pass erteilt selbst keine Freigabe. Bei einem gedeckten technischen Ersatzplan genügt die im Plantext belegte abgeleitete Freigabe; eine neue Nutzerbestätigung entfällt. Der Erstplan einer Etappe mit Gesamtfreigabe wird nach Review und vollständiger Anzeige bei belegter Deckung bestätigt, sonst erst nach neuer Nutzerfreigabe. Ohne bestätigten Rahmen sowie bei neuen eigenständigen Zielen, Meilensteinänderungen, ausdrücklichen Ausschlüssen, materiell offenen Entscheidungen, unklaren oder ungedeckten Wirkungen oder zusätzlichen ungedeckten Geldkosten bleibt die Nutzerentscheidung vor Schreiben und Ausführung erforderlich. Für den Planmodus gilt: Umsetzung setzt stets eine ausdrückliche oder belegte abgeleitete Planfreigabe und einen bestehenden Ausführungsauftrag voraus.
+3. **Planreview und Freigabe:** `core-plan` erstellt einen `plan/v1` mit Aufgaben, Abhängigkeiten, Akzeptanzkriterien und Checks. Für reguläre Pläne gilt: Nach statischer Validierung prüft `core-review` den Entwurf in frischem Kontext vor dem kanonischen Schreiben und einer noch erforderlichen Nutzerbestätigung als kurze Textantwort – ohne Run oder `review/v1`. Nur beim Erstplan einer Etappe mit Gesamtfreigabe oder aus einem Handoff schreibt `core-plan` nach statischer Validierung zuerst genau eine Draft-Datei am vorgesehenen Pfad; danach prüft `core-review` diesen Entwurf. Nach Review-pass wird der vollständige Plan sichtbar angezeigt. `Confirmed` folgt nur bei belegter Gesamtdeckung oder neuer ausdrücklicher Nutzerfreigabe; ein Review-pass allein bestätigt nicht. Bei einem gedeckten technischen Ersatzplan genügt die im Plantext belegte abgeleitete Freigabe; eine neue Nutzerbestätigung entfällt. Ohne bestätigten Rahmen oder bei neuen eigenständigen Zielen, Meilensteinänderungen, ausdrücklichen Ausschlüssen, materiell offenen Entscheidungen, unklaren oder ungedeckten Wirkungen oder zusätzlichen ungedeckten Geldkosten bleibt für reguläre und technische Ersatzpläne die Nutzerentscheidung vor Schreiben und Ausführung erforderlich; die oben begrenzte einzelne, nicht ausführbare Draft-Datei ist davon ausgenommen. Bei einem Handoff ohne belegte Gesamtdeckung wird dieser Draft erst nach neuer ausdrücklicher Nutzerfreigabe `Confirmed`. Für den Planmodus gilt: Umsetzung setzt stets eine ausdrückliche oder belegte abgeleitete Planfreigabe und einen bestehenden Ausführungsauftrag voraus.
 4. **Umsetzen:** `core-execute` arbeitet den eindeutig identifizierten, bestätigten Plan ab – im Direktmodus den ausdrücklich freigegebenen Auftrag aus `request.md` – und koordiniert passende Fachagenten. Execute kann innerhalb eines Tasks eng begrenzte Zusatzunterstützung delegieren; der Taskowner bleibt verantwortlich, Unterstützer delegieren nicht weiter.
 5. **Unabhängig prüfen:** Danach bewertet `core-review` in frischem Kontext die integrierte Gesamtänderung. Reviewbasis ist der bestätigte Plan (`plan_path`) oder im Direktmodus die unveränderliche `request.md` (`request_path`). Das Umsetzungsreview bleibt read-only; Korrekturen gehören zurück in die Umsetzung, nicht in das Review.
 
@@ -149,7 +149,7 @@ Core-Skills liegen unter `.apm/skills/core-<name>/`; der quelltreu migrierte Beg
 Die lokalen und CI-Aufgaben verwenden `mise` 2026.10.19 und Python 3.13.14. Weitere Versionen und Integritätswerte: [ci_toolchain.json](scripts/ci_toolchain.json), [requirements-ci.txt](scripts/requirements-ci.txt) und [Habit-Testtoolchain](scripts/habit-ci/package.json).
 
 ```bash
-# Einmaliges, ausdrücklich freigegebenes Setup im isolierten Arbeitsbereich
+# Ausdrücklich freizugebendes Setup im isolierten Arbeitsbereich; bei Bedarf erneut ausführen
 mise run tools:setup
 
 # Prüfungen ohne automatische Installation
@@ -160,7 +160,13 @@ mise run workflows:check
 mise run docs:check
 ```
 
-`tools:setup` lädt und installiert gepinnte Werkzeuge ausschließlich in den isolierten Arbeitsbereich. Die Prüftasks installieren nichts automatisch. Die qualifizierte Entwicklungs- und CI-Laufzeit ist Linux x64; daraus folgt keine universelle Betriebssystemfreigabe.
+`tools:setup` lädt und installiert gepinnte Werkzeuge ausschließlich in den isolierten Arbeitsbereich; es ist nicht zwingend nur einmal nötig. Die Prüftasks installieren nichts automatisch. Die vorbereitete Habit-Paketinstallation bindet ihren Quellstand ein und wird nach relevanten Core-Quelländerungen als veraltet abgewiesen. Mit vorhandenem SDK lässt sie sich gezielt und offline im Scratchbereich erneuern, zum Beispiel aus dem Standard-CI-Arbeitsbereich:
+
+```bash
+AWC_CI_WORKSPACE=/tmp/opencode/agentic-workflow-core-ci AWC_HABIT_SDK=/tmp/opencode/agentic-workflow-core-ci/habit-sdk python3 -B scripts/check_habit_feedback.py setup
+```
+
+`AWC_CI_WORKSPACE` kann auf einen anderen isolierten Arbeitsbereich zeigen; dessen SDK-Pfad ist dann `<Arbeitsbereich>/habit-sdk` und kann mit `AWC_HABIT_SDK` ausdrücklich gesetzt werden. Fehlt das SDK, blockiert der Setupbefehl statt es automatisch zu installieren. `setup` baut das Habit-Paket und installiert es offline in den Scratch-Testbereich; dafür ist eine ausdrückliche Setup-/Installationsfreigabe erforderlich. Die qualifizierte Entwicklungs- und CI-Laufzeit ist Linux x64; daraus folgt keine universelle Betriebssystemfreigabe.
 
 Die vollständige Abnahme `mise run acceptance` führt diese Prüfungen zusammen und baut zusätzlich ein Paket, das sie in einem frischen Scratch-Verbraucher installiert und kontrolliert. Sie hat daher ausdrückliche Paket- und Installationswirkung. Geprüft werden Quellen, Lizenzhinweise, alle Core-Bundles, der vollständige Konfigurator und relative Links. Ein Exitcode allein genügt nicht; temporäre Reports ersetzen keine dauerhaft gesicherten Ausführungsnachweise.
 
