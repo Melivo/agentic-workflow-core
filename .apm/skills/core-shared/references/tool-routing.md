@@ -60,7 +60,7 @@ der relevante Grund. Keine Zusatzfelder, Statusdatei oder Resolver.
 
 ## Sichtbare Plananzeige
 
-Für einen vollständigen, zur Freigabe vorgelegten Plan nutze zuerst eine tatsächlich verfügbare native Plan-/Dateianzeige des aktuellen Harnesses (OpenChamber ist nur ein Beispiel). Fehlt diese Fähigkeit, öffne den exakten lokalen Markdownpfad mit der OS-Standardanwendung. Bei Headless-Betrieb oder fehlgeschlagener Anzeige nenne die Einschränkung und stelle den vollständigen Planinhalt im Chat dar; ein Pfad oder eine Zusammenfassung genügt nicht. Behaupte weder Öffnung noch Lesen oder Freigabe ohne Nachweis. Anzeige ist keine Lesebestätigung oder Autorisierung. Keine Viewermechanik, Providerinstallation oder neue Abhängigkeit einführen.
+Für jeden vollständigen Plan, der zur Freigabe vorgelegt wird oder als geprüfter Erstplan einer gedeckten Etappe sichtbar werden muss, nutze zuerst eine tatsächlich verfügbare native Plan-/Dateianzeige des aktuellen Harnesses (OpenChamber ist nur ein Beispiel). Fehlt diese Fähigkeit, öffne den exakten lokalen Markdownpfad mit der OS-Standardanwendung. Bei Headless-Betrieb oder fehlgeschlagener Anzeige nenne die Einschränkung und stelle den vollständigen Planinhalt im Chat dar; ein Pfad oder eine Zusammenfassung genügt nicht. Behaupte weder Öffnung noch Lesen oder Freigabe ohne Nachweis. Anzeige ist keine Lesebestätigung oder Autorisierung. Auch ein gedeckter Plan wird angezeigt, ohne eine erneute Antwort zu verlangen; auf eine Antwort wartet er nur, wenn die Deckung fehlt. Keine Viewermechanik, Providerinstallation oder neue Abhängigkeit einführen.
 
 ## Capability-Matrix
 

@@ -23,7 +23,7 @@ Nur ein konkreter Auftrag mit tatsächlich benötigtem Vorher-/Nachher-Messvergl
 
 ## Autorisierungsgrenzen
 
-Build, Compile, Bundle, Package, Installation, Commit, Push, Tag, Release, Deployment sowie produktive oder destruktive Infrastruktur- und Datenbankaktionen werden nur bei passender ausdrücklicher Autorisierung ausgeführt. Eine aktuelle eindeutige auftragsbezogene Nutzeranweisung kann separate Bestätigungs-/Diff-Gates niedrigerer Skills oder AGENTS.md ersetzen, bleibt aber auf ihren Zweck und Wirkungsrahmen begrenzt. Preview, Dry-run oder Scratch-Installation gelten weiterhin als Installation beziehungsweise paketbezogene Prüfung, wenn der bestätigte Plan oder die unveränderliche direkte Auftragsgrundlage sie so begrenzt.
+Build, Compile, Bundle, Package, Installation, Commit, Push, Tag, Release, Deployment sowie produktive oder destruktive Infrastruktur- und Datenbankaktionen werden nur bei passender ausdrücklicher Autorisierung ausgeführt. Eine aktuelle eindeutige auftragsbezogene Nutzeranweisung kann separate Bestätigungs-/Diff-Gates niedrigerer Skills oder AGENTS.md ersetzen, bleibt aber auf ihren Zweck und Wirkungsrahmen begrenzt. Eine belegte Gesamtfreigabe mit begrenztem Ausführungsrahmen deckt Planung und Umsetzung einer bestätigten Etappe ebenfalls nur innerhalb dieses Rahmens; Pflichtchecks bleiben auszuführen, Sonderwirkungen benötigen passende Deckung. Preview, Dry-run oder Scratch-Installation gelten weiterhin als Installation beziehungsweise paketbezogene Prüfung, wenn der bestätigte Plan oder die unveränderliche direkte Auftragsgrundlage sie so begrenzt.
 
 Fehlt die Autorisierung, bleibt die Prüfung `blocked`; sie wird weder ausgelassen noch durch eine schwächere Prüfung als bestanden dargestellt. Paketdefaults erweitern keine Freigabe.
 
@@ -48,7 +48,7 @@ Tests, Hooks oder Validierungen dürfen nicht deaktiviert, übersprungen oder ab
 
 ## Unabhängiges Review
 
-`core-review` startet in frischem Kontext und implementiert keine Fixes. Das Planreview folgt dem [Workflowvertrag](workflow-contract.md#planreview) und erzeugt kein `review/v1`. Das Umsetzungsreview liest im Planmodus den bestätigten Plan, im Direktmodus stattdessen den exakt referenzierten `request.md`-Eingang, dazu aktuellen Gesamtdiff, kompaktes Handoff, aktuelle Task-/Checkevidenz und Einschränkungen. Es urteilt:
+`core-review` startet in frischem Kontext und implementiert keine Fixes. Das Planreview folgt dem [Workflowvertrag](workflow-contract.md#planreview), trennt Qualität und Deckung und erzeugt kein `review/v1`. Das Umsetzungsreview liest im Planmodus den bestätigten Plan, im Direktmodus stattdessen den exakt referenzierten `request.md`-Eingang, dazu aktuellen Gesamtdiff, kompaktes Handoff, aktuelle Task-/Checkevidenz und Einschränkungen. Es urteilt:
 
 - `pass`, wenn Zielbezug, funktionaler Scope, Kriterien und relevante Risiken mit aktueller Evidenz erfüllt sind; technische Korrektheit allein genügt bei belegtem Scopeverstoß nicht;
 - `changes_requested`, wenn innerhalb des bestätigten Scopes behebbarer Änderungsbedarf besteht;
