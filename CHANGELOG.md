@@ -4,6 +4,13 @@
 
 - Ergänzt reproduzierbare lokale/CI-Prüfungen und eine standardmäßig deaktivierte, getrennte Release-PR- und Veröffentlichungskette. GitHub-Livebetrieb und App-Einrichtung sind nicht bestätigt.
 
+## [0.14.0](https://github.com/Melivo/agentic-workflow-core/compare/v0.13.0...v0.14.0) (2026-11-08)
+
+
+### Features
+
+* **core:** integrate provider recovery and preserve goal approvals ([#22](https://github.com/Melivo/agentic-workflow-core/issues/22)) ([a8233d2](https://github.com/Melivo/agentic-workflow-core/commit/a8233d269c29c570ad3af8e272bcc594345243a8))
+
 ## [0.13.0](https://github.com/Melivo/agentic-workflow-core/compare/v0.12.0...v0.13.0) (2026-11-08)
 
 
