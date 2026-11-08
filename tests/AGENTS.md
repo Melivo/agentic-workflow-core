@@ -60,6 +60,17 @@ Prüfhelpers: bestätigte Auswahl und Abhängigkeiten, begrenzte Indexänderung,
 eine statisch validierte Draft-Datei, unabhängiges Review, vollständige Anzeige
 und neue Erstplanfreigabe bleiben getrennt. In-Memory-Mutationen entfernen
 Quellklauseln oder ergänzen widersprechende Freigabe-/Anzeigebehauptungen.
+Die Abdeckung `handoff-gesamtdeckung` hält als Szenarien nur gedeckte Handoff-
+und Erstetappenpläne, die bestätigte Sicherheitsmaßnahme, echte
+Einzelbestätigung, Mehrfeldfälle und je einen Fehlfall pro Prüfzweig. Die
+übrigen Ein-Feld-Kriterien (Freigabequelle, Rahmen, Definitionsversion,
+Revieweingaben, Urteil, Abweichungen, Sicherheitsmaßnahme ohne Rahmenbeleg,
+Plantext, Planlink, Recheck, Execute-Prüfung) prüft der Unit-Test als
+In-Memory-Mutationen des gedeckten Falls mit exakter Meldung; keine
+Vollkopien. Eine Sicherheitsmaßnahme gilt nur bei exakter Nennung im
+bestätigten Rahmen (`frame_security_measures`), ohne semantische Bewertung.
+Weitere Mutationen fügen den alten zwingenden Einzelplanhalt und unbegrenzte
+Erstplan-Ablaufsätze wieder ein.
 Native Anzeige, anderer Harness, OS-Fallback und Headless-/Fehlerfall sind
 modellierte Beziehungen, keine tatsächlichen GUI- oder Modellnachweise.
 Execute-Draft-Ablehnung und technische Ersatzplanregeln bleiben separat geprüft.

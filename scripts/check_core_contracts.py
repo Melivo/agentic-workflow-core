@@ -157,6 +157,8 @@ PLAN_RE = r'\.agentic-workflow/plans/plan-(G\d{2,})-(M\d{2,})-v([1-9]\d*)-p(\d{2
 RUN_RE = r'\.agentic-workflow/runs/(run-(G\d{2,})-(M\d{2,})-v([1-9]\d*)-p(\d{2,})-r(\d{2,}))/state\.yaml'
 REVALIDATION_RE = r'\.agentic-workflow/runs/run-(G\d{2,})-(M\d{2,})-v([1-9]\d*)-p\d{2,}-r\d{2,}/tasks/T\d{2,}(?:/attempt-\d{2,})?\.yaml'
 CONFIRMED = 'user-confirmed'
+# Derived execution coverage of one linked plan; never a personal approval.
+GOAL_COVERED = 'goal-covered'
 
 def parse_path(pattern, path, label):
     match = re.fullmatch(pattern, str(path))
@@ -229,14 +231,18 @@ def validate_selection(data):
 
 def validate_prompt(data):
     """A start/goal prompt is stale unless it matches the current index selection."""
-    if data.get('purpose') == 'handoff-first-plan':
+    if data.get('purpose') in ('handoff-first-plan', 'stage-first-plan'):
         validate_handoff_first_plan(data)
         return
     selected_entries(data['index'])
     current = [e for e in data['index']['milestones'] if e['current']]
     require(len(current) == 1, 'keine freigegebene aktuelle Etappe')
     entry, prompt = current[0], data['prompt']
-    require(entry.get('current_approval') == CONFIRMED, 'keine freigegebene aktuelle Etappe')
+    require(entry.get('current_approval') in (CONFIRMED, GOAL_COVERED), 'keine freigegebene aktuelle Etappe')
+    if entry['current_approval'] == GOAL_COVERED:
+        # The index value alone is no evidence; the prompt must name the coverage originals.
+        refs = set(prompt.get('coverage_refs', []))
+        require({prompt['goal_path'], prompt['definition_path'], prompt['index_path'], prompt['plan_path']} <= refs, 'goal-covered ohne Originalbelege')
     goal = parse_path(GOAL_RE, prompt['goal_path'], 'Prompt-Ziel')[1]
     definition = parse_path(DEF_RE, prompt['definition_path'], 'Prompt-Definition')
     require(positive_int(prompt['version']), 'Promptversion ist keine positive Ganzzahl: ' + repr(prompt['version']))
@@ -247,15 +253,58 @@ def validate_prompt(data):
     if prompt.get('run_path'):
         require(prompt['run_path'] in entry['run_paths'] and run_key(prompt['run_path'])[1] == plan_key(prompt['plan_path']), 'veralteter Start-/Goal-Prompt: Run nicht an Plan gebunden')
 
+COVERAGE_DEVIATIONS = {
+    'extra_function': 'Zusatzfunktion außerhalb der Kriterien',
+    'changed_criteria': 'geänderte Kriterien oder Nichtziele',
+    'open_decision': 'wesentliche offene Entscheidung',
+    'security_risk': 'ungedecktes Sicherheitsrisiko',
+    'uncovered_cost': 'ungedeckte Geld-/Usagekosten',
+    'special_effect': 'ungedeckte Build-/Installations-/SCM-/Produktivwirkung',
+    'stale_originals': 'veraltete Originale',
+}
+
+def coverage_gap(data, entry, prompt, handoff):
+    """Return why derived coverage is not proven, or None; never grants a personal approval."""
+    cov = data['coverage']
+    if cov['source_kind'] != 'goal-frame':
+        # Write-only, content-only, historical approval fields or a previous stage's execution order never cover.
+        return 'keine belegte Gesamtfreigabe: ' + cov['source_kind']
+    if not (cov['frame_explained_before_question'] and cov['frame_confirmed']):
+        return 'Ausführungsrahmen nicht sichtbar vorgelegt und bestätigt'
+    if cov['source_path'] != prompt['goal_path'] or cov['source_path'] not in data['original_paths']:
+        return 'Gesamtfreigabequelle nicht im aktuellen Original belegt'
+    if entry['definition_path'] not in cov['frame_definitions']:
+        return 'Gesamtfreigabe deckt diese Definitionsversion nicht'
+    required = {prompt['goal_path'], prompt['index_path'], prompt['definition_path']} | ({data['handoff_path']} if handoff else set())
+    if cov['expected_verdict_given'] or not required <= set(cov['review_inputs']):
+        return 'Deckungsreview ohne neutrale vollständige Originalbelege'
+    if cov['review_verdict'] != 'gedeckt':
+        return 'Deckungsreview: ' + cov['review_verdict']
+    unknown = set(cov['deviations']) - COVERAGE_DEVIATIONS.keys()
+    require(not unknown, 'unbekannte Deckungsabweichung: ' + ', '.join(sorted(unknown)))
+    if cov['deviations']:
+        # A reviewer verdict cannot override a concrete deviation; the user decides.
+        return 'Nutzerentscheidung nötig: ' + ', '.join(COVERAGE_DEVIATIONS[d] for d in sorted(cov['deviations']))
+    # Exact lookup against the concretely confirmed frame; no semantic classification.
+    unconfirmed = [m for m in cov['confirmed_security_measures'] if m not in cov['frame_security_measures']]
+    if unconfirmed:
+        return 'Nutzerentscheidung nötig: Sicherheitsmaßnahme ohne Rahmenbeleg: ' + ', '.join(unconfirmed)
+    if not cov['plan_text_evidence']:
+        return 'Deckungsbeleg fehlt im Planreviewabschnitt'
+    return None
+
 def validate_handoff_first_plan(data):
     """Static prompt/index/plan relationships, never an authorization or display service."""
+    handoff = data['purpose'] == 'handoff-first-plan'
+    marker = 'handoff-planning' if handoff else CONFIRMED
     require(data['current_user_order'] and not data['quoted_handoff'], 'Handoff ist kein aktueller Arbeitsauftrag')
+    require(handoff or data['handoff_path'] is None, 'Etappenerstplan ohne Handoff zitiert Handoff')
     require(data['originals_read'] and data['original_paths'] and all(safe_relative(p) for p in data['original_paths']), 'exakte Originalprüfung fehlt')
     require(not data['aborted'] and not data['concurrent_change'], 'Abbruch/konkurrierende Indexänderung')
     require(not data['active_plan_or_run'], 'aktive Arbeit bleibt Resume')
     require(not data['goal_completed'], 'Gesamtabschluss ohne Folgearbeit')
     require(data['activation_owner'] == 'core-milestone', 'Planungsaktivierung durch falschen Owner')
-    require(data['authority'] == 'handoff-planning' and not data['personal_approval_claim'], 'Planungsbefugnis ist keine persönliche Einzelgenehmigung')
+    require(data['authority'] == marker and not data['personal_approval_claim'], 'Planungsbefugnis ist keine persönliche Einzelgenehmigung')
     documents = data['documents']
     validate_artifacts(documents)
     before = next(d for d in documents if d['schema'] == 'milestone-index/v1')
@@ -264,17 +313,18 @@ def validate_handoff_first_plan(data):
     entries = [e for e in activated['milestones'] if e['current']]
     require(len(entries) == 1, 'genau eine Planungsaktivierung erforderlich')
     entry = entries[0]
-    require(entry['current_approval'] == 'handoff-planning', 'Planungsaktivierung ist keine Erstplanfreigabe')
+    require(entry['current_approval'] == marker, 'Planungsaktivierung ist keine Erstplanfreigabe')
     require(not any(e['current'] for e in before['milestones']), 'aktive Arbeit bleibt Resume')
     old = next((e for e in before['milestones'] if (e['id'], e['version']) == (entry['id'], entry['version'])), None)
     require(old is not None and old['selected'] and old['selection_approval'] == CONFIRMED, 'keine bestätigte ausgewählte Version')
-    expected = dict(before, revision=before['revision'] + 1, milestones=[dict(e, current=True, current_approval='handoff-planning') if e == old else e for e in before['milestones']])
+    expected = dict(before, revision=before['revision'] + 1, milestones=[dict(e, current=True, current_approval=marker) if e == old else e for e in before['milestones']])
     require(activated == expected and data['conditional_atomic_write'], 'Auswahl/Definition/Index unzulässig verändert')
     # Reuse the complete artifact validator for selected dependency versions and evidence.
     validate_artifacts([activated if d is before else d for d in documents])
     prompt = data['prompt']
     require(prompt == data['handoff_binding'], 'Handoff/Promptbindung widerspricht Originalen')
-    require({prompt['goal_path'], prompt['index_path'], prompt['definition_path'], data['handoff_path']} <= set(data['original_paths']), 'exakte Originalprüfung fehlt')
+    originals = {prompt['goal_path'], prompt['index_path'], prompt['definition_path']} | ({data['handoff_path']} if handoff else set())
+    require(originals <= set(data['original_paths']), 'exakte Originalprüfung fehlt')
     require((prompt['goal_path'], prompt['index_path']) == (before['goal_path'], before['goal_path'].removesuffix('goal.md') + 'index.yaml'), 'Handoff-Ziel/Indexbindung')
     require((prompt['milestone_id'], prompt['version'], prompt['definition_path']) == (entry['id'], entry['version'], entry['definition_path']), 'Handoff-Versions-/Auswahlkonflikt')
     require(positive_int(prompt['version']) and plan_key(prompt['plan_path'])[:3] == (parse_path(GOAL_RE, prompt['goal_path'], 'Prompt-Ziel')[1], entry['id'], entry['version']), 'Handoff-Planbindung')
@@ -293,17 +343,27 @@ def validate_handoff_first_plan(data):
     require(display['full_content'] and display['actual'] and display['after_review'], 'vollständige tatsächliche Anzeige nach Review fehlt')
     require(route != 'chat' or display['limitation_reported'], 'Anzeigeausfall/Headless verschwiegen')
     require(not display['read_claim'] and not display['approval_claim'] and not display['installs'], 'Anzeige ist keine Lese-/Freigabeevidenz oder Installation')
-    if not data['new_user_approval']:
-        require(data['final_plan'] == draft and data['final_index'] == activated and not data['execute'], 'Erstplan-Halt vor neuer Freigabe verletzt')
-    else:
+    gap = coverage_gap(data, entry, prompt, handoff)
+    if data['new_user_approval']:
+        # Real single-plan confirmation remains valid without any historical overall approval.
         require(data['approval_after_display'], 'Erstplanfreigabe vor vollständiger Anzeige')
-        require(data['final_plan'] == dict(draft, status='Confirmed'), 'bestätigte Datei/Inhalt verändert')
-        require(data['link_owner'] == 'core-milestone', 'Confirmed-Verknüpfung durch falschen Owner')
-        linked = dict(entry, current_approval=CONFIRMED, plan_paths=[prompt['plan_path']])
-        expected = dict(activated, revision=activated['revision'] + 1, milestones=[linked if e == entry else e for e in activated['milestones']])
-        require(data['final_index'] == expected, 'Confirmed-Link verändert ID-Version/Auswahl')
-        validate_plan(data['final_plan'])
+        approval = CONFIRMED
+    elif gap is None:
+        approval = GOAL_COVERED if handoff else entry['current_approval']
+    else:
+        require(data['final_plan'] == draft and data['final_index'] == activated and not data['execute'], 'Erstplan-Halt ohne belegte Deckung verletzt: ' + gap)
+        return
+    require(data['final_plan'] == dict(draft, status='Confirmed'), 'bestätigte Datei/Inhalt verändert')
+    require(data['link_owner'] == 'core-milestone', 'Confirmed-Verknüpfung durch falschen Owner')
+    require(data['link_recheck'], 'Planlink ohne erneute Original-/Index-/Konkurrenzprüfung')
+    # goal-covered replaces only handoff-planning; a real user-confirmed activation stays unchanged.
+    linked = dict(entry, current_approval=approval, plan_paths=[prompt['plan_path']])
+    expected = dict(activated, revision=activated['revision'] + 1, milestones=[linked if e == entry else e for e in activated['milestones']])
+    require(data['final_index'] == expected, 'Confirmed-Link verändert ID-Version/Auswahl/Aktivierung')
+    validate_plan(data['final_plan'])
+    if data['new_user_approval']:
         require(not data['execute'] or data['execution_order'], 'Planfreigabe ist kein Ausführungsauftrag')
+    require(not data['execute'] or data['execute_checks'], 'Execute ohne eigene Original-/Review-/Indexprüfung')
 
 
 def validate_write_sequence(data):
@@ -601,10 +661,13 @@ def check_index(data):
     selected = selected_entries(data)
     current = [m for m in entries if m['current']]
     require(len(current) <= 1, 'mehrere aktuelle Etappen')
-    require(all(m.get('current_approval') in (CONFIRMED, 'handoff-planning') for m in current), 'aktuelle Etappe ohne Freigabe')
+    require(all(m.get('current_approval') in (CONFIRMED, 'handoff-planning', GOAL_COVERED) for m in current), 'aktuelle Etappe ohne Freigabe')
     for entry in current:
         if entry['current_approval'] == 'handoff-planning':
             require(not entry['plan_paths'] and not entry['run_paths'] and not entry['completion_refs'], 'Planungsaktivierung enthält bestätigten Plan/Run/Abschluss')
+        if entry['current_approval'] == GOAL_COVERED:
+            # The value only labels a linked covered plan; it never proves coverage by itself.
+            require(entry['plan_paths'], 'goal-covered ohne verknüpften Confirmed-Plan')
     require(set(selected) == {m['id'] for m in entries}, 'M-ID ohne ausgewählte Version')
     for entry in entries:
         pinned = (goal, entry['id'], entry['version'])
@@ -647,7 +710,7 @@ def check_completion_ref(entry, pinned, ref):
 POLICIES = {
     'milestones': [(r'bestätigt\w* Definition\w*[^.!\n]*(?:unveränder|nicht.*(?:überschreib|veränder))', 'unveränderliche Definition'), (r'(?:Versionsauswahl|Ersatzdefinition|Versionswechsel)[^.!\n]*Bestätigung', 'bestätigter Versionswechsel'), (r'(?:Abschluss|Nachweis)[^.!\n]*(?:nicht automatisch|keine automatische)', 'keine Erfolgsübertragung')],
     'shared': [(r'(?:Execute|core-execute)[^.!\n]*(?:persistiert|schreibt)[^.!\n]*read-only', 'Execute persistiert read-only Ergebnisse'), (r'(?:Versuch|attempt)[^.!\n]*unveränder|unveränder[^.!\n]*(?:Versuch|attempt)', 'unveränderliche Versuche'), (r'(?:referenz|angewiesen)[^.!\n]*(?:erhalten|aufbewahr)', 'referenzabhängige Aufbewahrung'),
-               (r'Dateiscope[^.!\n]*(?:keine|nicht)[^.!\n]*Verantwortlich', 'Dateiscope ist keine Funktionsfreigabe'), (r'kumulativ[^.!\n]*(?:ursprünglich|Original)', 'kumulativer Scope gegen Originalbezug'), (r'Ersatzplanzyklus[^.!\n]*früh', 'Vereinfachungsstopp'), (r'Umbenennung[^.!\n]*nicht zurück', 'Umbenennung setzt nicht zurück'), (r'Planreview[^.!\n]*keinen Run', 'Planreview ohne Run'), (r'(?:Planreview-pass[^.!\n]*nicht[^.!\n]*bestätigt|Review-pass bedeutet nur prüffähig, niemals Nutzerbestätigung)', 'Planreview-pass ist keine Bestätigung'),
+               (r'Dateiscope[^.!\n]*(?:keine|nicht)[^.!\n]*Verantwortlich', 'Dateiscope ist keine Funktionsfreigabe'), (r'kumulativ[^.!\n]*(?:ursprünglich|Original)', 'kumulativer Scope gegen Originalbezug'), (r'Ersatzplanzyklus[^.!\n]*früh', 'Vereinfachungsstopp'), (r'Umbenennung[^.!\n]*nicht zurück', 'Umbenennung setzt nicht zurück'), (r'Planreview[^.!\n]*keinen Run', 'Planreview ohne Run'), (r'(?:Planreview-pass[^.!\n]*nicht[^.!\n]*bestätigt|Review-pass bedeutet nur prüffähig, niemals Nutzerbestätigung|Qualität `pass` heißt bestätigungsfähig, niemals bestätigt)', 'Planreview-pass ist keine Bestätigung'),
                (r'Eigenentwicklung[^.!\n]*belegte Lücke', 'Standard vor unbegründeter Eigenentwicklung'), (r'(?:keine|kein)[^.!\n]*präventiv', 'kein präventiver Zusatz'), (r'Übernommen\w* technisch\w* Voraussetzung\w*[^.!\n]*neu begründet', 'übernommene Voraussetzung neu begründen'), (r'(?:entfernt|vereinfach)[^.!\n]*nicht durch weitere Mechanismen', 'Vereinfachen statt kompensieren'),
                (r'beobachtbar\w* Verhalten[^.!\n]*Fehler\w*[^.!\n]*getrennt von technischen Entscheidungen', 'Verhalten getrennt von Lösung'), (r'technisch\w* Nutzerconstraints?[^.!\n]*verbindlich', 'Nutzerconstraint bleibt verbindlich'), (r'Agentenpräferenz[^.!\n]*nicht[^.!\n]*Nutzeranforderung', 'Agentenpräferenz keine Nutzeranforderung'), (r'Kleinfix[^.!\n]*nur[^.!\n]*Regressionstest', 'schlanker Kleinfix'),
                (r'(?:jede|alle) ursprünglich\w* Anforderung\w*[^.!\n]*Fehlerf', 'vollständige Originalabdeckung'), (r'Grün\w* selbst gewählt\w* Kriterien genügen nicht[^.!\n]*ursprünglich\w* Fehlerfall', 'grüne Eigenkriterien genügen nicht'), (r'Unbegründet\w* Zusätze entfallen', 'keine ungefragten Zusätze'), (r'keine zusätzlichen YAML-Felder', 'Abdeckung ohne neue Felder'),
@@ -694,7 +757,7 @@ REQUIRED_COVERAGE = (
     'S-dox-projektdokumentation',
     'g04-authorization-rahmen', 'g04-kosten-aufwand-trennung', 'g04-reparatur-evidenzbasis', 'g04-blast-radius', 'g04-delegation-consent', 'g04-katalog-ohne-limit',
     'execute-direkt-eingang', 'execute-freigabevorrang', 'execute-zusatzdelegation',
-    'handoff-planungsbefugnis', 'handoff-erstplan-halt', 'handoff-sichtbare-anzeige',
+    'handoff-planungsbefugnis', 'handoff-erstplan-halt', 'handoff-sichtbare-anzeige', 'handoff-gesamtdeckung',
 )
 
 def check_coverage(fixture):
@@ -891,7 +954,7 @@ REPLACEMENT_SOURCES = {
         r'Ohne bestätigten Rahmen[^.]*neuen eigenständigen Zielen[^.]*Meilensteinänderungen[^.]*Ausschlüssen[^.]*materiell offenen Entscheidungen[^.]*unklaren oder ungedeckten Wirkungen[^.]*ungedeckten Geldkosten[^.]*vor Schreiben und Ausführung[^.]*Nutzerentscheidung',
         r'Scopes blockieren[^.]*ausdrücklich oder abgeleitet freigegebenen neuen Plan',
         r'abgeleitet freigegebener Ersatzplan[^.]*neuen Run[^.]*Vorgängerplan und -run',
-        r'Review-pass bedeutet nur prüffähig, niemals Nutzerbestätigung',
+        r'Qualität `pass` heißt bestätigungsfähig, niemals bestätigt',
         r'abgeleitet freigegebener Ersatzplan[^.]*bestehendem Ausführungsauftrag[^.]*neuen Run',
         r'Der bestätigte Plan bleibt während der Ausführung unverändert',
     ),
@@ -900,20 +963,21 @@ REPLACEMENT_SOURCES = {
         r'technische Ersatzpläne[^.]*innerhalb des freigegebenen Rahmens benötigen keine erneute Nutzerentscheidung[^.]*abgeleitete Planfreigabe[^.]*exakte Original- und Vorgängerpfade',
         r'Eine offene Unsicherheit[^.]*Ziel, Sicherheit, Architektur, Scope oder Akzeptanz[^.]*verhindert `Confirmed`',
         r'Reguläre und technische Ersatzpläne behalten[^.]*status: Confirmed',
-        r'Technische Ersatzplanung und reguläre ausdrücklich freigegebene Erstplanung folgen unverändert ihren bisherigen Regeln[^.]*Handoff-Sperre wird nicht auf Ersatzpläne übertragen',
+        r'Technische Ersatzplanung und reguläre Erstplanung ohne Etappenbindung folgen unverändert ihren bisherigen Regeln',
         r'Bloße Planerstellung startet keine Ausführung',
         r'Eine gegebenenfalls noch erforderliche Nutzerbestätigung erfolgt erst nach dem Review',
     ),
     '.apm/skills/core-review/SKILL.md': (
-        r'Planentwurf \(regulär vor kanonischem Schreiben, Handoff-Draft nach dessen Schreiben\) vor einer gegebenenfalls noch erforderlichen Nutzerbestätigung',
-        r'reguläres Planreview vor kanonischem Schreiben[^.]*Handoff-Draft-Review[^.]*jeweils vor einer gegebenenfalls noch erforderlichen Nutzerbestätigung',
+        r'Planentwurf \(regulär vor kanonischem Schreiben, Erstplan-Draft einer Etappe oder eines Handoffs nach dessen Schreiben\) vor einer gegebenenfalls noch erforderlichen Nutzerbestätigung',
+        r'reguläres Planreview vor kanonischem Schreiben[^.]*Draft-Review eines Erstplans im Etappenmodus oder aus einem Handoff[^.]*jeweils vor einer gegebenenfalls noch erforderlichen Nutzerbestätigung',
     ),
     '.apm/skills/core-execute/SKILL.md': (
         r'prüfe vor Annahme des Ersatzplans[^.]*abgeleitete Freigabe[^.]*statische Validierung und unabhängigen Planreview-pass',
         r'gedeckter technischer Ersatzplan[^.]*bestehendem Ausführungsauftrag keine neue Nutzerbestätigung',
     ),
     '.apm/skills/core-milestone/SKILL.md': (
-        r'Etappenfreigabe erlauben die erste Detailplanung[^.]*starten aber keine Ausführung',
+        r'Ohne diesen Rahmen erlauben sie nur die Inhaltsbestätigung und die erste Detailplanung nach ausdrücklicher Nutzerfreigabe',
+        r'Die Planerstellung allein startet keine Ausführung',
         r'neue Plan- oder Ersatzplanpfade[^.]*statischer Validierung[^.]*unabhängigem Planreview[^.]*abgeleiteter Freigabe[^.]*ohne neue Einzelbestätigung',
     ),
     '.apm/skills/core-milestone/assets/goal-prompt.md': (
@@ -948,73 +1012,116 @@ HANDOFF_SOURCES = {
         r'Ein Handoff als Zitat oder Kontext aktiviert nichts',
         r'keine persönliche Einzelgenehmigung[^.]*kein Ersatz für Auswahl/Bestätigung der Definition[^.]*keine Ausführungsfreigabe',
         r'Fehlende/widersprüchliche Pfade[^.]*Abhängigkeiten, Abbruch, aktive wiederaufnehmbare Plan-/Runarbeit oder konkurrierende Indexänderung stoppen die Neuplanung; Resume bleibt Resume',
-        r'Nach ausdrücklicher Freigabe des Erstplans aktualisiert ausschließlich \x60core-milestone\x60 dieselbe aktuelle ID-Version[^.]*user-confirmed[^.]*Confirmed-Plan',
-        r'Erst eine neue ausdrückliche Nutzerfreigabe macht dieselbe Datei \x60Confirmed\x60; bis dahin ist sie nicht ausführbar und nicht in \x60plan_paths\x60',
-        r'Review-pass, Anzeige, Schweigen, alte Ausführungsfreigabe und abgeleitete Planungsbefugnis sind keine Bestätigung',
-        r'Diese Sperre gilt nicht für technische Ersatzplanung und beschränkt keinen aktuellen ausdrücklichen Direktauftrag',
+        r'Nach `Confirmed` aktualisiert ausschließlich `core-milestone` nach erneuter Original- und Indexprüfung dieselbe aktuelle ID-Version: bei belegter Gesamtdeckung von `handoff-planning` auf `current_approval: goal-covered`, sonst nach ausdrücklicher Nutzerfreigabe auf `current_approval: user-confirmed`',
+        r'auch wenn die Deckung belegt ist',
+        r'Ist die Deckung im Plantext belegt, setzt `core-plan` dieselbe Datei auf `Confirmed`',
+        r'Fehlt die Deckung oder bleibt eine wesentliche Entscheidung offen, bleibt die Datei `Draft`, nicht ausführbar und nicht in `plan_paths`, bis der Nutzer konkret entscheidet',
+        r'Review-pass, Anzeige, Schweigen, alte Ausführungsfreigabe und abgeleitete Planungsbefugnis allein sind keine Bestätigung',
+        r'Aktuelle ausdrückliche Direktaufträge und gedeckte technische Ersatzplanung folgen ihren eigenen Regeln',
+        r'Ein besonderer Freigabesatz pro Ziel oder Handoff ist nicht nötig',
+        r'Eine bloße Schreib- oder Inhaltsbestätigung ohne vorgelegten Rahmen deckt keine Ausführung',
+        r'Die Deckung endet bei neuen Zielen, Scopeänderungen, wesentlich offenen Entscheidungen, nicht gedeckten Sonderwirkungen[^.]*neuen oder wesentlich erhöhten ungedeckten Sicherheitsrisiken, neuen Definitionsversionen und Abbruch',
+        r'Konkret vereinbarte Sicherheitsmaßnahmen brauchen keine erneute Routinefreigabe; unklare Deckung ist eine Nutzerentscheidung',
+        r'Bei Etappenplänen mit Gesamtfreigabe gehören dazu `goal\.md` samt tatsächlicher Gesamtfreigabequelle, die exakt ausgewählte Definitionsdatei, der aktuelle Index, Abhängigkeitsnachweise und bei Handoff der exakte Handoff samt aktueller Fortsetzungsanweisung',
+        r'nie aus Planstatus, Indexwert, Dateiname, Anzeige oder Review-pass',
+        r'Der Reviewer erhält kein gewünschtes Urteil und erteilt keine Vollmacht',
     ),
     '.apm/skills/core-milestone/references/milestone-index-format.md': (
-        r'current_approval: handoff-planning[^.]*aktuelle Nutzerauftrag[^.]*ausdrücklich als Arbeitsauftrag[^.]*Originalprüfung[^.]*bereits ausgewählte und bestätigte ID-Version samt Abhängigkeiten',
-        r'Nach ausdrücklicher Freigabe des vollständigen Erstplans darf ausschließlich \x60core-milestone\x60 bei derselben aktuellen ID-Version[^.]*user-confirmed[^.]*Confirmed-Plan in \x60plan_paths\x60[^.]*selected[^.]*selection_approval[^.]*Definition bleiben unverändert',
+        r'`handoff-planning` ist nur zulässig, wenn der aktuelle Nutzerauftrag[^.]*ausdrücklich als Arbeitsauftrag[^.]*Originalprüfung[^.]*bereits ausgewählte und bestätigte ID-Version samt Abhängigkeiten',
+        r'Nach ausdrücklicher Freigabe des vollständigen Erstplans bei fehlender Deckung darf ausschließlich `core-milestone` bei derselben aktuellen ID-Version[^.]*user-confirmed[^.]*Confirmed-Plan in `plan_paths`[^.]*selected[^.]*selection_approval[^.]*Definition bleiben unverändert',
+        r'Nur `core-milestone` setzt ihn, ausschließlich als Ersatz für `handoff-planning`, und nur bei verknüpftem Confirmed-Plan in `plan_paths`',
+        r'ist `goal-covered` ungültig; er beweist keine Freigabe allein',
+        r'Eine echte `user-confirmed`-Aktivierung wird nie in `goal-covered` umgeschrieben',
         r'plan_paths\x60 enthält ausschließlich bestätigte Pläne für genau diese Definitionsversion',
         r'Ein Zähler allein erkennt keine fremden Änderungen[^.]*Inhalt[^.]*bedingte atomare Schreiboperation',
     ),
     '.apm/skills/core-plan/SKILL.md': (
-        r'Ausschließlich beim Handoff-abgeleiteten Erstplan[^.]*nach vollständiger statischer Validierung[^.]*status: Draft[^.]*vorgesehenen Planpfad',
+        r'Ausschließlich beim Erstplan einer Etappe mit Gesamtfreigabe \(auch der ersten Etappe\) und beim Handoff-Erstplan[^.]*nach vollständiger statischer Validierung als `status: Draft` am vorgesehenen Planpfad',
+        r'Ist die Deckung belegt, setzt `core-plan` dieselbe Datei auf `Confirmed`; fehlt sie, wartet `core-plan` auf die ausdrückliche neue Nutzerfreigabe',
         r'Danach prüft \x60core-review\x60 genau diese Datei unabhängig und schreibt keine Datei',
         r'Draft ist nicht ausführbar und wird nicht in \x60plan_paths\x60 geführt\. Keine Entwurfsduplikate',
-        r'Alte Etappenausführungsfreigabe, abgeleitete Planungsbefugnis, Review-pass, Anzeige oder Schweigen geben den Plan nicht frei',
-        r'Handoff-Sperre wird nicht auf Ersatzpläne übertragen',
+        r'Für Erstpläne einer Etappe mit Gesamtfreigabe oder aus einem Handoff gilt der \[Erstplan-Ablauf des Workflowvertrags\]',
+        r'Alte Etappenausführungsfreigabe, abgeleitete Planungsbefugnis, Review-pass, Anzeige oder Schweigen allein geben den Plan nicht frei',
+        r'Technische Ersatzpläne und reguläre Pläne ohne Etappenbindung bleiben von dieser Sonderregel unberührt',
     ),
     '.apm/skills/core-review/SKILL.md': (
-        r'Beim Handoff-abgeleiteten Erstplan prüfe den statisch validierten Draft unabhängig',
-        r'vollständige Inhalt tatsächlich sichtbar präsentiert[^.]*ausdrückliche neue Nutzerfreigabe warten[^.]*dieselbe Datei Confirmed',
+        r'Beim Erstplan einer Etappe mit Gesamtfreigabe oder aus einem Handoff prüfe den statisch validierten Draft unabhängig und getrennt nach Qualität und Deckung',
+        r'`core-plan` setzt die Datei nur bei belegter Deckung auf `Confirmed`, sonst wartet es auf die ausdrückliche neue Nutzerfreigabe',
+        r'Leite Deckung nie aus Planstatus, Indexwert, Dateiname, Anzeige oder Review-pass ab',
+        r'Fehlt eine Gesamtfreigabe, lautet das Deckungsurteil `nicht gedeckt`',
         r'Diese Sonderregel gilt nicht für technische Ersatzpläne',
     ),
     '.apm/skills/core-milestone/SKILL.md': (
         r'current_approval: handoff-planning[^.]*ausschließlich zur Planung aktivieren[^.]*keine persönliche Einzelgenehmigung und kein Ausführungsrecht',
-        r'Nach ausdrücklicher Freigabe des vollständigen Erstplans aktualisiert ausschließlich \x60core-milestone\x60 dieselbe ID-Version[^.]*user-confirmed[^.]*denselben Confirmed-Plan',
+        r'Nach `Confirmed` aktualisiert ausschließlich `core-milestone` nach erneuter Original- und Indexprüfung dieselbe ID-Version: bei belegter Gesamtdeckung von `handoff-planning` auf `goal-covered`, sonst nach ausdrücklicher Nutzerfreigabe auf `user-confirmed`',
+        r'Für Erstpläne einer Etappe mit Gesamtfreigabe oder aus einem Handoff gilt der \[Erstplan-Ablauf des Workflowvertrags\]',
+        r'Bei der ersten Etappe einer Gesamtfreigabe aktiviert `core-milestone` die ausgewählte ID-Version zunächst mit `current_approval: user-confirmed`',
+        r'Eine echte `user-confirmed`-Aktivierung bleibt unverändert',
+        r'lege vor der Bestätigungsfrage Ziel, Etappen, Nichtziele und den konkret gedeckten Wirkungs-, Risiko- und Kostenrahmen sichtbar vor',
+        r'Ziel- und Definitionsbestätigung mit vorgelegtem und mitbestätigtem begrenztem Ausführungsrahmen \(Gesamtfreigabe\) erlauben Planung und Umsetzung der bestätigten Etappe',
     ),
     '.apm/skills/core-handoff/assets/start-prompt.md': (
         r'Handoff aktiviert Planung nur, wenn die aktuelle Nutzeranweisung ihn ausdrücklich als Arbeitsauftrag übergibt[^.]*Originalprüfung[^.]*bereits ausgewählte und bestätigte Definitionsversion samt belegten Abhängigkeiten',
         r'abgeleitete Planungsbefugnis anhand exakter Originalpfade, nicht als persönliche Einzelgenehmigung',
-        r'vollständige Erstplan[^.]*unabhängigem Review tatsächlich sichtbar gezeigt[^.]*ausdrücklichen neuen Nutzerfreigabe Draft, nicht in \x60plan_paths\x60 und nicht ausführbar',
+        r'vollständige Erstplan[^.]*unabhängigem Review tatsächlich sichtbar gezeigt; er bleibt Draft, nicht in `plan_paths` und nicht ausführbar, bis belegte Gesamtdeckung oder eine neue ausdrückliche Nutzerfreigabe ihn bestätigt',
+        r'Freigabequelle: <exakter Abschnitt in goal\.md mit der Gesamtfreigabe',
         r'Bei Abbruch, Resume, Konkurrenz-, Abhängigkeits-, Versions- oder Auswahlfehler stoppe',
     ),
     '.apm/skills/core-milestone/assets/goal-prompt.md': (
         r'Nur wenn die aktuelle Nutzeranweisung[^.]*Handoff ausdrücklich als Arbeitsauftrag[^.]*Originalprüfung[^.]*bereits ausgewählte/bestätigte Folgeversion mit belegten Abhängigkeiten zur Planung aktivieren',
-        r'vollständiger unabhängig geprüfter Erstplan wird tatsächlich sichtbar gezeigt[^.]*ausdrücklichen neuen Nutzerfreigabe Draft und nicht ausführbar',
+        r'vollständiger, unabhängig geprüfter Erstplan wird tatsächlich sichtbar gezeigt; er bleibt Draft und nicht ausführbar, bis belegte Deckung oder eine neue ausdrückliche Nutzerfreigabe ihn bestätigt',
         r'Ist das Gesamtziel belegt abgeschlossen, gib den Gesamtabschluss mit Originalnachweisen aus\. Keine automatische Folgefreigabe, kein Folgedispatch',
     ),
     '.apm/skills/core-shared/references/artifact-contract.md': (
-        r'Nur der Handoff-abgeleitete Erstplan darf nach statischer Validierung vor dem unabhängigen Planreview als Draft am einen vorgesehenen Pfad geschrieben werden',
+        r'Nur der Erstplan einer Etappe mit Gesamtfreigabe oder aus einem Handoff darf nach statischer Validierung vor dem unabhängigen Planreview als Draft am einen vorgesehenen Pfad geschrieben werden',
         r'Draft ist nicht ausführbar, kein bestätigter Plan und nicht in \x60plan_paths\x60',
-        r'nach Review, vollständiger tatsächlicher Anzeige und neuer ausdrücklicher Freigabe wird dieselbe Datei Confirmed[^.]*ausschließlich \x60core-milestone\x60 dieselbe aktuelle ID-Version',
-        r'Technische Ersatzplanung bleibt unberührt',
+        r'Nach Review, vollständiger tatsächlicher Anzeige und belegter Deckung oder neuer ausdrücklicher Nutzerfreigabe wird dieselbe Datei Confirmed',
+        r'`Confirmed` bedeutet ausführbar nur mit belegter Freigabequelle \(persönliche Einzelbestätigung oder Gesamtdeckung\); der Statuswert allein beweist keine Freigabe',
+        r'Technische Ersatzplanung und reguläre Pläne ohne Etappenbindung bleiben unberührt',
+        r'historische Inhalts- oder Schreibbestätigungen erzeugen keine rückwirkende Gesamtvollmacht',
+        r'eine Massenmigration oder Freigabefiktion findet nicht statt',
     ),
     '.apm/skills/core-shared/references/tool-routing.md': (
         r'zuerst eine tatsächlich verfügbare native Plan-/Dateianzeige des aktuellen Harnesses \(OpenChamber ist nur ein Beispiel\)',
         r'Fehlt diese Fähigkeit, öffne den exakten lokalen Markdownpfad mit der OS-Standardanwendung',
         r'Bei Headless-Betrieb oder fehlgeschlagener Anzeige nenne die Einschränkung[^.]*vollständigen Planinhalt im Chat[^.]*ein Pfad oder eine Zusammenfassung genügt nicht',
         r'Behaupte weder Öffnung noch Lesen oder Freigabe ohne Nachweis',
-        r'Anzeige ist keine Lesebestätigung oder Autorisierung\. Keine Viewermechanik, Providerinstallation oder neue Abhängigkeit',
+        r'als geprüfter Erstplan einer gedeckten Etappe sichtbar werden muss',
+        r'Anzeige ist keine Lesebestätigung oder Autorisierung\. Auch ein gedeckter Plan wird angezeigt, ohne eine erneute Antwort zu verlangen; auf eine Antwort wartet er nur, wenn die Deckung fehlt\. Keine Viewermechanik, Providerinstallation oder neue Abhängigkeit',
     ),
     '.apm/skills/core-init-project/assets/core-routing.md': (
         r'ausdrücklich als Arbeitsauftrag übergebener Handoff aktiviert nach Originalprüfung nur die Planung genau einer[^.]*bereits ausgewählten und bestätigten Etappendefinition mit belegten Abhängigkeiten',
-        r'Der unabhängig geprüfte Erstplan wird vollständig tatsächlich sichtbar gezeigt[^.]*ausdrücklichen neuen Freigabe Draft und nicht ausführbar',
+        r'Der unabhängig geprüfte Erstplan wird vollständig tatsächlich sichtbar gezeigt; er bleibt Draft und nicht ausführbar, bis belegte Gesamtdeckung oder eine neue ausdrückliche Freigabe ihn bestätigt',
     ),
     'AGENTS.md': (
         r'abgeleitete Planungsbefugnis, nicht als persönliche Einzelgenehmigung',
         r'Planungsbefugnis bestätigt keinen Erstplan',
+        r'er bleibt Draft und nicht ausführbar, bis belegte Gesamtdeckung oder eine neue ausdrückliche Planfreigabe ihn bestätigt',
+    ),
+    '.apm/skills/core-milestone/references/goal-format.md': (
+        r'Hat der Nutzer den vorgelegten begrenzten Ausführungsrahmen mitbestätigt, nennt ein Abschnitt in der Markdown-Prosa dieser Datei die Autorisierungsquelle',
+        r'zusätzliche YAML-Pflichtfelder entstehen nicht',
+    ),
+    '.apm/skills/core-milestone/references/milestone-format.md': (
+        r'eine Gesamtfreigabe für v1 deckt keine spätere Version stillschweigend',
+    ),
+    '.apm/skills/core-execute/SKILL.md': (
+        r'Bei einem Etappenplan mit Gesamtfreigabe oder Handoff prüft `core-execute` selbst die Eingangsbedingungen',
+        r'eine historische Gesamtfreigabe ist dann nicht nötig',
+        r'`Confirmed`, ein Indexwert oder bloße Auswahl allein genügen nicht',
+        r'`core-execute` repariert die Indexbindung nicht selbst',
     ),
 }
-HANDOFF_WIDENING = r'Handoff erlaubt sofortige Ausführung|Draft ist ausführbar|handoff-planning ersetzt selection_approval|Anzeige gilt als Nutzerfreigabe|Ein Dateipfad genügt als vollständige Anzeige|Handoff-Sperre gilt auch für technische Ersatzpläne'
+HANDOFF_WIDENING = r'Handoff erlaubt sofortige Ausführung|Draft ist ausführbar|handoff-planning ersetzt selection_approval|Anzeige gilt als Nutzerfreigabe|Ein Dateipfad genügt als vollständige Anzeige|Handoff-Sperre gilt auch für technische Ersatzpläne|goal-covered ersetzt user-confirmed|goal-covered ersetzt selection_approval|Qualitäts-pass genügt als Deckung|Der Indexwert beweist die Ausführungsdeckung|Eine Schreibfreigabe gilt rückwirkend als Gesamtfreigabe|Die Gesamtfreigabe deckt jede spätere Definitionsversion|Die gedeckte Etappe startet automatisch die nächste Etappe|Für Erstpläne (?:im Etappenmodus )?gilt der \[Erstplan-Ablauf'
+# The old mandatory single-plan halt is replaced by coverage criteria, not merely deleted.
+HANDOFF_LEGACY = r'Erst eine neue ausdrückliche Nutzerfreigabe macht dieselbe Datei \x60Confirmed\x60|bleibt bis zur ausdrücklichen neuen (?:Nutzer)?[Ff]reigabe Draft|auf die ausdrückliche neue Nutzerfreigabe warten, bevor dieselbe Datei Confirmed wird'
 
 
 def check_handoff_sources(sources):
     for path, patterns in HANDOFF_SOURCES.items():
         text = sources[path]
         require(not re.search(HANDOFF_WIDENING, text), 'Handoff-Ausweitung: ' + path)
+        require(not re.search(HANDOFF_LEGACY, text), 'Handoff-Einzelplanhalt ohne Deckungskriterien: ' + path)
         for pattern in patterns:
             require(re.search(pattern, text), 'Handoff-Klausel fehlt: ' + path + ': ' + pattern)
 

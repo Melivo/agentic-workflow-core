@@ -673,10 +673,26 @@ class ContractTests(unittest.TestCase):
         widenings = ('Handoff erlaubt sofortige Ausführung.', 'Draft ist ausführbar.',
                      'handoff-planning ersetzt selection_approval.', 'Anzeige gilt als Nutzerfreigabe.',
                      'Ein Dateipfad genügt als vollständige Anzeige.',
-                     'Handoff-Sperre gilt auch für technische Ersatzpläne.')
+                     'Handoff-Sperre gilt auch für technische Ersatzpläne.',
+                     'goal-covered ersetzt user-confirmed.', 'goal-covered ersetzt selection_approval.',
+                     'Qualitäts-pass genügt als Deckung.', 'Der Indexwert beweist die Ausführungsdeckung.',
+                     'Eine Schreibfreigabe gilt rückwirkend als Gesamtfreigabe.',
+                     'Die Gesamtfreigabe deckt jede spätere Definitionsversion.',
+                     'Die gedeckte Etappe startet automatisch die nächste Etappe.',
+                     'Für Erstpläne gilt der [Erstplan-Ablauf des Workflowvertrags].',
+                     'Für Erstpläne im Etappenmodus gilt der [Erstplan-Ablauf des Workflowvertrags].')
         for relative in sources:
             for clause in widenings:
                 with self.subTest(source=relative, widening=clause), self.assertRaisesRegex(checker.ContractError, 'Handoff-Ausweitung'):
+                    run_group(relative, sources[relative] + '\n' + clause)
+                mutations += 1
+        # The old mandatory single-plan halt is replaced by coverage criteria; reinserting it fails.
+        legacy = ('Erst eine neue ausdrückliche Nutzerfreigabe macht dieselbe Datei `Confirmed`; bis dahin ist sie nicht ausführbar.',
+                  'Der Erstplan bleibt bis zur ausdrücklichen neuen Nutzerfreigabe Draft.',
+                  '`core-plan` muss auf die ausdrückliche neue Nutzerfreigabe warten, bevor dieselbe Datei Confirmed wird.')
+        for relative in sources:
+            for clause in legacy:
+                with self.subTest(source=relative, legacy=clause), self.assertRaisesRegex(checker.ContractError, 'Handoff-Einzelplanhalt ohne Deckungskriterien'):
                     run_group(relative, sources[relative] + '\n' + clause)
                 mutations += 1
         print('HANDOFF source mutations:', mutations, 'rejected; static evidence only')
@@ -704,7 +720,7 @@ class ContractTests(unittest.TestCase):
         for field in data:
             invalid = copy.deepcopy(data)
             del invalid[field]
-            if field in ('kind', 'purpose', 'approval_after_display', 'execution_order', 'link_owner'):
+            if field in ('kind', 'purpose', 'approval_after_display', 'execution_order', 'link_owner', 'link_recheck', 'execute_checks'):
                 continue
             with self.subTest(missing=field), self.assertRaises((checker.ContractError, KeyError)):
                 checker.validate_handoff_first_plan(invalid)
@@ -712,7 +728,7 @@ class ContractTests(unittest.TestCase):
     def test_handoff_coverage_and_display_paths_use_existing_scenarios(self):
         fixture = json.loads((ROOT / 'tests/core_scenario_cases.json').read_text())
         checker.check_coverage(fixture)
-        for key in ('handoff-planungsbefugnis', 'handoff-erstplan-halt', 'handoff-sichtbare-anzeige'):
+        for key in ('handoff-planungsbefugnis', 'handoff-erstplan-halt', 'handoff-sichtbare-anzeige', 'handoff-gesamtdeckung'):
             ids = fixture['coverage'][key]['cases']
             self.assertTrue({'pass', 'fail'} <= {c['expected'] for c in fixture['cases'] if c['id'] in ids})
             missing = copy.deepcopy(fixture)
@@ -726,6 +742,82 @@ class ContractTests(unittest.TestCase):
         # Existing independent replacement-plan controls must still pass without a new personal approval.
         checker.check_replacement_sources({p: (ROOT / p).read_text() for p in checker.REPLACEMENT_SOURCES})
         checker.validate_scenario(by_id['g04-authorization-positive']['input'])
+
+    def test_goal_coverage_scenarios_separate_activation_review_and_link(self):
+        # Static relationship model only: no live reviewer, harness display or model compliance.
+        by_id = {c['id']: c for c in json.loads((ROOT / 'tests/core_scenario_cases.json').read_text())['cases']}
+        handoff = by_id['handoff-covered-handoff-goal-covered']['input']
+        stage = by_id['handoff-covered-stage-first-user-confirmed']['input']
+        for data in (handoff, stage):
+            checker.validate_scenario(data)
+            # Draft stays unexecutable even when coverage is later proven.
+            with self.assertRaisesRegex(checker.ContractError, 'Plan nicht bestätigt'):
+                checker.validate_plan(data['draft'])
+        current = lambda ix: next(e for e in ix['milestones'] if e['current'])
+        self.assertEqual(current(handoff['index'])['current_approval'], 'handoff-planning')
+        self.assertEqual(current(handoff['final_index'])['current_approval'], 'goal-covered')
+        # A real first-stage activation is never rewritten to goal-covered.
+        self.assertEqual(current(stage['index'])['current_approval'], 'user-confirmed')
+        self.assertEqual(current(stage['final_index'])['current_approval'], 'user-confirmed')
+        # The positive covered fixture needs no own approval sentence and no new single-plan confirmation.
+        self.assertFalse(handoff['new_user_approval'])
+        # Every coverage criterion is necessary on its own: in-memory one-field mutations of the
+        # covered fixture with the exact expected message (replaces former full-copy fixtures).
+        goal, index, definition = (handoff['prompt'][k] for k in ('goal_path', 'index_path', 'definition_path'))
+        def cov(**fields):
+            return lambda d: d['coverage'].update(fields)
+        def top(**fields):
+            return lambda d: d.update(fields)
+        def unlinked(d):
+            current(d['final_index'])['plan_paths'] = []
+        mutations = [(f'source_kind={kind}', cov(source_kind=kind), 'keine belegte Gesamtfreigabe: ' + kind)
+                     for kind in ('write-only', 'historical-approval-field', 'previous-stage-execution', 'content-only')]
+        mutations += [
+            ('frame_explained', cov(frame_explained_before_question=False), 'Ausführungsrahmen nicht sichtbar vorgelegt und bestätigt'),
+            ('frame_confirmed', cov(frame_confirmed=False), 'Ausführungsrahmen nicht sichtbar vorgelegt und bestätigt'),
+            ('foreign_source', cov(source_path='.agentic-workflow/goals/G02/goal.md'), 'Gesamtfreigabequelle nicht im aktuellen Original belegt'),
+            ('new_definition_version', cov(frame_definitions=[d for d in handoff['coverage']['frame_definitions'] if d != definition]), 'Gesamtfreigabe deckt diese Definitionsversion nicht'),
+            ('expected_verdict', cov(expected_verdict_given=True), 'Deckungsreview ohne neutrale vollständige Originalbelege'),
+            ('review_without_handoff', cov(review_inputs=[goal, index, definition]), 'Deckungsreview ohne neutrale vollständige Originalbelege'),
+            ('quality_pass_only', cov(review_verdict='nicht geprüft'), 'Deckungsreview: nicht geprüft'),
+            ('unknown_deviation', cov(deviations=['unbekannt']), 'unbekannte Deckungsabweichung: unbekannt'),
+            ('unconfirmed_security_measure', cov(confirmed_security_measures=['Neue öffentliche Erreichbarkeit ohne bestätigten Rahmen']), 'Nutzerentscheidung nötig: Sicherheitsmaßnahme ohne Rahmenbeleg: Neue öffentliche Erreichbarkeit ohne bestätigten Rahmen'),
+            ('no_plan_text', cov(plan_text_evidence=False), 'Deckungsbeleg fehlt im Planreviewabschnitt'),
+            ('without_plan_link', unlinked, 'Confirmed-Link verändert ID-Version/Auswahl/Aktivierung'),
+            ('draft_linked', lambda d: d.update(final_plan=copy.deepcopy(d['draft'])), 'bestätigte Datei/Inhalt verändert'),
+            ('link_without_recheck', top(link_recheck=False), 'Planlink ohne erneute Original-/Index-/Konkurrenzprüfung'),
+            ('execute_without_own_checks', top(execute_checks=False), 'Execute ohne eigene Original-/Review-/Indexprüfung'),
+            ('without_review', top(review_pass=False), 'statische Validierung/unabhängiges Planreview fehlt'),
+        ]
+        mutations += [(f'deviation={key}', cov(deviations=[key]), 'Nutzerentscheidung nötig: ' + text)
+                      for key, text in checker.COVERAGE_DEVIATIONS.items()]
+        for name, mutate, message in mutations:
+            invalid = copy.deepcopy(handoff)
+            mutate(invalid)
+            with self.subTest(criterion=name), self.assertRaisesRegex(checker.ContractError, '(?:^|: )' + re.escape(message) + '$'):
+                checker.validate_scenario(invalid)
+        # A concretely confirmed security measure passes only when the confirmed frame names exactly it.
+        secured = by_id['handoff-covered-confirmed-security-measure']['input']
+        checker.validate_scenario(secured)
+        self.assertTrue(secured['coverage']['confirmed_security_measures'])
+        for name, frame in (('measure_missing_in_frame', []), ('other_measure_in_frame', ['Anderer Rahmen'])):
+            invalid = copy.deepcopy(secured)
+            invalid['coverage']['frame_security_measures'] = frame
+            with self.subTest(security=name), self.assertRaisesRegex(checker.ContractError, 'Sicherheitsmaßnahme ohne Rahmenbeleg'):
+                checker.validate_scenario(invalid)
+        # The index value alone never proves coverage for an execution/resume prompt.
+        prompt = {'goal_path': handoff['prompt']['goal_path'], 'index_path': handoff['prompt']['index_path'],
+                  'definition_path': handoff['prompt']['definition_path'], 'milestone_id': 'M02', 'version': 1,
+                  'plan_path': handoff['prompt']['plan_path']}
+        resume = {'kind': 'prompt', 'purpose': 'resume', 'index': handoff['final_index'], 'prompt': prompt}
+        with self.assertRaisesRegex(checker.ContractError, 'goal-covered ohne Originalbelege'):
+            checker.validate_prompt(resume)
+        resume['prompt'] = dict(prompt, coverage_refs=[prompt['goal_path'], prompt['index_path'], prompt['definition_path'], prompt['plan_path']])
+        checker.validate_prompt(resume)
+        bare = copy.deepcopy(handoff['final_index'])
+        current(bare)['plan_paths'] = []
+        with self.assertRaisesRegex(checker.ContractError, 'goal-covered ohne verknüpften Confirmed-Plan'):
+            checker.check_index(bare)
 
     def test_rv07_situational_user_confirmation_stays_valid(self):
         # RV07 rejects only blanket gates; situational confirmation remains allowed.
