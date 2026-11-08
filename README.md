@@ -15,7 +15,7 @@ Core ist keine zusätzliche Orchestrierungs-CLI und kein autonomer Releasebot. E
 
 - **Zwei Ausführungswege:** Für größere oder unklare Vorhaben ein Planablauf: optionales Brainstorming, Planreview vor kanonischem Schreiben, ausdrückliche oder belegte abgeleitete Planfreigabe, Umsetzung und unabhängiges Umsetzungsreview. Für eine klare, eng umrissene und ausdrücklich freigegebene Änderung der Direktmodus ohne Plan: `core-execute` arbeitet mit einer unveränderlichen Auftragsgrundlage und lässt die Umsetzung ebenfalls unabhängig prüfen.
 - **Passende Fachmethoden:** Architektur, Backend, Frontend, Mobile, Datenbanken, Terraform, Debugging und Refactoring.
-- **Überprüfbare Übergaben:** Pläne, Task-Ergebnisse und Reviews mit festen Formaten.
+- **Überprüfbare Übergaben:** Pläne, Task-Ergebnisse und Reviews mit festen Formaten. Ein ausdrücklich beauftragter Handoff kann nur die Planung einer exakt ausgewählten und bestätigten Folgeetappe aktivieren. Ihr vollständiger Erstplan wird nach unabhängigem Review sichtbar gezeigt und erst nach neuer ausdrücklicher Nutzerfreigabe ausführbar.
 - **Wiederaufnahme:** Arbeit anhand ihrer Artefakte in einer neuen Sitzung fortsetzen.
 - **Klare Grenzen:** keine ungeplanten Umbauten, stillen Installationen oder automatisch freigegebenen Veröffentlichungen.
 - **Gemeinsame Skills:** einmal installieren statt unnötiger Kopien für jedes Repository oder Harness.

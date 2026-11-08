@@ -3,7 +3,7 @@
 **Status:** Final und verbindlich
 **Geltungsbereich:** öffentliches Microsoft-APM-Paket und dessen Workflow-Werkbank
 **Kanonische Paketquelle:** `.apm/`
-**Kernablauf (Planmodus):** `core-brainstorm? → core-plan → core-review (Planreview, Text) → ausdrückliche/abgeleitete Planfreigabe + Ausführungsauftrag → core-execute ↔ core-review (Umsetzungsreview)`
+**Kernablauf (Planmodus):** `core-brainstorm? → core-plan → core-review (Planreview, Text) → ausdrückliche/abgeleitete Planfreigabe + Ausführungsauftrag → core-execute ↔ core-review (Umsetzungsreview)`; Handoff-abgeleitete Planung einer Folgeetappe endet beim sichtbaren Draft-Erstplan und verlangt eine neue ausdrückliche Nutzerfreigabe vor `Confirmed` oder Execute.
 **Direktmodus:** `klarer, eng umrissener, ausdrücklich freigegebener Änderungsauftrag → core-execute (unveränderliche request.md statt Plan) ↔ core-review (Umsetzungsreview über request_path)`
 
 ## 1. Zweck und Autorität

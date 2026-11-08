@@ -21,12 +21,14 @@ Szenariodaten liegen in `core_scenario_cases.json`; die Abdeckung
 Aufwand/Geldkosten, Reparaturfortsetzung, Sicherheitsannahmen, Delegation,
 Katalog ohne starres Limit) verlangen Positiv- und Negativfälle ihrer Regeln,
 Mutationstests entfernen die kanonischen DOX-Sätze nur im Speicher
-und führen dort die früheren Drift-only-Klauseln von core-docs wieder ein. Paket- und Hosttests
-benötigen ihre dokumentierte isolierte Toolchain. Ersatzplantests verbinden
+und führen dort die früheren Drift-only-Klauseln von core-docs wieder ein.
+Paket- und Hosttests benötigen ihre dokumentierte isolierte Toolchain.
+Ersatzplantests verbinden
 die vorhandenen Rahmen-/Ziel-/Kosten-/Wirkungsfixtures mit den konkreten
 Ablaufquellen und weisen die Wiedereinfügung alter zwingender
-Bestätigungsklauseln auch bei erhaltener positiver Rahmenprosa zurück. Pakettests verlangen den
-quellengebundenen DOX-Skillindex, prüfen seine Links und weisen fehlende,
+Bestätigungsklauseln auch bei erhaltener positiver Rahmenprosa zurück.
+Pakettests verlangen den quellengebundenen DOX-Skillindex, prüfen seine Links
+und weisen fehlende,
 veränderte oder nicht aus den Quellen stammende Indexdateien zurück; die
 synthetischen Archiv-/Installationsfixtures decken zusätzlich Aufnahme und
 Ablehnung fehlender oder verkürzter `core-shared/THIRD_PARTY_NOTICES.md`-Notice
@@ -51,6 +53,16 @@ und `core-devops/SKILL.md` brauchen nur ihre Geltungs-/Autorenbedingungen, keine
 eigene Linkkante. In-Memory-Mutationen brechen Anker, Ziele außerhalb `core-*`,
 private Laufzeitpfade, Einstieg, Einstiegsbedingungen sowie Autoritäts- und
 Rechteklauseln. Das ist statische Konsistenz, keine M05-Abnahme.
+
+Die Handoff-Abdeckungen `handoff-planungsbefugnis`, `handoff-erstplan-halt`
+und `handoff-sichtbare-anzeige` verwenden dieselben Szenariodaten und
+Prüfhelpers: bestätigte Auswahl und Abhängigkeiten, begrenzte Indexänderung,
+eine statisch validierte Draft-Datei, unabhängiges Review, vollständige Anzeige
+und neue Erstplanfreigabe bleiben getrennt. In-Memory-Mutationen entfernen
+Quellklauseln oder ergänzen widersprechende Freigabe-/Anzeigebehauptungen.
+Native Anzeige, anderer Harness, OS-Fallback und Headless-/Fehlerfall sind
+modellierte Beziehungen, keine tatsächlichen GUI- oder Modellnachweise.
+Execute-Draft-Ablehnung und technische Ersatzplanregeln bleiben separat geprüft.
 
 Die M04-Auswahltests sichern den gemeinsamen Zusatzmethodenvertrag mit
 Positiv-/Negativklauseln und In-Memory-Mutationen sowie alle zwölf Profilowner,

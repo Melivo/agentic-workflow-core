@@ -14,7 +14,8 @@
       ".apm/skills/core-shared/references/user-instructions-contract.md",
       ".apm/skills/core-shared/assets/workflow-catalog.yaml",
       ".apm/skills/core-shared/assets/handoff.md",
-      ".apm/skills/core-shared/assets/review-finding.yaml"
+      ".apm/skills/core-shared/assets/review-finding.yaml",
+      ".apm/skills/core-shared/references/tool-routing.md"
     ],
     "workflows": [
       ".apm/skills/core-brainstorm/SKILL.md",
@@ -30,7 +31,8 @@
       ".apm/skills/core-handoff/SKILL.md",
       ".apm/skills/core-handoff/assets/start-prompt.md",
       ".apm/skills/core-architecture/references/design-baseline.md",
-      ".apm/skills/core-architecture/references/principles-background.md"
+      ".apm/skills/core-architecture/references/principles-background.md",
+      "AGENTS.md"
     ],
     "domains": [
       ".apm/skills/core-backend/SKILL.md",
@@ -46,7 +48,8 @@
     "setup": [
       ".apm/skills/core-init-mcps/SKILL.md",
       ".apm/skills/core-init-project/SKILL.md",
-      ".apm/skills/core-user2agent-instructions/SKILL.md"
+      ".apm/skills/core-user2agent-instructions/SKILL.md",
+      ".apm/skills/core-init-project/assets/core-routing.md"
     ],
     "docs": [
       "README.md",
