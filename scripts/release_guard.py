@@ -148,7 +148,7 @@ def package_report(report, version, commit, archive_sha256):
     archive = report.get('archive') or {}
     expected = {
         'schema': 'core-package-report/v1', 'verified': True, 'version': version, 'source_commit': commit,
-        'source_clean': True, 'core_bundles': CORE_BUNDLES, 'bundled_skills': [BUNDLED_SKILL],
+        'source_clean': True, 'core_bundles': CORE_BUNDLES, 'bundled_skills': [],
     }
     violations = ['Paketbericht: %s=%r, erwartet %r' % (k, report.get(k), v) for k, v in expected.items() if report.get(k) != v]
     if archive.get('name') != '%s-%s.zip' % (PACKAGE, version):
@@ -277,8 +277,8 @@ def main(argv=None):
         print('FAIL:', violation, file=sys.stderr)
     if violations:
         return 1
-    print('PASS version-check version=%s manifest=%s version_file=%s apm.yml=%s release-please=%s bundled-skill=%s external-apm-dependencies=0'
-          % (version, version, version, version, CONFIG, BUNDLED_SKILL))
+    print('PASS version-check version=%s manifest=%s version_file=%s apm.yml=%s release-please=%s standalone-skills=0 external-apm-dependencies=0'
+          % (version, version, version, version, CONFIG))
     return 0
 
 

@@ -261,6 +261,7 @@ COVERAGE_DEVIATIONS = {
     'uncovered_cost': 'ungedeckte Geld-/Usagekosten',
     'special_effect': 'ungedeckte Build-/Installations-/SCM-/Produktivwirkung',
     'stale_originals': 'veraltete Originale',
+    'planning_only': 'ausdrücklicher Nur-Planen-Auftrag',
 }
 
 def coverage_gap(data, entry, prompt, handoff):
@@ -758,6 +759,7 @@ REQUIRED_COVERAGE = (
     'g04-authorization-rahmen', 'g04-kosten-aufwand-trennung', 'g04-reparatur-evidenzbasis', 'g04-blast-radius', 'g04-delegation-consent', 'g04-katalog-ohne-limit',
     'execute-direkt-eingang', 'execute-freigabevorrang', 'execute-zusatzdelegation',
     'handoff-planungsbefugnis', 'handoff-erstplan-halt', 'handoff-sichtbare-anzeige', 'handoff-gesamtdeckung',
+    'initialer-rahmen-und-erhaltene-handoffdeckung',
 )
 
 def check_coverage(fixture):
@@ -1005,8 +1007,17 @@ REPLACEMENT_SOURCES = {
 
 # Handoff first-plan clauses stay source-local; these are bounded textual contracts,
 # not a natural-language oracle or a live harness/display test.
+# Der Bullet "Autorisierte Arbeit" steht wortgleich in Root und Init-Vorlage.
+AUTHORIZED_WORK_CLAUSES = (
+    r'Eine Gesamtfreigabe deckt nur die im sichtbaren Freigabebeleg genannten Etappen innerhalb des bestätigten Rahmens; fehlt diese Reichweite, klärt `core-milestone` gezielt nach',
+    r'Die erste Indexauswahl begrenzt die bestätigte Gesamtdeckung nicht, und keine Etappe wird automatisch ausgewählt',
+    r'Neue Ziele, Scopeänderungen, nicht gedeckte Folgeetappen und gesondert freigabepflichtige Aktionen benötigen eigene ausdrückliche Autorisierung; ein ausdrücklicher Nur-Planen-Auftrag erlaubt keine Umsetzung',
+    r'Beachte die evidenzbasierten Reparatur- und Stopgrenzen des zuständigen Skills statt starrer Rundenzahlen',
+)
 HANDOFF_SOURCES = {
     '.apm/skills/core-shared/references/workflow-contract.md': (
+        r'Ausdrückliche Einschränkungen, fehlende Deckung, Konflikte, Abbruch, Resume-Grenzen und ungedeckte Wirkungen bleiben unverändert bindend',
+        r'Die Gesamtfreigabe wählt umgekehrt keine weitere Etappe automatisch aus und ersetzt nicht die bestehende Auswahl- und Planungsaktivierung',
         r'Nur wenn die aktuelle Nutzeranweisung[^.]*Handoff ausdrücklich als Arbeitsauftrag[^.]*Originalprüfung genau eine[^.]*bereits ausgewählte und bestätigte Definitionsversion mit belegten Abhängigkeiten ausschließlich zur Planung aktivieren',
         r'current_approval: handoff-planning[^.]*unverändertem \x60selected\x60, \x60selection_approval\x60 und Definition[^.]*kein Ausführungsrecht',
         r'Ein Handoff als Zitat oder Kontext aktiviert nichts',
@@ -1020,6 +1031,10 @@ HANDOFF_SOURCES = {
         r'Aktuelle ausdrückliche Direktaufträge und gedeckte technische Ersatzplanung folgen ihren eigenen Regeln',
         r'Ein besonderer Freigabesatz pro Ziel oder Handoff ist nicht nötig',
         r'Eine bloße Schreib- oder Inhaltsbestätigung ohne vorgelegten Rahmen deckt keine Ausführung',
+        r'vor der Bestätigungsfrage[^.]*Ziel, Etappen, Nichtziele sowie Wirkungs-, Risiko- und Kostengrenzen[^.]*sichtbar vor[^.]*bestätigt der Nutzer genau diesen vorgelegten Rahmen',
+        r'im sichtbaren Freigabebeleg genannte Liste exakter ID-Versionen[^.]*erste beziehungsweise aktuelle Indexauswahl[^.]*verengt die Gesamtfreigabe nicht',
+        r'Die Übergabe erhält dennoch den vollständigen ursprünglichen Freigaberahmen samt allen ausdrücklich gedeckten ID-Versionen und Ausschlüssen, nicht nur die erste oder aktuelle Indexauswahl',
+        r'Nach Qualitäts-pass, belegter Deckung, vollständiger Anzeige, `Confirmed` und korrekter Indexbindung bleibt gedeckte Umsetzung ohne zusätzliches persönliches Einzelgate zulässig',
         r'Die Deckung endet bei neuen Zielen, Scopeänderungen, wesentlich offenen Entscheidungen, nicht gedeckten Sonderwirkungen[^.]*neuen oder wesentlich erhöhten ungedeckten Sicherheitsrisiken, neuen Definitionsversionen und Abbruch',
         r'Konkret vereinbarte Sicherheitsmaßnahmen brauchen keine erneute Routinefreigabe; unklare Deckung ist eine Nutzerentscheidung',
         r'Bei Etappenplänen mit Gesamtfreigabe gehören dazu `goal\.md` samt tatsächlicher Gesamtfreigabequelle, die exakt ausgewählte Definitionsdatei, der aktuelle Index, Abhängigkeitsnachweise und bei Handoff der exakte Handoff samt aktueller Fortsetzungsanweisung',
@@ -1052,15 +1067,30 @@ HANDOFF_SOURCES = {
         r'Diese Sonderregel gilt nicht für technische Ersatzpläne',
     ),
     '.apm/skills/core-milestone/SKILL.md': (
+        r'Der Rahmen deckt genau die im Freigabebeleg benannten Etappen-IDs und Versionen',
+        r'eine solche Planungserlaubnis ist keine Ausführungsfreigabe',
         r'current_approval: handoff-planning[^.]*ausschließlich zur Planung aktivieren[^.]*keine persönliche Einzelgenehmigung und kein Ausführungsrecht',
         r'Nach `Confirmed` aktualisiert ausschließlich `core-milestone` nach erneuter Original- und Indexprüfung dieselbe ID-Version: bei belegter Gesamtdeckung von `handoff-planning` auf `goal-covered`, sonst nach ausdrücklicher Nutzerfreigabe auf `user-confirmed`',
         r'Für Erstpläne einer Etappe mit Gesamtfreigabe oder aus einem Handoff gilt der \[Erstplan-Ablauf des Workflowvertrags\]',
         r'Bei der ersten Etappe einer Gesamtfreigabe aktiviert `core-milestone` die ausgewählte ID-Version zunächst mit `current_approval: user-confirmed`',
         r'Eine echte `user-confirmed`-Aktivierung bleibt unverändert',
         r'lege vor der Bestätigungsfrage Ziel, Etappen, Nichtziele und den konkret gedeckten Wirkungs-, Risiko- und Kostenrahmen sichtbar vor',
+        r'Vor dem Schreiben kläre bei unklarer Reichweite gezielt, welche Etappen-ID-Versionen zur Umsetzung mitbestätigt werden',
+        r'„Mit M01 beginnen“ allein bedeutet weder „nur M01 freigegeben“ noch Gesamtdeckung; eine bloße Inhaltsbestätigung ist keine Gesamtfreigabe',
+        r'Die erste Auswahl im Index bezeichnet nur die aktuelle Etappe und verengt diesen bestätigten Gesamtrahmen nicht; sie wählt jedoch keine weitere Etappe aus und ersetzt nicht deren bestehende Auswahl- und Planungsaktivierung',
+        r'Für eine gedeckte, ordnungsgemäß ausgewählte Etappe ist nach bestätigtem Plan und dessen korrekter Indexbindung keine zusätzliche persönliche Einzelbestätigung zur Umsetzung erforderlich',
         r'Ziel- und Definitionsbestätigung mit vorgelegtem und mitbestätigtem begrenztem Ausführungsrahmen \(Gesamtfreigabe\) erlauben Planung und Umsetzung der bestätigten Etappe',
     ),
+    '.apm/skills/core-handoff/SKILL.md': (
+        r'Handoff und Startprompt referenzieren den vollständigen ursprünglichen Rahmen \(Freigabequelle in `goal\.md` samt gedeckten Etappen-IDs/Versionen und Ausschlüssen, Definition, Index\)',
+        r'die Auswahl verengt den bestätigten Rahmen nicht, und der Rahmen wählt keine weitere Etappe automatisch aus',
+        r'Bei gedeckter, ordnungsgemäß ausgewählter Arbeit führt ein bestätigter Plan nach Qualitäts- und Deckungsprüfung, vollständiger Anzeige und korrekter Indexbindung ohne zusätzliche persönliche Einzelbestätigung zur Umsetzung; ausdrückliche Einschränkungen und ungedeckte Wirkungen bleiben Stopgrenzen',
+    ),
     '.apm/skills/core-handoff/assets/start-prompt.md': (
+        r'Geltungsbereich der Freigabe: <vollständiger bestätigter Rahmen, alle gedeckten Etappen-IDs/Versionen und Ausschlüsse; getrennt von der ersten/aktuellen Indexauswahl>',
+        r'Die erste beziehungsweise aktuelle Indexauswahl verengt den bestätigten Gesamtrahmen nicht; sie wählt auch keine weitere Etappe automatisch aus',
+        r'Für gedeckte, ordnungsgemäß ausgewählte Umsetzung ist nach Qualitäts- und Deckungsprüfung, vollständiger Anzeige, `Confirmed` und korrekter Indexbindung keine zusätzliche persönliche Einzelbestätigung erforderlich',
+        r'Explizite Einschränkungen, fehlende Deckung, Konflikte, Abbruch, Resume-Grenzen und ungedeckte Wirkungen bleiben bindend',
         r'Handoff aktiviert Planung nur, wenn die aktuelle Nutzeranweisung ihn ausdrücklich als Arbeitsauftrag übergibt[^.]*Originalprüfung[^.]*bereits ausgewählte und bestätigte Definitionsversion samt belegten Abhängigkeiten',
         r'abgeleitete Planungsbefugnis anhand exakter Originalpfade, nicht als persönliche Einzelgenehmigung',
         r'vollständige Erstplan[^.]*unabhängigem Review tatsächlich sichtbar gezeigt; er bleibt Draft, nicht in `plan_paths` und nicht ausführbar, bis belegte Gesamtdeckung oder eine neue ausdrückliche Nutzerfreigabe ihn bestätigt',
@@ -1068,6 +1098,8 @@ HANDOFF_SOURCES = {
         r'Bei Abbruch, Resume, Konkurrenz-, Abhängigkeits-, Versions- oder Auswahlfehler stoppe',
     ),
     '.apm/skills/core-milestone/assets/goal-prompt.md': (
+        r'Übernimm aus der Freigabequelle den vollständigen belegten Rahmen samt allen gedeckten Etappen-IDs/Versionen und Ausschlüssen; die aktuelle Indexauswahl ist getrennt davon und darf den Rahmen nicht allein verengen',
+        r'Ist die Etappe gedeckt, ausgewählt und der Erstplan nach Qualitäts- und Deckungsprüfung, vollständiger Anzeige sowie korrekter Indexbindung bestätigt, verlange für gedeckte Umsetzung keine zusätzliche persönliche Einzelbestätigung; echte Einschränkungen und ungedeckte Wirkungen stoppen weiterhin',
         r'Nur wenn die aktuelle Nutzeranweisung[^.]*Handoff ausdrücklich als Arbeitsauftrag[^.]*Originalprüfung[^.]*bereits ausgewählte/bestätigte Folgeversion mit belegten Abhängigkeiten zur Planung aktivieren',
         r'vollständiger, unabhängig geprüfter Erstplan wird tatsächlich sichtbar gezeigt; er bleibt Draft und nicht ausführbar, bis belegte Deckung oder eine neue ausdrückliche Nutzerfreigabe ihn bestätigt',
         r'Ist das Gesamtziel belegt abgeschlossen, gib den Gesamtabschluss mit Originalnachweisen aus\. Keine automatische Folgefreigabe, kein Folgedispatch',
@@ -1090,16 +1122,20 @@ HANDOFF_SOURCES = {
         r'Anzeige ist keine Lesebestätigung oder Autorisierung\. Auch ein gedeckter Plan wird angezeigt, ohne eine erneute Antwort zu verlangen; auf eine Antwort wartet er nur, wenn die Deckung fehlt\. Keine Viewermechanik, Providerinstallation oder neue Abhängigkeit',
     ),
     '.apm/skills/core-init-project/assets/core-routing.md': (
+        *AUTHORIZED_WORK_CLAUSES,
         r'ausdrücklich als Arbeitsauftrag übergebener Handoff aktiviert nach Originalprüfung nur die Planung genau einer[^.]*bereits ausgewählten und bestätigten Etappendefinition mit belegten Abhängigkeiten',
         r'Der unabhängig geprüfte Erstplan wird vollständig tatsächlich sichtbar gezeigt; er bleibt Draft und nicht ausführbar, bis belegte Gesamtdeckung oder eine neue ausdrückliche Freigabe ihn bestätigt',
     ),
     'AGENTS.md': (
+        *AUTHORIZED_WORK_CLAUSES,
         r'abgeleitete Planungsbefugnis, nicht als persönliche Einzelgenehmigung',
         r'Planungsbefugnis bestätigt keinen Erstplan',
         r'er bleibt Draft und nicht ausführbar, bis belegte Gesamtdeckung oder eine neue ausdrückliche Planfreigabe ihn bestätigt',
     ),
     '.apm/skills/core-milestone/references/goal-format.md': (
         r'Hat der Nutzer den vorgelegten begrenzten Ausführungsrahmen mitbestätigt, nennt ein Abschnitt in der Markdown-Prosa dieser Datei die Autorisierungsquelle',
+        r'Diese Liste bestimmt den Umfang der Gesamtfreigabe; die erste Auswahl im Index bezeichnet nur die aktuelle Etappe und verengt sie nicht',
+        r'Umgekehrt wählt die Gesamtfreigabe keine weitere Etappe automatisch aus',
         r'zusätzliche YAML-Pflichtfelder entstehen nicht',
     ),
     '.apm/skills/core-milestone/references/milestone-format.md': (
@@ -1112,9 +1148,9 @@ HANDOFF_SOURCES = {
         r'`core-execute` repariert die Indexbindung nicht selbst',
     ),
 }
-HANDOFF_WIDENING = r'Handoff erlaubt sofortige Ausführung|Draft ist ausführbar|handoff-planning ersetzt selection_approval|Anzeige gilt als Nutzerfreigabe|Ein Dateipfad genügt als vollständige Anzeige|Handoff-Sperre gilt auch für technische Ersatzpläne|goal-covered ersetzt user-confirmed|goal-covered ersetzt selection_approval|Qualitäts-pass genügt als Deckung|Der Indexwert beweist die Ausführungsdeckung|Eine Schreibfreigabe gilt rückwirkend als Gesamtfreigabe|Die Gesamtfreigabe deckt jede spätere Definitionsversion|Die gedeckte Etappe startet automatisch die nächste Etappe|Für Erstpläne (?:im Etappenmodus )?gilt der \[Erstplan-Ablauf'
+HANDOFF_WIDENING = r'Mit M01 beginnen bedeutet Gesamtfreigabe|Die Gesamtfreigabe wählt weitere Etappen automatisch aus|Ausdrückliches Nur-Planen erlaubt Umsetzung|Handoff erlaubt sofortige Ausführung|Draft ist ausführbar|handoff-planning ersetzt selection_approval|Anzeige gilt als Nutzerfreigabe|Ein Dateipfad genügt als vollständige Anzeige|Handoff-Sperre gilt auch für technische Ersatzpläne|goal-covered ersetzt user-confirmed|goal-covered ersetzt selection_approval|Qualitäts-pass genügt als Deckung|Der Indexwert beweist die Ausführungsdeckung|Eine Schreibfreigabe gilt rückwirkend als Gesamtfreigabe|Die Gesamtfreigabe deckt jede spätere Definitionsversion|Die gedeckte Etappe startet automatisch die nächste Etappe|Für Erstpläne (?:im Etappenmodus )?gilt der \[Erstplan-Ablauf'
 # The old mandatory single-plan halt is replaced by coverage criteria, not merely deleted.
-HANDOFF_LEGACY = r'Erst eine neue ausdrückliche Nutzerfreigabe macht dieselbe Datei \x60Confirmed\x60|bleibt bis zur ausdrücklichen neuen (?:Nutzer)?[Ff]reigabe Draft|auf die ausdrückliche neue Nutzerfreigabe warten, bevor dieselbe Datei Confirmed wird'
+HANDOFF_LEGACY = r'Mit M01 beginnen bedeutet nur M01 freigegeben|Die erste Indexauswahl begrenzt die Gesamtfreigabe|Handoffs geben nur die aktuelle Etappenfreigabe weiter|Gedeckte Umsetzung braucht eine zusätzliche persönliche Einzelbestätigung|Erst eine neue ausdrückliche Nutzerfreigabe macht dieselbe Datei \x60Confirmed\x60|bleibt bis zur ausdrücklichen neuen (?:Nutzer)?[Ff]reigabe Draft|auf die ausdrückliche neue Nutzerfreigabe warten, bevor dieselbe Datei Confirmed wird|(?<!nicht gedeckte )Folgeetappen und gesondert freigabepflichtige Aktionen benötigen'
 
 
 def check_handoff_sources(sources):

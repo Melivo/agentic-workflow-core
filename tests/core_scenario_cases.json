@@ -12,6 +12,48 @@
   ],
   "cases": [
     {
+      "id": "initial-visible-confirmed-frame",
+      "group": "workflows",
+      "source": ".apm/skills/core-milestone/SKILL.md",
+      "input": {
+        "kind": "authorization",
+        "frame_confirmed": true,
+        "goal_changed": false,
+        "technical_change": false,
+        "within_frame": true,
+        "coverage_known": true,
+        "extra_monetary_cost": false,
+        "consent_given": false,
+        "uncovered_usage": false,
+        "production_effect": false,
+        "impact_clear": true,
+        "recovery_safe": true
+      },
+      "expected": "pass",
+      "observation": "Bestätigter begrenzter Rahmen erlaubt gedeckte Arbeit"
+    },
+    {
+      "id": "initial-writing-without-frame",
+      "group": "workflows",
+      "source": ".apm/skills/core-milestone/SKILL.md",
+      "input": {
+        "kind": "authorization",
+        "frame_confirmed": false,
+        "goal_changed": false,
+        "technical_change": false,
+        "within_frame": true,
+        "coverage_known": true,
+        "extra_monetary_cost": false,
+        "consent_given": false,
+        "uncovered_usage": false,
+        "production_effect": false,
+        "impact_clear": true,
+        "recovery_safe": true
+      },
+      "expected": "fail",
+      "observation": "Erstplanung ohne bestätigten Rahmen bleibt bestätigungspflichtig"
+    },
+    {
       "id": "names-positive",
       "group": "milestones",
       "source": ".apm/skills/core-milestone/references/milestone-format.md",
@@ -39715,6 +39757,22 @@
         "handoff-draft-in-plan-paths",
         "handoff-approval-before-display"
       ]
+    },
+    "initialer-rahmen-und-erhaltene-handoffdeckung": {
+      "cases": [
+        "initial-visible-confirmed-frame",
+        "initial-writing-without-frame",
+        "handoff-covered-stage-first-user-confirmed",
+        "handoff-covered-handoff-goal-covered",
+        "handoff-aborted",
+        "handoff-concurrent",
+        "handoff-resume-not-replan",
+        "handoff-missing-dependency-evidence",
+        "handoff-version-conflict",
+        "handoff-selection-not-confirmed",
+        "handoff-confirmation-not-execution"
+      ],
+      "review_scenario": "test_initial_frame_and_handoff_repair_mutations verändert Klauseln im Speicher; test_initial_frame_to_covered_execute_and_real_stops prüft Nur-Planen, Schreib-/Inhaltsbestätigung, M01-only/M02-Halt wie G06, Drift und Kosten ohne Großfixture oder reale Modellbefolgung."
     },
     "handoff-gesamtdeckung": {
       "cases": [

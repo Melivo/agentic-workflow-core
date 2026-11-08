@@ -37,7 +37,7 @@ PRODUCER_COMMANDS = (
 BUNDLED_SKILL = release_guard.BUNDLED_SKILL
 SKILL_INDEX = 'AGENTS.md'
 # License and third-party notice files carried into the package report.
-REPORT_LICENSES = ('core-shared/LICENSE', 'core-shared/THIRD_PARTY_NOTICES.md', 'core-architecture/THIRD_PARTY_NOTICES.md', BUNDLED_SKILL + '/LICENSE')
+REPORT_LICENSES = ('core-shared/LICENSE', 'core-shared/THIRD_PARTY_NOTICES.md', 'core-architecture/THIRD_PARTY_NOTICES.md', 'core-init-project/LICENSE')
 FORBIDDEN_PARTS = {'.agentic-workflow', '.git', 'apm_modules', 'node_modules', '__pycache__', '.agents', '.opencode', '.codex'}
 FORBIDDEN_NAME = re.compile(r'(\.env(\..+)?|\.npmrc|\.pypirc|id_rsa|id_ed25519|.*\.(pem|key|p12|pfx|pyc))$')
 SECRET = re.compile(rb'-----BEGIN [A-Z ]*PRIVATE KEY-----|gh[pousr]_[A-Za-z0-9]{36}|github_pat_[A-Za-z0-9_]{40,}|AKIA[0-9A-Z]{16}|xox[abprs]-[A-Za-z0-9-]{10,}')
@@ -64,18 +64,10 @@ def auxiliary_files(files, prefix):
 
 
 def compare_auxiliary(sources, actual, where):
+    """The retired standalone provider payload is never a valid package member."""
     expected = auxiliary_files(sources, '.apm/skills/')
-    violations = []
-    if BUNDLED_SKILL + '/SKILL.md' not in expected:
-        violations.append('kanonischer Begleitskill fehlt: ' + BUNDLED_SKILL)
-    for key in sorted(set(expected) | set(actual)):
-        if key not in actual:
-            violations.append(where + ': Begleitskill-Datei fehlt: ' + key)
-        elif key not in expected:
-            violations.append(where + ': unerwartete Begleitskill-Datei: ' + key)
-        elif expected[key] != actual[key]:
-            violations.append(where + ': Begleitskill-Datei verändert: ' + key)
-    return violations
+    return [where + ': verbotener Standalone-Skill: ' + key
+            for key in sorted(set(expected) | set(actual))]
 
 
 def compare_skill_index(sources, files, prefix, where):
@@ -112,8 +104,7 @@ def links(files, prefix):
     known = set(files) | {posixpath.dirname(p) for p in files}
     count, unresolved = 0, []
     for path, data in sorted(files.items()):
-        if not (path.startswith(prefix + 'core-') or path.startswith(prefix + BUNDLED_SKILL + '/')
-                or path == prefix + SKILL_INDEX) or not path.endswith('.md'):
+        if not (path.startswith(prefix + 'core-') or path == prefix + SKILL_INDEX) or not path.endswith('.md'):
             continue
         for ref in LINK.findall(data.decode('utf-8')):
             if re.match(r'[a-z][a-z0-9+.-]*:', ref) or ref.startswith('#'):
@@ -150,8 +141,8 @@ def licenses(files, prefix, sources):
         violations.append(prefix + 'core-shared/THIRD_PARTY_NOTICES.md fehlt oder ohne vollständigen OMA-MIT-Hinweis')
     if b'MIT' not in files.get(prefix + 'core-architecture/THIRD_PARTY_NOTICES.md', b''):
         violations.append(prefix + 'core-architecture/THIRD_PARTY_NOTICES.md fehlt oder ohne MIT-Hinweis')
-    if files.get(prefix + BUNDLED_SKILL + '/LICENSE') != sources.get('LICENSE'):
-        violations.append(prefix + BUNDLED_SKILL + '/LICENSE fehlt oder weicht von LICENSE ab')
+    if files.get(prefix + 'core-init-project/LICENSE') != sources.get('LICENSE'):
+        violations.append(prefix + 'core-init-project/LICENSE fehlt oder weicht von LICENSE ab')
     return violations
 
 
@@ -287,7 +278,7 @@ def verify(output=None):
         'archive': {'name': archive.name, 'sha256': sha256(data), 'bytes': len(data)},
         'core_bundles': install_summary['core_bundles'], 'core_files': install_summary['core_files'],
         'internal_links': install_summary['internal_links'], 'archive_files': archive_summary.get('archive_files'),
-        'bundled_skills': [BUNDLED_SKILL],
+        'bundled_skills': [],
         'external_dependencies': [],
         'licenses': list(REPORT_LICENSES),
         'inventory': {k: sha256(v) for k, v in sorted(entries.items())},

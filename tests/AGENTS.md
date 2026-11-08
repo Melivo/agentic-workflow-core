@@ -9,8 +9,8 @@ mit den vorhandenen Regressionstests prüfen.
 
 Dieser Bereich besitzt Tests und Szenariodaten. Produktionsverträge bleiben
 unter [.apm/skills/](../.apm/skills/AGENTS.md), Prüf- und Paketwerkzeuge unter
-[scripts/](../scripts/AGENTS.md). Die Konfigurator-Originaltests bleiben beim
-[mitgelieferten Konfigurator](../.apm/skills/gortex-serena-configurator/AGENTS.md).
+[scripts/](../scripts/AGENTS.md). Die Provider-Originaltests bleiben beim
+[internen Providerbundle](../.apm/skills/core-init-project/AGENTS.md).
 
 ## Local Contracts
 
@@ -74,6 +74,11 @@ Erstplan-Ablaufsätze wieder ein.
 Native Anzeige, anderer Harness, OS-Fallback und Headless-/Fehlerfall sind
 modellierte Beziehungen, keine tatsächlichen GUI- oder Modellnachweise.
 Execute-Draft-Ablehnung und technische Ersatzplanregeln bleiben separat geprüft.
+Die Freigaberahmen-Fälle (Gesamtfreigabe mit Reichweitenklärung, erste
+Indexauswahl ohne Verengung, Nur-Planen als `planning_only`, Inhaltsbestätigung
+ohne sichtbaren Rahmen) ergänzen positive Szenarien und In-Memory-Mutationen auf
+denselben Szenariodaten; sie belegen statische Konsistenz, keine reale
+Agentenbefolgung.
 
 Die M04-Auswahltests sichern den gemeinsamen Zusatzmethodenvertrag mit
 Positiv-/Negativklauseln und In-Memory-Mutationen sowie alle zwölf Profilowner,

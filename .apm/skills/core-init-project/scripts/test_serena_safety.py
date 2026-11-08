@@ -3,12 +3,30 @@
 
 from __future__ import annotations
 
+import contextlib
+import io
+import json
 import os
 import tempfile
 import unittest
 from pathlib import Path
+from unittest import mock
 
 import serena_safety
+
+
+def make_project(root: Path, base: str | None = None, local: str | None = None, sources: int = 0) -> Path:
+    """Create a minimal project with optional Serena YAML files and TypeScript sources."""
+    (root / ".serena").mkdir(parents=True, exist_ok=True)
+    if base is not None:
+        (root / ".serena" / "project.yml").write_text(base, encoding="utf-8")
+    if local is not None:
+        (root / ".serena" / "project.local.yml").write_text(local, encoding="utf-8")
+    if sources:
+        (root / "src").mkdir(exist_ok=True)
+        for index in range(sources):
+            (root / "src" / f"module-{index}.ts").write_text("export {};\n", encoding="utf-8")
+    return root
 
 
 class SerenaSafetyTests(unittest.TestCase):
@@ -727,6 +745,291 @@ class SerenaSafetyTests(unittest.TestCase):
                 before,
                 {path: path.read_bytes() for path in (project_config, global_config, client_config)},
             )
+
+
+class LanguageKeyFormTests(unittest.TestCase):
+    """Serena 1.7 stores languages as `language_servers`; older projects still use `languages`."""
+
+    def read(self, path: Path) -> str:
+        return path.read_text(encoding="utf-8")
+
+    def test_current_empty_language_servers_without_sources_is_current_and_untouched(self) -> None:
+        with tempfile.TemporaryDirectory() as temp:
+            root = make_project(Path(temp), base="project_name: demo\nlanguage_servers: []\n")
+            before = (root / ".serena" / "project.yml").read_bytes()
+
+            for apply in (False, True):
+                result = serena_safety.set_project_languages(root, apply=apply)
+
+                self.assertEqual(result["status"], "current")
+                self.assertEqual(result["language_key"], "language_servers")
+                self.assertEqual(result["configured"], [])
+                self.assertEqual(result["detected"], [])
+                self.assertFalse(result["changed"])
+                self.assertIsNone(result["remediation"])
+            self.assertEqual((root / ".serena" / "project.yml").read_bytes(), before)
+
+    def test_audit_with_language_servers_is_read_only_and_names_the_current_key(self) -> None:
+        with tempfile.TemporaryDirectory() as temp:
+            root = make_project(Path(temp), base="language_servers: [python]\n", sources=3)
+            before = (root / ".serena" / "project.yml").read_bytes()
+
+            result = serena_safety.set_project_languages(root, apply=False)
+
+            self.assertEqual(result["status"], "update-needed")
+            self.assertIn("Set language_servers in", result["remediation"])
+            self.assertEqual((root / ".serena" / "project.yml").read_bytes(), before)
+
+    def test_apply_updates_language_servers_without_adding_the_legacy_key(self) -> None:
+        with tempfile.TemporaryDirectory() as temp:
+            root = make_project(Path(temp), base="language_servers: [python]\nencoding: utf-8\n", sources=3)
+
+            result = serena_safety.set_project_languages(root, apply=True)
+
+            text = self.read(root / ".serena" / "project.yml")
+            self.assertEqual(result["status"], "written")
+            self.assertEqual(serena_safety.parse_configured_languages(text), ["typescript"])
+            self.assertIn("language_servers:", text)
+            self.assertNotIn("\nlanguages:", "\n" + text)
+            self.assertIn("encoding: utf-8", text)
+
+    def test_legacy_languages_key_stays_supported_and_is_not_migrated(self) -> None:
+        with tempfile.TemporaryDirectory() as temp:
+            root = make_project(Path(temp), base="languages: [python]\n", sources=3)
+
+            audit = serena_safety.set_project_languages(root, apply=False)
+            self.assertEqual(audit["language_key"], "languages")
+            self.assertEqual(audit["status"], "update-needed")
+            serena_safety.set_project_languages(root, apply=True)
+
+            text = self.read(root / ".serena" / "project.yml")
+            self.assertEqual(serena_safety.parse_configured_languages(text), ["typescript"])
+            self.assertNotIn("language_servers", text)
+
+    def test_legacy_single_language_is_read_and_converted_on_apply(self) -> None:
+        with tempfile.TemporaryDirectory() as temp:
+            root = make_project(Path(temp), base="language: python\nencoding: utf-8\n", sources=3)
+
+            audit = serena_safety.set_project_languages(root, apply=False)
+            self.assertEqual(audit["configured"], ["python"])
+            self.assertEqual(audit["language_key"], "language")
+            serena_safety.set_project_languages(root, apply=True)
+
+            text = self.read(root / ".serena" / "project.yml")
+            self.assertEqual(serena_safety.parse_configured_languages(text), ["typescript"])
+            self.assertIn("language_servers:", text)
+            self.assertNotIn("language:", text)
+
+    def test_single_language_is_ignored_when_a_list_key_exists(self) -> None:
+        self.assertEqual(
+            serena_safety.parse_configured_languages("language: python\nlanguage_servers: [go]\n"),
+            ["go"],
+        )
+
+    def test_missing_key_is_reported_and_apply_adds_the_current_key(self) -> None:
+        with tempfile.TemporaryDirectory() as temp:
+            root = make_project(Path(temp), base="project_name: demo\n", sources=3)
+
+            audit = serena_safety.set_project_languages(root, apply=False)
+            self.assertEqual(audit["status"], "languages-key-missing")
+            self.assertIsNone(audit["language_key"])
+            self.assertIn("Set language_servers in", audit["remediation"])
+            serena_safety.set_project_languages(root, apply=True)
+
+            text = self.read(root / ".serena" / "project.yml")
+            self.assertEqual(serena_safety.parse_configured_languages(text), ["typescript"])
+            self.assertIn("language_servers:", text)
+
+    def test_local_override_wins_for_either_key_form_and_only_it_is_written(self) -> None:
+        cases = {
+            "current base, legacy local": ("language_servers: [python]\n", "languages: [python]\n", "languages"),
+            "legacy base, current local": ("languages: [python]\n", "language_servers: [python]\n", "language_servers"),
+            "current base and local": ("language_servers: [python]\n", "language_servers: [go]\n", "language_servers"),
+        }
+        for name, (base, local, key) in cases.items():
+            with self.subTest(name), tempfile.TemporaryDirectory() as temp:
+                root = make_project(Path(temp), base=base, local=local, sources=3)
+                base_bytes = (root / ".serena" / "project.yml").read_bytes()
+
+                result = serena_safety.set_project_languages(root, apply=True)
+
+                self.assertEqual(result["source"], "project.local.yml")
+                self.assertEqual(result["language_key"], key)
+                local_text = self.read(root / ".serena" / "project.local.yml")
+                self.assertEqual(serena_safety.parse_configured_languages(local_text), ["typescript"])
+                self.assertEqual((root / ".serena" / "project.yml").read_bytes(), base_bytes)
+
+    def test_local_file_without_a_language_key_does_not_hide_the_base_list(self) -> None:
+        with tempfile.TemporaryDirectory() as temp:
+            root = make_project(Path(temp), base="language_servers: [typescript]\n", local="symbol_info_budget: 5\n", sources=3)
+
+            result = serena_safety.set_project_languages(root, apply=False)
+
+            self.assertEqual(result["source"], "project.yml")
+            self.assertEqual(result["status"], "current")
+
+    def test_identical_duplicate_keys_in_one_file_are_kept_consistent_on_apply(self) -> None:
+        with tempfile.TemporaryDirectory() as temp:
+            root = make_project(Path(temp), base="languages: [python]\nlanguage_servers: [python]\n", sources=3)
+
+            audit = serena_safety.set_project_languages(root, apply=False)
+            self.assertEqual(audit["status"], "update-needed")
+            self.assertEqual(audit["language_key"], "language_servers")
+            serena_safety.set_project_languages(root, apply=True)
+
+            data = serena_safety.load_yaml_mapping(self.read(root / ".serena" / "project.yml"))[1]
+            self.assertEqual(list(data["languages"]), ["typescript"])
+            self.assertEqual(list(data["language_servers"]), ["typescript"])
+
+    def test_contradicting_keys_in_one_file_block_audit_and_apply_without_writing(self) -> None:
+        with tempfile.TemporaryDirectory() as temp:
+            root = make_project(Path(temp), base="languages: [python]\nlanguage_servers: [go]\n", sources=3)
+            before = (root / ".serena" / "project.yml").read_bytes()
+
+            for apply in (False, True):
+                result = serena_safety.set_project_languages(root, apply=apply)
+
+                self.assertEqual(result["status"], "conflicting-language-keys")
+                self.assertFalse(result["changed"])
+                self.assertIn("contradicts", result["error"])
+                self.assertIn("identical", result["remediation"])
+            self.assertEqual((root / ".serena" / "project.yml").read_bytes(), before)
+            with self.assertRaises(serena_safety.LanguageKeyConflict):
+                serena_safety.parse_configured_languages(self.read(root / ".serena" / "project.yml"))
+
+    def test_invalid_language_values_are_parse_errors_for_either_key(self) -> None:
+        invalid = {
+            "null current": "language_servers:\n",
+            "null legacy": "languages: null\n",
+            "string current": "language_servers: python\n",
+            "numbers": "language_servers: [1, 2]\n",
+            "non-string single": "language: [python]\n",
+        }
+        for name, text in invalid.items():
+            with self.subTest(name), tempfile.TemporaryDirectory() as temp:
+                root = make_project(Path(temp), base=text, sources=3)
+                before = (root / ".serena" / "project.yml").read_bytes()
+
+                result = serena_safety.set_project_languages(root, apply=True)
+
+                self.assertEqual(result["status"], "parse-error")
+                self.assertFalse(result["changed"])
+                self.assertEqual((root / ".serena" / "project.yml").read_bytes(), before)
+
+    def test_error_names_the_failing_file(self) -> None:
+        with tempfile.TemporaryDirectory() as temp:
+            root = make_project(Path(temp), base="language_servers: [go]\n", local="language_servers: null\n", sources=3)
+
+            result = serena_safety.set_project_languages(root, apply=False)
+
+            self.assertEqual(result["status"], "parse-error")
+            self.assertTrue(result["path"].endswith("project.local.yml"))
+
+    def test_conflict_blocks_selected_apply_before_any_write(self) -> None:
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            cwd = make_project(root / "project", base="languages: [python]\nlanguage_servers: [go]\n", sources=3)
+            home = root / "home"
+            home.mkdir()
+            before = (cwd / ".serena" / "project.yml").read_bytes()
+            argv = ["serena_safety.py", "--cwd", str(cwd), "--home", str(home), "--apply-languages"]
+            stdout = io.StringIO()
+
+            with mock.patch("sys.argv", argv), contextlib.redirect_stdout(stdout):
+                code = serena_safety.main()
+
+            report = json.loads(stdout.getvalue())
+            self.assertEqual(code, 2)
+            self.assertEqual(report["mode"], "preflight-failed")
+            self.assertEqual(report["native_serena"]["languages"]["status"], "conflicting-language-keys")
+            self.assertEqual((cwd / ".serena" / "project.yml").read_bytes(), before)
+
+    def test_audit_exit_code_flags_conflict_and_not_the_valid_no_lsp_project(self) -> None:
+        for text, expected in (("language_servers: []\n", 0), ("languages: [a]\nlanguage_servers: [b]\n", 2)):
+            with self.subTest(text), tempfile.TemporaryDirectory() as temp:
+                root = Path(temp)
+                cwd = make_project(root / "project", base=text)
+                home = root / "home"
+                (home / ".serena").mkdir(parents=True)
+                (home / ".serena" / "serena_config.yml").write_text("tool_timeout: 10.0\n", encoding="utf-8")
+                cwd.joinpath("AGENTS.md").write_text(serena_safety.PROJECT_PLAYBOOK, encoding="utf-8")
+                home.joinpath("AGENTS.md").write_text(serena_safety.PLAYBOOK, encoding="utf-8")
+                argv = ["serena_safety.py", "--cwd", str(cwd), "--home", str(home)]
+
+                with mock.patch("sys.argv", argv), contextlib.redirect_stdout(io.StringIO()):
+                    self.assertEqual(serena_safety.main(), expected)
+
+    def test_global_metadata_accepts_current_form_and_clears_in_place(self) -> None:
+        with tempfile.TemporaryDirectory() as temp:
+            home = Path(temp)
+            config = home / ".serena" / ".serena" / "project.yml"
+            config.parent.mkdir(parents=True)
+            config.write_text("language_servers: []\n", encoding="utf-8")
+            self.assertEqual(serena_safety.clear_global_metadata_languages(home, apply=False)["status"], "current")
+
+            config.write_text("language_servers: [dart]\n", encoding="utf-8")
+            audit = serena_safety.clear_global_metadata_languages(home, apply=False)
+            self.assertEqual(audit["status"], "update-needed")
+            self.assertIn("Set language_servers to []", audit["remediation"])
+            self.assertEqual(self.read(config), "language_servers: [dart]\n")
+            result = serena_safety.clear_global_metadata_languages(home, apply=True)
+
+            self.assertEqual(result["status"], "written")
+            self.assertEqual(result["language_key"], "language_servers")
+            self.assertEqual(serena_safety.parse_configured_languages(self.read(config)), [])
+            self.assertNotIn("\nlanguages:", "\n" + self.read(config))
+
+    def test_global_metadata_local_override_in_either_form_wins(self) -> None:
+        with tempfile.TemporaryDirectory() as temp:
+            home = Path(temp)
+            config = home / ".serena" / ".serena" / "project.yml"
+            local = home / ".serena" / ".serena" / "project.local.yml"
+            config.parent.mkdir(parents=True)
+            config.write_text("language_servers: []\n", encoding="utf-8")
+            local.write_text("languages: [dart]\n", encoding="utf-8")
+
+            result = serena_safety.clear_global_metadata_languages(home, apply=True)
+
+            self.assertEqual(result["source"], "project.local.yml")
+            self.assertEqual(result["language_key"], "languages")
+            self.assertEqual(serena_safety.parse_configured_languages(self.read(local)), [])
+            self.assertEqual(self.read(config), "language_servers: []\n")
+
+    def test_global_metadata_conflict_is_reported_and_never_overwritten(self) -> None:
+        with tempfile.TemporaryDirectory() as temp:
+            home = Path(temp)
+            config = home / ".serena" / ".serena" / "project.yml"
+            config.parent.mkdir(parents=True)
+            config.write_text("languages: [dart]\nlanguage_servers: []\n", encoding="utf-8")
+
+            for apply in (False, True):
+                result = serena_safety.clear_global_metadata_languages(home, apply=apply)
+                self.assertEqual(result["status"], "conflicting-language-keys")
+                self.assertFalse(result["changed"])
+            self.assertEqual(self.read(config), "languages: [dart]\nlanguage_servers: []\n")
+
+    def test_resolution_matches_installed_serena_when_importable(self) -> None:
+        try:
+            from serena.config.serena_config import ProjectConfig
+        except ImportError:
+            self.skipTest("serena is not importable in this interpreter")
+        fixtures = [
+            "language_servers: []\n",
+            "language_servers: [python]\n",
+            "languages: [python]\n",
+            "language: python\n",
+            "languages: [python]\nlanguage_servers: [python]\n",
+            "language: python\nlanguage_servers: [go]\n",
+            "symbol_info_budget: 5\n",
+        ]
+        for text in fixtures:
+            with self.subTest(text), tempfile.TemporaryDirectory() as temp:
+                path = Path(temp) / "project.yml"
+                path.write_text(text, encoding="utf-8")
+                data, _ = ProjectConfig._load_yaml_dict(str(path), apply_defaults=False)
+                expected = data.get("language_servers")
+                actual = serena_safety.parse_configured_languages(text)
+                self.assertEqual(actual, None if expected is None else list(expected))
 
 
 if __name__ == "__main__":

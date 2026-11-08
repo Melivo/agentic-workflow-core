@@ -15,9 +15,9 @@ Lade vor einer Mutation:
 
 - den [Vertrag für Benutzeranweisungen](../core-shared/references/user-instructions-contract.md) für Pfade, Marker, Vorschau, Bestätigung und Erhaltung außerhalb des Zielbereichs;
 - das [Toolrouting](../core-shared/references/tool-routing.md) für Providerreihenfolge, Projektgrenzen und sichtbare Fallbacks;
-- den mitgelieferten Skill [`gortex-serena-configurator`](../gortex-serena-configurator/SKILL.md) für die Code-Intelligence-Readiness.
+- die interne [Provider- und Laufzeitreferenz](references/provider-setup.md) nur für Code-Intelligence-Readiness, Interpreterauflösung oder ausdrücklich ausgewählte Provideraktionen.
 
-`gortex-serena-configurator` ist eine quelltreu migrierte Konfigurationsmethode der kanonischen Paketquelle. Verwende ihn **inline** als Methode im aktuellen Lauf: nicht kopieren, nicht umbenennen, nicht als Subagent dispatchen und keinen separaten Status anlegen.
+Die Provider- und Laufzeitmethodik ist vollständig in dieses Bundle integriert. Verwende sie **inline** im aktuellen Lauf: kein zweiter Skill-Einstieg, kein Subagent und kein separater Status.
 
 ## Workflow
 
@@ -33,25 +33,16 @@ Dateiglobs sind nur Signale. Kombiniere sie mit Taskabsicht, Stack und Pfadkonte
 
 ### 2. Provider-Readiness inline prüfen
 
-Prüfe vor dem ersten Skriptaufruf die Konfigurator-Laufzeit; führe erst danach den Preflight von `gortex-serena-configurator` mit der konkreten Repositorywurzel read-only aus. Halte `--apply-agents` und jede entsprechende `AGENTS.md`-Schreiboption deaktiviert. Provideraktionen benötigen eine konkret gezeigte Auswahl und passende ausdrückliche Autorisierung. Serena darf ausschließlich für dieses konkrete Projekt initialisiert werden; aktiviere oder konfiguriere niemals globales Serena. Der Configurator liefert den Readiness-Befund; der Schreibbesitz für den unten definierten Projektblock bleibt bei `core-init-project`.
+Prüfe vor dem ersten Skriptaufruf die Provider-Laufzeit; führe erst danach den internen Provider-Preflight mit der konkreten Repositorywurzel read-only aus. Halte `--apply-agents` und jede entsprechende `AGENTS.md`-Schreiboption deaktiviert. Provideraktionen benötigen eine konkret gezeigte Auswahl und passende ausdrückliche Autorisierung. Serena darf ausschließlich für dieses konkrete Projekt initialisiert werden; aktiviere oder konfiguriere niemals globales Serena. Der Providerhelfer liefert den Readiness-Befund; der Schreibbesitz für den unten definierten Projektblock bleibt bei `core-init-project`.
 
-#### Konfigurator-Laufzeit vorbereiten
+#### Provider-Laufzeit vorbereiten
 
-1. Lies die [Laufzeitanforderungen](../gortex-serena-configurator/REQUIREMENTS.md) und die [Dependencydeklaration](../gortex-serena-configurator/scripts/requirements.txt). Sie bleiben die einzige Quelle für Python-Mindestversion und Paketversionsbereiche. PyYAML ersetzt `ruamel.yaml` nicht.
-2. Wähle einen vorhandenen geeigneten Python-Interpreter und ermittle dessen absoluten Pfad. Prüfe mit genau diesem Interpreter read-only Python-Version, Paketversion und tatsächlichen Import:
-
-   ```text
-   "<python>" -B -c "import sys; from importlib.metadata import version; from ruamel.yaml import YAML, YAMLError; print(sys.executable); print(sys.version); print(version('ruamel.yaml'))"
-   ```
-
-   Vergleiche die beobachteten Versionen mit den Anforderungen; ein erfolgreicher Import allein genügt nicht. Verwechsle die Umgebung des Serena-CLI/MCP-Prozesses nicht mit der Laufzeit des Audit-Skripts.
-3. Fehlt Python, das Paket oder eine passende Version, biete die notwendige Laufzeiteinrichtung als eigene Auswahl an. Zeige vor der Freigabe Interpreter, absoluten Umgebungspfad, Requirementsdatei, konkrete Befehle, Netzwerk-/Dateiwirkungen und Entfernungspfad. Bevorzuge eine vorhandene geeignete isolierte Werkzeugumgebung; andernfalls schlage eine separate virtuelle Umgebung vor. Erzeuge sie erst nach ausdrücklicher Freigabe. Installiere Pakete ausschließlich über den bestätigten Interpreter mit `"<python>" -m pip install -r "<absoluter-konfiguratorpfad>/scripts/requirements.txt"`. Keine globale oder Systeminstallation, kein `sudo`, kein `--break-system-packages` und keine Änderung der Anwendungsabhängigkeiten. Die Auswahl einer Serena-Provideraktion allein ist keine Installationsfreigabe.
-4. Wiederhole nach einer freigegebenen Einrichtung dieselbe Versions- und Importprüfung. Verwende den verifizierten absoluten Interpreterpfad für alle Audit- und ausgewählten Apply-Aufrufe; kein Rückfall auf ein unqualifiziertes `python`. Bei erneutem Init prüfe erneut und überspringe die Einrichtung, wenn alles passt. Fehlt die Freigabe oder scheitert die Einrichtung, führe das Audit-Skript nicht aus und melde die konkrete Laufzeitlücke; ein nicht gestartetes Audit ist kein erfolgreicher Readiness-Nachweis.
+Löse Interpreter und gegebenenfalls Einrichtung inline über den kanonischen [Python-Laufzeitvertrag](references/provider-setup.md#python-runtime) auf; dieser Abschnitt ergänzt nur die Init-Folgen. Verwende den dort verifizierten absoluten Interpreterpfad für alle Audit- und ausgewählten Apply-Aufrufe. Bei erneutem Init wird er neu geprüft. Bleibt die Laufzeit ungelöst, führe das Audit-Skript nicht aus und schließe gemäß den Ergebniszuständen unten mit der konkreten Laufzeitlücke ab.
 
 #### Provideraudit durchführen
 
 1. Prüfe Gortex-Gesundheit und vorhandenes Tracking read-only.
-2. Prüfe Serena-Verfügbarkeit, projektspezifische Initialisierung, effektive Sprachen und autoritative MCP-Quelle read-only.
+2. Prüfe Serena-Verfügbarkeit, projektspezifische Initialisierung, effektive Sprachliste und autoritative MCP-Quelle read-only. Die Liste heißt in Serena 1.7 `language_servers`, in älteren Projekten `languages`; der Providerhelfer wertet beide samt `project.local.yml` aus. `language_servers: []` ohne Quellcode ist gültig und kein Befund; widersprüchliche Schlüssel sind ein Befund und werden nicht automatisch aufgelöst.
 3. Stelle nur tatsächlich notwendige Aktionen gemeinsam zur Auswahl.
 4. Führe ausschließlich ausdrücklich ausgewählte Aktionen aus.
 5. Auditiere danach Gortex, Serena und native Fallbacks erneut und berichte ihre Bereitschaft getrennt.
@@ -117,7 +108,7 @@ Für den erneuten Abgleich einer bestehenden `AGENTS.md` gegen die zuständigen 
 Vorlagen bleiben bei ihrem Eigentümer und werden nicht dupliziert:
 
 - `CORE-INIT-PROJECT`: der nach Abschnitt 3 entworfene Block einschließlich der [Core-Routingvorlage](assets/core-routing.md). Erhalte sämtliche belegten Projektfakten aus dem bestehenden Block unverändert und ersetze nur eindeutig zuordenbares Routing. Ist die Fakt-/Anweisungsgrenze unklar, blockiere den konkreten Vorschlag; keine heuristische Löschung oder semantische Klassifikation. Der Aufrufer schreibt diesen vollständig geprüften Block als temporäre Vorlagendatei. Der Helper prüft Marker und Schreibgrenzen, nicht die fachliche Wahrheit der gelieferten Vorlage.
-- `SERENA-GORTEX-PROJECT`: Eigentum des Mitgelieferten Konfigurators. Extrahiere die Vorlage read-only aus der Konstante `PROJECT_PLAYBOOK` in `../gortex-serena-configurator/scripts/serena_safety.py` über `extract-template` und schreibe sie in eine temporäre Vorlagendatei; übernimm sie nicht in dieses Bundle. Enthält der bestehende Projektblock zusätzliche belegte Projektfakten, erhalte diese im geprüften Entwurf; bei unklarer Abgrenzung blockiere den Vorschlag ebenso wie beim Core-Block.
+- `SERENA-GORTEX-PROJECT`: Eigentum der internen Providerintegration. Extrahiere die Vorlage read-only aus der Konstante `PROJECT_PLAYBOOK` in `scripts/serena_safety.py` über `extract-template` und schreibe sie in eine temporäre Vorlagendatei; dupliziere sie nicht als zweite Vorlagenquelle. Enthält der bestehende Projektblock zusätzliche belegte Projektfakten, erhalte diese im geprüften Entwurf; bei unklarer Abgrenzung blockiere den Vorschlag ebenso wie beim Core-Block.
 
 Ablauf:
 
@@ -132,7 +123,7 @@ Der Helper bearbeitet ausschließlich Dateien namens `AGENTS.md`, lehnt Symlinks
 Beispiel (Helperpfad und alle Eingaben absolut setzen; `core-block.md` ist der geprüfte Entwurf einschließlich erhaltener Projektfakten):
 
 ```sh
-python -B "$helper" extract-template --source "$configurator/scripts/serena_safety.py" --name PROJECT_PLAYBOOK > "$tmp/serena-block.md"
+python -B "$helper" extract-template --source "$bundle/scripts/serena_safety.py" --name PROJECT_PLAYBOOK > "$tmp/serena-block.md"
 python -B "$helper" preview --target "$project/AGENTS.md" --block "CORE-INIT-PROJECT=$tmp/core-block.md" --block "SERENA-GORTEX-PROJECT=$tmp/serena-block.md" --select "CORE-INIT-PROJECT,SERENA-GORTEX-PROJECT"
 # Erst nach separater Bestätigung der gezeigten Fassung:
 python -B "$helper" apply --target "$project/AGENTS.md" --block "CORE-INIT-PROJECT=$tmp/core-block.md" --block "SERENA-GORTEX-PROJECT=$tmp/serena-block.md" --select "CORE-INIT-PROJECT,SERENA-GORTEX-PROJECT" --confirm "$confirmed_token"
@@ -144,8 +135,8 @@ Im reinen Abgleich bedeutet **completed**: bestätigte Auswahl geschrieben (oder
 
 ## Ergebnisse und Zustände
 
-- **completed:** Konfigurator-Laufzeit und Preflight sind belegt, ausgewählte Provideraktionen sind geprüft, der bestätigte Projektblock und der Artefaktschutz sind verifiziert, keine Artefakte in den beiden Verzeichnissen sind getrackt und ein zweiter Lauf wäre diff-frei.
-- **partial:** Der Harness oder Block ist gültig, aber die Konfigurator-Laufzeit oder eine optionale Providerfähigkeit fehlt oder bereits getrackte Artefakte lassen eine Datenschutzlücke offen; nenne die konkrete Einschränkung.
+- **completed:** Provider-Laufzeit und Preflight sind belegt, ausgewählte Provideraktionen sind geprüft, der bestätigte Projektblock und der Artefaktschutz sind verifiziert, keine Artefakte in den beiden Verzeichnissen sind getrackt und ein zweiter Lauf wäre diff-frei.
+- **partial:** Der Harness oder Block ist gültig, aber die Provider-Laufzeit oder eine optionale Providerfähigkeit fehlt oder bereits getrackte Artefakte lassen eine Datenschutzlücke offen; nenne die konkrete Einschränkung.
 - **blocked:** Projektgrenze, Eingabeartefakt, exakte Diff-Bestätigung, sichere Markerlage oder erforderliche Providerfähigkeit fehlt oder der wirksame Artefaktschutz bleibt ungeklärt.
 - **failed:** Eine ausgewählte Aktion oder verifizierte Mutation schlug fehl; nenne Pfad, Teilwirkung und sicheren nächsten Schritt.
 

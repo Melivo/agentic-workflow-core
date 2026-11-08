@@ -443,35 +443,45 @@ class ContractTests(unittest.TestCase):
             with self.assertRaises(checker.ContractError):
                 checker.local_path(root, '../outside.md')
 
-    def test_init_project_checks_configurator_runtime_before_audit(self):
+    def test_init_project_checks_provider_runtime_before_audit(self):
         # Static instruction regression, not a live agent or installation test.
         skill = ROOT / '.apm/skills/core-init-project/SKILL.md'
         text = skill.read_text(encoding='utf-8')
-        runtime = text.split('#### Konfigurator-Laufzeit vorbereiten', 1)[1].split('#### Provideraudit durchführen', 1)[0]
+        runtime = text.split('#### Provider-Laufzeit vorbereiten', 1)[1].split('#### Provideraudit durchführen', 1)[0]
+        self.assertIn('references/provider-setup.md#python-runtime', runtime)
+        self.assertIn('verifizierten absoluten Interpreterpfad für alle Audit- und ausgewählten Apply-Aufrufe', runtime)
+        self.assertIn('Bei erneutem Init wird er neu geprüft', runtime)
+        self.assertIn('führe das Audit-Skript nicht aus', runtime)
+        # One internal source owns the complete runtime procedure.
+        provider = (ROOT / '.apm/skills/core-init-project/references/provider-setup.md').read_text(encoding='utf-8')
+        canonical_runtime = provider.split('## Python Runtime', 1)[1].split('## Workflow', 1)[0]
+        self.assertIn('[Python Runtime](#python-runtime)', provider)
         for requirement in (
-            '../gortex-serena-configurator/REQUIREMENTS.md',
-            '../gortex-serena-configurator/scripts/requirements.txt',
-            'einzige Quelle',
+            '[REQUIREMENTS.md](../REQUIREMENTS.md)',
+            '[scripts/requirements.txt](../scripts/requirements.txt)',
+            'besitzen das',
             'from ruamel.yaml import YAML, YAMLError',
             "version('ruamel.yaml')",
-            'ein erfolgreicher Import allein genügt nicht',
+            'Ein erfolgreicher Import allein',
             'PyYAML ersetzt `ruamel.yaml` nicht',
-            'als eigene Auswahl',
+            'frage einmal gemeinsam mit der Aufrufauswahl',
             'Netzwerk-/Dateiwirkungen und Entfernungspfad',
-            'erst nach ausdrücklicher Freigabe',
-            '"<python>" -m pip install -r',
-            'Keine globale oder Systeminstallation',
-            'keine Änderung der Anwendungsabhängigkeiten',
-            'allein ist keine Installationsfreigabe',
-            'verifizierten absoluten Interpreterpfad für alle Audit- und ausgewählten Apply-Aufrufe',
-            'überspringe die Einrichtung, wenn alles passt',
-            'führe das Audit-Skript nicht aus',
+            'Eine konkrete Freigabe, die genau diese Laufzeiteinrichtung benannt',
+            '"<env-python>" -m pip install -r',
+            'kein System-, Global- oder `--user`-pip',
+            'keine App-Abhängigkeitsänderung',
+            'Eine Serena-Provideraktion allein ist keine',
+            'ausgegebene absolute `sys.executable`',
+            'stoppe beim ersten erfolgreichen',
+            'MISE_AUTO_INSTALL=0 MISE_EXEC_AUTO_INSTALL=0 mise exec --',
+            'tatsächlichen Runner',
+            'bleibt das Audit ungestartet',
         ):
             with self.subTest(requirement=requirement):
-                self.assertIn(requirement, runtime)
+                self.assertIn(requirement, canonical_runtime)
         self.assertIn('Readiness-Preflight löst keinen Vollscan und keine Installation aus', text)
-        self.assertIn('**completed:** Konfigurator-Laufzeit und Preflight sind belegt', text)
-        self.assertIn('**partial:** Der Harness oder Block ist gültig, aber die Konfigurator-Laufzeit', text)
+        self.assertIn('**completed:** Provider-Laufzeit und Preflight sind belegt', text)
+        self.assertIn('**partial:** Der Harness oder Block ist gültig, aber die Provider-Laufzeit', text)
 
     def test_setup_source_rejects_old_installer_and_unrelated_keywords(self):
         front = {'description': 'Prüft vorhandene MCP-Provider read-only; keine Einrichtung.'}
@@ -670,7 +680,10 @@ class ContractTests(unittest.TestCase):
                     with self.assertRaises(checker.ContractError):
                         run_group(relative, text)
                 mutations += 1
-        widenings = ('Handoff erlaubt sofortige Ausführung.', 'Draft ist ausführbar.',
+        widenings = ('Mit M01 beginnen bedeutet Gesamtfreigabe.',
+                     'Die Gesamtfreigabe wählt weitere Etappen automatisch aus.',
+                     'Ausdrückliches Nur-Planen erlaubt Umsetzung.',
+                     'Handoff erlaubt sofortige Ausführung.', 'Draft ist ausführbar.',
                      'handoff-planning ersetzt selection_approval.', 'Anzeige gilt als Nutzerfreigabe.',
                      'Ein Dateipfad genügt als vollständige Anzeige.',
                      'Handoff-Sperre gilt auch für technische Ersatzpläne.',
@@ -687,15 +700,126 @@ class ContractTests(unittest.TestCase):
                     run_group(relative, sources[relative] + '\n' + clause)
                 mutations += 1
         # The old mandatory single-plan halt is replaced by coverage criteria; reinserting it fails.
-        legacy = ('Erst eine neue ausdrückliche Nutzerfreigabe macht dieselbe Datei `Confirmed`; bis dahin ist sie nicht ausführbar.',
+        legacy = ('Mit M01 beginnen bedeutet nur M01 freigegeben.',
+                  'Die erste Indexauswahl begrenzt die Gesamtfreigabe.',
+                  'Handoffs geben nur die aktuelle Etappenfreigabe weiter.',
+                  'Gedeckte Umsetzung braucht eine zusätzliche persönliche Einzelbestätigung.',
+                  'Erst eine neue ausdrückliche Nutzerfreigabe macht dieselbe Datei `Confirmed`; bis dahin ist sie nicht ausführbar.',
                   'Der Erstplan bleibt bis zur ausdrücklichen neuen Nutzerfreigabe Draft.',
-                  '`core-plan` muss auf die ausdrückliche neue Nutzerfreigabe warten, bevor dieselbe Datei Confirmed wird.')
+                  '`core-plan` muss auf die ausdrückliche neue Nutzerfreigabe warten, bevor dieselbe Datei Confirmed wird.',
+                  'Neue Ziele, Scopeänderungen, Folgeetappen und gesondert freigabepflichtige Aktionen benötigen eigene ausdrückliche Autorisierung.')
         for relative in sources:
             for clause in legacy:
                 with self.subTest(source=relative, legacy=clause), self.assertRaisesRegex(checker.ContractError, 'Handoff-Einzelplanhalt ohne Deckungskriterien'):
                     run_group(relative, sources[relative] + '\n' + clause)
                 mutations += 1
         print('HANDOFF source mutations:', mutations, 'rejected; static evidence only')
+
+    def test_initial_frame_and_handoff_repair_mutations(self):
+        # Alter clauses in place, retaining the surrounding positive prose. These
+        # regressions were missed by the pre-repair source-local checks. Include
+        # the handoff owner even when replaying the old checker's smaller source set.
+        paths = set(checker.HANDOFF_SOURCES) | {'.apm/skills/core-handoff/SKILL.md'}
+        sources = {p: (ROOT / p).read_text() for p in paths}
+        checker.check_handoff_sources(sources)
+        mutations = (
+            ('.apm/skills/core-milestone/SKILL.md',
+             'Vor dem Schreiben kläre bei unklarer Reichweite gezielt, welche Etappen-ID-Versionen zur Umsetzung mitbestätigt werden.',
+             'Die Reichweite kann nach dem Schreiben offenbleiben.'),
+            ('.apm/skills/core-milestone/SKILL.md',
+             '„Mit M01 beginnen“ allein bedeutet weder „nur M01 freigegeben“ noch Gesamtdeckung',
+             '„Mit M01 beginnen“ allein bedeutet „nur M01 freigegeben“'),
+            ('.apm/skills/core-milestone/references/goal-format.md',
+             'die erste Auswahl im Index bezeichnet nur die aktuelle Etappe und verengt sie nicht',
+             'die erste Auswahl im Index begrenzt die Gesamtfreigabe'),
+            ('.apm/skills/core-handoff/SKILL.md',
+             'den vollständigen ursprünglichen Rahmen', 'nur den aktuellen Etappenrahmen'),
+            ('.apm/skills/core-handoff/assets/start-prompt.md',
+             'alle gedeckten Etappen-IDs/Versionen und Ausschlüsse', 'nur die aktuelle Etappen-ID/Version'),
+            ('.apm/skills/core-shared/references/workflow-contract.md',
+             'ohne zusätzliches persönliches Einzelgate zulässig', 'erst nach zusätzlichem persönlichem Einzelgate zulässig'),
+            ('.apm/skills/core-handoff/assets/start-prompt.md',
+             'Explizite Einschränkungen, fehlende Deckung, Konflikte, Abbruch, Resume-Grenzen und ungedeckte Wirkungen bleiben bindend',
+             'Explizite Einschränkungen werden durch Gesamtdeckung aufgehoben'),
+            ('.apm/skills/core-shared/references/workflow-contract.md',
+             'Ausdrückliche Einschränkungen, fehlende Deckung, Konflikte, Abbruch, Resume-Grenzen und ungedeckte Wirkungen bleiben unverändert bindend',
+             'Ausdrückliche Einschränkungen treten hinter belegte Gesamtdeckung zurück'),
+            ('.apm/skills/core-shared/references/workflow-contract.md',
+             'Die Gesamtfreigabe wählt umgekehrt keine weitere Etappe automatisch aus und ersetzt nicht die bestehende Auswahl- und Planungsaktivierung',
+             'Die Gesamtfreigabe aktiviert jede weitere gedeckte Etappe unmittelbar'),
+            ('.apm/skills/core-milestone/SKILL.md',
+             'Der Rahmen deckt genau die im Freigabebeleg benannten Etappen-IDs und Versionen',
+             'Der Rahmen deckt alle Etappen des Ziels'),
+            ('.apm/skills/core-milestone/SKILL.md',
+             'eine solche Planungserlaubnis ist keine Ausführungsfreigabe',
+             'eine solche Planungserlaubnis erlaubt auch die Ausführung'),
+            *((relative, old, new)
+              for relative in ('.apm/skills/core-init-project/assets/core-routing.md', 'AGENTS.md')
+              for old, new in (
+                  ('Eine Gesamtfreigabe deckt nur die im sichtbaren Freigabebeleg genannten Etappen',
+                   'Eine Gesamtfreigabe deckt alle Etappen des Ziels'),
+                  ('fehlt diese Reichweite, klärt `core-milestone` gezielt nach',
+                   'fehlt diese Reichweite, gilt nur die aktuelle Etappe'),
+                  ('Die erste Indexauswahl begrenzt die bestätigte Gesamtdeckung nicht',
+                   'Die erste Indexauswahl begrenzt die bestätigte Gesamtdeckung'),
+                  ('keine Etappe wird automatisch ausgewählt', 'gedeckte Etappen werden automatisch ausgewählt'),
+                  ('nicht gedeckte Folgeetappen', 'Folgeetappen nach Wahl'),
+                  ('ein ausdrücklicher Nur-Planen-Auftrag erlaubt keine Umsetzung',
+                   'ein ausdrücklicher Nur-Planen-Auftrag erlaubt bei Deckung die Umsetzung'),
+                  ('evidenzbasierten Reparatur- und Stopgrenzen des zuständigen Skills statt starrer Rundenzahlen',
+                   'starren Rundenzahlen'),
+              )),
+        )
+        for relative in ('.apm/skills/core-init-project/assets/core-routing.md', 'AGENTS.md'):
+            # Re-tightening in place is a separate reversal: every further stage needs approval again.
+            self.assertEqual(sources[relative].count('nicht gedeckte Folgeetappen'), 1)
+            changed = sources[relative].replace('nicht gedeckte Folgeetappen', 'Folgeetappen')
+            with self.subTest(source=relative, mutation='pauschales Folgeetappengate'), self.assertRaisesRegex(checker.ContractError, 'Handoff-Einzelplanhalt'):
+                checker.check_handoff_sources(dict(sources, **{relative: changed}))
+        for relative, old, new in mutations:
+            self.assertEqual(sources[relative].count(old), 1, old)
+            changed = sources[relative].replace(old, new)
+            with self.subTest(source=relative, mutation=new), self.assertRaisesRegex(checker.ContractError, 'Handoff-Klausel fehlt'):
+                checker.check_handoff_sources(dict(sources, **{relative: changed}))
+        print('FRAME:', len(mutations) + 2, 'source alterations rejected (static only)')
+
+    def test_initial_frame_to_covered_execute_and_real_stops(self):
+        # Reuse the existing full chain: initial two-version frame, first stage,
+        # handoff order, separate reviews, display, Confirmed, index and Execute.
+        cases = {c['id']: c['input'] for c in json.loads((ROOT / 'tests/core_scenario_cases.json').read_text())['cases']}
+        handoff = cases['handoff-covered-handoff-goal-covered']
+        first = cases['handoff-covered-stage-first-user-confirmed']
+        self.assertEqual(first['coverage']['frame_definitions'], handoff['coverage']['frame_definitions'])
+        self.assertEqual(len(handoff['coverage']['frame_definitions']), 2)
+        for data in (first, handoff):
+            before = copy.deepcopy(data)
+            self.assertTrue(data['execute'])
+            self.assertFalse(data['new_user_approval'])
+            checker.validate_scenario(data)
+            self.assertEqual(data, before)
+            # Coverage may not be silently narrowed to an unnecessary Draft halt.
+            narrowed = copy.deepcopy(data)
+            narrowed.update(final_plan=copy.deepcopy(data['draft']), final_index=copy.deepcopy(data['index']), execute=False)
+            with self.assertRaisesRegex(checker.ContractError, 'bestätigte Datei/Inhalt verändert'):
+                checker.validate_scenario(narrowed)
+        for name, fields, gap in (
+            ('write-only', {'source_kind': 'write-only'}, 'keine belegte Gesamtfreigabe: write-only'),
+            ('content-only', {'source_kind': 'content-only'}, 'keine belegte Gesamtfreigabe: content-only'),
+            ('not-shown', {'frame_explained_before_question': False}, 'Ausführungsrahmen nicht sichtbar'),
+            ('G06-like-M01-only', {'frame_definitions': handoff['coverage']['frame_definitions'][:1]}, 'Gesamtfreigabe deckt diese Definitionsversion nicht'),
+            ('only-plan', {'deviations': ['planning_only']}, 'ausdrücklicher Nur-Planen-Auftrag'),
+            ('drift', {'deviations': ['stale_originals']}, 'veraltete Originale'),
+            ('cost', {'deviations': ['uncovered_cost']}, 'ungedeckte Geld-/Usagekosten'),
+        ):
+            halted = copy.deepcopy(handoff)
+            halted['coverage'].update(fields)
+            halted.update(final_plan=copy.deepcopy(halted['draft']), final_index=copy.deepcopy(halted['index']), execute=False)
+            with self.subTest(stop=name):
+                checker.validate_scenario(halted)
+                for change in ({'execute': True}, {'final_plan': handoff['final_plan']}):
+                    with self.assertRaisesRegex(checker.ContractError, gap):
+                        checker.validate_scenario(dict(halted, **change))
+        print('FRAME: covered first-stage/handoff Execute; 7 real halts with forced execution/confirmation rejected (static only)')
 
     def test_handoff_draft_keeps_execute_gate_and_task_validation(self):
         cases = {c['id']: c['input'] for c in json.loads((ROOT / 'tests/core_scenario_cases.json').read_text())['cases']}
