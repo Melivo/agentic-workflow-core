@@ -4,6 +4,21 @@
 
 - Ergänzt reproduzierbare lokale/CI-Prüfungen und eine standardmäßig deaktivierte, getrennte Release-PR- und Veröffentlichungskette. GitHub-Livebetrieb und App-Einrichtung sind nicht bestätigt.
 
+## [0.15.0](https://github.com/Melivo/agentic-workflow-core/compare/v0.14.1...v0.15.0) (2026-11-09)
+
+
+### Features
+
+* **core-init:** include text-content audit guidance ([3d0676b](https://github.com/Melivo/agentic-workflow-core/commit/3d0676b418be439f55961f85db91c89907bcd890))
+* **core-init:** strengthen generated project guidance ([b6e50ea](https://github.com/Melivo/agentic-workflow-core/commit/b6e50ea26d9bdef0c13758843aeb83f710b569d0))
+* **core-init:** strengthen generated project guidance ([#26](https://github.com/Melivo/agentic-workflow-core/issues/26)) ([b6e50ea](https://github.com/Melivo/agentic-workflow-core/commit/b6e50ea26d9bdef0c13758843aeb83f710b569d0))
+
+
+### Bug Fixes
+
+* **core-init:** align audit contracts with project guidance ([ce9abec](https://github.com/Melivo/agentic-workflow-core/commit/ce9abec37f38c190248084e7bc566e6ea98c863d))
+* **core-init:** clarify discovery and setup boundaries ([e912c46](https://github.com/Melivo/agentic-workflow-core/commit/e912c46f394224f7326966d3805dd21b840483b4))
+
 ## [0.14.1](https://github.com/Melivo/agentic-workflow-core/compare/v0.14.0...v0.14.1) (2026-11-09)
 
 
