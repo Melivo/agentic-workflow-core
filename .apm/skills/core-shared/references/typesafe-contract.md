@@ -7,7 +7,7 @@ Diese bedingte Referenz gilt nur für ausdrücklich passende Design-, Integratio
 Semantische Bewertung kann nur variable Sprache unterstützen; sie ersetzt keine fachliche Verantwortung. Nichtnutzung ist ein valides Ergebnis.
 
 | Skill | Sinnvolle Teilaufgabe oder begründete Nichtnutzung; unveränderte Verantwortung |
-|---|---|
+| --- | --- |
 | core-architecture | Optional: semantischer Fit eines Vorschlags zu vorgegebenen Boundary-Fragen; Architekturentscheidung und Trade-offs bleiben beim Owner. |
 | core-backend | Kein routinemäßiger Fit: API-Korrektheit und Autorisierung folgen überprüfbaren Verträgen und menschlicher Prüfung. |
 | core-brainstorm | Optional: Gruppierung sprachlicher Nutzerabsichten; Richtungsentscheidung bleibt beim Nutzer. |
@@ -36,7 +36,7 @@ Semantische Bewertung kann nur variable Sprache unterstützen; sie ersetzt keine
 Jev unterstützt atomare Noul-Aussagen (Wahrheitswahrscheinlichkeit) und Choice-Auswahl. Fragen sehen einander nicht; benötigte Fakten gehören in den jeweiligen State. Eine Choice wird mit einer Noul-Fitfrage gepaart, damit No-fit ausdrückbar bleibt. Wahrscheinlichkeiten sind keine Wahrheit oder Konfidenzgarantie.
 
 | Profil | State und atomare Frage | Ergebnis und offene Fälle |
-|---|---|---|
+| --- | --- | --- |
 | skill_relevance | Plan-Ziel, einzelner Task und angebotene Skillverantwortungen. Choice: Welche angebotene Verantwortung ist zentral? Noul: Ist eine davon tatsächlich nötig? | Wahrscheinlichkeiten je Option plus Fit-Wahrscheinlichkeit. No-fit bei fehlendem Fit; Grenzbereich oder diffuse Verteilung = unsicher, nie automatischer Dispatch. |
 | requirement_coverage | Ein Kriterium, Tasktext und konkrete Referenzstellen. Noul: Deckt diese Task das Kriterium ausdrücklich ab? Optionale Choice zu einer einzigen Lückenart separat. | Wahrscheinlichkeit plus Eingabereferenzen; fehlende Evidenz oder Grenzbereich bleibt unresolved. Keine Ja/Nein-Erzwingung. |
 | claim_support | Einzelbehauptung, Originalquelle und bezeichnete Passage. Noul: Stützt diese Passage die Behauptung direkt? Choice: direkt gestützt / widerspricht / thematisch aber nicht belegend / keine passende Passage; separat Noul, ob überhaupt passende Passage existiert. | Wahrscheinlichkeiten je Relation und Fit; Modell erzeugt keine Belegreferenz. Fehlende Quelle oder Unsicherheit bleibt unresolved. |

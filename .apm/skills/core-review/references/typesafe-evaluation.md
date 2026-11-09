@@ -29,7 +29,7 @@ Bei Nullnenner ist eine Quote nicht bestimmbar, nicht null. Unresolved, APIerror
 Für ein adjudiziertes material_defect-Kriterium gibt es vier Kombinationen:
 
 | TypeSafe | Reviewer-Ersturteil | Zählung |
-|---|---|---|
+| --- | --- | --- |
 | alert | defect_found | kein TypeSafe-Miss, kein Reviewer-Miss |
 | alert | no_defect_found | kein TypeSafe-Miss, Reviewer-Miss |
 | unflagged | defect_found | TypeSafe-Miss, kein Reviewer-Miss |
