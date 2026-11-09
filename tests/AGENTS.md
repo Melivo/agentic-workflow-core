@@ -109,6 +109,10 @@ verbotenen Altregeln und In-Memory-Mutationen. Originaltests prüfen erzeugte
 Vorlagen; der Blockabgleich erhält Außenbytes auch mit den echten Vorlagen.
 Diese Nachweise sind statisch und lokal, keine reale Modellbefolgung.
 
+Die Vorlagenfälle sichern außerdem die endungsunabhängige Textprüfungspflicht,
+Markdown-Skriptgrenze, manuelle Rubrikprüfung und report-only-/Installationsgrenze
+samt expliziter Prüflückenmeldung durch positive und negative Mutationen.
+
 ## Verification
 
 `mise run check` aus der Repositorywurzel führt Vertrags- und

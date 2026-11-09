@@ -57,6 +57,16 @@ class RoutingAndReadinessContract(unittest.TestCase):
     """Static source/consumer contracts; mutations never write files or call models."""
 
     CONTRACTS = {
+        'README.md': (
+            ('separat bereitzustellende Inhaltsprüfmethode',
+             'keine neue APM-Paketabhängigkeit', 'wird nicht automatisch installiert',
+             'bestehende Skillverfügbarkeitscheck die konkrete Prüflücke',
+             'Direkte Dateieingaben und automatische Skripte unterstützen nur Markdown',
+             'übrigen zugänglichen Text nach der geladenen Rubrik manuell beurteilen',
+             'Format-/Extraktionslücken ausdrücklich melden',
+             'keine universelle Formatgarantie', 'das Audit bleibt report-only'),
+            ('`skill-creator` und `context-debloater` sind Werkzeuge für die Paketentwicklung, keine zusätzlichen Verbraucherabhängigkeiten',),
+        ),
         '.apm/skills/core-init-project/scripts/serena_safety.py': (
             ('Before project assignment only', 'native path/name discovery',
              'do not search contents or symbols', 'An unknown file within a known project is not an exception',
@@ -78,8 +88,17 @@ class RoutingAndReadinessContract(unittest.TestCase):
              'keine Inhalts- oder Symbolsuche',
              'Eine unbekannte Datei innerhalb eines bekannten Projekts begründet keine Ausnahme',
              'Bei CWD `Path.home()`', 'Serena-Readiness bleibt rein lesend',
-             'benötigen jeweils ausdrückliche Autorisierung für das konkrete Projekt'),
-            (),
+             'benötigen jeweils ausdrückliche Autorisierung für das konkrete Projekt',
+             'Prüfe beim Erstellen oder inhaltlichen Bearbeiten von Dateien deren Textinhalt mit context-debloater',
+             'README, AGENTS.md, Markdown, TXT, PDF, DOCX, HTML, JSON, YAML/YML, TOML, CONF, SUDOERS, LOCK, IN, TEMPLATE, TMPL, TPL, JS/MJS/CJS, PY, SH, PHP, SQL, CSS, SERVICE, TIMER, MOUNT, DOCKERFILE, SVG, DIFF, PATCH, OUT, RC, BACKUP, ORIGINAL, Dateien ohne Endung und weitere',
+             'Die Pflicht gilt unabhängig von der Endung',
+             'Direkte Dateieingaben und automatische Skripte des vorhandenen Skills sind auf Markdown begrenzt',
+             'prüfe übrigen zugänglichen Text anhand seiner geladenen Rubrik manuell',
+             'Melde nicht unterstützte oder unlesbare Textinhalte ausdrücklich als Prüflücke',
+             'Das Audit bleibt report-only: keine automatische Kürzung oder Mutation',
+             'keine Toolinstallation oder Convertereinrichtung daraus ableiten'),
+            ('Prüfe nur Markdowndateien', 'Übergebe alle Dateiformate direkt an die Audit-Skripte',
+             'Kürze Dateien automatisch nach dem Audit'),
         ),
         '.apm/skills/core-init-project/SKILL.md': (
             ('vor Projektzuordnung', 'native Pfad-/Namenssuche', 'keine Inhalts- oder Symbolsuche',
@@ -87,8 +106,12 @@ class RoutingAndReadinessContract(unittest.TestCase):
              'Home-Ausnahme', 'Readiness bleibt rein lesend',
              'benötigen jeweils ausdrückliche Autorisierung für dieses konkrete Projekt',
              'Weder normales Init noch fehlende Bereitschaft erteilen diese Freigabe',
-             '(references/configuration-precedence.md#markdownlint-konfiguration)'),
-            (),
+             '(references/configuration-precedence.md#markdownlint-konfiguration)',
+             'Textprüfungspflicht', 'Dateien unabhängig von ihrer Endung',
+             'Automatische Skripte und direkte Dateieingaben nur für unterstützte Markdownziele',
+             'übrigen zugänglichen Text manuell nach der Rubrik prüfen',
+             'Benenne Formatgrenzen und unlesbare Inhalte als Prüflücke'),
+            ('Prüfe nur Markdowndateien', 'Übergebe alle Dateiformate direkt an die Audit-Skripte'),
         ),
         '.apm/skills/core-init-project/references/provider-setup.md': (
             ('Vor Projektzuordnung ist ausschließlich eng begrenzte native',
@@ -143,7 +166,7 @@ class RoutingAndReadinessContract(unittest.TestCase):
         self.assert_contract(root, required, forbidden)
         template = (SKILL/'assets/core-routing.md').read_text()
         # The project fact/routing boundary is literal, not a semantic rewrite.
-        self.assertIn(template.split('\n\n- **Einstieg:**', 1)[0], root)
+        self.assertIn(template.split('- **Einstieg:**', 1)[0], root)
 
 
 class PythonRuntimeContract(unittest.TestCase):

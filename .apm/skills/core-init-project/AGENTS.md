@@ -44,6 +44,11 @@ Markdownlint-Fallbacks werden nach `configuration-precedence.md` mit gelesener,
 eindeutig zugeordneter Konfigurationsquelle belegt, nicht als privater Hostpfad
 oder unaufgelöste „zentrale Config“ ins Paket übernommen.
 
+Die Routingvorlage besitzt die endungsunabhängige Textprüfungspflicht mit
+`context-debloater`: Skripte nur für unterstütztes Markdown, übrigen zugänglichen
+Text nach geladener Rubrik manuell prüfen; Format-/Leselücken berichten.
+Das Audit bleibt report-only und begründet keine Installation oder Kürzung.
+
 ## Verification
 
 - Repositoryintegration: `tests/test_core_init_provider.py`.

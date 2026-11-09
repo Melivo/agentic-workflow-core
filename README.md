@@ -204,7 +204,7 @@ Versionsregel für 0.x: Fehlerkorrektur → Patch; neue Funktion oder inkompatib
 - [Verifikation: Nachweise und unabhängiges Review](.apm/skills/core-shared/references/verification.md)
 - [Versionshistorie](CHANGELOG.md)
 
-`skill-creator` und `context-debloater` sind Werkzeuge für die Paketentwicklung, keine zusätzlichen Verbraucherabhängigkeiten. Native Fachagenten werden über die Profile des Harnesses genutzt; eine zusätzliche Orchestrierungs-CLI ist nicht vorgesehen.
+`skill-creator` ist ein Werkzeug für die Paketentwicklung. `context-debloater` ist eine separat bereitzustellende Inhaltsprüfmethode, die auch die Init-Ausgabe für erstellte oder inhaltlich bearbeitete Dateien verlangt; sie ist keine neue APM-Paketabhängigkeit und wird nicht automatisch installiert. Fehlt die Methode, meldet der bestehende Skillverfügbarkeitscheck die konkrete Prüflücke statt sie als installiert zu behaupten. Direkte Dateieingaben und automatische Skripte unterstützen nur Markdown; übrigen zugänglichen Text nach der geladenen Rubrik manuell beurteilen und Format-/Extraktionslücken ausdrücklich melden. Das ist keine universelle Formatgarantie; das Audit bleibt report-only. Native Fachagenten werden über die Profile des Harnesses genutzt; eine zusätzliche Orchestrierungs-CLI ist nicht vorgesehen.
 
 ## Lizenz
 
