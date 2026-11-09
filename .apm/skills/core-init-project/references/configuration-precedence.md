@@ -2,9 +2,11 @@
 
 ## Provider Precedence
 
-Use Gortex first when its MCP is healthy and the active repository is already tracked. If either condition is false, use a prepared project-scoped Serena server. Use native repository and file tools only when neither provider can serve the operation.
+Use Gortex first when its MCP is healthy and the active repository is already tracked. If either condition is false, use a prepared project-scoped Serena server. Within a known project, use native repository and file tools only when neither provider can serve the operation.
 
-Keep Gortex as the primary code-intelligence provider. The skill owns the readiness check and explicit transition to project-scoped Serena, not a change of primary provider. Maintain Serena initialization, project languages, and MCP exposure so the fallback is usable before an outage. Do not add Serena globally, alter Gortex tracking without selection, or query providers in parallel.
+Keep Gortex as the primary code-intelligence provider. The skill owns the read-only readiness check and explicit transition to already configured project-scoped Serena, not a change of primary provider. Initialization, language reconciliation, and MCP configuration each require explicit authorization for the concrete project; normal init or a missing fallback grants none. Report missing readiness without changing configuration. Do not add Serena globally, alter Gortex tracking without selection, or query providers in parallel.
+
+Before project assignment only, use narrowly bounded native path/name discovery to identify the project, never content or symbol search. An unknown file within a known project is not an exception to Gortex → configured project-scoped Serena → native fallback when neither can serve the operation. Preserve the user-home exception: when CWD is `Path.home()`, use native file, search, and runtime tools instead of either provider; never activate home or a filesystem root as a Serena project.
 
 At every invocation, audit both provider states before asking which remediations to apply. Gortex tracking, global `AGENTS.md`, Serena initialization/MCP exposure, and Serena language reconciliation are separate selectable mutations.
 
@@ -135,7 +137,23 @@ The threshold prevents isolated helpers from starting extra language servers. Fo
 
 If no meaningful source language exists, use an empty list (`language_servers: []`, or the existing legacy key) in an already valid Serena project config. Do not write a language key with a null value and do not invent a fallback language. Restart Serena after changing the language list because language servers are selected during project initialization.
 
-## Source Evidence
+## Markdownlint-Konfiguration
+
+Bei Markdownlint-Checks zuerst Repositorykonfiguration und den tatsächlichen
+Prüfbefehl lesen; Projektkonfiguration hat Vorrang. Führe Markdownlint über
+`mise exec` aus, ohne dabei fehlende Werkzeuge automatisch zu installieren.
+Ein Fallback auf „zentrale Config“ benötigt eine belegte konkrete Quelle:
+Lies die geltende Benutzeranweisung und die von ihr benannte Konfigurationsdatei.
+Ist nur der Begriff, aber kein Pfad vorgegeben, prüfe eng begrenzt den Kandidaten
+`<home>/.markdownlint-cli2.jsonc`; der Name allein belegt weder Existenz noch
+Nutzung. Nutze ihn nur nach bestätigter Zuordnung zur Benutzeranweisung und
+lesendem Nachweis der Datei, dann mit explizitem `--config <absolute-config>`.
+Fehlt eine eindeutig belegte Quelle, melde die Konfigurationslücke statt eine
+Datei oder einen Pfad zu erfinden. Das portable Bundle enthält keinen privaten
+Hostpfad und keine neue zentrale Konfiguration; vorhandene globale oder manuelle
+Benutzeranweisungen werden nicht automatisch geändert.
+
+## Serena Source Evidence
 
 The behavior above is grounded in current Serena source:
 

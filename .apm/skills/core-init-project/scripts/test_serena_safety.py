@@ -30,6 +30,21 @@ def make_project(root: Path, base: str | None = None, local: str | None = None, 
 
 
 class SerenaSafetyTests(unittest.TestCase):
+    def test_playbooks_preserve_discovery_and_authorization_guards(self) -> None:
+        for text in (serena_safety.PLAYBOOK, serena_safety.PROJECT_PLAYBOOK):
+            with self.subTest(text=text.splitlines()[1]):
+                self.assertIn('Readiness checks are read-only', text)
+                self.assertIn('concrete project', text)
+                self.assertIn('native path/name discovery', text.lower())
+                self.assertIn('project assignment', text)
+                self.assertIn('unknown file within', text)
+                self.assertNotIn('Keep Serena initialized for each concrete project', text)
+                self.assertNotIn('If the target location is unknown', text)
+        self.assertIn('do not search contents or symbols', serena_safety.PLAYBOOK)
+        self.assertIn('never includes content or symbol searches', serena_safety.PROJECT_PLAYBOOK)
+        self.assertIn('When the CWD is the user home (`Path.home()`)', serena_safety.PLAYBOOK)
+        self.assertIn('Never configure or activate the user home', serena_safety.PLAYBOOK)
+
     def test_writes_missing_playbook(self) -> None:
         with tempfile.TemporaryDirectory() as temp:
             agents = Path(temp) / "AGENTS.md"

@@ -19,13 +19,13 @@ SOURCE_HASHES = {
     'scripts/requirements.txt': '3eb0bcd11c478e00ecb6dca8668b5ed32dc5aa273cb278411c1d0d90e6a72584',
 }
 PROBE_TIMEOUT_SECONDS = 30
-# Files revised for Serena 1.7 (`language_servers` next to the legacy `languages` key). Re-pin
-# deliberately when one of them changes; migration revision hashes: git history of this test.
+# Files revised for Serena 1.7 and bounded discovery/readiness instructions. Re-pin
+# deliberately when one of them changes; earlier revision hashes: git history of this test.
 REVISED_HASHES = {
-    'references/provider-setup.md': '59185cc3cb65b1bcdfa53fbf69b6d5bb220a6a269384690ac277915f5fd9991c',
-    'scripts/serena_safety.py': 'e3fd93ecb27a6c8f47a9d19a56b1610c2ec3a59b15d73ed766929941d456b9ea',
-    'scripts/test_serena_safety.py': '13ac624a827ec7bdebf6ab9a75861b0cae22f5e7de596a4b723b8edd1570374c',
-    'references/configuration-precedence.md': 'a91d7d60a15c62288fc68b3f4a0229b588e981569e9d539f0546a108601e027d',
+    'references/provider-setup.md': '0496c80a28183193f7c1c99767f57c884da8a455c817ef64e5a402a4cf09befc',
+    'scripts/serena_safety.py': '72ab9b4326a52654e0b0357b69f6602928545f3aab1441d6508385ca7655a246',
+    'scripts/test_serena_safety.py': '7136a6fe27cfa58d36395fa9c6467fdb6db8c655367aa394f3476e8ce10d7eaa',
+    'references/configuration-precedence.md': '8fc5a919922c1678f79bca2add6f2a2cb4b41c419058833c8cbec6da2426a53c',
 }
 
 
@@ -51,6 +51,122 @@ class MigrationBoundary(unittest.TestCase):
         self.assertFalse(LEGACY_SKILL.exists())
         self.assertFalse((SKILL/'agents/openai.yaml').exists())
         self.assertFalse((SKILL/'references/provider-setup.md').read_text().startswith('---'))
+
+
+class RoutingAndReadinessContract(unittest.TestCase):
+    """Static source/consumer contracts; mutations never write files or call models."""
+
+    CONTRACTS = {
+        'README.md': (
+            ('separat bereitzustellende Inhaltsprüfmethode',
+             'keine neue APM-Paketabhängigkeit', 'wird nicht automatisch installiert',
+             'bestehende Skillverfügbarkeitscheck die konkrete Prüflücke',
+             'Direkte Dateieingaben und automatische Skripte unterstützen nur Markdown',
+             'übrigen zugänglichen Text nach der geladenen Rubrik manuell beurteilen',
+             'Format-/Extraktionslücken ausdrücklich melden',
+             'keine universelle Formatgarantie', 'das Audit bleibt report-only'),
+            ('`skill-creator` und `context-debloater` sind Werkzeuge für die Paketentwicklung, keine zusätzlichen Verbraucherabhängigkeiten',),
+        ),
+        '.apm/skills/core-init-project/scripts/serena_safety.py': (
+            ('Before project assignment only', 'native path/name discovery',
+             'do not search contents or symbols', 'An unknown file within a known project is not an exception',
+             'When the CWD is the user home (`Path.home()`)',
+             'Readiness checks are read-only', 'only when explicitly authorized for that concrete project'),
+            ('If the target location is unknown, use narrow native discovery',
+             'Keep Serena initialized for each concrete project'),
+        ),
+        '.apm/skills/core-shared/references/tool-routing.md': (
+            ('Vor Projektzuordnung ist ausschließlich eng begrenzte native Pfad-/Namenssuche',
+             'keine Inhalts- oder Symbolsuche',
+             'Eine unbekannte Datei innerhalb eines bekannten Projekts begründet keine Ausnahme',
+             'Bei CWD `Path.home()`', 'Readiness ist rein lesend',
+             'benötigen jeweils ausdrückliche Autorisierung für das konkrete Projekt'),
+            ('die normale Wahl außerhalb eines indexierten Projekts',),
+        ),
+        '.apm/skills/core-init-project/assets/core-routing.md': (
+            ('Vor Projektzuordnung ist ausschließlich eng begrenzte native Pfad-/Namenssuche',
+             'keine Inhalts- oder Symbolsuche',
+             'Eine unbekannte Datei innerhalb eines bekannten Projekts begründet keine Ausnahme',
+             'Bei CWD `Path.home()`', 'Serena-Readiness bleibt rein lesend',
+             'benötigen jeweils ausdrückliche Autorisierung für das konkrete Projekt',
+             'Prüfe beim Erstellen oder inhaltlichen Bearbeiten von Dateien deren Textinhalt mit context-debloater',
+             'README, AGENTS.md, Markdown, TXT, PDF, DOCX, HTML, JSON, YAML/YML, TOML, CONF, SUDOERS, LOCK, IN, TEMPLATE, TMPL, TPL, JS/MJS/CJS, PY, SH, PHP, SQL, CSS, SERVICE, TIMER, MOUNT, DOCKERFILE, SVG, DIFF, PATCH, OUT, RC, BACKUP, ORIGINAL, Dateien ohne Endung und weitere',
+             'Die Pflicht gilt unabhängig von der Endung',
+             'Direkte Dateieingaben und automatische Skripte des vorhandenen Skills sind auf Markdown begrenzt',
+             'prüfe übrigen zugänglichen Text anhand seiner geladenen Rubrik manuell',
+             'Melde nicht unterstützte oder unlesbare Textinhalte ausdrücklich als Prüflücke',
+             'Das Audit bleibt report-only: keine automatische Kürzung oder Mutation',
+             'keine Toolinstallation oder Convertereinrichtung daraus ableiten'),
+            ('Prüfe nur Markdowndateien', 'Übergebe alle Dateiformate direkt an die Audit-Skripte',
+             'Kürze Dateien automatisch nach dem Audit'),
+        ),
+        '.apm/skills/core-init-project/SKILL.md': (
+            ('vor Projektzuordnung', 'native Pfad-/Namenssuche', 'keine Inhalts- oder Symbolsuche',
+             'Eine unbekannte Datei im bekannten Projekt hebt die Providerfolge nicht auf',
+             'Home-Ausnahme', 'Readiness bleibt rein lesend',
+             'benötigen jeweils ausdrückliche Autorisierung für dieses konkrete Projekt',
+             'Weder normales Init noch fehlende Bereitschaft erteilen diese Freigabe',
+             '(references/configuration-precedence.md#markdownlint-konfiguration)',
+             'Textprüfungspflicht', 'Dateien unabhängig von ihrer Endung',
+             'Automatische Skripte und direkte Dateieingaben nur für unterstützte Markdownziele',
+             'übrigen zugänglichen Text manuell nach der Rubrik prüfen',
+             'Benenne Formatgrenzen und unlesbare Inhalte als Prüflücke'),
+            ('Prüfe nur Markdowndateien', 'Übergebe alle Dateiformate direkt an die Audit-Skripte'),
+        ),
+        '.apm/skills/core-init-project/references/provider-setup.md': (
+            ('Vor Projektzuordnung ist ausschließlich eng begrenzte native',
+             'keine Inhalts-/Symbolsuche', 'eine unbekannte Datei ist keine',
+             'Home-Ausnahme bleibt erhalten', 'Readiness bleibt rein lesend',
+             'benötigen jeweils ausdrückliche Autorisierung für das konkrete',
+             'normales Init oder ein fehlender Fallback erteilen diese nicht'),
+            (),
+        ),
+        '.apm/skills/core-init-project/references/configuration-precedence.md': (
+            ('Before project assignment only', 'never content or symbol search',
+             'An unknown file within a known project is not an exception',
+             'CWD is `Path.home()`', 'read-only readiness check',
+             'each require explicit authorization for the concrete project',
+             'normal init or a missing fallback grants none',
+             'Projektkonfiguration hat Vorrang', '`mise exec`',
+             '`<home>/.markdownlint-cli2.jsonc`', 'bestätigter Zuordnung zur Benutzeranweisung',
+             'lesendem Nachweis der Datei', '`--config <absolute-config>`',
+             'melde die Konfigurationslücke', 'Benutzeranweisungen werden nicht automatisch geändert'),
+            ('Maintain Serena initialization, project languages, and MCP exposure',),
+        ),
+    }
+
+    def assert_contract(self, text, required, forbidden):
+        for clause in required:
+            self.assertIn(clause, text)
+        for clause in forbidden:
+            self.assertNotIn(clause, text)
+
+    def test_sources_cover_positive_and_negative_boundaries(self):
+        for path, (required, forbidden) in self.CONTRACTS.items():
+            with self.subTest(path=path):
+                text = (ROOT/path).read_text()
+                self.assert_contract(text, required, forbidden)
+                self.assertNotIn('/home/visimeos/', text)
+                self.assertNotIn('C:\\Users\\', text)
+
+    def test_in_memory_mutations_reject_lost_guards_and_old_instructions(self):
+        for path, (required, forbidden) in self.CONTRACTS.items():
+            text = (ROOT/path).read_text()
+            for clause in required:
+                with self.subTest(path=path, removed=clause), self.assertRaises(AssertionError):
+                    self.assert_contract(text.replace(clause, ''), required, forbidden)
+            for clause in forbidden:
+                with self.subTest(path=path, inserted=clause), self.assertRaises(AssertionError):
+                    self.assert_contract(text + '\n' + clause, required, forbidden)
+
+    def test_generated_root_routing_retains_template_boundaries(self):
+        required, forbidden = self.CONTRACTS['.apm/skills/core-init-project/assets/core-routing.md']
+        root = (ROOT/'AGENTS.md').read_text().split('<!-- CORE-INIT-PROJECT:START -->', 1)[1].split(
+            '<!-- CORE-INIT-PROJECT:END -->', 1)[0]
+        self.assert_contract(root, required, forbidden)
+        template = (SKILL/'assets/core-routing.md').read_text()
+        # The project fact/routing boundary is literal, not a semantic rewrite.
+        self.assertIn(template.split('- **Einstieg:**', 1)[0], root)
 
 
 class PythonRuntimeContract(unittest.TestCase):

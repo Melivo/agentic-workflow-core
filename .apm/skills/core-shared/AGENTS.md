@@ -35,6 +35,11 @@ Vertragsänderungen mit den betroffenen Verbrauchern und Vorlagen abgleichen.
 Katalog und Assets sind kein Plan-, Run- oder Statusspeicher. Fachmethodik
 nicht in den gemeinsamen Index verschieben.
 
+Toolrouting begrenzt native Projektermittlung auf Pfad-/Namenssuche vor
+Projektzuordnung; bekannte Projekte behalten ihre Providerfolge und die
+Home-Ausnahme bleibt separat. Serena-Readiness ist rein lesend, keine
+Einrichtungs- oder Sprachabgleichfreigabe.
+
 ## Verification
 
 Bestehende Vertragsprüfungen: `mise run check` aus der Repositorywurzel.

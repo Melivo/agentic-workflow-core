@@ -71,7 +71,8 @@ Für jeden vollständigen Plan, der zur Freigabe vorgelegt wird oder als geprüf
 | Aktuelle Bibliotheks-, Framework-, SDK-, API-, CLI- oder Cloud-Dokumentation | Context7 | Offizielle Primärquelle nur bei dokumentierter Lücke; kein Einsatz für Repositoryreview oder Business-Logic-Debugging |
 | Bekannte relevante Videoquelle | YouTube Transcript | Kein allgemeiner Videosuchdienst; entscheidungsrelevante Aussagen gegen stärkere Quellen prüfen |
 | Projektbezogene Datei-, Text-, Symbol- oder Language-Server-Informationssuche | Serena | Nur ausdrücklich konfiguriertes Projekt; niemals Benutzer-Home oder Dateisystemroot |
-| Dateien und Suche außerhalb indexierter Projekte oder letzter lokaler Fallback | native Werkzeuge | Fallback im Ergebnis nennen und auf den erforderlichen Pfad begrenzen |
+| Projekt vor Projektzuordnung ermitteln | native Pfad-/Namenssuche | Nur eng begrenzt; keine Inhalts-/Symbolsuche, keine Ausnahme für unbekannte Dateien im bekannten Projekt |
+| Dateien und Suche außerhalb indexierter Projekte oder letzter lokaler Fallback | native Werkzeuge | Im bekannten Projekt erst nach Gortex und konfiguriertem projektspezifischem Serena; Fallback und erforderlichen Pfad nennen |
 | Langlebige bestätigte Präferenzen und Constraints | Honcho | Nur nicht autoritative semantische Erinnerung; gegen aktuelle Sources of Truth prüfen |
 
 ## Gortex
@@ -95,7 +96,11 @@ Nur eine bekannte oder fokussiert ausgewählte URL wird verarbeitet. Videoangabe
 
 ## Serena und native Werkzeuge
 
-Serena ist ergänzende projektbezogene Informationssuche und konfigurierter Code-Fallback, kein Webresearch- oder Workflowmemory-Provider. Seine Memories und Onboardingnotizen werden nicht als Workflowzustand verwendet. Native Datei- und Suchwerkzeuge sind der letzte Fallback im Projekt und die normale Wahl außerhalb eines indexierten Projekts.
+Serena ist ergänzende projektbezogene Informationssuche und konfigurierter Code-Fallback, kein Webresearch- oder Workflowmemory-Provider. Seine Memories und Onboardingnotizen werden nicht als Workflowzustand verwendet. Readiness ist rein lesend: Initialisierung, Sprachabgleich und MCP-Konfiguration benötigen jeweils ausdrückliche Autorisierung für das konkrete Projekt. Ein fehlender Fallback löst keine Einrichtung aus.
+
+Vor Projektzuordnung ist ausschließlich eng begrenzte native Pfad-/Namenssuche zur Ermittlung des Projekts zulässig, keine Inhalts- oder Symbolsuche. Sobald das Projekt bekannt ist, gilt Gortex → ausdrücklich konfiguriertes projektspezifisches Serena → native Werkzeuge nur, wenn beide die konkrete Operation nicht bedienen können. Eine unbekannte Datei innerhalb eines bekannten Projekts begründet keine Ausnahme; auch fehlendes Indextracking allein überspringt den Serena-Fallback nicht. Begrenze jeden Suchraum auf den kleinsten sinnvollen Pfad; keine breiten rekursiven Home-, Eltern-, Dependency-, generierten, Binär-, Cache- oder Vendor-Scans.
+
+Bei CWD `Path.home()` gilt unabhängig davon die Home-Ausnahme: native Datei-, Such- und Laufzeitwerkzeuge statt Gortex oder Serena. Serena-CLI dort nur für Konfiguration, Projektverwaltung, Memories und Wiederherstellung verwenden; Home und Dateisystemroot niemals als Serena-Projekt konfigurieren oder aktivieren.
 
 ## Honcho
 

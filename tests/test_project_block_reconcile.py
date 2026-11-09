@@ -356,6 +356,31 @@ class AdditionalSafety(ReconcileFixture):
         self.assertEqual(actual.read_text(), 'untouched')
 
 
+class RealTemplateReconcile(ReconcileFixture):
+    def test_current_templates_preserve_outside_bytes_and_second_run(self):
+        routing = (ROOT / '.apm/skills/core-init-project/assets/core-routing.md').read_text()
+        write(self.core_tpl, '<!-- ' + CORE_NAME + ':START -->\n'
+              '# Facts: Python; mise\n\n' + routing + '\n<!-- ' + CORE_NAME + ':END -->')
+        code, template = run_helper('extract-template', '--source', SERENA_SAFETY,
+                                    '--name', 'PROJECT_PLAYBOOK')
+        self.assertEqual(code, 0, template)
+        write(self.serena_tpl, template)
+        prefix, middle, suffix = '# Manual\r\n', '\nMIDDLE\r\n', '\r\nTAIL'
+        old_core = '<!-- ' + CORE_NAME + ':START -->\nold\n<!-- ' + CORE_NAME + ':END -->'
+        old_serena = '<!-- ' + SERENA_NAME + ':START -->\nold\n<!-- ' + SERENA_NAME + ':END -->'
+        write(self.target, prefix + old_core + middle + old_serena + suffix)
+        selection = CORE_NAME + ',' + SERENA_NAME
+        report = self.preview(selection)
+        code, out = self.apply(selection, report['token'])
+        self.assertEqual(code, 0, out)
+        # Read bytes: Path.read_text would normalize the deliberately mixed newlines.
+        expected = (prefix.encode() + self.core_tpl.read_bytes().rstrip(b'\r\n')
+                    + middle.encode() + self.serena_tpl.read_bytes().rstrip(b'\r\n') + suffix.encode())
+        self.assertEqual(self.target.read_bytes(), expected)
+        self.assertFalse(self.preview(selection)['changed_planned'])
+        self.assert_neighbours_unchanged()
+
+
 class TemplateOwnership(unittest.TestCase):
     """The Serena/Gortex template stays with the configurator, unduplicated."""
 
@@ -383,6 +408,10 @@ class TemplateOwnership(unittest.TestCase):
         self.assertEqual(out.count(end), 1)
         self.assertLess(out.find(start), out.find(end))
         self.assertIn('Use one provider per operation', out)
+        self.assertIn('Readiness checks are read-only', out)
+        self.assertIn('explicit authorization for this concrete project', out)
+        self.assertIn('An unknown file within this known project', out)
+        self.assertIn('never includes content or symbol searches', out)
 
     def test_extract_template_rejects_unresolvable_names(self):
         code, out = run_helper(
@@ -411,4 +440,3 @@ class TemplateOwnership(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
-
