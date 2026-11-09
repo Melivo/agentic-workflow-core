@@ -103,6 +103,12 @@ Keine globalen Provider oder Benutzerkonfiguration als Testnebenwirkung ändern.
 aus und prüft Auswahl, Vorschau-/Bestätigungsbindung, Markerfehler, Fakten- und
 Byteerhaltung sowie den diff-freien Zweitlauf ohne Provideraktionen.
 
+`test_core_init_provider.py` prüft native Projektermittlung, read-only
+Serena-Readiness und belegte Markdownlint-Konfiguration mit positiven Klauseln,
+verbotenen Altregeln und In-Memory-Mutationen. Originaltests prüfen erzeugte
+Vorlagen; der Blockabgleich erhält Außenbytes auch mit den echten Vorlagen.
+Diese Nachweise sind statisch und lokal, keine reale Modellbefolgung.
+
 ## Verification
 
 `mise run check` aus der Repositorywurzel führt Vertrags- und

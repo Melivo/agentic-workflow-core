@@ -29,11 +29,15 @@ Die Provider- und Laufzeitmethodik ist vollständig in dieses Bundle integriert.
 4. Ermittle aus Repositoryevidenz Stack, Task Runner, Architektur- und Modulgrenzen, projektspezifische Sicherheits- und Freigabegrenzen sowie verbindliche Checks.
 5. Verwende Gortex bedarfsgerecht; Toolverfügbarkeit erweitert weder Lese- noch Schreibscope.
 
+Ist vor Projektzuordnung nur der Zielort unklar, erlaube ausschließlich eng begrenzte native Pfad-/Namenssuche zur Projektermittlung, keine Inhalts- oder Symbolsuche. Eine unbekannte Datei im bekannten Projekt hebt die Providerfolge nicht auf. Die Home-Ausnahme und die genauen Grenzen stehen im [Toolrouting](../core-shared/references/tool-routing.md#serena-und-native-werkzeuge).
+
+Wenn Markdownlint zu den Checks gehört, belege zuerst die konkrete Konfigurationsquelle gemäß [Markdownlint-Konfiguration](references/configuration-precedence.md#markdownlint-konfiguration). Übernimm keine unaufgelöste „zentrale Config“ in den Projektblock und ändere bestehende Benutzeranweisungen nicht automatisch.
+
 Dateiglobs sind nur Signale. Kombiniere sie mit Taskabsicht, Stack und Pfadkontext. Persistiere keine Vermutung und keine flüchtigen Health-, Session- oder Workflowstatuswerte.
 
 ### 2. Provider-Readiness inline prüfen
 
-Prüfe vor dem ersten Skriptaufruf die Provider-Laufzeit; führe erst danach den internen Provider-Preflight mit der konkreten Repositorywurzel read-only aus. Halte `--apply-agents` und jede entsprechende `AGENTS.md`-Schreiboption deaktiviert. Provideraktionen benötigen eine konkret gezeigte Auswahl und passende ausdrückliche Autorisierung. Serena darf ausschließlich für dieses konkrete Projekt initialisiert werden; aktiviere oder konfiguriere niemals globales Serena. Der Providerhelfer liefert den Readiness-Befund; der Schreibbesitz für den unten definierten Projektblock bleibt bei `core-init-project`.
+Prüfe vor dem ersten Skriptaufruf die Provider-Laufzeit; führe erst danach den internen Provider-Preflight mit der konkreten Repositorywurzel read-only aus. Halte `--apply-agents` und jede entsprechende `AGENTS.md`-Schreiboption deaktiviert. Provideraktionen benötigen eine konkret gezeigte Auswahl und passende ausdrückliche Autorisierung. Readiness bleibt rein lesend: Serena-Initialisierung, Sprachabgleich und MCP-Konfiguration benötigen jeweils ausdrückliche Autorisierung für dieses konkrete Projekt. Weder normales Init noch fehlende Bereitschaft erteilen diese Freigabe; ohne sie nur die Lücke berichten. Aktiviere oder konfiguriere niemals globales Serena. Der Providerhelfer liefert den Readiness-Befund; der Schreibbesitz für den unten definierten Projektblock bleibt bei `core-init-project`.
 
 #### Provider-Laufzeit vorbereiten
 

@@ -10,8 +10,12 @@ ausgewählte Provideraktionen. Der reine `AGENTS.md`-Blockabgleich lädt sie nic
    erfasst ist.
 2. Verwende projektbezogenes Serena, wenn Gortex die Operation nicht bedienen
    kann.
-3. Verwende native Datei- und Suchwerkzeuge nur, wenn beide Provider die
-   Operation nicht bedienen können.
+3. Im bekannten Projekt verwende native Datei- und Suchwerkzeuge nur, wenn beide
+   Provider die Operation nicht bedienen können; eine unbekannte Datei ist keine
+   Ausnahme. Vor Projektzuordnung ist ausschließlich eng begrenzte native
+   Pfad-/Namenssuche zur Projektermittlung zulässig, keine Inhalts-/Symbolsuche.
+   Die Home-Ausnahme bleibt erhalten: bei CWD `Path.home()` native Datei-, Such-
+   und Laufzeitwerkzeuge statt Gortex oder Serena.
 4. Begrenze Serena auf das konkrete Projekt; Benutzer-Home, Dateisystemroot und
    breite Elternverzeichnisse sind keine Projektroots.
 5. Kehre zu Gortex zurück, sobald es verfügbar ist. Wiederhole eine Abfrage
@@ -32,6 +36,10 @@ Serena-Fallback ändert diese Primärauswahl nicht.
    nicht erneut abgefragt.
 4. Jede Auswahl autorisiert nur ihre konkret gezeigte Mutation. Nicht ausgewählte
    Prüfungen bleiben read-only.
+
+Readiness bleibt rein lesend. Serena-Initialisierung, Sprachabgleich und
+MCP-Konfiguration benötigen jeweils ausdrückliche Autorisierung für das konkrete
+Projekt; normales Init oder ein fehlender Fallback erteilen diese nicht.
 
 `core-init-project` bleibt Eigentümer seines Projektblocks und aktiviert keinen
 konkurrierenden `--apply-agents`-Schreibmodus. Globale Benutzeranweisungen
@@ -197,4 +205,4 @@ Python-Minimum und den Paketbereich; PyYAML ersetzt `ruamel.yaml` nicht.
 - `references/configuration-precedence.md`: Provider-, Timeout-, Client-,
   Sprach- und Eigentumsregeln.
 - `scripts/serena_safety.py`: Audit und selektiv autorisierte Writes.
-- `scripts/test_serena_safety.py`: unveränderte Original-Regressionstests.
+- `scripts/test_serena_safety.py`: Original-Regressionstests samt Vorlagengrenzen.

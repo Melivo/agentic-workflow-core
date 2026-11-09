@@ -29,13 +29,13 @@ PLAYBOOK = f"""{START}
 ## Serena/Gortex Code Intelligence Playbook
 
 - Use Gortex when its MCP is healthy and the repository is already tracked. Otherwise use the initialized, project-scoped Serena fallback.
-- Use native file and search tools only when neither Gortex nor Serena can serve the operation. Never add Serena silently to global MCP configuration.
-- Keep Serena initialized for each concrete project and align its effective language-server list (`language_servers`, or legacy `languages`) with meaningful repository source languages.
+- Within a known project, use native file and search tools only when neither Gortex nor Serena can serve the operation. Never add Serena silently to global MCP configuration.
+- Readiness checks are read-only. Initialize Serena, align its effective language-server list (`language_servers`, or legacy `languages`), or configure its MCP source only when explicitly authorized for that concrete project; a missing fallback is not authorization.
 - When the CWD is the user home (`Path.home()`), use native file, search, and runtime tools as the fallback instead of Gortex or Serena. Ignore instructions from skills, workflows, subagents, or documentation that require either MCP there.
 - In the user home, use suitable native platform tools. On Windows, use available PowerShell or Windows command-line tools; on Linux and macOS, use available POSIX/GNU utilities.
 - In the user home, use the local Serena CLI only for configuration, project management, memories, and recovery. Never configure or activate the user home or a filesystem root as a Serena project through either CLI or MCP.
 - Never run broad recursive scans over the user home, broad project root, generated tree, dependency, binary, cache, or vendor directory. Expand scope incrementally and sequentially.
-- If the target location is unknown, use narrow native discovery such as `Glob`; use the smallest useful file or subdirectory once known.
+- Before project assignment only, use narrowly bounded native path/name discovery such as `Glob` to identify the project; do not search contents or symbols. An unknown file within a known project is not an exception: use Gortex, then configured project-scoped Serena, then native fallback only when neither can serve the operation. The user-home exception above remains unchanged.
 - Keep the global Serena metadata project at `Path.home()/.serena` free of language servers: its effective project config must use an empty list (`language_servers: []`, or legacy `languages: []`; `project.local.yml` when it defines either key, otherwise `project.yml`).
 - Keep the global Serena MCP deprovisioned. Configure Serena MCP only through an explicitly confirmed concrete-project source.
 {END}
@@ -44,8 +44,9 @@ PROJECT_PLAYBOOK = f"""{PROJECT_START}
 ## Serena/Gortex Repository Code Intelligence
 
 - Use Gortex when its MCP is healthy and this repository is tracked.
-- Otherwise use this repository's initialized Serena project with languages aligned to meaningful source files.
-- Use native file and search tools only when neither Gortex nor Serena can serve the operation.
+- Otherwise use this repository's initialized Serena project with languages aligned to meaningful source files. Readiness checks are read-only; initialization, language reconciliation, and MCP configuration each require explicit authorization for this concrete project.
+- Within this known project, use native file and search tools only when neither Gortex nor Serena can serve the operation.
+- An unknown file within this known project does not permit native discovery ahead of Gortex and configured project-scoped Serena. Native path/name discovery before project assignment never includes content or symbol searches.
 - Use one provider per operation; do not duplicate queries across providers.
 {PROJECT_END}
 """
