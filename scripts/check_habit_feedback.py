@@ -60,6 +60,7 @@ CORE_FILES = (
  '.apm/skills/core-execute/references/direct-mode.md',
  '.apm/skills/core-plan/SKILL.md',
  '.apm/skills/core-review/SKILL.md',
+ '.apm/skills/core-review/references/typesafe-evaluation.md',
  '.apm/skills/core-milestone/references/goal-format.md',
  '.apm/skills/core-milestone/references/milestone-format.md',
  '.apm/skills/core-milestone/references/milestone-index-format.md',
@@ -70,6 +71,7 @@ CORE_FILES = (
  '.apm/skills/core-shared/assets/workflow-catalog.yaml',
  '.apm/skills/core-shared/references/artifact-contract.md',
  '.apm/skills/core-shared/references/tool-routing.md',
+ '.apm/skills/core-shared/references/typesafe-contract.md',
  '.apm/skills/core-shared/references/verification.md',
  '.apm/skills/core-shared/references/workflow-contract.md')
 LINK = re.compile(r'(?<!!)\[[^\]]*\]\(([^)\s]+)\)')

@@ -22,6 +22,7 @@ Dieses Bundle ist ein interner Index. Es führt keinen Workflow aus, dispatcht k
   Providerauswahl, Fallbackgrenzen und ergänzende Auswahl von Fachmethoden
   durch Fachagenten.
 - [Verifikation](references/verification.md) — Evidenz, Pflichtchecks, blockierte Prüfungen und Reviewurteile.
+- [TypeSafe-Bewertungsvertrag](references/typesafe-contract.md) — bedingt für passende Design-, Integrations- oder Evaluationsaufträge; keine aktive Pflichtphase.
 - [Benutzeranweisungen](references/user-instructions-contract.md) — sichere Synchronisierung manueller `AGENTS.md`-Inhalte.
 
 ## Erhaltung übernommener Methoden
