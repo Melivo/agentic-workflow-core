@@ -113,6 +113,13 @@ Die Vorlagenfälle sichern außerdem die endungsunabhängige Textprüfungspflich
 Markdown-Skriptgrenze, manuelle Rubrikprüfung und report-only-/Installationsgrenze
 samt expliziter Prüflückenmeldung durch positive und negative Mutationen.
 
+`test_devops_contracts.py` trennt reine Authoring-Werkzeuge von der vollständigen,
+verfügbarkeitsgeprüften Init-Auditpassage: keine APM-Abhängigkeit oder automatische
+Installation, keine weiteren Toolnennungen im Verbrauchertext. README-Rollen und
+verlorene Auditgrenzen werden mit isolierten Textmutationen geprüft; FreshFixture
+in `test_ci_portability.py` führt denselben Vertrag unverändert ohne installierte
+Authoring-Skills aus.
+
 ## Verification
 
 `mise run check` aus der Repositorywurzel führt Vertrags- und

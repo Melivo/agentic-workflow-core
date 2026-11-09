@@ -114,16 +114,52 @@ def read(path):
     return path.read_text(encoding='utf-8')
 
 
+README_AUDIT_GUARDS = (
+    'Fehlt die Methode, meldet der bestehende Skillverfügbarkeitscheck die konkrete Prüflücke statt sie als installiert zu behaupten.',
+    'Direkte Dateieingaben und automatische Skripte unterstützen nur Markdown;',
+    'übrigen zugänglichen Text nach der geladenen Rubrik manuell beurteilen und',
+    'Format-/Extraktionslücken ausdrücklich melden.',
+    'Das ist keine universelle Formatgarantie; das Audit bleibt report-only.',
+)
+INIT_AUDIT = (
+    'Die Textprüfungspflicht der [Routingvorlage](assets/core-routing.md) gilt auch für alle hier '
+    'erstellten oder inhaltlich bearbeiteten Dateien unabhängig von ihrer Endung. Lade `context-debloater` '
+    'und seine Rubrik: Automatische Skripte und direkte Dateieingaben nur für unterstützte Markdownziele '
+    'verwenden, übrigen zugänglichen Text manuell nach der Rubrik prüfen. Benenne Formatgrenzen und '
+    'unlesbare Inhalte als Prüflücke; das Audit autorisiert weder automatische Kürzung/Mutation noch '
+    'Toolinstallation oder Convertereinrichtung. Erhalte diese Pflicht samt Grenzen beim Entwurf und '
+    'selektiven Blockabgleich.'
+)
+INIT_AVAILABILITY = 'Fehlende Skills werden als Einschränkung benannt, nicht installiert oder als verfügbar behauptet.'
+
+
 def authoring_tools_are_not_dependencies(text):
-    """Recognize a scoped declaration, not dependency words elsewhere in README."""
-    sentences = [sentence for paragraph in text.split(chr(10) * 2)
-                 for sentence in re.split(r'[.!?]', ' '.join(paragraph.split()))]
-    declarations = [s.strip() for s in sentences
+    """Require split roles and audit guards in one README declaration paragraph."""
+    paragraphs = [' '.join(p.split()) for p in text.split(chr(10) * 2)]
+    named = [p for p in paragraphs if re.search(r'\b(?:skill-creator|context-debloater)\b', p)]
+    if len(named) != 1:
+        return False
+    declarations = [s.strip() for s in re.split(r'[.!?]', named[0])
                     if re.search(r'\b(?:skill-creator|context-debloater)\b', s)]
-    pattern = (r'`skill-creator` und `context-debloater` sind '
-               r'(?:Werkzeuge für die Paketentwicklung|Authoring-Werkzeuge)'
-               r'(?:,| und) keine (?:Paketabhängigkeiten|zusätzlichen Verbraucherabhängigkeiten)')
-    return bool(declarations) and all(re.fullmatch(pattern, s) for s in declarations)
+    patterns = (
+        r'`skill-creator` ist ein Werkzeug für die Paketentwicklung',
+        r'`context-debloater` ist eine separat bereitzustellende Inhaltsprüfmethode, '
+        r'die auch die Init-Ausgabe für erstellte oder inhaltlich bearbeitete Dateien verlangt; '
+        r'sie ist keine (?:neue|zusätzliche) APM-Paketabhängigkeit und wird nicht automatisch installiert',
+    )
+    return (len(declarations) == len(patterns)
+            and all(re.fullmatch(p, s) for p, s in zip(patterns, declarations))
+            and all(guard in named[0] for guard in README_AUDIT_GUARDS))
+
+
+def consumer_authoring_tools_are_bounded(text, *, init=False):
+    """Only the complete, guarded Init audit paragraph is consumer-facing."""
+    normalized = ' '.join(text.split())
+    if init:
+        if normalized.count(INIT_AUDIT) != 1 or INIT_AVAILABILITY not in normalized:
+            return False
+        normalized = normalized.replace(INIT_AUDIT, '', 1)
+    return all(tool not in normalized for tool in ('skill-creator', 'context-debloater'))
 
 
 def frontmatter(text):
@@ -258,11 +294,14 @@ class CurrentText(unittest.TestCase):
         deps = read(ROOT / 'apm.yml').split('dependencies:', 1)[1]
         for tool in ('skill-creator', 'context-debloater'):
             self.assertNotIn(tool, deps)
-            # Provenance may name authoring tools; consumer-loaded instructions must not.
-            for path in SKILLS.glob('core-*/SKILL.md'):
-                self.assertNotIn(tool, read(path), f'{path} makes {tool} a consumer dependency')
+        for path in SKILLS.glob('core-*/SKILL.md'):
+            self.assertTrue(consumer_authoring_tools_are_bounded(
+                read(path), init=path.parent.name == 'core-init-project'), path)
         self.assertTrue(authoring_tools_are_not_dependencies(read(ROOT / 'README.md')))
-        self.assertIn('keine APM-Abhängigkeiten und keine Bestandteile eines Verbraucher-Workflows', read(ROOT / 'DESIGN.md'))
+        design = read(ROOT / 'DESIGN.md')
+        self.assertIn('`skill-creator` bleibt ein Authoring-Werkzeug der Paketentwicklung.', design)
+        self.assertIn('separat verfügbare, report-only Inhaltsprüfmethode für die Init-Ausgabe', design)
+        self.assertIn('Beide sind keine APM-Abhängigkeiten und werden weder durch dieses Paket installiert noch mit ihm ausgeliefert.', design)
 
 
 # rule -> (file, protective text, replacement simulating the lost guard)
@@ -319,15 +358,20 @@ MUTATIONS = {
 class AuthoringDependencyText(unittest.TestCase):
     """Frozen text mutations; CurrentText separately checks the mutable README."""
 
-    DECLARATION = ('`skill-creator` und `context-debloater` sind Werkzeuge für die '
-                   'Paketentwicklung, keine zusätzlichen Verbraucherabhängigkeiten.')
+    DECLARATION = (
+        '`skill-creator` ist ein Werkzeug für die Paketentwicklung. '
+        '`context-debloater` ist eine separat bereitzustellende Inhaltsprüfmethode, '
+        'die auch die Init-Ausgabe für erstellte oder inhaltlich bearbeitete Dateien verlangt; '
+        'sie ist keine neue APM-Paketabhängigkeit und wird nicht automatisch installiert. '
+        + ' '.join(README_AUDIT_GUARDS)
+    )
     TEXT = '## Lizenz' + chr(10) * 2 + DECLARATION
 
     def test_both_valid_dependency_phrasings(self):
         text = self.TEXT
-        anchor = 'keine zusätzlichen Verbraucherabhängigkeiten'
+        anchor = 'keine neue APM-Paketabhängigkeit'
         self.assertIn(anchor, text)
-        for phrase in ('keine Paketabhängigkeiten', anchor):
+        for phrase in ('keine zusätzliche APM-Paketabhängigkeit', anchor):
             with self.subTest(phrase=phrase):
                 self.assertTrue(authoring_tools_are_not_dependencies(text.replace(anchor, phrase)))
 
@@ -337,20 +381,18 @@ class AuthoringDependencyText(unittest.TestCase):
         self.assertEqual(text.count(declaration), 1)
         variants = {
             'removed': text.replace(declaration, ''),
-            'no negation': text.replace('keine zusätzlichen Verbraucherabhängigkeiten',
-                                       'zusätzliche Verbraucherabhängigkeiten'),
-            'package dependencies': text.replace('keine zusätzlichen Verbraucherabhängigkeiten',
-                                                 'Paketabhängigkeiten'),
+            'no negation': text.replace('keine neue APM-Paketabhängigkeit', 'eine neue APM-Paketabhängigkeit'),
+            'auto install': text.replace('wird nicht automatisch installiert', 'wird automatisch installiert'),
             'unrelated negation': text.replace(declaration,
                 '`skill-creator` und `context-debloater` sind Paketabhängigkeiten. '
                 'Andere Werkzeuge sind keine Paketabhängigkeiten.'),
             'detached tool names': text.replace(declaration,
                 '`skill-creator` und `context-debloater` werden verwendet. '
                 'Andere Werkzeuge sind keine zusätzlichen Verbraucherabhängigkeiten.'),
-            'one tool missing': text.replace(' und `context-debloater`', ''),
+            'one tool missing': text.replace('`skill-creator` ist ein Werkzeug für die Paketentwicklung.', ''),
             'different tool': text.replace('`context-debloater`', '`other-tool`'),
-            'qualified denial': text.replace('keine zusätzlichen Verbraucherabhängigkeiten',
-                                             'keine zusätzlichen Verbraucherabhängigkeiten nur im Test'),
+            'qualified denial': text.replace('keine neue APM-Paketabhängigkeit',
+                                             'keine neue APM-Paketabhängigkeit nur im Test'),
             'quoted claim': text.replace(declaration, 'Ein Beispiel lautet: ' + declaration),
             'contradiction': text + """
 `skill-creator` ist eine Paketabhängigkeit.""",
@@ -359,6 +401,9 @@ class AuthoringDependencyText(unittest.TestCase):
             with self.subTest(label=label):
                 self.assertNotEqual(mutated, text)
                 self.assertFalse(authoring_tools_are_not_dependencies(mutated))
+        for guard in README_AUDIT_GUARDS:
+            with self.subTest(removed_guard=guard):
+                self.assertFalse(authoring_tools_are_not_dependencies(text.replace(guard, '')))
         self.assertFalse(authoring_tools_are_not_dependencies(''))
         self.assertFalse(authoring_tools_are_not_dependencies('keine Paketabhängigkeiten'))
 
@@ -367,9 +412,24 @@ class AuthoringDependencyText(unittest.TestCase):
         self.assertIn('## Lizenz', text)
         self.assertTrue(authoring_tools_are_not_dependencies(text.replace('## Lizenz', '## Paketlizenz')))
         self.assertTrue(authoring_tools_are_not_dependencies(text.replace(
-            'Paketentwicklung, keine zusätzlichen Verbraucherabhängigkeiten',
-            """Paketentwicklung,
-keine zusätzlichen Verbraucherabhängigkeiten""")))
+            'keine neue APM-Paketabhängigkeit', 'keine neue\nAPM-Paketabhängigkeit')))
+
+    def test_consumer_audit_is_scoped_and_requires_every_guard(self):
+        text = INIT_AVAILABILITY + '\n\n' + INIT_AUDIT
+        self.assertTrue(consumer_authoring_tools_are_bounded(text, init=True))
+        self.assertTrue(consumer_authoring_tools_are_bounded('# Other consumer'))
+        self.assertTrue(consumer_authoring_tools_are_bounded(text.replace('Rubrik:', 'Rubrik:\n'), init=True))
+        self.assertFalse(consumer_authoring_tools_are_bounded(text))
+        for old in (INIT_AVAILABILITY, 'unabhängig von ihrer Endung',
+                    'nur für unterstützte Markdownziele', 'manuell nach der Rubrik prüfen',
+                    'als Prüflücke', 'weder automatische Kürzung/Mutation',
+                    'noch Toolinstallation oder Convertereinrichtung'):
+            with self.subTest(removed=old):
+                self.assertFalse(consumer_authoring_tools_are_bounded(text.replace(old, ''), init=True))
+        for contrary in ('Lade `skill-creator`.', 'Installiere `context-debloater` automatisch.',
+                         'Lade `context-debloater` als zusätzliche Voraussetzung.'):
+            with self.subTest(injected=contrary):
+                self.assertFalse(consumer_authoring_tools_are_bounded(text + '\n\n' + contrary, init=True))
 
 
 class PackageVersion(unittest.TestCase):

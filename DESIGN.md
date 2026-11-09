@@ -172,7 +172,7 @@ Der Paketbau benötigt damit keine privaten Git-Clones oder Zugangsdaten. APM er
 
 Alle paketeigenen Markdown-Dateien von Skills und Workflows werden auf Deutsch verfasst. Das betrifft insbesondere `SKILL.md`, zugehörige Markdown-Referenzen, Assets mit Instruktionstext und optionale Workflow-Promptadapter. Technische IDs, Frontmatter-Schlüssel, Dateipfade, Befehle, Schemanamen und Codebeispiele bleiben unverändert beziehungsweise in ihrer technisch erforderlichen Sprache. Dateien externer APM-Abhängigkeiten und generierte Zielprojektionen werden nicht übersetzt oder direkt bearbeitet.
 
-`skill-creator` und `context-debloater` sind Authoring-Werkzeuge der Paketentwicklung, keine APM-Abhängigkeiten und keine Bestandteile eines Verbraucher-Workflows. Sie müssen in der Erstellungsumgebung verfügbar sein, werden aber weder durch dieses Paket installiert noch mit ihm ausgeliefert.
+`skill-creator` bleibt ein Authoring-Werkzeug der Paketentwicklung. `context-debloater` ist zusätzlich eine separat verfügbare, report-only Inhaltsprüfmethode für die Init-Ausgabe; fehlende Methode und Format-/Extraktionslücken werden ausdrücklich gemeldet, universelle Formatunterstützung wird nicht garantiert. Beide sind keine APM-Abhängigkeiten und werden weder durch dieses Paket installiert noch mit ihm ausgeliefert.
 
 Für jeden neu erstellten oder materiell geänderten Skill beziehungsweise Workflow gilt verbindlich:
 
