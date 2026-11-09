@@ -23,6 +23,13 @@ Katalog ohne starres Limit) verlangen Positiv- und Negativfälle ihrer Regeln,
 Mutationstests entfernen die kanonischen DOX-Sätze nur im Speicher
 und führen dort die früheren Drift-only-Klauseln von core-docs wieder ein.
 Paket- und Hosttests benötigen ihre dokumentierte isolierte Toolchain.
+`test_ci_portability.py` prüft mise als numerische stabile Mindestversion
+(gleich/neuer, älter, ungültig, Vorabversion, fehlgeschlagene/fehlende Abfrage),
+die Konsistenz mit `mise.toml` und weiterhin exakte übrige Pins.
+`test_ci_workflows.py` sichert die stabile Standardauswahl der SHA-gepinnten
+mise-action mit signierten Prüfsummen statt festem mise-Binärhash; Mutationen
+weisen exakte/literale Versionsinputs, statische Hashes und Install-/Cachedrift
+weiterhin zurück.
 Ersatzplantests verbinden
 die vorhandenen Rahmen-/Ziel-/Kosten-/Wirkungsfixtures mit den konkreten
 Ablaufquellen und weisen die Wiedereinfügung alter zwingender

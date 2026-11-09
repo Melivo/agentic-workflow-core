@@ -31,8 +31,7 @@ jobs:
           check-latest: false
       - uses: jdx/mise-action@2d8d4cafcbd33be2ea37d2b6f5ad595363d1f1ca # v5.1.1
         with:
-          version: '2026.10.19'
-          sha256: '3162760f40b6b5f706c60641e4ef5ee7322bc6c54f72fc26a7111b337aa18d9d'
+          # Default stable release; pinned action verifies Minisign-signed checksums.
           mise_dir: ${{ runner.temp }}/mise
           install: false
           cache: false

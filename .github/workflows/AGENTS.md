@@ -16,6 +16,12 @@ Fachliche Releaseentscheidungen bleiben bei den
 
 - CI nutzt die gemeinsamen Tasks aus [mise.toml](../../mise.toml), nur lesende
   Repositoryrechte und keine Veröffentlichungssecrets.
+- Die SHA-gepinnte mise-action nutzt ohne `version`-/`sha256`-Input ihre
+  stabile Standardauswahl und prüft Downloads gegen Minisign-signierte
+  Prüfsummen. Der geprüfte Commit ist
+  `2d8d4cafcbd33be2ea37d2b6f5ad595363d1f1ca`; Installationen von Projekttools
+  und Cache bleiben abgeschaltet, `mise_dir` liegt im Runner-Tempbereich.
+  Das Mindestversionsgate besitzt der Bootstrap, nicht ein exakter Host-Pin.
 - Release-PR und Veröffentlichung haben getrennte Schalter:
   `RELEASE_PR_AUTOMATION_ENABLED` und `RELEASE_PUBLICATION_ENABLED`.
 - Fehlende oder nicht exakt auf `true` gesetzte Schalter erlauben keine Wirkung.

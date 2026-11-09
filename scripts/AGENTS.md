@@ -18,6 +18,13 @@ Die Workflowverkabelung bleibt unter
 - [mise.toml](../mise.toml) definiert die gemeinsamen Einstiegspunkte.
 - [ci_toolchain.json](ci_toolchain.json) und Requirements/Lockdateien bestimmen
   Versionen und Integrität; keine stillen Installationen in Prüftasks.
+- mise ist ein systemverwalteter Taskrunner: `mise.min_version` in
+  `ci_toolchain.json` ist das zentrale Minimum und muss `min_version` in
+  `mise.toml` entsprechen. Stabile neuere Systemupdates nicht durch exakte
+  Host-Pins blockieren; RPM-Binary weder ersetzen noch herunterstufen.
+  Bootstrap vergleicht die drei Versionsteile numerisch, lehnt fehlende,
+  fehlgeschlagene, ungültige und Vorabversionsabfragen ab und meldet beobachtete
+  Version und Minimum als `RUNTIME`. Python und alle anderen Pins bleiben exakt.
 - [ci_contract_targets.json](ci_contract_targets.json) ordnet Vertragsgruppen zu.
 - `check_core_contracts.py` prüft den
   [DOX-Vertrag](../.apm/skills/core-shared/references/workflow-contract.md#projektdokumentation-und-dox)

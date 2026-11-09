@@ -50,7 +50,9 @@ def load_toolchain(path=TOOLCHAIN):
     require(data.get('platform') == 'linux-x64', 'nur linux-x64 ist gepinnt')
     for name in ('mise', 'python', 'node', 'apm', 'actionlint', 'shellcheck', 'npm'):
         require(isinstance(data.get(name), dict), 'Toolchaineintrag fehlt: ' + name)
-    for name in ('mise', 'python', 'node', 'apm', 'actionlint', 'shellcheck'):
+    require(set(data['mise']) == {'min_version'}, 'mise benötigt ausschließlich min_version statt exaktem Pin')
+    require(re.fullmatch(r'[0-9]+\.[0-9]+\.[0-9]+', str(data['mise'].get('min_version', ''))), 'ungültige mise-Mindestversion')
+    for name in ('python', 'node', 'apm', 'actionlint', 'shellcheck'):
         require(re.fullmatch(r'\d+\.\d+\.\d+', str(data[name].get('version', ''))), 'keine exakte Version: ' + name)
     for name in DOWNLOADS:
         require(str(data[name].get('url', '')).startswith('https://'), 'Download ohne HTTPS: ' + name)
@@ -100,14 +102,23 @@ def source_snapshot():
 
 
 def check_runtime(tc):
-    mise = subprocess.run(['mise', '--version'], capture_output=True, text=True, env=dict(os.environ, MISE_QUIET='1')).stdout.split()
-    require(mise and mise[0] == tc['mise']['version'], 'mise ' + tc['mise']['version'] + ' erforderlich, gefunden: ' + (mise[0] if mise else 'keines'))
+    minimum = tc['mise']['min_version']
+    try:
+        probe = subprocess.run(['mise', '--version'], capture_output=True, text=True, env=dict(os.environ, MISE_QUIET='1'), timeout=30)
+    except (OSError, subprocess.SubprocessError) as exc:
+        raise ToolchainError('mise-Versionsabfrage fehlgeschlagen: ' + str(exc)) from exc
+    require(probe.returncode == 0, 'mise-Versionsabfrage fehlgeschlagen (' + str(probe.returncode) + ')')
+    tokens = probe.stdout.split()
+    found_mise = tokens[0] if tokens else ''
+    require(re.fullmatch(r'[0-9]+\.[0-9]+\.[0-9]+', found_mise), 'mise meldet keine stabile Releaseversion: ' + repr(found_mise))
+    require(tuple(map(int, found_mise.split('.'))) >= tuple(map(int, minimum.split('.'))), 'mise >= ' + minimum + ' erforderlich, gefunden: ' + found_mise)
+    print('RUNTIME mise=' + found_mise + ' minimum=' + minimum)
     found = '%d.%d.%d' % sys.version_info[:3]
     require(found == tc['python']['version'], 'Python ' + tc['python']['version'] + ' erforderlich, gefunden: ' + found + ' (keine Ersatzversion)')
 
 
 def check_pins(tc):
-    """Toolchain, requirements and package manifest must name the same exact versions."""
+    """Requirements and package manifests keep their exact versions and integrity."""
     requirements = (ROOT / tc['python']['requirements']).read_text(encoding='utf-8')
     for name, version in tc['python']['packages'].items():
         require(re.search(r'(?m)^' + re.escape(name) + '==' + re.escape(version) + r' \\$', requirements), 'requirements-ci.txt pinnt nicht ' + name + '==' + version)
