@@ -4,6 +4,13 @@
 
 - Ergänzt reproduzierbare lokale/CI-Prüfungen und eine standardmäßig deaktivierte, getrennte Release-PR- und Veröffentlichungskette. GitHub-Livebetrieb und App-Einrichtung sind nicht bestätigt.
 
+## [0.14.1](https://github.com/Melivo/agentic-workflow-core/compare/v0.14.0...v0.14.1) (2026-11-09)
+
+
+### Bug Fixes
+
+* **core:** reconcile TypeSafe docs and mise update compatibility ([#24](https://github.com/Melivo/agentic-workflow-core/issues/24)) ([dc43fd3](https://github.com/Melivo/agentic-workflow-core/commit/dc43fd3691d22f41c02ec9b4cd96712bf6eefb87))
+
 ## [0.14.0](https://github.com/Melivo/agentic-workflow-core/compare/v0.13.0...v0.14.0) (2026-11-08)
 
 
