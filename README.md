@@ -145,7 +145,7 @@ Core-Skills liegen unter `.apm/skills/core-<name>/`; `core-init-project` führt 
 
 ### Lokale Prüfungen und Paketabnahme
 
-Die lokalen und CI-Aufgaben verwenden `mise` 2026.10.19 und Python 3.13.14. Weitere Versionen und Integritätswerte: [ci_toolchain.json](scripts/ci_toolchain.json), [requirements-ci.txt](scripts/requirements-ci.txt) und [Habit-Testtoolchain](scripts/habit-ci/package.json).
+Die lokalen und CI-Aufgaben benötigen `mise` **mindestens 2026.10.19** und Python **exakt 3.13.14**. Die zentrale Mindestversion in der Toolchain muss mit `min_version` in `mise.toml` übereinstimmen. Stabile neuere mise-Versionen aus Systemupdates bleiben zulässig; ein RPM-verwaltetes mise wird weder vom Core-Bootstrap ersetzt noch heruntergestuft. Die Versionsabfrage muss erfolgreich sein; ältere, ungültige und Vorabversionen werden abgewiesen. Bootstrap protokolliert die beobachtete mise-Version und das Minimum als `RUNTIME`, die übrigen Werkzeugversionen als `TOOLS` beziehungsweise Setupausgabe. CI lässt `version` und `sha256` bei der vorhandenen SHA-gepinnten mise-action weg: Deren stabile Standardauswahl prüft Downloads gegen Minisign-signierte Prüfsummen (geprüfter Action-Commit `2d8d4cafcbd33be2ea37d2b6f5ad595363d1f1ca`), statt eine veraltete feste Binärchecksumme zu verlangen. Weitere Versionen und Integritätswerte: [ci_toolchain.json](scripts/ci_toolchain.json), [requirements-ci.txt](scripts/requirements-ci.txt) und [Habit-Testtoolchain](scripts/habit-ci/package.json).
 
 ```bash
 # Ausdrücklich freizugebendes Setup im isolierten Arbeitsbereich; bei Bedarf erneut ausführen

@@ -34,8 +34,7 @@ PINS = {
     'actions/upload-artifact': 'cf430e030ddbb5b0abf93d22962f4752f3646cd9',  # v7.0.2
     'actions/download-artifact': '9000827ccba6bdab643e8b6fd33ac0654aef8333',  # v8.0.2
 }
-# Release asset digest of mise-v<version>-linux-x64 (the binary mise-action hashes).
-MISE_SHA256 = '3162760f40b6b5f706c60641e4ef5ee7322bc6c54f72fc26a7111b337aa18d9d'
+# mise-action at PINS resolves the stable release by default and verifies signed checksums.
 TOKEN_ACTION = 'actions/create-github-app-token'
 HEAD_SHA = '${{ github.event.workflow_run.head_sha }}'
 PR_GATE = "vars.RELEASE_PR_AUTOMATION_ENABLED == 'true'"
@@ -110,9 +109,9 @@ def common_violations(text, doc):
                 if step.get('with') != {'python-version': TOOLCHAIN['python']['version'], 'check-latest': False}:
                     found.append('toolchain: Python nicht exakt ' + TOOLCHAIN['python']['version'])
             if action(step) == 'jdx/mise-action':
-                expected = {'version': TOOLCHAIN['mise']['version'], 'sha256': MISE_SHA256, 'mise_dir': '${{ runner.temp }}/mise', 'install': False, 'cache': False}
+                expected = {'mise_dir': '${{ runner.temp }}/mise', 'install': False, 'cache': False}
                 if step.get('with') != expected:
-                    found.append('toolchain: mise nicht exakt, geprüft, isoliert und ohne Cache')
+                    found.append('toolchain: mise nicht stabil, signaturgeprüft, isoliert und ohne Cache')
             if step.get('run') == 'mise run tools:setup':
                 prior = ' '.join(str(s.get('run', '')) for s in steps[:index])
                 if 'AWC_CI_WORKSPACE=$RUNNER_TEMP/' not in prior:
@@ -294,7 +293,10 @@ CI_MUTATIONS = {
     'action tag': ('actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1', 'actions/checkout@v7', 'pin'),
     'foreign sha': ('jdx/mise-action@2d8d4cafcbd33be2ea37d2b6f5ad595363d1f1ca', 'jdx/mise-action@2d8d4cafcbd33be2ea37d2b6f5ad595363d1f1cb', 'pin'),
     'python minor only': ("python-version: '3.13.14'", "python-version: '3.13'", 'toolchain'),
-    'mise unpinned': ("version: '2026.10.19'", "version: 'latest'", 'toolchain'),
+    'mise literal latest': ('          mise_dir:', "          version: 'latest'\n          mise_dir:", 'toolchain'),
+    'mise exact host pin': ('          mise_dir:', "          version: '2026.10.19'\n          mise_dir:", 'toolchain'),
+    'mise static checksum': ('          mise_dir:', "          sha256: 'obsolete'\n          mise_dir:", 'toolchain'),
+    'mise installs tools': ('          install: false', '          install: true', 'toolchain'),
     'mise cache': ('cache: false', 'cache: true', 'toolchain'),
     'kept credentials': ('persist-credentials: false', 'persist-credentials: true', 'credentials'),
     'weaker task': ('run: mise run acceptance', 'run: mise run check', 'tasks'),

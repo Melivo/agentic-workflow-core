@@ -204,9 +204,10 @@ class FreshFixture(unittest.TestCase):
 
 
 class Toolchain(unittest.TestCase):
-    def test_pins_are_exact_and_consistent(self):
+    def test_mise_minimum_and_other_exact_pins_are_consistent(self):
         tc = bootstrap.load_toolchain()
-        self.assertEqual((tc['mise']['version'], tc['python']['version'], tc['node']['version'], tc['apm']['version'], tc['actionlint']['version'], tc['shellcheck']['version']), ('2026.10.19', '3.13.14', '22.23.3', '0.31.0', '1.7.12', '0.11.0'))
+        self.assertEqual(tomllib.loads((ROOT / 'mise.toml').read_text(encoding='utf-8'))['min_version'], tc['mise']['min_version'])
+        self.assertEqual((tc['mise']['min_version'], tc['python']['version'], tc['node']['version'], tc['apm']['version'], tc['actionlint']['version'], tc['shellcheck']['version']), ('2026.10.19', '3.13.14', '22.23.3', '0.31.0', '1.7.12', '0.11.0'))
         self.assertEqual(tc['python']['packages'], {'PyYAML': '6.0.3', 'ruamel.yaml': '0.19.1'})
         self.assertEqual(tc['npm']['packages'], {'release-please': '17.11.2'})
         bootstrap.check_pins(tc)
@@ -221,6 +222,7 @@ class Toolchain(unittest.TestCase):
             with self.subTest(file=relative), tempfile.TemporaryDirectory(prefix='toolchain-') as directory:
                 root = Path(directory)
                 shutil.copytree(ROOT / 'scripts', root / 'scripts')
+                shutil.copyfile(ROOT / 'mise.toml', root / 'mise.toml')
                 path = root / relative
                 path.write_text(path.read_text(encoding='utf-8').replace(old, new, 1), encoding='utf-8')
                 module = load('bootstrap_ci', root)
@@ -228,7 +230,7 @@ class Toolchain(unittest.TestCase):
                     module.check_pins(module.load_toolchain())
         with tempfile.TemporaryDirectory(prefix='toolchain-') as directory:
             path = Path(directory) / 'toolchain.json'
-            for change in (lambda d: d['node'].update(sha256=''), lambda d: d['apm'].update(url='http://example.invalid/apm'), lambda d: d['actionlint'].update(sha256='abc'), lambda d: d.pop('actionlint'), lambda d: d['shellcheck'].update(sha256=''), lambda d: d['shellcheck'].update(version='0.11'), lambda d: d.pop('shellcheck'), lambda d: d['python'].update(version='3.13'), lambda d: d.pop('npm')):
+            for change in (lambda d: d['mise'].update(version='2026.10.19'), lambda d: d['mise'].pop('min_version'), lambda d: d['mise'].update(min_version='2026.11.4-rc.1'), lambda d: d['mise'].update(min_version='2026.11'), lambda d: d['node'].update(sha256=''), lambda d: d['apm'].update(url='http://example.invalid/apm'), lambda d: d['actionlint'].update(sha256='abc'), lambda d: d.pop('actionlint'), lambda d: d['shellcheck'].update(sha256=''), lambda d: d['shellcheck'].update(version='0.11'), lambda d: d.pop('shellcheck'), lambda d: d['python'].update(version='3.13'), lambda d: d.pop('npm')):
                 data = json.loads((ROOT / 'scripts/ci_toolchain.json').read_text(encoding='utf-8'))
                 change(data)
                 path.write_text(json.dumps(data), encoding='utf-8')
@@ -237,9 +239,23 @@ class Toolchain(unittest.TestCase):
 
     def test_wrong_runtime_versions_fail_without_substitution(self):
         tc = bootstrap.load_toolchain()
-        with patch.object(bootstrap.subprocess, 'run', return_value=subprocess.CompletedProcess([], 0, '2026.10.7 linux-x64\n', '')), self.assertRaisesRegex(bootstrap.ToolchainError, 'mise 2026.10.19'):
+        with patch.object(bootstrap.subprocess, 'run', return_value=subprocess.CompletedProcess([], 0, '2026.10.7 linux-x64\n', '')), self.assertRaisesRegex(bootstrap.ToolchainError, 'mise >= 2026.10.19'):
             bootstrap.check_runtime(tc)
         with patch.object(bootstrap.subprocess, 'run', return_value=subprocess.CompletedProcess([], 0, '2026.10.19 linux-x64\n', '')), patch.object(bootstrap.sys, 'version_info', (3, 13, 13)), self.assertRaisesRegex(bootstrap.ToolchainError, 'keine Ersatzversion'):
+            bootstrap.check_runtime(tc)
+
+    def test_mise_stable_minimum_accepts_numeric_newer_releases(self):
+        tc = bootstrap.load_toolchain()
+        for version in ('2026.10.19', '2026.10.20', '2026.11.4', '2026.10.100', '2027.1.1'):
+            with self.subTest(version=version), patch.object(bootstrap.subprocess, 'run', return_value=subprocess.CompletedProcess([], 0, version + ' linux-x64 (2026-11-07)\n', '')), patch.object(bootstrap.sys, 'version_info', (3, 13, 14)):
+                bootstrap.check_runtime(tc)
+
+    def test_mise_invalid_old_failed_or_missing_probe_is_rejected(self):
+        tc = bootstrap.load_toolchain()
+        for version, code in [('2026.10.9', 0), ('2026.9.99', 0), ('2025.12.99', 0), ('', 0), ('garbage', 0), ('2026.11', 0), ('v2026.11.4', 0), ('2026.11.4-rc.1', 0), ('2026.11.4+dev', 0), ('2026.11.4', 1)]:
+            with self.subTest(version=version, code=code), patch.object(bootstrap.subprocess, 'run', return_value=subprocess.CompletedProcess([], code, version, 'probe failed')), self.assertRaises(bootstrap.ToolchainError):
+                bootstrap.check_runtime(tc)
+        with patch.object(bootstrap.subprocess, 'run', side_effect=FileNotFoundError('mise')), self.assertRaisesRegex(bootstrap.ToolchainError, 'mise'):
             bootstrap.check_runtime(tc)
 
     def test_workspace_must_be_isolated(self):
