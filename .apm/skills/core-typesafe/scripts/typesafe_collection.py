@@ -52,6 +52,8 @@ SOURCE_SCHEMA = 'plan-comparison/v1'
 MAX_WIRE_BYTES = 64 * 1024
 MAX_JSON_DEPTH = 32
 MAX_TOKEN_LENGTH = 256
+# Match typesafe_eval; standalone collection deployment cannot import the evaluator.
+PROBABILITY_SUM_TOLERANCE = 0.05
 LOCK_TIMEOUT = 2.0
 APPLICATION_ID = 0x54534331
 SCHEMA_VERSION = 1
@@ -235,7 +237,7 @@ def _observation(obs):
                 for option, p in options.items():
                     _token(option)
                     _number(p, probability=True)
-                _require(abs(sum(options.values()) - 1) <= 1e-6)
+                _require(abs(sum(options.values()) - 1) <= PROBABILITY_SUM_TOLERANCE)
     _require(probabilities is None or obs['uncertainty'] == 'unassessed')
 
 

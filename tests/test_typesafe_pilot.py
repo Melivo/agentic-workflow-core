@@ -89,6 +89,45 @@ class PilotOffline(unittest.TestCase):
                 self.assertEqual(c.SCHEMA_VERSION, 1)
                 self.assertEqual(c.WIRE_SCHEMA, 'collection/v1')
 
+    def test_rounded_choice_sum_preserves_originals_end_to_end(self):
+        inputs = dict(INPUTS['skill_relevance'], candidates=[
+            {'ref': key, 'responsibility': 'SYNTHETIC'} for key in ('a', 'b')])
+        prepared = ts.build_request('skill_relevance', inputs, model='synthetic')
+        binding = pc.bind_plan(project_id='synthetic-a', plan_ref='local-plan',
+                               plan_bytes=PLAN, criteria=CRITERIA)
+        self.assertEqual(c.PROBABILITY_SUM_TOLERANCE, ts.PROBABILITY_SUM_TOLERANCE)
+        for second in (0.499, 0.451, 0.549):
+            with self.subTest(second=second):
+                original = {'a': 0.5, 'b': second}
+                raw = fake_response(prepared.payload)
+                for answer in raw['answers'].values():
+                    if answer['type'] == 'choice':
+                        answer['probabilities'] = dict(original)
+                        answer['choice'] = max(original, key=original.get)
+                before = json.dumps(raw, sort_keys=True)
+                result = ts.finalize_response(prepared, raw, core_version='synthetic',
+                                              duration_seconds=0.1)
+                self.assertEqual(result.outcome, 'unresolved')
+                self.assertIsNone(result.error)
+                event = pc.model_event(binding, criterion_id='AC01', evaluation=result.to_dict(),
+                                       selection='eligible')
+                self.assertEqual(event['observation']['model_status'], 'uncertain')
+                data = c.project_event(event, projects={'synthetic-a'})
+                restored = c.parse_wire(data, projects={'synthetic-a'})
+                self.assertEqual(restored['observation'], event['observation'])
+                choices = [answer['probabilities'] for answer in
+                           restored['observation']['probabilities'].values()
+                           if 'probabilities' in answer]
+                self.assertEqual(choices, [original])
+                self.assertEqual(json.dumps(raw, sort_keys=True), before)
+                for invalid in (0.449, 0.551):
+                    damaged = json.loads(json.dumps(event))
+                    for answer in damaged['observation']['probabilities'].values():
+                        if 'probabilities' in answer:
+                            answer['probabilities']['b'] = invalid
+                    with self.assertRaisesRegex(c.CollectionError, 'invalid_wire'):
+                        c.project_event(damaged, projects={'synthetic-a'})
+
     def test_safe_owner_config_is_read_only_and_closed(self):
         value = {'projects': {'projects': ['synthetic-a'], 'core_project_ids': True},
                  'transport': {'ssh_target': 'synthetic-alias',
