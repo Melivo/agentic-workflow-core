@@ -849,6 +849,40 @@ class ContractTests(unittest.TestCase):
             with self.subTest(missing=field), self.assertRaises((checker.ContractError, KeyError)):
                 checker.validate_handoff_first_plan(invalid)
 
+    def test_direct_covered_transition_cannot_stop_after_confirmed_link(self):
+        cases = {c['id']: c['input'] for c in json.loads((ROOT / 'tests/core_scenario_cases.json').read_text())['cases']}
+        # Existing first-stage and follow-handoff originals: no new fixture/schema.
+        for name in ('handoff-covered-stage-first-user-confirmed', 'handoff-covered-handoff-goal-covered'):
+            data = copy.deepcopy(cases[name])
+            self.assertFalse(data['new_user_approval'])
+            checker.validate_scenario(data)
+            data['execute'] = False
+            with self.subTest(case=name), self.assertRaisesRegex(checker.ContractError, 'gedeckter Übergang wartet grundlos'):
+                checker.validate_scenario(data)
+        completion = copy.deepcopy(cases['completion-positive'])
+        checker.validate_scenario(completion)
+        # Even historical coverage does not permit a same-session completion cascade.
+        completion.update(next_started=True, next_authorized=True)
+        with self.assertRaisesRegex(checker.ContractError, 'Handoff und Halt'):
+            checker.validate_scenario(completion)
+
+    def test_direct_transition_rejects_prompt_gate_wait_and_completion_cascade(self):
+        sources = {p: (ROOT / p).read_text() for p in checker.HANDOFF_SOURCES}
+        checker.check_handoff_sources(sources)
+        for path, text in sources.items():
+            for clause in ('Fülle den Goal-Prompt aus.',
+                           'Verlange das Asset assets/goal-prompt.md.',
+                           'Gedeckte Arbeit wartet auf eine neue Nutzerantwort.',
+                           'Nach Etappenabschluss plane unmittelbar die nächste Etappe.',
+                           'Nach Etappenabschluss ist Handoff optional.'):
+                with self.subTest(path=path, clause=clause), self.assertRaisesRegex(checker.ContractError, 'direkter Etappenübergang verletzt'):
+                    checker.check_handoff_sources(dict(sources, **{path: text + '\n' + clause}))
+        self.assertFalse((ROOT / '.apm/skills/core-milestone/assets/goal-prompt.md').exists())
+        fixture = json.loads((ROOT / 'tests/core_scenario_cases.json').read_text())
+        inventory = json.loads((ROOT / checker.TARGETS).read_text())
+        self.assertTrue(all('assets/goal-prompt.md' not in c['source'] for c in fixture['cases']))
+        self.assertTrue(all('assets/goal-prompt.md' not in p for paths in inventory['groups'].values() for p in paths))
+
     def test_handoff_coverage_and_display_paths_use_existing_scenarios(self):
         fixture = json.loads((ROOT / 'tests/core_scenario_cases.json').read_text())
         checker.check_coverage(fixture)
@@ -965,8 +999,7 @@ class ContractTests(unittest.TestCase):
                 'Prüft einen vollständigen Planentwurf vor der Nutzerbestätigung (Planreview, Textergebnis).',
                 'Zwei Modi: Planreview vor der Nutzerbestätigung und Umsetzungsreview nach core-execute.',
             ),
-            '.apm/skills/core-milestone/SKILL.md': ('Ziel-/Definitionsbestätigung und aktuelle Etappenfreigabe sind weder Planbestätigung noch Ausführungsfreigabe.', 'Der Nutzer aktiviert ihn erst nach Bestätigung des eigenen Plans, ab core-execute.'),
-            '.apm/skills/core-milestone/assets/goal-prompt.md': ('Ausführung beginnt erst nach Planbestätigung und ausdrücklicher Execute-Autorisierung.',),
+            '.apm/skills/core-milestone/SKILL.md': ('Ziel-/Definitionsbestätigung und aktuelle Etappenfreigabe sind weder Planbestätigung noch Ausführungsfreigabe.', 'Der Nutzer aktiviert ihn erst nach Bestätigung des eigenen Plans, ab core-execute.', 'Ausführung beginnt erst nach Planbestätigung und ausdrücklicher Execute-Autorisierung.'),
             '.apm/skills/core-handoff/assets/start-prompt.md': ('die Planbestätigung bleibt erforderlich.', 'Execute beginnt erst nach bestätigtem Plan und ausdrücklicher Ausführungsautorisierung.'),
             'README.md': (
                 'Planreview vor deiner Bestätigung.',

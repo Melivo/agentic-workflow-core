@@ -364,6 +364,8 @@ def validate_handoff_first_plan(data):
     validate_plan(data['final_plan'])
     if data['new_user_approval']:
         require(not data['execute'] or data['execution_order'], 'Planfreigabe ist kein Ausführungsauftrag')
+    elif gap is None:
+        require(data['execute'], 'gedeckter Übergang wartet grundlos statt Execute')
     require(not data['execute'] or data['execute_checks'], 'Execute ohne eigene Original-/Review-/Indexprüfung')
 
 
@@ -576,6 +578,7 @@ def validate_scenario(data):
         require(data['review_pass'] and data['evidence_valid'], 'Run-pass ohne gültige Evidenz')
         require(not data['milestone_mode'] or data['milestone_checked'], 'Run-pass ist kein Etappenabschluss')
         require(not data['next_started'] or data['next_authorized'], 'automatische Folgefreigabe')
+        require(not data['milestone_mode'] or not data['next_started'], 'Etappenabschluss verlangt Handoff und Halt statt Folgestart')
         require(not data['goal_completed'] or data['goal_evidence'], 'Gesamterfolg unbelegt')
     else:
         raise ContractError('unbekannter Szenariotyp: ' + str(kind))
@@ -982,10 +985,6 @@ REPLACEMENT_SOURCES = {
         r'Die Planerstellung allein startet keine Ausführung',
         r'neue Plan- oder Ersatzplanpfade[^.]*statischer Validierung[^.]*unabhängigem Planreview[^.]*abgeleiteter Freigabe[^.]*ohne neue Einzelbestätigung',
     ),
-    '.apm/skills/core-milestone/assets/goal-prompt.md': (
-        r'abgeleitet freigegebenen Plan und bestehenden Ausführungsauftrag[^.]*gedeckte technische Ersatzpläne verlangen keine neue Nutzerbestätigung',
-        r'Bloße Zieldefinition oder Planerstellung startet keine Ausführung',
-    ),
     '.apm/skills/core-handoff/assets/start-prompt.md': (
         r'abgeleitet freigegebenen Plan und bestehenden Ausführungsauftrag[^.]*gedeckte technische Ersatzpläne verlangen keine neue Nutzerbestätigung',
         r'statische Validierung, unabhängiges Planreview[^.]*abgeleitete Freigabe gemäß Workflowvertrag bleiben erforderlich',
@@ -1016,6 +1015,13 @@ AUTHORIZED_WORK_CLAUSES = (
 )
 HANDOFF_SOURCES = {
     '.apm/skills/core-shared/references/workflow-contract.md': (
+        r'Für Neuanlage, ersten Etappenstart und ausdrücklich beauftragten Folge-Handoff gilt derselbe interne Übergang aus den exakten Originalartefakten',
+        r'`core-milestone` übergibt die ausgewählte und freigegebene aktuelle Etappe direkt an `core-plan`, ohne separate Goal-/Reinject-Prompt-Ausgabe oder zusätzliche Startformel',
+        r'Nach Qualitäts-pass und belegter Deckung, vollständiger tatsächlicher Anzeige, `Confirmed` derselben Datei und korrekter Indexbindung übergibt `core-plan` intern in frischem Kontext an `core-execute`, ohne neue Nutzerantwort abzuwarten',
+        r'Ein ausdrücklicher Nur-Planen-Auftrag verhindert Umsetzung auch bei historischer Gesamtdeckung',
+        r'Nach verifiziertem Etappenabschluss ist `core-handoff` mit exakten Originalartefakten und kopierbarem Startprompt im Chat verpflichtend; danach halte an, ohne unmittelbar die nächste Etappe zu planen oder zu starten und ohne Auswahl oder Freigabe zu wechseln',
+        r'Ist das Gesamtziel belegt erfüllt, liefert `core-handoff` stattdessen den belegten Gesamtabschluss ohne erfundene Folgearbeit',
+        r'Das interne Run-Handoff bleibt für Review und Resume bei `core-execute` und wird durch den Sitzungsstartprompt nicht ersetzt',
         r'Ausdrückliche Einschränkungen, fehlende Deckung, Konflikte, Abbruch, Resume-Grenzen und ungedeckte Wirkungen bleiben unverändert bindend',
         r'Die Gesamtfreigabe wählt umgekehrt keine weitere Etappe automatisch aus und ersetzt nicht die bestehende Auswahl- und Planungsaktivierung',
         r'Nur wenn die aktuelle Nutzeranweisung[^.]*Handoff ausdrücklich als Arbeitsauftrag[^.]*Originalprüfung genau eine[^.]*bereits ausgewählte und bestätigte Definitionsversion mit belegten Abhängigkeiten ausschließlich zur Planung aktivieren',
@@ -1052,6 +1058,7 @@ HANDOFF_SOURCES = {
     ),
     '.apm/skills/core-plan/SKILL.md': (
         r'Ausschließlich beim Erstplan einer Etappe mit Gesamtfreigabe \(auch der ersten Etappe\) und beim Handoff-Erstplan[^.]*nach vollständiger statischer Validierung als `status: Draft` am vorgesehenen Planpfad',
+        r'Bei gedeckter Etappenarbeit übergib nach vollständiger Anzeige, `Confirmed` und korrekter Indexbindung intern ohne neue Nutzerantwort an `core-execute`',
         r'Ist die Deckung belegt, setzt `core-plan` dieselbe Datei auf `Confirmed`; fehlt sie, wartet `core-plan` auf die ausdrückliche neue Nutzerfreigabe',
         r'Danach prüft \x60core-review\x60 genau diese Datei unabhängig und schreibt keine Datei',
         r'Draft ist nicht ausführbar und wird nicht in \x60plan_paths\x60 geführt\. Keine Entwurfsduplikate',
@@ -1061,6 +1068,7 @@ HANDOFF_SOURCES = {
     ),
     '.apm/skills/core-review/SKILL.md': (
         r'Beim Erstplan einer Etappe mit Gesamtfreigabe oder aus einem Handoff prüfe den statisch validierten Draft unabhängig und getrennt nach Qualität und Deckung',
+        r'Indexbindung durch `core-milestone` und Übergabe an Execute ohne neue Nutzerantwort gemäß Workflowvertrag',
         r'`core-plan` setzt die Datei nur bei belegter Deckung auf `Confirmed`, sonst wartet es auf die ausdrückliche neue Nutzerfreigabe',
         r'Leite Deckung nie aus Planstatus, Indexwert, Dateiname, Anzeige oder Review-pass ab',
         r'Fehlt eine Gesamtfreigabe, lautet das Deckungsurteil `nicht gedeckt`',
@@ -1068,6 +1076,10 @@ HANDOFF_SOURCES = {
     ),
     '.apm/skills/core-milestone/SKILL.md': (
         r'Der Rahmen deckt genau die im Freigabebeleg benannten Etappen-IDs und Versionen',
+        r'Übergib die ausgewählte und freigegebene aktuelle Etappe intern an `core-plan`, bei Neuanlage ebenso wie beim ersten Start oder originalgeprüften Handoff-Auftrag',
+        r'Erhalte den vollständigen ursprünglichen Freigaberahmen samt allen gedeckten ID-Versionen und Ausschlüssen getrennt von der aktuellen Auswahl',
+        r'Nach verifiziertem Etappenabschluss rufe verpflichtend `core-handoff` mit exakten Originalartefakten auf und gib dessen kopierbaren Startprompt im Chat aus',
+        r'Danach halte an: keine unmittelbare Folgeplanung, kein Folgestart und kein Auswahl- oder Freigabewechsel',
         r'eine solche Planungserlaubnis ist keine Ausführungsfreigabe',
         r'current_approval: handoff-planning[^.]*ausschließlich zur Planung aktivieren[^.]*keine persönliche Einzelgenehmigung und kein Ausführungsrecht',
         r'Nach `Confirmed` aktualisiert ausschließlich `core-milestone` nach erneuter Original- und Indexprüfung dieselbe ID-Version: bei belegter Gesamtdeckung von `handoff-planning` auf `goal-covered`, sonst nach ausdrücklicher Nutzerfreigabe auf `user-confirmed`',
@@ -1082,11 +1094,17 @@ HANDOFF_SOURCES = {
         r'Ziel- und Definitionsbestätigung mit vorgelegtem und mitbestätigtem begrenztem Ausführungsrahmen \(Gesamtfreigabe\) erlauben Planung und Umsetzung der bestätigten Etappe',
     ),
     '.apm/skills/core-handoff/SKILL.md': (
+        r'Dieser zeigt Gesamtziel, Etappenübersicht und aktuelle ID und übergibt aus den Originalartefakten intern an den zuständigen Workflow',
+        r'Nach Qualitäts-/Deckungsreview, vollständiger Anzeige, `Confirmed` und Indexbindung setzt gedeckte Arbeit intern ohne neue Nutzerantwort zu Execute fort',
+        r'Nach verifiziertem Etappenabschluss ist dagegen dieser Handoff verpflichtend, gefolgt von Halt ohne unmittelbare Folgeplanung oder Folgestart',
         r'Handoff und Startprompt referenzieren den vollständigen ursprünglichen Rahmen \(Freigabequelle in `goal\.md` samt gedeckten Etappen-IDs/Versionen und Ausschlüssen, Definition, Index\)',
         r'die Auswahl verengt den bestätigten Rahmen nicht, und der Rahmen wählt keine weitere Etappe automatisch aus',
         r'Bei gedeckter, ordnungsgemäß ausgewählter Arbeit führt ein bestätigter Plan nach Qualitäts- und Deckungsprüfung, vollständiger Anzeige und korrekter Indexbindung ohne zusätzliche persönliche Einzelbestätigung zur Umsetzung; ausdrückliche Einschränkungen und ungedeckte Wirkungen bleiben Stopgrenzen',
     ),
     '.apm/skills/core-handoff/assets/start-prompt.md': (
+        r'Mit Milestones übergibt core-milestone die ausgewählte und freigegebene ID-Version aus exakten Ziel-, Index- und Definitionspfaden intern an core-plan, ohne separate Goal-/Reinject-Prompt-Ausgabe',
+        r'Bei belegter Deckung folgen Confirmed derselben Datei, erneute Original-/Indexprüfung und korrekte Indexbindung durch core-milestone; danach intern zu Execute ohne neue Nutzerantwort',
+        r'Nach verifiziertem Etappenabschluss sind core-handoff und Halt verpflichtend: keine unmittelbare Folgeplanung oder Folgestart',
         r'Geltungsbereich der Freigabe: <vollständiger bestätigter Rahmen, alle gedeckten Etappen-IDs/Versionen und Ausschlüsse; getrennt von der ersten/aktuellen Indexauswahl>',
         r'Die erste beziehungsweise aktuelle Indexauswahl verengt den bestätigten Gesamtrahmen nicht; sie wählt auch keine weitere Etappe automatisch aus',
         r'Für gedeckte, ordnungsgemäß ausgewählte Umsetzung ist nach Qualitäts- und Deckungsprüfung, vollständiger Anzeige, `Confirmed` und korrekter Indexbindung keine zusätzliche persönliche Einzelbestätigung erforderlich',
@@ -1096,13 +1114,6 @@ HANDOFF_SOURCES = {
         r'vollständige Erstplan[^.]*unabhängigem Review tatsächlich sichtbar gezeigt; er bleibt Draft, nicht in `plan_paths` und nicht ausführbar, bis belegte Gesamtdeckung oder eine neue ausdrückliche Nutzerfreigabe ihn bestätigt',
         r'Freigabequelle: <exakter Abschnitt in goal\.md mit der Gesamtfreigabe',
         r'Bei Abbruch, Resume, Konkurrenz-, Abhängigkeits-, Versions- oder Auswahlfehler stoppe',
-    ),
-    '.apm/skills/core-milestone/assets/goal-prompt.md': (
-        r'Übernimm aus der Freigabequelle den vollständigen belegten Rahmen samt allen gedeckten Etappen-IDs/Versionen und Ausschlüssen; die aktuelle Indexauswahl ist getrennt davon und darf den Rahmen nicht allein verengen',
-        r'Ist die Etappe gedeckt, ausgewählt und der Erstplan nach Qualitäts- und Deckungsprüfung, vollständiger Anzeige sowie korrekter Indexbindung bestätigt, verlange für gedeckte Umsetzung keine zusätzliche persönliche Einzelbestätigung; echte Einschränkungen und ungedeckte Wirkungen stoppen weiterhin',
-        r'Nur wenn die aktuelle Nutzeranweisung[^.]*Handoff ausdrücklich als Arbeitsauftrag[^.]*Originalprüfung[^.]*bereits ausgewählte/bestätigte Folgeversion mit belegten Abhängigkeiten zur Planung aktivieren',
-        r'vollständiger, unabhängig geprüfter Erstplan wird tatsächlich sichtbar gezeigt; er bleibt Draft und nicht ausführbar, bis belegte Deckung oder eine neue ausdrückliche Nutzerfreigabe ihn bestätigt',
-        r'Ist das Gesamtziel belegt abgeschlossen, gib den Gesamtabschluss mit Originalnachweisen aus\. Keine automatische Folgefreigabe, kein Folgedispatch',
     ),
     '.apm/skills/core-shared/references/artifact-contract.md': (
         r'Nur der Erstplan einer Etappe mit Gesamtfreigabe oder aus einem Handoff darf nach statischer Validierung vor dem unabhängigen Planreview als Draft am einen vorgesehenen Pfad geschrieben werden',
@@ -1122,11 +1133,13 @@ HANDOFF_SOURCES = {
         r'Anzeige ist keine Lesebestätigung oder Autorisierung\. Auch ein gedeckter Plan wird angezeigt, ohne eine erneute Antwort zu verlangen; auf eine Antwort wartet er nur, wenn die Deckung fehlt\. Keine Viewermechanik, Providerinstallation oder neue Abhängigkeit',
     ),
     '.apm/skills/core-init-project/assets/core-routing.md': (
+        r'Bei Neuanlage, erstem Start und beauftragtem Folge-Handoff erfolgt die Übergabe intern aus Originalartefakten an `core-plan`; nach Qualitäts-/Deckungsreview, vollständiger Anzeige, Confirmed und korrekter Indexbindung geht gedeckte Arbeit ohne neue Nutzerantwort intern zu `core-execute`, ohne separate Goal-/Reinject-Prompt-Ausgabe',
         *AUTHORIZED_WORK_CLAUSES,
         r'ausdrücklich als Arbeitsauftrag übergebener Handoff aktiviert nach Originalprüfung nur die Planung genau einer[^.]*bereits ausgewählten und bestätigten Etappendefinition mit belegten Abhängigkeiten',
-        r'Der unabhängig geprüfte Erstplan wird vollständig tatsächlich sichtbar gezeigt; er bleibt Draft und nicht ausführbar, bis belegte Gesamtdeckung oder eine neue ausdrückliche Freigabe ihn bestätigt',
+        r'Der unabhängig geprüfte Erstplan wird vollständig tatsächlich sichtbar gezeigt; er bleibt Draft und nicht ausführbar, bis belegte Gesamtdeckung oder eine neue ausdrückliche Planfreigabe ihn bestätigt',
     ),
     'AGENTS.md': (
+        r'Bei Neuanlage, erstem Start und beauftragtem Folge-Handoff erfolgt die Übergabe intern aus Originalartefakten an `core-plan`; nach Qualitäts-/Deckungsreview, vollständiger Anzeige, Confirmed und korrekter Indexbindung geht gedeckte Arbeit ohne neue Nutzerantwort intern zu `core-execute`, ohne separate Goal-/Reinject-Prompt-Ausgabe',
         *AUTHORIZED_WORK_CLAUSES,
         r'abgeleitete Planungsbefugnis, nicht als persönliche Einzelgenehmigung',
         r'Planungsbefugnis bestätigt keinen Erstplan',
@@ -1142,6 +1155,8 @@ HANDOFF_SOURCES = {
         r'eine Gesamtfreigabe für v1 deckt keine spätere Version stillschweigend',
     ),
     '.apm/skills/core-execute/SKILL.md': (
+        r'Nach erfolgreicher eigener Eingangsprüfung führe die intern übergebene gedeckte Etappe ohne neue Nutzerantwort aus',
+        r'Bei gepinnter Etappe folgt nach verifiziertem Etappenabschluss verpflichtend `core-handoff` und anschließend Halt',
         r'Bei einem Etappenplan mit Gesamtfreigabe oder Handoff prüft `core-execute` selbst die Eingangsbedingungen',
         r'eine historische Gesamtfreigabe ist dann nicht nötig',
         r'`Confirmed`, ein Indexwert oder bloße Auswahl allein genügen nicht',
@@ -1156,6 +1171,7 @@ HANDOFF_LEGACY = r'Mit M01 beginnen bedeutet nur M01 freigegeben|Die erste Index
 def check_handoff_sources(sources):
     for path, patterns in HANDOFF_SOURCES.items():
         text = sources[path]
+        require(not re.search(r'assets/goal-prompt\.md|(?:fülle|gib|verlange)[^.!\n]*(?:den|einen) Goal-Prompt|Gedeckte Arbeit wartet auf eine neue Nutzerantwort|Nach Etappenabschluss plane unmittelbar die nächste Etappe|Nach Etappenabschluss ist Handoff optional', text, re.I), 'direkter Etappenübergang verletzt: ' + path)
         require(not re.search(HANDOFF_WIDENING, text), 'Handoff-Ausweitung: ' + path)
         require(not re.search(HANDOFF_LEGACY, text), 'Handoff-Einzelplanhalt ohne Deckungskriterien: ' + path)
         for pattern in patterns:
