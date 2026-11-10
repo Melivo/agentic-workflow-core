@@ -12,7 +12,7 @@ import tempfile
 import threading
 import time
 import unittest
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -337,6 +337,33 @@ class TransportTests(unittest.TestCase):
         with self.assertRaises(c.CollectionError):
             c.SSHSender('synthetic', executable=exe)(self.data, time.monotonic() + 1)
 
+    def assert_descendant_stopped(self, status, deadline):
+        while True:
+            try:
+                state = status.read_text().split()[2]
+            except FileNotFoundError:
+                return
+            if state == 'Z':
+                return
+            if time.monotonic() >= deadline:
+                self.assertEqual(state, 'Z')
+            time.sleep(0.005)
+
+    def test_descendant_status_read_race_and_failures(self):
+        status = Mock()
+        for reads in ([FileNotFoundError()], ['1 (child) S', FileNotFoundError()],
+                      ['1 (child) Z']):
+            with self.subTest(reads=reads):
+                status.read_text.side_effect = reads
+                self.assert_descendant_stopped(status, time.monotonic() + 0.5)
+        status.read_text.side_effect = PermissionError('denied')
+        with self.assertRaises(PermissionError):
+            self.assert_descendant_stopped(status, time.monotonic())
+        status.read_text.side_effect = None
+        status.read_text.return_value = '1 (child) S'
+        with self.assertRaises(AssertionError):
+            self.assert_descendant_stopped(status, time.monotonic())
+
     def test_process_timeout_output_limit_and_descendant_cleanup(self):
         pidfile = self.home / 'child.pid'
         exe = self.fake('import os,time\nfrom pathlib import Path\n'
@@ -350,11 +377,7 @@ class TransportTests(unittest.TestCase):
         pid = int(pidfile.read_text())
         # Killed descendants can be zombies until their OS reaper runs, never senders.
         status = Path('/proc') / str(pid) / 'stat'
-        deadline = time.monotonic() + 0.5
-        while status.exists() and status.read_text().split()[2] != 'Z' and time.monotonic() < deadline:
-            time.sleep(0.005)
-        if status.exists():
-            self.assertEqual(status.read_text().split()[2], 'Z')
+        self.assert_descendant_stopped(status, time.monotonic() + 0.5)
         exe = self.fake('import sys\nsys.stdout.write("x"*4096)\n')
         with self.assertRaisesRegex(c.CollectionError, 'transport_output_limit'):
             c._process([exe], b'', time.monotonic() + 1)
