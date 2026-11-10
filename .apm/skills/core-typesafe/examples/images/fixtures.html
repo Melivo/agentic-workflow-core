@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="de"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Synthetischer Bildlernkorpus v1</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#f7f9fb;color:#2e363e;font:18px/1.5 Arial,sans-serif}header{padding:20px 32px;background:white;border-bottom:1px solid #ddd}main{padding:32px;max-width:1100px;margin:auto}h1{font-size:30px;margin:0 0 24px}h2{font-size:24px;margin:0 0 12px}.card{position:relative;padding:32px;background:white;border-radius:16px;box-shadow:0 12px 40px #2e363e29}.grid{display:grid;grid-template-columns:2fr 1fr;gap:24px}.aside{padding:24px;border:1px solid #ddd;border-radius:16px}.actions{display:flex;gap:16px;flex-wrap:wrap;margin-top:28px}button{font:700 20px/1.4 Nunito,Arial,sans-serif;padding:15px 25px;border:2px solid #262f75;border-radius:15px;background:white;color:#262f75}button:focus-visible{outline:3px solid #273073;outline-offset:3px}.primary{background:#ff712b;color:white;border-color:white}.muted{color:#69727d}.cover{position:absolute;background:#e4e7ec;color:#2e363e;display:grid;place-items:center;z-index:2;border:1px solid #69727d}.sheet{position:relative;margin:24px;padding:40px;background:white;min-height:880px;border:1px solid #ddd}.sheet header{padding:0 0 24px;background:none}.invoice-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin:32px 0}.field{position:relative;padding:20px;border:2px solid #262f75;min-height:100px}.value{display:inline-block;font-size:28px;font-weight:bold}.row{display:flex;justify-content:space-between;padding:12px 0;border-bottom:1px solid #ddd}.variant-b .invoice-grid{display:flex;flex-direction:column-reverse}.test .invoice-grid{grid-template-columns:1fr}.test.ui .grid{grid-template-columns:1fr}.test .sheet{border-top:12px solid #262f75}.test.ui main{max-width:950px}.badge{font-size:14px;letter-spacing:.05em}.footer{margin-top:36px;font-size:14px}.twin{font-size:28px;font-weight:bold;margin-left:24px}
+@media(max-width:600px){header{padding:16px}main{padding:24px 16px}.grid{grid-template-columns:1fr}.card{padding:24px;border-radius:12px}.aside{padding:16px}h1{font-size:26px}.actions{gap:12px}button{padding:15px 20px}.footer{margin-top:24px}}
+</style>
+<body><script>
+'use strict';
+const id=new URLSearchParams(location.search).get('case')||'ui-learn-positive-desktop';
+const [family,split,kind,variant]=id.split('-');
+if(!['ui','document'].includes(family)||!['learn','test'].includes(split)||!['positive','negative','unclear'].includes(kind))throw Error('Unknown case');
+const test=split==='test', ui=family==='ui';
+const caption=family+' • '+split+' • '+variant;
+document.body.className=split+' '+family+' variant-'+variant;
+const title=test?'Deine Nachrichten im Blick':'Dein E-Mail-Abo';
+if(ui){
+ document.body.innerHTML='<header><span class="badge">SYNTHETISCHE KARTENANSICHT • '+(test?'PROBE B':'PROBE A')+'</span></header><main><h1>Automationen Staging</h1><div class="grid"><section class="card"><h2>'+title+'</h2><p>'+(test?'Sortiere Mitteilungen in klar getrennte Themen.':'Wichtige Nachrichten erkennen und Newsletter übersichtlich halten.')+'</p><p class="muted">Künstliches Angebot • keine Anmeldung • keine Bestellung</p><div class="actions">'+(!(kind==='negative'&&variant==='desktop')?'<button id="target" class="primary">Jetzt starten</button>':'')+'<button id="secondary">Details ansehen</button></div></section><aside class="aside"><h2>'+(test?'So funktioniert es':'Deine Auswahl')+'</h2><p>'+(test?'Vorschau ohne echte Kontodaten.':'Beispielpaket ohne Produktwirkung.')+'</p></aside></div><p class="footer">'+caption+' • Rein synthetische Lernfixture</p></main>';
+ if(kind==='unclear')document.querySelector('#secondary').classList.add('primary');
+ if(kind==='negative'&&variant==='mobile'){
+  const el=document.querySelector('#target'),r=el.getBoundingClientRect(),c=document.createElement('div');c.className='cover';c.textContent='Ansicht gesperrt';Object.assign(c.style,{position:'fixed',left:r.x+'px',top:r.y+'px',width:r.width+'px',height:r.height+'px'});document.body.append(c);
+ }
+}else{
+ const number=(test?'B-2602':'A-1401')+({positive:'7',negative:'4',unclear:'9'}[kind]),amount=test?'247,90 EUR':'128,40 EUR';
+ document.body.innerHTML='<article class="sheet"><header><span class="badge">KÜNSTLICHE RECHNUNG • NICHT ZAHLBAR</span><h1>Rechnung '+number+'</h1><p>'+(test?'Beispielwerk Nord':'Musterbüro West')+' • Fiktive Dienstleistung</p></header><div class="invoice-grid"><section><h2>Leistung</h2><p>'+(test?'Dokumentation eines Beispielprozesses':'Einrichtung einer künstlichen Sortierung')+'</p><p>Datum: '+(test?'12.10.2026':'03.09.2026')+'</p></section><section class="field"><h2>Gesamtbetrag</h2>'+(!(kind==='negative'&&variant==='b')?'<span id="target" class="value">'+amount+'</span>':'<span class="muted">Nicht angegeben</span>')+'</section></div><div class="row"><span>Position</span><span>Betrag</span></div><div class="row"><span>Beispielleistung</span><span>'+amount+'</span></div><p>Kein Konto, keine Adresse und keine Zahlungsanweisung.</p><p class="footer">'+caption+' • Synthetische Originaltexte, kein OCR-Produkt</p></article>';
+ if(kind==='unclear'&&variant==='a'){
+  const el=document.querySelector('#target'),r=el.getBoundingClientRect(),c=document.createElement('div');c.className='cover';c.textContent='Feld verdeckt';Object.assign(c.style,{position:'fixed',left:r.x+'px',top:r.y+'px',width:r.width+'px',height:r.height+'px'});document.body.append(c);
+ }
+ if(kind==='unclear'&&variant==='b')document.querySelector('#target').insertAdjacentHTML('afterend','<span class="twin">'+(test?'249,70 EUR':'124,80 EUR')+'</span>');
+}
+window.fixture={id,family,split,case_kind:kind,variant};
+</script></body></html>

@@ -280,7 +280,7 @@ class CurrentText(unittest.TestCase):
     def test_package_inventory_and_version(self):
         package_version(read(ROOT / 'apm.yml'))
         bundles = sorted(p.parent.name for p in SKILLS.glob('core-*/SKILL.md'))
-        self.assertEqual(len(bundles), 22)
+        self.assertEqual(len(bundles), 23)
         self.assertIn('core-devops', bundles)
         self.assertNotIn('core-scm', bundles)
 

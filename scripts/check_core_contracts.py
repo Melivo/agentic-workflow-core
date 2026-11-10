@@ -697,7 +697,9 @@ def check_completion_ref(entry, pinned, ref):
     require(run_plan == plan, 'Abschlussrun gehört nicht zum Abschlussplan')
     base = '.agentic-workflow/runs/' + run_id + '/'
     require(ref['review_path'] == base + 'review.yaml', 'Review gehört nicht zum Abschlussrun')
-    require(isinstance(ref['evidence_paths'], list) and ref['evidence_paths'] and all(safe_relative(p) and p.startswith(base) for p in ref['evidence_paths']), 'Evidenz gehört nicht zum Abschlussrun oder ist kein sicherer projektrelativer Pfad: ' + str(ref['evidence_paths']))
+    # Original sources and prior-run evidence may live outside the completion run.
+    # This validates path syntax, not existence or substantive criterion coverage.
+    require(isinstance(ref['evidence_paths'], list) and ref['evidence_paths'] and all(safe_relative(p) for p in ref['evidence_paths']), 'Evidenz ist kein sicherer projektrelativer Pfad: ' + str(ref['evidence_paths']))
     if plan[:3] == pinned:
         require(ref['plan_path'] in entry['plan_paths'] and ref['run_path'] in entry['run_paths'], 'Abschlussnachweis nicht im Eintrag verknüpft')
         require('revalidation_path' not in ref, 'Revalidierung ohne Versionswechsel')
@@ -1255,6 +1257,150 @@ def check_replacement_sources(sources):
             require(re.search(pattern, text, re.I), 'RV05 Ersatzplan-Ablaufklausel fehlt: ' + path + ': ' + pattern)
 
 
+# Source-local TypeSafe consumer contracts, not a harness or an authorization engine.
+TYPESAFE_SOURCES = {
+    '.apm/skills/core-plan/SKILL.md': (
+        r'Bei jedem Core-Planreview versucht \x60core-plan\x60 regulär eine minimierte TypeSafe-Vorbewertung ohne Projektpilot-Auswahl',
+        r'Fehlende Datenfreigabe, Fähigkeit oder technische Fehler lassen die Beobachtung offen; normales Review und Produktarbeit gehen weiter',
+        r'puffert der Owner minimierte Vergleichsdaten nur bei erlaubter lokaler Config und stellt sie nur bei freigegebener konfigurierter Collection zu',
+        r'keine privaten Text- oder Kostenvollmachten[^.]*garantiert keine zukünftige Agentenbefolgung',
+        r'bindet zuerst die exakten Planbytes und vorab festgelegten Kriterien',
+        r'Vor jedem Versand prüft der Owner Daten-, Kosten- und Requestfreigabe[^.]*fehlt eine davon, wird nicht gesendet',
+        r'ohnehin bestehende unabhängige Planreviewrunde erhält ausschließlich Originalplan, Kriterien und nötige Quellen[^.]*externe Leseregel[^.]*Modellhinweise und fremde Sessions',
+        r'Modellresultate gehören nicht in Prompt, Titel oder Handoff',
+        r'nach der unveränderten Erstantwort deren Originalbytes und Hash',
+        r'Erst danach erhält derselbe Reviewer in derselben Session Modellresultat und Originale[^.]*Ersturteil bleibt unverändert',
+        r'Geänderte Planbytes benötigen eine neue Bindung und Erstprüfung',
+        r'Das Modul prüft Wertgleichheit, nicht Objektidentität über Prozesse',
+        r'HTTPS ist nur bei vor möglichem Versand nachweislich fehlendem MCP/Endpoint eine bewusste Alternative',
+        r'Fehlen Originale, Zustimmung oder die deklarierte \x60sessionID\x60-Fortsetzung[^.]*offen beziehungsweise nur hinsichtlich des Vergleichs blockiert; eine neue Session ist kein stiller Ersatz',
+    ),
+    '.apm/skills/core-review/SKILL.md': (
+        r'Der Owner versucht regulär eine minimierte Vorbewertung ohne Projektpilot-Auswahl',
+        r'Fehlende Datenfreigabe, Fähigkeit oder technische Fehler lassen die Beobachtung offen; normales Review und Produktarbeit gehen weiter',
+        r'ohnehin bestehende unabhängige Erstreviewrunde vor Modelloffenlegung',
+        r'derselbe Reviewer in derselben Session separat adjudizieren, ohne das fixierte Ersturteil zu ändern',
+        r'Leseregel ist organisatorisch, keine technisch erzwungene Zugriffssperre[^.]*Kontaminationsverdacht[^.]*offen beziehungsweise ausgeschlossen',
+        r'Ein Modellresultat ist kein Reviewurteil',
+        r'soll der Owner die Modellbewertung vor dem unabhängigen Erstreview durchführen und verborgen speichern; der Reviewer erhält sie erst nach Fixierung des Ersturteils',
+    ),
+    '.apm/skills/core-execute/SKILL.md': (
+        r'Profil \x60claim_support\x60 gezielt nutzen',
+        r'\x60typesafe-mcp-arbitype\.evaluate\x60[^.]*bevorzugten optionalen Transport',
+        r'Daten-/Kosten-/Requestfreigabe[^.]*ersetzt weder Pflichtchecks noch Status, Autorisierung oder Reviewurteil',
+        r'Nutzung bleibt optional und löst keinen zusätzlichen Aufruf aus',
+        r'Das Modul prüft Wertgleichheit, nicht Objektidentität über Prozesse',
+    ),
+    '.apm/skills/core-docs/SKILL.md': (
+        r'bedingt \x60claim_support\x60',
+        r'\x60typesafe-mcp-arbitype\.evaluate\x60[^.]*zuerst dessen aktuelles Schema',
+        r'Quellenprüfung, Dokumentationsscope und Freigabe bleiben beim Curator; keine Rohpassagen ohne Daten-/Kosten-/Requestfreigabe',
+    ),
+    '.apm/skills/core-shared/references/tool-routing.md': (
+        r'Bei jedem Core-Planreview versucht \x60core-plan\x60 regulär eine minimierte Vorbewertung ohne Projektpilot-Auswahl und ordnet \x60skill_relevance\x60, \x60requirement_coverage\x60 und \x60claim_support\x60',
+        r'Der reguläre Versuch ist kein Setupzwang: Autorisierung, Daten-/Kostenfreigabe, Status und menschliche Entscheidungen bleiben unverändert',
+        r'der bekannte Toolkatalog führt ihn nicht als Pflicht oder globale Setupanforderung',
+        r'das Pythonmodul ist kein MCP-Client',
+    ),
+    '.apm/skills/core-shared/references/typesafe-contract.md': (
+        r'bei jedem Core-Planreview für einen regulären minimierten TypeSafe-Beobachtungsversuch ohne Projektpilot-Auswahl',
+        r'puffert minimierte Vergleichsdaten nur bei erlaubter lokaler Config und stellt sie nur bei freigegebener konfigurierter Collection zu',
+        r'Fehlende Datenfreigabe, Fähigkeit oder technische Fehler lassen die Beobachtung offen; normales Review und Produktarbeit gehen weiter',
+        r'identische ID bei anderer Nutzlast ist Konflikt, nicht Update',
+        r'append-only Revisionen mit Vorgänger-ID und explizitem supersedes-Verweis; alte Ereignisse und Originalreferenzen bleiben erhalten',
+        r'Fehlende oder unzugängliche Originalquellen bleiben unresolved',
+        r'Es gibt keine bestätigten Schwellen und keine Modellhoheit über Freigabe, Dispatch oder Urteil',
+        r'Vollständige Ereignishistorie, unveränderte Originalwerte und Dateikonflikte prüft der Owner',
+        # Optional MCP route: discovery, exact payload, value binding, safe fallback, metadata limits.
+        r'nach einer vorgängigen \x60search\x60-Discovery für den exakten Namespace und die Operation',
+        r'übergibt exakt \x60state\x60, \x60questions\x60 und \x60model\x60 aus dem tatsächlich vorbereiteten Payload',
+        r'ruft der Abschlussprozess \x60build_request\x60 mit den erhaltenen Originalinputs frisch auf[^.]*exakt',
+        r'Das Modul prüft Wertgleichheit mit dem intern aus Originalinputs neu gebauten Request, nicht Objektidentität über Prozesse',
+        r'HTTPS-Fallback ist nur zulässig, wenn MCP-Tool oder Endpoint nachweislich vor einem möglichen Bewertungsversand nicht verfügbar ist',
+        r'kein automatischer Retry oder HTTP-Zweitversand',
+        r'\x60health\(false\)\x60 ohne Modellaufruf ist kein Bewertungsnachweis',
+        r'nicht beobachtete Werte bleiben unbekannt',
+        r'Originalinputs, Profil-/Modellkennung, Fragenversion, Core-Version, Referenzen, Fingerprint und den tatsächlich übergebenen Payload unverändert',
+        r'die unveränderte strukturierte Rohantwort über \x60finalize_response\(prepared, response, \*, core_version, duration_seconds\)\x60 der gemeinsamen strengen Prüfung',
+        r'Ein sichtbarer MCP-Toolaufruf begrenzt nicht die Zahl interner Provideranfragen',
+        r'Timeout-, Auth-, API-, Schema- und Antwortfehler offen',
+    ),
+    '.apm/skills/core-review/references/typesafe-evaluation.md': (
+        r'Bei jedem Core-Planreview',
+        r'Der Owner versucht regulär eine minimierte Vorbewertung ohne Projektpilot-Auswahl',
+        r'Erst danach sieht derselbe Reviewer das Modellresultat',
+        r'separates Ereignis[^.]*überschreibt das Ersturteil nicht',
+        r'material_defect, no_material_defect, unresolved',
+        r'beweisen keine technische Zugriffssperre',
+        r'Die Modellbewertung soll der Owner vor der unabhängigen Reviewrunde durchführen und verborgen speichern; der Reviewer erhält das Ergebnis erst nach Fixierung des Ersturteils',
+        r'Vorabzugriff, mitgegebene Modellhinweise oder begründeter Kontaminationsverdacht[^.]*offen beziehungsweise ausgeschlossen',
+    ),
+    '.apm/skills/core-typesafe/SKILL.md': (
+        r'Bei jedem Core-Planreview versucht der Owner regulär eine minimierte Vorbewertung ohne Projektpilot-Auswahl',
+        r'fehlende Datenfreigabe, Fähigkeit oder technische Fehler lassen die Beobachtung offen, normales Review und Produktarbeit gehen weiter',
+        r'bind_plan\x60, \x60model_event\x60, \x60fix_review\x60, \x60comparison_event\x60, \x60append_event\x60',
+        r'weder IO noch Modellaufrufe oder Workflowänderungen',
+        r'Owner bewahrt Originale, vollständige Ereignishistorie und freie Zielpfade',
+        r'Für den bevorzugten optionalen MCP-Weg braucht Core keinen lokalen Schlüssel',
+        r'Rufe zuerst \x60search\x60 für den exakten Namespace \x60typesafe-mcp-arbitype\x60 und die Operation \x60evaluate\x60 auf, prüfe das zurückgegebene aktuelle Schema',
+        r'leite nur \x60state\x60, \x60questions\x60 und \x60model\x60 aus \x60prepared\.payload\x60 weiter',
+        r'ruft der Abschlussprozess \x60build_request\x60 mit diesen Originalinputs frisch auf[^.]*exakt',
+        r'Das Modul validiert Wertgleichheit, nicht Objektidentität über Prozesse',
+        r'HTTPS darf nur bewusst gewählt werden, wenn der MCP bzw\. sein Endpoint bereits vor einem möglichen Bewertungsversand nachweislich nicht verfügbar ist',
+        r'keinen automatischen Retry und keinen HTTP-Zweitversand',
+    ),
+    '.apm/skills/core-typesafe/AGENTS.md': (
+        r'Keine Datei-, Log- oder Statusschreibzugriffe',
+        r'Aktionsschwellen fehlen bewusst',
+    ),
+    '.apm/skills/core-typesafe/assets/evaluation-directory-AGENTS.md': (
+        r'Vor dem fixierten unabhängigen Erstreview darf der externe Reviewer[^.]*nicht lesen; der Owner darf sie diesem Reviewer nicht offenlegen',
+        r'Erst danach erhält derselbe Reviewer in derselben Session Modellresultate und Originale',
+        r'Originale und alle Ereignisrevisionen unverändert',
+        r'freie Pfade[^.]*Dateikonflikte',
+        r'keine Rohtexte, Secrets oder vollständigen Chats exportieren',
+        r'organisatorische Leseregel erzwingt keine technische Zugriffssperre',
+        r'fremde vorhandene lokale Dateien nicht überschreiben',
+    ),
+    '.apm/skills/core-shared/SKILL.md': (r'regulärer minimierter Beobachtungsversuch bei jedem Core-Planreview',),
+    '.apm/skills/core-shared/AGENTS.md': (r'regulärer minimierter Beobachtungsversuch bei jedem Core-Planreview',),
+    '.apm/skills/AGENTS.md': (r'TypeSafe-Vertrag gilt bei jedem Core-Planreview',),
+    'scripts/AGENTS.md': (r'CORE_FILES[^.]*geschlossene transitive',),
+    'tests/AGENTS.md': (r'synthetische Projektfixtures; sie setzen die echte \x60\.agentic-workflow/\x60-Kopie\s+weder voraus noch legen sie sie an',),
+    'AGENTS.md': (
+        r'TypeSafe-Evaluationsartefakte entstehen nur bei ausdrücklich beauftragter Evaluation und vorhandenem Artefaktschreibrecht',
+        r'lokale gitignorierte Anleitung wird nicht vorausgesetzt',
+    ),
+}
+TYPESAFE_WIDENING = (r'Modellresultate dürfen vor dem Ersturteil gelesen werden|Eine neue Session ersetzt die Erstprüfung|Wahrscheinlichkeiten entscheiden die Freigabe|Die Leseregel garantiert technische Isolation'
+                     r'|Nach einem MCP-(?:Timeout|Fehler) folgt automatisch ein HTTP-(?:Zweitversand|Fallback)|API-Schlüssel wird als Toolargument übergeben'
+                     r'|health\(false\) belegt Livekompatibilität'
+                     r'|Fehlende TypeSafe-Beobachtung blockiert das normale Review'
+                     r'|Regulärer Versuch erlaubt private Volltexte ohne Datenfreigabe'
+                     r'|Collection wird ohne lokale Config zugestellt')
+# Superseded over-narrow M03 wording: cross-process object identity, blanket ban on earlier model runs.
+TYPESAFE_STALE = (r'PreparedRequest-Objekt muss über Prozesse identisch bleiben|Modellbewertung darf erst nach dem Ersturteil erzeugt werden'
+                  r'|keine aktive Pflichtphase|keine aktive Phase|kein automatischer Aufruf'
+                  r'|Planvergleich (?:bleibt optional|nur für Pilotprojekte)|Kein Pflichtaufruf:'
+                  r'|Bei ausdrücklich beauftragter Plan-Evaluation')
+TYPESAFE_MCP_TOOL = 'typesafe-mcp-arbitype'
+
+
+def check_typesafe_sources(sources):
+    # Same bounded pattern checks as other consumer contracts; no semantic labels inferred.
+    for path, patterns in TYPESAFE_SOURCES.items():
+        text = sources[path]
+        require(not re.search(TYPESAFE_WIDENING, text), 'TypeSafe-Ausweitung: ' + path)
+        require(not re.search(TYPESAFE_STALE, text), 'TypeSafe-Altregel: ' + path)
+        for pattern in patterns:
+            require(re.search(pattern, text), 'TypeSafe-Klausel fehlt: ' + path + ': ' + pattern)
+
+
+def check_typesafe_catalog(catalog):
+    # Exact optional provider vocabulary only; declaring it never makes the MCP required.
+    require(TYPESAFE_MCP_TOOL in catalog.get('known_tool_ids', ()), 'TypeSafe-MCP fehlt im Toolkatalog: ' + TYPESAFE_MCP_TOOL)
+
+
 DOCS_EXCLUSIVE = re.compile(r'\b(?:ausschließlich|nur|einzig)\b', re.I)
 DOCS_ACTION = re.compile(r'\b(?:Ändere|Dokumentiere|dokumentiert|Bearbeite|bearbeitet|Korrigiere|korrigiert|ergänz\w*)\b', re.I)
 
@@ -1275,7 +1421,7 @@ def check_setup_source(front, text):
 def check_group(root, group, with_authoring=False, tool_root=None):
     paths = targets(root, group)
     if group == 'workflows':
-        paths = list(dict.fromkeys([*paths, *(root / p for p in (*REPLACEMENT_SOURCES, *DIRECT_SOURCES, *HANDOFF_SOURCES))]))
+        paths = list(dict.fromkeys([*paths, *(root / p for p in (*REPLACEMENT_SOURCES, *DIRECT_SOURCES, *HANDOFF_SOURCES, *TYPESAFE_SOURCES))]))
     def action():
         # Missing inputs take precedence over content findings in earlier targets.
         for path in paths:
@@ -1303,6 +1449,7 @@ def check_group(root, group, with_authoring=False, tool_root=None):
                 value = load_yaml(text)
                 if path.name == 'workflow-catalog.yaml':
                     validate_catalog(value)
+                    check_typesafe_catalog(value)
                 elif isinstance(value, dict) and 'schema' in value:
                     examples.append(value)
         if group == 'workflows':
@@ -1310,6 +1457,7 @@ def check_group(root, group, with_authoring=False, tool_root=None):
             check_replacement_sources(sources)
             check_direct_sources(sources)
             check_handoff_sources(sources)
+            check_typesafe_sources(sources)
         joined = '\n'.join(texts)
         for pattern, label in POLICIES[group]:
             require(re.search(pattern, joined, re.I), 'semantische Klausel nicht belegt: ' + label)

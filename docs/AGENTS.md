@@ -6,7 +6,7 @@ Dauerhafte Diskussionsgrundlagen für spätere Rückfragen aufbewahren.
 
 ## Ownership
 
-Dieser Bereich besitzt Arbeitskontext unter `proposals/`. Kanonische
+Dieser Bereich besitzt Arbeitskontext unter `proposals/` sowie die Betriebsreferenzen unter [`operations/`](operations/AGENTS.md). Kanonische
 Skillverträge bleiben unter [`.apm/skills/`](../.apm/skills/AGENTS.md),
 bestätigte Pläne und Run-Artefakte unter `.agentic-workflow/`.
 
@@ -27,4 +27,4 @@ Stand von aktuellen Benutzerentscheidungen und kanonischen Verträgen trennen.
 
 ## Child DOX Index
 
-- No child DOX guides.
+- [Operations](operations/AGENTS.md): Core-eigene Betriebsreferenzen; fachliche Sammlungsdetails stehen im zugehörigen Runbook.

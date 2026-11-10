@@ -36,7 +36,10 @@ Ablaufquellen und weisen die Wiedereinfügung alter zwingender
 Bestätigungsklauseln auch bei erhaltener positiver Rahmenprosa zurück.
 Pakettests verlangen den quellengebundenen DOX-Skillindex, prüfen seine Links
 und weisen fehlende,
-veränderte oder nicht aus den Quellen stammende Indexdateien zurück; die
+veränderte oder nicht aus den Quellen stammende Indexdateien zurück. Tests für
+gitignorierte TypeSafe-Evaluationsartefakte verwenden ausschließlich temporäre
+synthetische Projektfixtures; sie setzen die echte `.agentic-workflow/`-Kopie
+weder voraus noch legen sie sie an. Die
 synthetischen Archiv-/Installationsfixtures decken zusätzlich Aufnahme und
 Ablehnung fehlender oder verkürzter `core-shared/THIRD_PARTY_NOTICES.md`-Notice
 samt Report-Lizinventar ab, ohne realen Paketbau. Satzbasierte Positiv-/Negativfälle
@@ -49,10 +52,16 @@ gebundene Planarbeit, Scopegrenzen, Resume-/Reviewgrundlage, Freigabe ohne
 Änderungsauftrag sowie Owner-/Dispatchgrenzen; In-Memory-Mutationen entfernen die
 Direktklauseln, fügen Ausweitungen ein oder kehren die Negativklausel zur
 Freigabe ohne Änderungsauftrag um. Das belegt statische Konsistenz,
-keine reale Agentenbefolgung. `test_core_contracts.py` lädt zusätzlich den
+keine reale Agentenbefolgung. TypeSafe-Quelltests entfernen die regulären
+Planreview-Defaultklauseln und injizieren optionale Pilotprojektauswahl,
+Produktblockade sowie unautorisierte Text-/Collectionfreigaben im Speicher.
+Blindheit, Originalurteil und kein Doppelversand bleiben separat geprüft. `test_core_contracts.py` lädt zusätzlich den
 Habit-Producer pfadbezogen (ohne main/package/stage) und prüft dessen
 bestehendes `check_links` auf der `CORE_FILES`-Snapshotmenge im Speicher,
-positiv und mit entferntem `direct-mode.md`; das ist SDK-/TypeScript-unabhängig.
+positiv und mit entfernten direkten Linkzielen einschließlich `image_probe.py`,
+`cases.json`, `typesafe_owner.py` und `typesafe_collection.py`. Synthetische Archivdaten weisen fehlende oder abweichende
+Bytes dieser statischen Quellen über `inspect_archive` zurück; kein
+Producerlauf, SDK/TypeScript, PNG-Korpus oder Bildbeispiellauf ist beteiligt.
 Der M02-Methodenerhaltstest nutzt `link_findings` aus
 `check_design_principles.py` für Ziele und Anker von `method-preservation.md`
 samt direktem bedingtem Einstieg aus `core-shared/SKILL.md`; `workflow-contract.md`
@@ -92,6 +101,28 @@ Positiv-/Negativklauseln und In-Memory-Mutationen sowie alle zwölf Profilowner,
 Shared-Einstiege und lokale Link-/Ankerziele über vorhandene Prüfhelpers ab.
 Externe Lesegrenzen werden nur als Vertragstext geprüft; weder echte
 Methodenverfügbarkeit noch Modellbefolgung oder M05-Praxisabnahme folgen daraus.
+
+`test_typesafe_pilot.py` prüft offline die Bundlekopie, feste pseudonyme Core-IDs, explizite Policy ohne Wildcard, Legacydefault, gepufferte Zwei-Projektzustellung, sichere Config, SSH-Bindungsdrift und Monatsende in Europe/Berlin einschließlich Schaltjahr/DST. Das aktiviert weder normale Planreviews noch einen Scheduler und belegt keinen Modell- oder Hostbetrieb.
+
+Die Tests `test_typesafe_collection*.py` prüfen lokale Speicherung, Outbox und Transportgrenzen mit synthetischen Daten und temporären Ressourcen. Sie belegen keinen Pi-Betrieb; die Owner-Schnittstelle steht in der [Operationsreferenz](../docs/operations/typesafe-collection.md).
+
+`test_typesafe_integration.py` prüft zusätzlich die versionierten Bildreferenzen und ihre direkten Links mit vorhandenen Link-/Quellenhelpers; Negativmutationen entfernen erforderliche Kanten im Speicher. Das bleibt eine statische Quellenregression und wertet keine Modellantworten. `test_typesafe_eval.py` prüft das portable `core-typesafe`-Bundle offline: Netzwerk
+blockiert und protokolliert, synthetische Antworten, Uhren und Secret-Sentinels, Lauf
+aus einer Kopie außerhalb des Repositorys. Die `finalize_response`-Fälle verwenden
+ein echtes unverändertes `build_request`-Objekt im selben Prozess; sie decken strikte
+Rohantwortprüfung, unbekannte Usage, lokal übergebene Dauer, konservatives
+`request_sent` und feste Fehlergrenzen ab. Sie simulieren keinen MCP-Toolaufruf und
+belegen keine Liveintegration oder Providerrequestzahl. Die Gesamtfristregressionen nutzen ausschließlich einen isolierten Test-Unterprozess
+mit Loopback für tröpfelnde Statuszeilen, Header und Body sowie TLS; DNS/TCP
+werden dort blockierend simuliert. Der IO-Worker muss vor Rückgabe eingesammelt
+sein. Die Netzsperre des Haupttestprozesses bleibt unverändert. Das belegt keine
+Modellgüte und keine Live-Kompatibilität. Paket-, Release- und Bestandstests
+erwarten 23 Bundles.
+
+Die Abschlussreferenztests verwenden synthetische Indexfixtures für sichere
+Originalquellen und Vorgängerruns sowie unsichere/leere Pfade, Pflichtfelder,
+Plan-/Run-/Reviewbindung und Versionsrevalidierung. Der echte G06-Index ist
+keine Testfixture; eine separate Strukturprüfung belegt keinen Etappenabschluss.
 
 ## Work Guidance
 

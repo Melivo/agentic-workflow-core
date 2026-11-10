@@ -17,7 +17,7 @@ import yaml
 ROOT = Path(__file__).resolve().parents[1]
 PACKAGE = 'agentic-workflow-core'
 BRANCH = 'main'
-CORE_BUNDLES = 22
+CORE_BUNDLES = 23
 BASELINE_COMMIT = 'a541a41a8a100f8a72d680356dd3b08e335ef068'
 BUNDLED_SKILL = 'gortex-serena-configurator'
 MANIFEST = '.release-please-manifest.json'

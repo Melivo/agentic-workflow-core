@@ -273,7 +273,7 @@ def facts(**change):
         'sources': {'manifest': '{".":"0.3.0"}\n', 'version_file': '0.3.0\n', 'apm_yml': 'name: agentic-workflow-core\nversion: 0.3.0\n'},
         'check_runs': {sha: [{'id': 1, 'name': n, 'status': 'completed', 'conclusion': 'success'} for n in ('check', 'acceptance')] for sha in ('a' * 40, 'c' * 40)},
         'package': {'schema': 'core-package-report/v1', 'verified': True, 'version': '0.3.0', 'source_commit': 'c' * 40, 'source_clean': True,
-                    'core_bundles': 22, 'bundled_skills': [], 'archive': archive},
+                    'core_bundles': 23, 'bundled_skills': [], 'archive': archive},
         'archive_sha256': 'd' * 64, 'tags': {'v0.2.1': BASE}, 'releases': [],
     }
     for key, value in change.items():

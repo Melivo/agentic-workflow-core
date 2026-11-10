@@ -75,6 +75,10 @@ Für jeden vollständigen Plan, der zur Freigabe vorgelegt wird oder als geprüf
 | Dateien und Suche außerhalb indexierter Projekte oder letzter lokaler Fallback | native Werkzeuge | Im bekannten Projekt erst nach Gortex und konfiguriertem projektspezifischem Serena; Fallback und erforderlichen Pfad nennen |
 | Langlebige bestätigte Präferenzen und Constraints | Honcho | Nur nicht autoritative semantische Erinnerung; gegen aktuelle Sources of Truth prüfen |
 
+## TypeSafe-Verbraucher
+
+Bei jedem Core-Planreview versucht `core-plan` regulär eine minimierte Vorbewertung ohne Projektpilot-Auswahl und ordnet `skill_relevance`, `requirement_coverage` und `claim_support` den konkreten Planfragen zu; `core-execute` und `core-docs` können `claim_support` für einzelne Belegbehauptungen nutzen. Andere Skills prüfen ihre Eignung anhand der [TypeSafe-Vertragsmatrix](typesafe-contract.md) und wählen den Aufruf nur bei konkretem Nutzen. Der bereits eingerichtete `typesafe-mcp-arbitype` kann für den Harness ein bevorzugter optionaler Provider sein; der bekannte Toolkatalog führt ihn nicht als Pflicht oder globale Setupanforderung. Nur das Harness entdeckt sein aktuelles Schema und vermittelt den Toolaufruf; das Pythonmodul ist kein MCP-Client. Keine Rohantwort nach möglichem Versand durch HTTP wiederholen. Der reguläre Versuch ist kein Setupzwang: Autorisierung, Daten-/Kostenfreigabe, Status und menschliche Entscheidungen bleiben unverändert. Fehlende Datenfreigabe, Fähigkeit oder technische Fehler lassen die Beobachtung offen; normales Review und Produktarbeit gehen weiter.
+
 ## Gortex
 
 Gortex ist die primäre Code-Intelligence. Für verändernde Codearbeit gilt als Baseline:

@@ -95,6 +95,8 @@ Nach bestandenem Review:
 
 Unterstützende Skills sind keine alternativen Lebenszyklen.
 
+Bei jedem Core-Planreview versucht `core-plan` regulär eine minimierte TypeSafe-Vorbewertung ohne Projektpilot-Auswahl. Das Ergebnis bleibt bis zum fixierten blinden Ersturteil verborgen; danach adjudiziert dieselbe Reviewer-Session getrennt. Fehlende Datenfreigabe, Fähigkeit oder technische Fehler lassen nur die Beobachtung offen, normales Review und Produktarbeit gehen weiter. Minimierte Vergleichsdaten werden nur bei erlaubter lokaler Config gepuffert und bei freigegebener konfigurierter Collection zugestellt. Dies ist weder Modellfreigabe noch private Text-/Kostenvollmacht, Setupzwang oder Garantie künftiger Agentenbefolgung; Details besitzt der [TypeSafe-Vertrag](.apm/skills/core-shared/references/typesafe-contract.md).
+
 ## 6. Kanonische Paketstruktur
 
 ```text
@@ -146,16 +148,19 @@ apm.yml
     ├── core-mobile/
     ├── core-refactor/
     ├── core-research/
+    ├── core-typesafe/
     └── core-tf-infra/
 ```
 
 Jedes neu erstellte paketeigene Skillverzeichnis verwendet das Präfix `core-` und ist ein gültiges APM-Skillbundle mit `SKILL.md`; Verzeichnisname und Frontmatter-`name` sind identisch. `core-shared` ist ein intern referenziertes Bundle und kein fünfter Workflow. Seine `SKILL.md` ist ein kurzer Index; Verträge und Vorlagen liegen in `references/` beziehungsweise `assets/`.
 
-Die Paketquelle enthält aktuell genau 22 paketeigene `core-*`-Skillbundles einschließlich des internen `core-shared`. Die Provider-/Runtimeintegration ist Bestandteil des `core-init-project`-Bundles und erzeugt keinen zusätzlichen öffentlichen Einstieg oder separates Bundle.
+Die Paketquelle enthält aktuell genau 23 paketeigene `core-*`-Skillbundles einschließlich des internen `core-shared`. Die Provider-/Runtimeintegration ist Bestandteil des `core-init-project`-Bundles und erzeugt keinen zusätzlichen öffentlichen Einstieg oder separates Bundle.
 
 APM projiziert `.apm/` in die Zielharnesses. Generierte `.agents/`, `.opencode/` oder `.codex/`-Kopien sind keine kanonischen Quellen und werden nicht manuell gepflegt.
 
 Optionale Slash-Command-Adapter dürfen unter `.apm/prompts/` angeboten werden. Sie enthalten nur den Aufruf beziehungsweise die Übergabe an den kanonischen Skill und duplizieren keine Workflowlogik. Die Funktion des Pakets darf nicht von Command-Support eines einzelnen Harnesses abhängen.
+
+Die einzige Collection-/Outbox-/Transportimplementierung liegt unter `core-typesafe/scripts/typesafe_collection.py`; der bisherige Repositoryeinstieg ist ein Kompatibilitätswrapper. Ein kleiner Ownerhelper liest sichere lokale Transportconfig und prüft Monatsende, ohne Modelle, Scheduler oder Workflowzustände zu steuern. Die reinen Bewertungs- und Planvergleichsmodule bleiben IO-frei.
 
 ### Mitgelieferte Code-Intelligence-Methode
 
@@ -819,7 +824,7 @@ Das Design gilt als umgesetzt, wenn:
 12. `.apm/` die einzige Paketquelle ist und alle generierten Projektionen reproduzierbar sind,
 13. kein Paketdefault Builds, SCM, Deployment oder destruktive Aktionen implizit autorisiert,
 14. APM-Validierung keine toten Workflow-, Agenten-, Skill- oder MCP-Referenzen findet,
-15. genau 22 Core-Bundles bestehen und `core-init-project` der einzige öffentliche Init-Einstieg mit interner, bedingt geladener Provider-/Runtimeintegration ist,
+15. genau 23 Core-Bundles bestehen und `core-init-project` der einzige öffentliche Init-Einstieg mit interner, bedingt geladener Provider-/Runtimeintegration ist,
 16. Providerquellen, Originaltests, Requirements, Herkunfts- und Lizenznachweise im Init-Bundle quellgebunden geprüft werden und frühere Standalone-Payloads abgewiesen werden,
 17. alle neu verfassten paketeigenen Markdown-Dateien von Skills und Workflows auf Deutsch verfasst sind,
 18. jeder neu erstellte oder materiell geänderte Skill mit `skill-creator` erstellt beziehungsweise revidiert und anschließend mit `context-debloater` geprüft wurde.
