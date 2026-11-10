@@ -4,6 +4,13 @@
 
 - Ergänzt reproduzierbare lokale/CI-Prüfungen und eine standardmäßig deaktivierte, getrennte Release-PR- und Veröffentlichungskette. GitHub-Livebetrieb und App-Einrichtung sind nicht bestätigt.
 
+## [0.15.1](https://github.com/Melivo/agentic-workflow-core/compare/v0.15.0...v0.15.1) (2026-11-10)
+
+
+### Bug Fixes
+
+* **core:** streamline covered milestone transitions ([#28](https://github.com/Melivo/agentic-workflow-core/issues/28)) ([542308f](https://github.com/Melivo/agentic-workflow-core/commit/542308fda108fc15485e76d32a0e8dbdc99ef75b))
+
 ## [0.15.0](https://github.com/Melivo/agentic-workflow-core/compare/v0.14.1...v0.15.0) (2026-11-09)
 
 
