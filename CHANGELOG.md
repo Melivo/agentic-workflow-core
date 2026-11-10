@@ -4,6 +4,20 @@
 
 - Ergänzt reproduzierbare lokale/CI-Prüfungen und eine standardmäßig deaktivierte, getrennte Release-PR- und Veröffentlichungskette. GitHub-Livebetrieb und App-Einrichtung sind nicht bestätigt.
 
+## [0.16.0](https://github.com/Melivo/agentic-workflow-core/compare/v0.15.1...v0.16.0) (2026-11-10)
+
+
+### Features
+
+* **typesafe:** add portable advisory evaluation and regular plan observation ([fee812b](https://github.com/Melivo/agentic-workflow-core/commit/fee812bd71c8815fd9f0ccbeefe6fb2f78059e86))
+* **typesafe:** add portable advisory evaluation and regular plan observation ([3732d90](https://github.com/Melivo/agentic-workflow-core/commit/3732d90e2ef24aa98a999c4ea6a65801bcb17bd0))
+
+
+### Bug Fixes
+
+* **test:** handle disappearing descendant process status ([8c5e210](https://github.com/Melivo/agentic-workflow-core/commit/8c5e210d682d886c28d3b5cd139fcbe722b302a3))
+* **typesafe:** preserve rounded choice probabilities in collection ([58051bb](https://github.com/Melivo/agentic-workflow-core/commit/58051bb4b00102257d25b561f770fad9b9fce341))
+
 ## [0.15.1](https://github.com/Melivo/agentic-workflow-core/compare/v0.15.0...v0.15.1) (2026-11-10)
 
 
