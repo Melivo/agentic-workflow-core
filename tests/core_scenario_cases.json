@@ -7463,7 +7463,7 @@
     {
       "id": "t08-prompt-old-version",
       "group": "workflows",
-      "source": ".apm/skills/core-milestone/assets/goal-prompt.md",
+      "source": ".apm/skills/core-handoff/assets/start-prompt.md",
       "input": {
         "kind": "prompt",
         "index": {
@@ -7628,7 +7628,7 @@
     {
       "id": "t08-prompt-contradicting-ids",
       "group": "workflows",
-      "source": ".apm/skills/core-milestone/assets/goal-prompt.md",
+      "source": ".apm/skills/core-handoff/assets/start-prompt.md",
       "input": {
         "kind": "prompt",
         "index": {
@@ -7683,7 +7683,7 @@
     {
       "id": "t08-prompt-completed-milestone",
       "group": "workflows",
-      "source": ".apm/skills/core-milestone/assets/goal-prompt.md",
+      "source": ".apm/skills/core-handoff/assets/start-prompt.md",
       "input": {
         "kind": "prompt",
         "index": {
@@ -39772,7 +39772,7 @@
         "handoff-selection-not-confirmed",
         "handoff-confirmation-not-execution"
       ],
-      "review_scenario": "test_initial_frame_and_handoff_repair_mutations verändert Klauseln im Speicher; test_initial_frame_to_covered_execute_and_real_stops prüft Nur-Planen, Schreib-/Inhaltsbestätigung, M01-only/M02-Halt wie G06, Drift und Kosten ohne Großfixture oder reale Modellbefolgung."
+      "review_scenario": "test_initial_frame_and_handoff_repair_mutations verändert Klauseln im Speicher; test_initial_frame_to_covered_execute_and_real_stops prüft Nur-Planen, Schreib-/Inhaltsbestätigung, M01-only/M02-Halt wie G06, Drift und Kosten. test_direct_covered_transition_cannot_stop_after_confirmed_link prüft Erststart/Folge-Handoff ohne neue Antwort und Abschluss ohne Kaskade; test_direct_transition_rejects_prompt_gate_wait_and_completion_cascade prüft Rückkehr der Prompt-Pflicht, unnötigen Halt und optionalen Handoff. Statische Bestandsfixtures, keine neue Harness und kein Nachweis realer Modellbefolgung."
     },
     "handoff-gesamtdeckung": {
       "cases": [

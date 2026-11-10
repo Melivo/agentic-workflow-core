@@ -37,8 +37,10 @@ Die Workflowverkabelung bleibt unter
   und delegierter Testbedienung. Das ist statische Konsistenz, kein Nachweis
   tatsächlicher Agentenbefolgung oder der Qualität realer Guides. Die Gruppe
   `workflows` prüft die Ersatzplan-Ablaufklauseln quellengebunden vom gemeinsamen
-  Vertrag über Plan/Execute/Review bis Milestone und Goal-/Startprompt sowie die
-  öffentlichen Verbraucher README.md und DESIGN.md, einschließlich
+  Vertrag über Plan/Execute/Review bis Milestone. Für Erstplan- und
+  Gesamtfreigaberegeln erfasst `HANDOFF_SOURCES` die jeweiligen Ownerquellen
+  einschließlich des verbleibenden Startprompts. Die öffentlichen Verbraucher
+  README.md und DESIGN.md prüft sie ebenfalls, einschließlich
   widersprechender alter pauschaler Bestätigungsgates; situationsabhängige
   Nutzerbestätigung bleibt zulässig. `DIRECT_SOURCES` bindet zusätzlich die
   Direktmodus-, Freigabevorrang- und Zusatzdelegationsklauseln an Execute,

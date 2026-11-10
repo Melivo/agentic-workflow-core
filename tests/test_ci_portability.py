@@ -33,7 +33,7 @@ bootstrap = load('bootstrap_ci')
 CHARACTERIZED = {
     'milestones': ['milestone-format.md', 'goal-format.md', 'milestone-index-format.md'],
     'shared': ['SKILL.md', 'workflow-contract.md', 'artifact-contract.md', 'verification.md', 'user-instructions-contract.md', 'workflow-catalog.yaml', 'handoff.md', 'review-finding.yaml'],
-    'workflows': ['core-brainstorm', 'core-plan', 'core-execute', 'core-review', 'core-research', 'core-architecture', 'core-refactor', 'core-repo-audit', 'core-milestone', 'goal-prompt.md', 'core-handoff', 'start-prompt.md'],
+    'workflows': ['core-brainstorm', 'core-plan', 'core-execute', 'core-review', 'core-research', 'core-architecture', 'core-refactor', 'core-repo-audit', 'core-milestone', 'core-handoff', 'start-prompt.md'],
     'domains': ['core-backend', 'core-database', 'core-frontend', 'core-mobile', 'core-tf-infra', 'core-debug', 'core-docs'],
     'setup': ['core-init-mcps', 'core-init-project', 'core-user2agent-instructions'],
     'docs': ['README.md', 'DESIGN.md'],

@@ -167,6 +167,13 @@ class RoutingAndReadinessContract(unittest.TestCase):
         template = (SKILL/'assets/core-routing.md').read_text()
         # The project fact/routing boundary is literal, not a semantic rewrite.
         self.assertIn(template.split('- **Einstieg:**', 1)[0], root)
+        self.assertIn(template.rstrip(), root)
+        for clause in ('ohne neue Nutzerantwort intern zu `core-execute`',
+                       'ohne separate Goal-/Reinject-Prompt-Ausgabe',
+                       'Nach verifiziertem Milestone-Abschluss führe zwingend `core-handoff`',
+                       'Danach stoppe: Plane oder starte nicht unmittelbar den nächsten Milestone'):
+            self.assertIn(clause, root)
+            self.assertIn(clause, template)
 
 
 class PythonRuntimeContract(unittest.TestCase):

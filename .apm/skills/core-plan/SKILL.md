@@ -130,7 +130,7 @@ Eingabe: <exakter Pfad dieses bestätigten Plans>
 Rahmenbedingungen: <relevante bestätigte Planabschnitte>
 ```
 
-`core-execute` beginnt in frischem Kontext und erhält den exakten Pfad; es sucht nicht nach einem vermeintlich neuesten Plan.
+`core-execute` beginnt in frischem Kontext und erhält den exakten Pfad; es sucht nicht nach einem vermeintlich neuesten Plan. Bei gedeckter Etappenarbeit übergib nach vollständiger Anzeige, `Confirmed` und korrekter Indexbindung intern ohne neue Nutzerantwort an `core-execute` gemäß dem Erstplan-Ablauf des Workflowvertrags. Fehlt Deckung, bleibt der Draft unverknüpft bis zur konkreten Nutzerentscheidung; Nur-Planen und die übrigen Stopgrenzen gelten weiter.
 
 ## Abschluss und Fehlerfälle
 

@@ -384,6 +384,29 @@ class RealTemplateReconcile(ReconcileFixture):
 class TemplateOwnership(unittest.TestCase):
     """The Serena/Gortex template stays with the configurator, unduplicated."""
 
+    def test_direct_routing_projection_keeps_project_facts_and_outer_bytes(self):
+        original = (ROOT / 'AGENTS.md').read_bytes()
+        start = b'<!-- CORE-INIT-PROJECT:START -->'
+        end = b'<!-- CORE-INIT-PROJECT:END -->'
+        prefix, rest = original.split(start)
+        block, suffix = rest.split(end)
+        facts, routing = block.split(b'## Core-Routing und ' + 'Übergaben'.encode(), 1)
+        template = (ROOT / '.apm/skills/core-init-project/assets/core-routing.md').read_bytes().rstrip(b'\n')
+        self.assertEqual(b'## Core-Routing und ' + 'Übergaben'.encode() + routing.rstrip(b'\n'), template)
+        with tempfile.TemporaryDirectory() as directory:
+            target = Path(directory) / 'AGENTS.md'
+            target.write_bytes(original)
+            source = Path(directory) / 'core.tpl'
+            source.write_bytes(start + facts + template + b'\n' + end)
+            args = ('--target', target, '--block', CORE_NAME + '=' + str(source), '--select', CORE_NAME)
+            code, out = run_helper('preview', *args)
+            self.assertEqual(code, 0, out)
+            report = json.loads(out)
+            self.assertFalse(report['changed_planned'])
+            code, out = run_helper('apply', *args, '--confirm', report['token'])
+            self.assertEqual(code, 0, out)
+            self.assertEqual(target.read_bytes(), prefix + start + block + end + suffix)
+
     def test_extract_template_resolves_owner_constant_without_import(self):
         # No duplication: the template is resolved from the owning module by
         # AST, without executing it (ruamel.yaml is intentionally not needed).
