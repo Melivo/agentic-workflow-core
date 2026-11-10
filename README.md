@@ -20,7 +20,7 @@ Core ist keine zusätzliche Orchestrierungs-CLI und kein autonomer Releasebot. E
 - **Klare Grenzen:** keine ungeplanten Umbauten, stillen Installationen oder automatisch freigegebenen Veröffentlichungen.
 - **Gemeinsame Skills:** einmal installieren statt unnötiger Kopien für jedes Repository oder Harness.
 
-Die kanonische Paketquelle liegt unter `.apm/` und enthält **22 Core-Bundles**. Die Provider-/Runtimeintegration gehört intern zu `core-init-project`; es gibt keinen zusätzlichen öffentlichen Provider-Skill. Es gibt **keine externe APM-Skillabhängigkeit und keinen erforderlichen Zugriff auf eine private Skillsammlung**.
+Die kanonische Paketquelle liegt unter `.apm/` und enthält **23 Core-Bundles**. Die Provider-/Runtimeintegration gehört intern zu `core-init-project`; es gibt keinen zusätzlichen öffentlichen Provider-Skill. Es gibt **keine externe APM-Skillabhängigkeit und keinen erforderlichen Zugriff auf eine private Skillsammlung**.
 
 ## Installation
 
@@ -108,6 +108,7 @@ Definitionen sind versioniert und nach Bestätigung unveränderlich. Resume setz
 | Untersuchung und Pflege | [Research](.apm/skills/core-research/SKILL.md), [Debugging](.apm/skills/core-debug/SKILL.md), [Refactoring](.apm/skills/core-refactor/SKILL.md), [Repo-Audit](.apm/skills/core-repo-audit/SKILL.md), [Dokumentation](.apm/skills/core-docs/SKILL.md), [DevOps/SCM](.apm/skills/core-devops/SKILL.md) |
 | Einrichtung | [core-init-project](.apm/skills/core-init-project/SKILL.md) (inklusive interner Providerintegration), [core-init-mcps](.apm/skills/core-init-mcps/SKILL.md), [core-user2agent-instructions](.apm/skills/core-user2agent-instructions/SKILL.md) |
 | Etappen und Übergaben | [core-milestone](.apm/skills/core-milestone/SKILL.md), [core-handoff](.apm/skills/core-handoff/SKILL.md) |
+| Beratende Bewertung | [core-typesafe](.apm/skills/core-typesafe/SKILL.md): drei TypeSafe-Profile für den regulären minimierten Versuch bei jedem Core-Planreview; blindes Ersturteil, danach getrennte Adjudikation derselben Session; Collection nur bei erlaubter lokaler Config, offene Beobachtung blockiert keine Produktarbeit |
 | Gemeinsame Verträge | [core-shared](.apm/skills/core-shared/SKILL.md): interner Vertragsindex, kein zusätzlicher öffentlicher Workflow |
 
 Die Provider-/Runtime-Methodik wird bei Bedarf aus der internen [Provider- und Laufzeitreferenz](.apm/skills/core-init-project/references/provider-setup.md) geladen. Ein globaler Serena-MCP wird nicht eingerichtet. Herkunft, Anforderungen und Lizenz der integrierten Quellen sind im [Provenienznachweis](.apm/skills/core-init-project/PROVENANCE.md), den [Requirements](.apm/skills/core-init-project/REQUIREMENTS.md) und der [MIT-Lizenz](.apm/skills/core-init-project/LICENSE) dokumentiert.

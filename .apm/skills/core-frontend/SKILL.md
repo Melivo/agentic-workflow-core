@@ -31,12 +31,16 @@ Fachagenten wählen keine Ziel-/Milestone-Version und ändern weder Ziel, Defini
 - Fehlt ein passender Task oder erfordert die Arbeit eine materielle API-, Ziel- oder Scopeänderung, geht sie über Execute an `core-plan`; starte keinen Agenten direkt und erweitere den UI-Task nicht.
 - Wähle oder ändere keine Ziel-/Milestone-Version und ändere weder Ziel, unveränderliche Definition, Index noch Freigabe. Bei Etappenarbeit gelten ausschließlich ausdrücklich gepinnte Ziel-, Index- und Definitionspfade; Dateineuheit begründet keine Auswahl.
 
+## Bedingte Bildreferenz
+
+Nur wenn eine bestätigte Aufgabe die semantische Auswertung sichtbarer, synthetischer UI-Bilder ausdrücklich umfasst, gelten die [Core-TypeSafe-Bildgrenzen](../core-typesafe/references/images.md) und deren [Evaluationsbefunde](../core-typesafe/references/images-evaluation.md). Sie ersetzen keine DOM-/Accessibility-Prüfung, deterministischen Tests oder manuelle Abnahme und erteilen keine Klickfreigabe.
+
 ## Bedingte Frameworkreferenzen
 
 Lade genau die Referenz, deren Stack im aktuellen Projekt belegt ist:
 
 | Auslöser | Referenz |
-|---|---|
+| --- | --- |
 | React; bei belegtem Next.js zusätzlich dessen Rendering- und Routingregeln | [React und Next.js](references/react-nextjs.md) |
 | Angular | [Angular](references/angular.md) |
 | anderer oder nicht eindeutig belegter Web-Stack | keine dieser Referenzen; folge Repositorycode und offiziellen Projektverträgen |

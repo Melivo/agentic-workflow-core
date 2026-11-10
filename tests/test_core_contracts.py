@@ -157,6 +157,61 @@ class ContractTests(unittest.TestCase):
         with self.assertRaisesRegex(checker.ContractError, 'automatisch übertragen'):
             checker.check_format(reused[2]['schema'], reused[2])
 
+    def test_completion_original_sources_and_prior_runs(self):
+        index = examples_fixture()[2]
+        ref = completion_ref()
+        originals = ['.apm/skills/core-milestone/SKILL.md',
+                     '.agentic-workflow/runs/run-G01-M02-v1-p01-r01/tasks/T01/attempt-01.yaml']
+        ref['evidence_paths'].extend(originals)
+        entry = index['milestones'][0]
+        entry.update(plan_paths=[ref['plan_path']], run_paths=[ref['run_path']], completion_refs=[ref])
+        checker.check_index(index)
+        # Historical originals still need explicit revalidation for the new version.
+        reused = completion_ref(version=1)
+        reused.update(version=2, definition_path=entry['definition_path'])
+        reused['evidence_paths'].extend(originals)
+        entry['completion_refs'] = [reused]
+        with self.assertRaisesRegex(checker.ContractError, 'revalidation_path fehlt'):
+            checker.check_index(index)
+        reused['revalidation_path'] = ref['evidence_paths'][0]
+        checker.check_index(index)
+
+    def test_completion_original_paths_do_not_relax_bindings(self):
+        index = examples_fixture()[2]
+        ref = completion_ref()
+        ref['evidence_paths'].append('.apm/skills/core-milestone/SKILL.md')
+        index['milestones'][0].update(plan_paths=[ref['plan_path']], run_paths=[ref['run_path']], completion_refs=[ref])
+        for field in ('version', 'definition_path', 'acceptance_ids', 'plan_path', 'run_path', 'review_path', 'evidence_paths'):
+            bad = copy.deepcopy(index)
+            del bad['milestones'][0]['completion_refs'][0][field]
+            with self.subTest(missing=field), self.assertRaisesRegex(checker.ContractError, 'Abschluss ohne Originalnachweise/Kriterien'):
+                checker.check_index(bad)
+        for paths in ([], None, 'source.md', [''], [None], ['/source.md'], ['../source.md'],
+                      ['./source.md'], ['src//source.md'], ['src/../source.md'],
+                      ['C:/source.md'], ['src\\source.md'], ref['evidence_paths'] + ['../bad.md']):
+            bad = copy.deepcopy(index)
+            bad['milestones'][0]['completion_refs'][0]['evidence_paths'] = paths
+            with self.subTest(paths=paths), self.assertRaises(checker.ContractError):
+                checker.check_index(bad)
+        mutations = [
+            ('version', 1, 'historischer Abschluss'),
+            ('definition_path', '.agentic-workflow/goals/G01/milestones/M02-v1.yaml', 'historischer Abschluss'),
+            ('plan_path', completion_ref(plan='p02')['plan_path'], 'Abschlussrun gehört nicht'),
+            ('run_path', completion_ref(plan='p02')['run_path'], 'Abschlussrun gehört nicht'),
+            ('review_path', completion_ref(run='r02')['review_path'], 'Review gehört nicht'),
+            ('revalidation_path', ref['evidence_paths'][0], 'Revalidierung ohne Versionswechsel'),
+        ]
+        for field, value, message in mutations:
+            bad = copy.deepcopy(index)
+            bad['milestones'][0]['completion_refs'][0][field] = value
+            with self.subTest(field=field), self.assertRaisesRegex(checker.ContractError, message):
+                checker.check_index(bad)
+        for field in ('plan_paths', 'run_paths'):
+            bad = copy.deepcopy(index)
+            bad['milestones'][0][field] = []
+            with self.subTest(unlinked=field), self.assertRaises(checker.ContractError):
+                checker.check_index(bad)
+
     def test_rv06_evidence_paths_normalized_to_pinned_run(self):
         cases = {c['id']: c for c in json.loads((ROOT / 'tests/core_scenario_cases.json').read_text())['cases']}
         for case_id, index in (('t08-artifacts-new-structure', 0), ('t08-artifacts-confirmed-replacement', 1)):
@@ -167,7 +222,7 @@ class ContractTests(unittest.TestCase):
             for bad in ('../run-G99-M99-v1-p01-r01/tasks/T01.yaml', './tasks/T01.yaml', 'tasks//T01.yaml', 'tasks\\T01.yaml', 'tasks/../../run-G99-M99-v1-p01-r01/tasks/T01.yaml'):
                 mutated = copy.deepcopy(base)
                 mutated['input']['documents'][-1]['milestones'][index]['completion_refs'][0]['evidence_paths'] = [run_dir + bad]
-                with self.assertRaisesRegex(checker.ContractError, 'Abschlussrun oder ist kein sicherer projektrelativer Pfad'):
+                with self.assertRaisesRegex(checker.ContractError, 'Evidenz ist kein sicherer projektrelativer Pfad'):
                     checker.validate_scenario(mutated['input'])
             for good in ('tasks/T01.yaml', 'tasks/T01/attempt-03.yaml', 'review.yaml'):
                 valid = copy.deepcopy(base)
@@ -1248,10 +1303,97 @@ class ContractTests(unittest.TestCase):
         spec.loader.exec_module(producer)
         files = {'core/' + name: producer.source_bytes(ROOT, name) for name in producer.CORE_FILES}
         producer.check_links(files)
-        missing = 'core/.apm/skills/core-execute/references/direct-mode.md'
-        self.assertIn(missing, files)
-        with self.assertRaisesRegex(producer.CheckError, r'unresolved Core snapshot link: .* -> [^ ]*direct-mode\.md'):
-            producer.check_links({k: v for k, v in files.items() if k != missing})
+        self.assertEqual(files, {'core/' + name: (ROOT / name).read_bytes() for name in producer.CORE_FILES})
+        for relative in ('core-execute/references/direct-mode.md',
+                         'core-typesafe/assets/evaluation-directory-AGENTS.md',
+                         'core-typesafe/scripts/typesafe_collection.py',
+                         'core-typesafe/scripts/typesafe_owner.py',
+                         'core-typesafe/examples/images/image_probe.py',
+                         'core-typesafe/examples/images/cases.json'):
+            missing = 'core/.apm/skills/' + relative
+            self.assertIn(missing, files)
+            with self.subTest(missing=missing), self.assertRaisesRegex(producer.CheckError, 'unresolved Core snapshot link'):
+                producer.check_links({k: v for k, v in files.items() if k != missing})
+        # Synthetic archive data only: directly linked static sources, no runtime/build.
+        expected = {name: files[name] for name in files
+                    if name.startswith('core/.apm/skills/core-typesafe/examples/images/')
+                    or name.endswith(('/typesafe_collection.py', '/typesafe_owner.py'))}
+        self.assertEqual({Path(name).name for name in expected},
+                         {'image_probe.py', 'cases.json', 'typesafe_collection.py', 'typesafe_owner.py'})
+        for name in expected:
+            for mutation in ('missing', 'changed'):
+                actual = dict(expected)
+                if mutation == 'missing':
+                    del actual[name]
+                else:
+                    actual[name] += b'\nchanged static source\n'
+                with self.subTest(source=name, mutation=mutation), tempfile.TemporaryDirectory() as directory:
+                    archive = Path(directory) / 'synthetic.tar.gz'
+                    with producer.tarfile.open(archive, 'w:gz') as tar:
+                        for key, data in actual.items():
+                            item = producer.tarfile.TarInfo('package/' + key)
+                            item.size = len(data)
+                            tar.addfile(item, io.BytesIO(data))
+                    with self.assertRaisesRegex(producer.CheckError, 'archive inventory/content mismatch'):
+                        producer.inspect_archive(archive, expected)
+
+    def test_typesafe_source_clauses_and_mutations(self):
+        # Rules and evidence requirements only: H01 is separate actual harness evidence.
+        sources = {p: (ROOT / p).read_text(encoding='utf-8') for p in checker.TYPESAFE_SOURCES}
+        checker.check_typesafe_sources(sources)
+        for path, patterns in checker.TYPESAFE_SOURCES.items():
+            for pattern in patterns:
+                changed, count = re.subn(pattern, '', sources[path])
+                self.assertGreater(count, 0, (path, pattern))
+                with self.subTest(path=path, pattern=pattern), self.assertRaisesRegex(checker.ContractError, 'TypeSafe-Klausel fehlt'):
+                    checker.check_typesafe_sources(dict(sources, **{path: changed}))
+        for clause in ('Modellresultate dürfen vor dem Ersturteil gelesen werden',
+                       'Eine neue Session ersetzt die Erstprüfung',
+                       'Wahrscheinlichkeiten entscheiden die Freigabe',
+                       'Die Leseregel garantiert technische Isolation',
+                       'Nach einem MCP-Timeout folgt automatisch ein HTTP-Zweitversand',
+                       'Nach einem MCP-Fehler folgt automatisch ein HTTP-Fallback',
+                       'Der API-Schlüssel wird als Toolargument übergeben',
+                       'Lokales health(false) belegt Livekompatibilität',
+                       'Fehlende TypeSafe-Beobachtung blockiert das normale Review',
+                       'Regulärer Versuch erlaubt private Volltexte ohne Datenfreigabe',
+                       'Collection wird ohne lokale Config zugestellt'):
+            for path in ('.apm/skills/core-review/SKILL.md', '.apm/skills/core-shared/references/typesafe-contract.md'):
+                with self.subTest(clause=clause, path=path), self.assertRaisesRegex(checker.ContractError, 'TypeSafe-Ausweitung'):
+                    checker.check_typesafe_sources(dict(sources, **{path: sources[path] + '\n' + clause}))
+        # Superseded over-narrow wording: object identity across processes, blanket ban on earlier model runs.
+        for clause, path in (('Das PreparedRequest-Objekt muss über Prozesse identisch bleiben.', '.apm/skills/core-typesafe/SKILL.md'),
+                             ('Die Modellbewertung darf erst nach dem Ersturteil erzeugt werden.', '.apm/skills/core-review/SKILL.md'),
+                             ('Der Planvergleich bleibt optional.', '.apm/skills/core-plan/SKILL.md'),
+                             ('Der Planvergleich nur für Pilotprojekte.', '.apm/skills/core-review/SKILL.md'),
+                             ('Es gilt keine aktive Pflichtphase.', '.apm/skills/core-shared/SKILL.md')):
+            with self.subTest(stale=clause), self.assertRaisesRegex(checker.ContractError, 'TypeSafe-Altregel'):
+                checker.check_typesafe_sources(dict(sources, **{path: sources[path] + '\n' + clause}))
+        # Positive: hidden earlier evaluation stays allowed; only disclosure follows the fixed first verdict.
+        review = sources['.apm/skills/core-review/SKILL.md']
+        self.assertRegex(review, r'Modellbewertung vor dem unabhängigen Erstreview durchführen und verborgen speichern')
+        self.assertNotRegex(review, checker.TYPESAFE_STALE)
+        # Verify the real workflows group consumes this helper, not just a standalone oracle.
+        with patch.object(checker, 'check_typesafe_sources', side_effect=checker.ContractError('TypeSafe sentinel')) as checked:
+            with contextlib.redirect_stdout(io.StringIO()), self.assertRaisesRegex(checker.ContractError, 'TypeSafe sentinel'):
+                checker.check_group(ROOT, 'workflows')
+            checked.assert_called_once()
+
+    def test_typesafe_mcp_is_exact_optional_catalog_tool(self):
+        catalog = checker.load_yaml((ROOT / '.apm/skills/core-shared/assets/workflow-catalog.yaml').read_text(encoding='utf-8'))
+        checker.check_typesafe_catalog(catalog)
+        self.assertEqual(catalog['known_tool_ids'].count('typesafe-mcp-arbitype'), 1)
+        # Known vocabulary only: no workflow entry declares tools, so the MCP is never a requirement.
+        self.assertFalse(any(key for w in catalog['workflows'] for key in w if 'tool' in key or 'mcp' in key))
+        for ids in ([t for t in catalog['known_tool_ids'] if t != 'typesafe-mcp-arbitype'],
+                    [t.replace('typesafe-mcp-arbitype', 'typesafe-arbitype') for t in catalog['known_tool_ids']],
+                    [t.replace('typesafe-mcp-arbitype', 'arbitype') for t in catalog['known_tool_ids']]):
+            with self.subTest(ids=ids), self.assertRaisesRegex(checker.ContractError, 'TypeSafe-MCP fehlt'):
+                checker.check_typesafe_catalog(dict(catalog, known_tool_ids=ids))
+        with patch.object(checker, 'check_typesafe_catalog', side_effect=checker.ContractError('catalog sentinel')) as checked:
+            with contextlib.redirect_stdout(io.StringIO()), self.assertRaisesRegex(checker.ContractError, 'catalog sentinel'):
+                checker.check_group(ROOT, 'shared')
+            checked.assert_called_once()
 
     def test_catalog_execute_entries_and_escalation(self):
         catalog = checker.load_yaml((ROOT / '.apm/skills/core-shared/assets/workflow-catalog.yaml').read_text(encoding='utf-8'))

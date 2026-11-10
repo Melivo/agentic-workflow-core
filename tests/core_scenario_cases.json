@@ -9084,7 +9084,7 @@
       "observation": "revalidation_path ist kein exakter projektrelativer Prüfpfad"
     },
     {
-      "id": "rv03-reuse-evidence-foreign-run",
+      "id": "rv03-reuse-evidence-parent-traversal",
       "group": "milestones",
       "source": ".apm/skills/core-milestone/references/milestone-index-format.md",
       "input": {
@@ -9247,7 +9247,7 @@
                     "run_path": ".agentic-workflow/runs/run-G01-M01-v1-p01-r01/state.yaml",
                     "review_path": ".agentic-workflow/runs/run-G01-M01-v1-p01-r01/review.yaml",
                     "evidence_paths": [
-                      ".agentic-workflow/runs/run-G99-M99-v1-p01-r01/tasks/T01.yaml"
+                      ".agentic-workflow/runs/run-G01-M01-v1-p01-r01/../tasks/T01.yaml"
                     ],
                     "revalidation_path": ".agentic-workflow/runs/run-G01-M01-v2-p01-r01/tasks/T01.yaml"
                   }
@@ -9282,7 +9282,7 @@
         ]
       },
       "expected": "fail",
-      "observation": "Evidenz gehört nicht zum Abschlussrun"
+      "observation": "Evidenz ist kein sicherer projektrelativer Pfad"
     },
     {
       "id": "rv03-reuse-original-evidence-attempt-revalidation",
@@ -39427,7 +39427,7 @@
         "rv03-reuse-revalidation-bool",
         "rv03-reuse-revalidation-outside",
         "rv03-reuse-revalidation-old-version",
-        "rv03-reuse-evidence-foreign-run",
+        "rv03-reuse-evidence-parent-traversal",
         "rv03-reuse-original-evidence-attempt-revalidation"
       ]
     },

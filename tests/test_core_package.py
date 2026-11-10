@@ -97,8 +97,19 @@ class ArchiveInspection(unittest.TestCase):
         _, violations = package.inspect_archive(TOP[:-1] + '.zip', archive_entries(), sources, VERSION)
         self.assertIn('unerwarteter Archivinhalt: skills/AGENTS.md', violations)
 
-    def test_source_inventory_has_exactly_22_core_bundles(self):
-        self.assertEqual(len(package.bundles(package.core_files(SOURCES, '.apm/skills/'))), 22)
+    def test_source_inventory_has_exactly_23_core_bundles(self):
+        core = package.core_files(SOURCES, '.apm/skills/')
+        self.assertEqual(len(package.bundles(core)), 23)
+        self.assertIn('core-typesafe/scripts/typesafe_eval.py', core)
+
+    def test_changed_or_missing_typesafe_script_is_detected(self):
+        key = TOP + 'skills/core-typesafe/scripts/typesafe_eval.py'
+        entries = archive_entries()
+        entries[key] += b'# manipuliert\n'
+        self.assertFlags(with_inventory({k[len(TOP):]: v for k, v in entries.items()}), 'verändert')
+        entries = archive_entries()
+        del entries[key]
+        self.assertFlags(entries, 'fehlt')
 
     def test_missing_bundle_is_incomplete(self):
         entries = {k: v for k, v in archive_entries().items() if '/skills/core-devops/' not in k}
@@ -199,7 +210,7 @@ class InstallationInspection(unittest.TestCase):
     def test_fresh_installation_passes_with_resolvable_links(self):
         summary, violations = package.inspect_installation(installation(), SOURCES)
         self.assertEqual(violations, [])
-        self.assertEqual(summary['core_bundles'], 22)
+        self.assertEqual(summary['core_bundles'], 23)
         self.assertGreaterEqual(summary['internal_links'], 217)
 
     def test_skill_index_is_required_and_source_bound(self):
@@ -257,7 +268,7 @@ class InstallationInspection(unittest.TestCase):
 class ReportBinding(unittest.TestCase):
     def report(self, **change):
         report = {'schema': 'core-package-report/v1', 'verified': True, 'version': '0.3.0', 'source_commit': 'c' * 40,
-                  'source_clean': True, 'core_bundles': 22, 'bundled_skills': [], 'archive': {'name': 'agentic-workflow-core-0.3.0.zip', 'sha256': 'd' * 64}}
+                  'source_clean': True, 'core_bundles': 23, 'bundled_skills': [], 'archive': {'name': 'agentic-workflow-core-0.3.0.zip', 'sha256': 'd' * 64}}
         report.update(change)
         return release_guard.package_report(report, '0.3.0', 'c' * 40, 'd' * 64)
 
@@ -271,7 +282,7 @@ class ReportBinding(unittest.TestCase):
 
     def test_wrongly_bound_or_unverified_package_blocks(self):
         for change in ({'verified': False}, {'version': '0.2.9'}, {'source_commit': 'e' * 40}, {'source_clean': False},
-                       {'core_bundles': 21}, {'bundled_skills': [release_guard.BUNDLED_SKILL]}, {'archive': {'name': 'agentic-workflow-core-0.3.0.zip', 'sha256': 'f' * 64}},
+                       {'core_bundles': 22}, {'bundled_skills': [release_guard.BUNDLED_SKILL]}, {'archive': {'name': 'agentic-workflow-core-0.3.0.zip', 'sha256': 'f' * 64}},
                        {'archive': {'name': 'other.zip', 'sha256': 'd' * 64}}, {'schema': 'x'}):
             with self.subTest(change=change):
                 self.assertNotEqual(self.report(**change), [])

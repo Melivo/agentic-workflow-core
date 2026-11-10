@@ -19,7 +19,7 @@ Fachmethodik bleiben bei den konsumierenden Skills.
   Fachmethoden.
 - [Verifikation](references/verification.md): Nachweise, Reviewgrenzen und bedarfsabhängige
   Messvergleich-Klarstellung.
-- [TypeSafe-Vertrag](references/typesafe-contract.md): bedingte Bewertungs- und Datenprotokollgrenzen; keine aktive Phase.
+- [TypeSafe-Vertrag](references/typesafe-contract.md): Bewertungs-, Planvergleichs- und Datenprotokollgrenzen; regulärer minimierter Beobachtungsversuch bei jedem Core-Planreview, ohne Produktblockade bei offener Beobachtung. Der optionale Harness-MCP-Weg ist eine bedingte Fähigkeit, keine globale Setup-Pflicht.
 - [Third-Party-Notices](THIRD_PARTY_NOTICES.md): gepinnte fremde Quellen und vollständige
   Lizenztexte der Vertragsübernahmen, derzeit die OMA-Messvergleich-Adaption.
 - [Benutzeranweisungen](references/user-instructions-contract.md): sichere

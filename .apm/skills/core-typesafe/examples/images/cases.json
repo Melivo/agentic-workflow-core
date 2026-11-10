@@ -1,0 +1,3545 @@
+{
+  "schema": "image-cases/v1",
+  "question_version": "m08-images-v1",
+  "synthetic": true,
+  "pre_model": true,
+  "questions_sha256": "27ad64391eae330c08a14851d4f82a280a4bf9ac0b482b6ea4c57749f3946eb3",
+  "corpus_sha256": "e2d58f33f34a5d0bead9e851a39aac0ec0edf278d08fad21c44404b1b76f14e5",
+  "hash_conventions": {"questions": "SHA256 UTF-8 JSON of [{id,version:question_version,questions}] in case order, sorted keys, compact separators, ensure_ascii=False", "corpus": "SHA256 UTF-8 concatenation of id + space + image sha256 + LF in case order"},
+  "manual_inspection": {"date": "2026-11-10", "count": 24, "model_requests_before_inspection": 0, "ui": "All 12 images viewed: unique orange target versus outlined secondary; absent desktop target and fully covered mobile target; equal orange competitors in unclear cases. Mobile 430px reflow, no horizontal clipping; no hero CTA.", "document": "All 12 images viewed: clear amounts 128,40 / 247,90 EUR, mismatching supplied values, absent total value, opaque cover and two competing totals remain separate. Two layouts per case kind; test content/layout differs from learning cases.", "limits": "Advisory visual references, not model truth or Accessibility pass. White/orange contrast remains 2.745:1; Arial fallback, no downloaded Nunito."},
+  "model_requests": 0,
+  "source": {
+    "path": "fixtures.html",
+    "sha256": "5f8050cb32aee301fd7fd446cdbaadfa5d8ff22784474392d20a370d4c34e0d2",
+    "byte_count": 5780,
+    "provenance": "Locally authored synthetic card UI and fictional invoices; no logo/account/product image; CSS Nunito falls back to Arial, no downloaded font."
+  },
+  "render": {
+    "browser": "reserved chrome-profile-1 via MCP",
+    "capture": "viewport PNG, DPR 1; mobile explicitly emulated at 430x800",
+    "padding": "UI 32px desktop / 16px horizontal mobile; document 24px outer + 40px sheet inset",
+    "asset_limits": {
+      "min_side_px": 280,
+      "max_side_px": 1568,
+      "max_asset_bytes": 16777216,
+      "max_processed_bytes_per_request": 33554432
+    },
+    "reference_is_local_only": true,
+    "model_state_allowlist": [
+      "asset_reference",
+      "target_description",
+      "comparison_input"
+    ],
+    "excluded_from_model_state": [
+      "id",
+      "family",
+      "split",
+      "case_kind",
+      "reference",
+      "dom_evidence",
+      "hashes",
+      "expected_values"
+    ],
+    "no_post_model_optimization": true
+  },
+  "cases": [
+    {
+      "id": "ui-learn-positive-desktop",
+      "asset_reference": "image-001",
+      "family": "ui",
+      "split": "learn",
+      "case_kind": "positive",
+      "variant": "desktop",
+      "path": "fixtures/ui-learn-positive-desktop.png",
+      "format": "png",
+      "sha256": "cc4db86c1470907b91a16d6d3eeee6560b810811ecee2a532a4785b75d891bb1",
+      "byte_count": 79986,
+      "dimensions": [
+        1280,
+        800
+      ],
+      "question_version": "m08-images-v1",
+      "target_description": "Button „Jetzt starten“",
+      "comparison_input": null,
+      "questions": [
+        {
+          "id": "presence",
+          "type": "noul",
+          "question": "Ist der Button „Jetzt starten“ vollständig sichtbar?"
+        },
+        {
+          "id": "score",
+          "type": "score",
+          "question": "Wie deutlich hebt sich der Button „Jetzt starten“ im sichtbaren Bereich gegenüber den übrigen interaktiven Elementen hervor?",
+          "rubric": [
+            {
+              "value": 0,
+              "description": "Nicht sichtbar oder verdeckt."
+            },
+            {
+              "value": 1,
+              "description": "Sichtbar, aber kaum von Nebenaktionen unterscheidbar."
+            },
+            {
+              "value": 2,
+              "description": "Erkennbar, aber mit ähnlich auffälliger konkurrierender Aktion."
+            },
+            {
+              "value": 3,
+              "description": "Eindeutig hervorgehobene Hauptaktion."
+            }
+          ]
+        },
+        {
+          "id": "box",
+          "type": "box",
+          "question": "Lokalisiere ausschließlich Button „Jetzt starten“."
+        }
+      ],
+      "transform": {
+        "source_viewport": [
+          1280,
+          800
+        ],
+        "crop_css_px": [
+          0,
+          0,
+          1280,
+          800
+        ],
+        "scale_xy": [
+          1,
+          1
+        ],
+        "padding_px": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "device_pixel_ratio": 1,
+        "orientation": "upright",
+        "box_convention": "normalized left/top/right/bottom in sent image; source CSS equals image pixels"
+      },
+      "reference": {
+        "origin": "synthetic source DOM and Chrome geometry; all 24 original PNGs manually inspected by T02 before any model request on 2026-11-10",
+        "dom_present": true,
+        "presence": true,
+        "visibility": "visible",
+        "missing": false,
+        "unclear": false,
+        "score": 3,
+        "text_value": "Jetzt starten",
+        "candidate_matches_source": null,
+        "box_source_css_px": [
+          154,
+          355,
+          171.8125,
+          62
+        ],
+        "box_normalized": {
+          "left": 0.1203125,
+          "top": 0.44375,
+          "right": 0.254541015625,
+          "bottom": 0.52125
+        },
+        "box_usable": true
+      },
+      "dom_evidence": {
+        "fixture": {
+          "id": "ui-learn-positive-desktop",
+          "family": "ui",
+          "split": "learn",
+          "case_kind": "positive",
+          "variant": "desktop"
+        },
+        "viewport": [
+          1280,
+          800
+        ],
+        "dpr": 1,
+        "body_text": "SYNTHETISCHE KARTENANSICHT • PROBE A\nAutomationen Staging\nDein E-Mail-Abo\n\nWichtige Nachrichten erkennen und Newsletter übersichtlich halten.\n\nKünstliches Angebot • keine Anmeldung • keine Bestellung\n\nJetzt starten\nDetails ansehen\nDeine Auswahl\n\nBeispielpaket ohne Produktwirkung.\n\nui • learn • desktop • Rein synthetische Lernfixture",
+        "target": {
+          "text": "Jetzt starten",
+          "role": "button",
+          "rect": [
+            154,
+            355,
+            171.8125,
+            62
+          ],
+          "center_topmost": true,
+          "background": "rgb(255, 113, 43)",
+          "color": "rgb(255, 255, 255)",
+          "font": "700 20px / 28px Nunito, Arial, sans-serif"
+        },
+        "covers": [],
+        "alternatives": [],
+        "overflow": false,
+        "buttons": [
+          {
+            "id": "target",
+            "label": "Jetzt starten",
+            "rect": [
+              154,
+              355,
+              171.8125,
+              62
+            ],
+            "background": "rgb(255, 113, 43)"
+          },
+          {
+            "id": "secondary",
+            "label": "Details ansehen",
+            "rect": [
+              341.8125,
+              355,
+              206.296875,
+              62
+            ],
+            "background": "rgb(255, 255, 255)"
+          }
+        ],
+        "hero_buttons": 0
+      }
+    },
+    {
+      "id": "ui-learn-positive-mobile",
+      "asset_reference": "image-002",
+      "family": "ui",
+      "split": "learn",
+      "case_kind": "positive",
+      "variant": "mobile",
+      "path": "fixtures/ui-learn-positive-mobile.png",
+      "format": "png",
+      "sha256": "37004dac8d62783fa78936091b5ab4564eb4d2248a4781a93a9a7c43d9ac9077",
+      "byte_count": 65134,
+      "dimensions": [
+        430,
+        800
+      ],
+      "question_version": "m08-images-v1",
+      "target_description": "Button „Jetzt starten“",
+      "comparison_input": null,
+      "questions": [
+        {
+          "id": "presence",
+          "type": "noul",
+          "question": "Ist der Button „Jetzt starten“ vollständig sichtbar?"
+        },
+        {
+          "id": "score",
+          "type": "score",
+          "question": "Wie deutlich hebt sich der Button „Jetzt starten“ im sichtbaren Bereich gegenüber den übrigen interaktiven Elementen hervor?",
+          "rubric": [
+            {
+              "value": 0,
+              "description": "Nicht sichtbar oder verdeckt."
+            },
+            {
+              "value": 1,
+              "description": "Sichtbar, aber kaum von Nebenaktionen unterscheidbar."
+            },
+            {
+              "value": 2,
+              "description": "Erkennbar, aber mit ähnlich auffälliger konkurrierender Aktion."
+            },
+            {
+              "value": 3,
+              "description": "Eindeutig hervorgehobene Hauptaktion."
+            }
+          ]
+        },
+        {
+          "id": "box",
+          "type": "box",
+          "question": "Lokalisiere ausschließlich Button „Jetzt starten“."
+        }
+      ],
+      "transform": {
+        "source_viewport": [
+          430,
+          800
+        ],
+        "crop_css_px": [
+          0,
+          0,
+          430,
+          800
+        ],
+        "scale_xy": [
+          1,
+          1
+        ],
+        "padding_px": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "device_pixel_ratio": 1,
+        "orientation": "upright",
+        "box_convention": "normalized left/top/right/bottom in sent image; source CSS equals image pixels"
+      },
+      "reference": {
+        "origin": "synthetic source DOM and Chrome geometry; all 24 original PNGs manually inspected by T02 before any model request on 2026-11-10",
+        "dom_present": true,
+        "presence": true,
+        "visibility": "visible",
+        "missing": false,
+        "unclear": false,
+        "score": 3,
+        "text_value": "Jetzt starten",
+        "candidate_matches_source": null,
+        "box_source_css_px": [
+          40,
+          379,
+          161.8125,
+          62
+        ],
+        "box_normalized": {
+          "left": 0.09302325581395349,
+          "top": 0.47375,
+          "right": 0.4693313953488372,
+          "bottom": 0.55125
+        },
+        "box_usable": true
+      },
+      "dom_evidence": {
+        "fixture": {
+          "id": "ui-learn-positive-mobile",
+          "family": "ui",
+          "split": "learn",
+          "case_kind": "positive",
+          "variant": "mobile"
+        },
+        "viewport": [
+          430,
+          800
+        ],
+        "dpr": 1,
+        "body_text": "SYNTHETISCHE KARTENANSICHT • PROBE A\nAutomationen Staging\nDein E-Mail-Abo\n\nWichtige Nachrichten erkennen und Newsletter übersichtlich halten.\n\nKünstliches Angebot • keine Anmeldung • keine Bestellung\n\nJetzt starten\nDetails ansehen\nDeine Auswahl\n\nBeispielpaket ohne Produktwirkung.\n\nui • learn • mobile • Rein synthetische Lernfixture",
+        "target": {
+          "text": "Jetzt starten",
+          "role": "button",
+          "rect": [
+            40,
+            379,
+            161.8125,
+            62
+          ],
+          "center_topmost": true,
+          "background": "rgb(255, 113, 43)",
+          "color": "rgb(255, 255, 255)",
+          "font": "700 20px / 28px Nunito, Arial, sans-serif"
+        },
+        "covers": [],
+        "alternatives": [],
+        "overflow": false,
+        "buttons": [
+          {
+            "id": "target",
+            "label": "Jetzt starten",
+            "rect": [
+              40,
+              379,
+              161.8125,
+              62
+            ],
+            "background": "rgb(255, 113, 43)"
+          },
+          {
+            "id": "secondary",
+            "label": "Details ansehen",
+            "rect": [
+              40,
+              453,
+              196.296875,
+              62
+            ],
+            "background": "rgb(255, 255, 255)"
+          }
+        ],
+        "hero_buttons": 0
+      }
+    },
+    {
+      "id": "ui-learn-negative-desktop",
+      "asset_reference": "image-003",
+      "family": "ui",
+      "split": "learn",
+      "case_kind": "negative",
+      "variant": "desktop",
+      "path": "fixtures/ui-learn-negative-desktop.png",
+      "format": "png",
+      "sha256": "25c6935421e707873105e2f9d5dda833ab424af2a0352e9686a9bbe1b84b9d53",
+      "byte_count": 76960,
+      "dimensions": [
+        1280,
+        800
+      ],
+      "question_version": "m08-images-v1",
+      "target_description": "Button „Jetzt starten“",
+      "comparison_input": null,
+      "questions": [
+        {
+          "id": "presence",
+          "type": "noul",
+          "question": "Ist der Button „Jetzt starten“ vollständig sichtbar?"
+        },
+        {
+          "id": "score",
+          "type": "score",
+          "question": "Wie deutlich hebt sich der Button „Jetzt starten“ im sichtbaren Bereich gegenüber den übrigen interaktiven Elementen hervor?",
+          "rubric": [
+            {
+              "value": 0,
+              "description": "Nicht sichtbar oder verdeckt."
+            },
+            {
+              "value": 1,
+              "description": "Sichtbar, aber kaum von Nebenaktionen unterscheidbar."
+            },
+            {
+              "value": 2,
+              "description": "Erkennbar, aber mit ähnlich auffälliger konkurrierender Aktion."
+            },
+            {
+              "value": 3,
+              "description": "Eindeutig hervorgehobene Hauptaktion."
+            }
+          ]
+        },
+        {
+          "id": "box",
+          "type": "box",
+          "question": "Lokalisiere ausschließlich Button „Jetzt starten“."
+        }
+      ],
+      "transform": {
+        "source_viewport": [
+          1280,
+          800
+        ],
+        "crop_css_px": [
+          0,
+          0,
+          1280,
+          800
+        ],
+        "scale_xy": [
+          1,
+          1
+        ],
+        "padding_px": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "device_pixel_ratio": 1,
+        "orientation": "upright",
+        "box_convention": "normalized left/top/right/bottom in sent image; source CSS equals image pixels"
+      },
+      "reference": {
+        "origin": "synthetic source DOM and Chrome geometry; all 24 original PNGs manually inspected by T02 before any model request on 2026-11-10",
+        "dom_present": false,
+        "presence": false,
+        "visibility": "absent",
+        "missing": true,
+        "unclear": false,
+        "score": 0,
+        "text_value": null,
+        "candidate_matches_source": null,
+        "box_source_css_px": null,
+        "box_normalized": null,
+        "box_usable": false
+      },
+      "dom_evidence": {
+        "fixture": {
+          "id": "ui-learn-negative-desktop",
+          "family": "ui",
+          "split": "learn",
+          "case_kind": "negative",
+          "variant": "desktop"
+        },
+        "viewport": [
+          1280,
+          800
+        ],
+        "dpr": 1,
+        "body_text": "SYNTHETISCHE KARTENANSICHT • PROBE A\nAutomationen Staging\nDein E-Mail-Abo\n\nWichtige Nachrichten erkennen und Newsletter übersichtlich halten.\n\nKünstliches Angebot • keine Anmeldung • keine Bestellung\n\nDetails ansehen\nDeine Auswahl\n\nBeispielpaket ohne Produktwirkung.\n\nui • learn • desktop • Rein synthetische Lernfixture",
+        "target": null,
+        "covers": [],
+        "alternatives": [],
+        "overflow": false,
+        "buttons": [
+          {
+            "id": "secondary",
+            "label": "Details ansehen",
+            "rect": [
+              154,
+              355,
+              206.296875,
+              62
+            ],
+            "background": "rgb(255, 255, 255)"
+          }
+        ],
+        "hero_buttons": 0
+      }
+    },
+    {
+      "id": "ui-learn-negative-mobile",
+      "asset_reference": "image-004",
+      "family": "ui",
+      "split": "learn",
+      "case_kind": "negative",
+      "variant": "mobile",
+      "path": "fixtures/ui-learn-negative-mobile.png",
+      "format": "png",
+      "sha256": "d78ef5e5c4c525b67f26f89e1ce9e43aea159099d74d33a5cb152452b604bbac",
+      "byte_count": 64983,
+      "dimensions": [
+        430,
+        800
+      ],
+      "question_version": "m08-images-v1",
+      "target_description": "Button „Jetzt starten“",
+      "comparison_input": null,
+      "questions": [
+        {
+          "id": "presence",
+          "type": "noul",
+          "question": "Ist der Button „Jetzt starten“ vollständig sichtbar?"
+        },
+        {
+          "id": "score",
+          "type": "score",
+          "question": "Wie deutlich hebt sich der Button „Jetzt starten“ im sichtbaren Bereich gegenüber den übrigen interaktiven Elementen hervor?",
+          "rubric": [
+            {
+              "value": 0,
+              "description": "Nicht sichtbar oder verdeckt."
+            },
+            {
+              "value": 1,
+              "description": "Sichtbar, aber kaum von Nebenaktionen unterscheidbar."
+            },
+            {
+              "value": 2,
+              "description": "Erkennbar, aber mit ähnlich auffälliger konkurrierender Aktion."
+            },
+            {
+              "value": 3,
+              "description": "Eindeutig hervorgehobene Hauptaktion."
+            }
+          ]
+        },
+        {
+          "id": "box",
+          "type": "box",
+          "question": "Lokalisiere ausschließlich Button „Jetzt starten“."
+        }
+      ],
+      "transform": {
+        "source_viewport": [
+          430,
+          800
+        ],
+        "crop_css_px": [
+          0,
+          0,
+          430,
+          800
+        ],
+        "scale_xy": [
+          1,
+          1
+        ],
+        "padding_px": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "device_pixel_ratio": 1,
+        "orientation": "upright",
+        "box_convention": "normalized left/top/right/bottom in sent image; source CSS equals image pixels"
+      },
+      "reference": {
+        "origin": "synthetic source DOM and Chrome geometry; all 24 original PNGs manually inspected by T02 before any model request on 2026-11-10",
+        "dom_present": true,
+        "presence": false,
+        "visibility": "covered",
+        "missing": false,
+        "unclear": false,
+        "score": 0,
+        "text_value": "Jetzt starten",
+        "candidate_matches_source": null,
+        "box_source_css_px": [
+          40,
+          379,
+          161.8125,
+          62
+        ],
+        "box_normalized": {
+          "left": 0.09302325581395349,
+          "top": 0.47375,
+          "right": 0.4693313953488372,
+          "bottom": 0.55125
+        },
+        "box_usable": false
+      },
+      "dom_evidence": {
+        "fixture": {
+          "id": "ui-learn-negative-mobile",
+          "family": "ui",
+          "split": "learn",
+          "case_kind": "negative",
+          "variant": "mobile"
+        },
+        "viewport": [
+          430,
+          800
+        ],
+        "dpr": 1,
+        "body_text": "SYNTHETISCHE KARTENANSICHT • PROBE A\nAutomationen Staging\nDein E-Mail-Abo\n\nWichtige Nachrichten erkennen und Newsletter übersichtlich halten.\n\nKünstliches Angebot • keine Anmeldung • keine Bestellung\n\nJetzt starten\nDetails ansehen\nDeine Auswahl\n\nBeispielpaket ohne Produktwirkung.\n\nui • learn • mobile • Rein synthetische Lernfixture\n\nAnsicht gesperrt",
+        "target": {
+          "text": "Jetzt starten",
+          "role": "button",
+          "rect": [
+            40,
+            379,
+            161.8125,
+            62
+          ],
+          "center_topmost": false,
+          "background": "rgb(255, 113, 43)",
+          "color": "rgb(255, 255, 255)",
+          "font": "700 20px / 28px Nunito, Arial, sans-serif"
+        },
+        "covers": [
+          [
+            40,
+            379,
+            161.8125,
+            62
+          ]
+        ],
+        "alternatives": [],
+        "overflow": false,
+        "buttons": [
+          {
+            "id": "target",
+            "label": "Jetzt starten",
+            "rect": [
+              40,
+              379,
+              161.8125,
+              62
+            ],
+            "background": "rgb(255, 113, 43)"
+          },
+          {
+            "id": "secondary",
+            "label": "Details ansehen",
+            "rect": [
+              40,
+              453,
+              196.296875,
+              62
+            ],
+            "background": "rgb(255, 255, 255)"
+          }
+        ],
+        "hero_buttons": 0
+      }
+    },
+    {
+      "id": "ui-learn-unclear-desktop",
+      "asset_reference": "image-005",
+      "family": "ui",
+      "split": "learn",
+      "case_kind": "unclear",
+      "variant": "desktop",
+      "path": "fixtures/ui-learn-unclear-desktop.png",
+      "format": "png",
+      "sha256": "1613a9bf084ac2de7651c059579f03edf55b62c3a6eed0524c2d941ce0c3368d",
+      "byte_count": 78276,
+      "dimensions": [
+        1280,
+        800
+      ],
+      "question_version": "m08-images-v1",
+      "target_description": "Button „Jetzt starten“",
+      "comparison_input": null,
+      "questions": [
+        {
+          "id": "presence",
+          "type": "noul",
+          "question": "Ist der Button „Jetzt starten“ vollständig sichtbar?"
+        },
+        {
+          "id": "score",
+          "type": "score",
+          "question": "Wie deutlich hebt sich der Button „Jetzt starten“ im sichtbaren Bereich gegenüber den übrigen interaktiven Elementen hervor?",
+          "rubric": [
+            {
+              "value": 0,
+              "description": "Nicht sichtbar oder verdeckt."
+            },
+            {
+              "value": 1,
+              "description": "Sichtbar, aber kaum von Nebenaktionen unterscheidbar."
+            },
+            {
+              "value": 2,
+              "description": "Erkennbar, aber mit ähnlich auffälliger konkurrierender Aktion."
+            },
+            {
+              "value": 3,
+              "description": "Eindeutig hervorgehobene Hauptaktion."
+            }
+          ]
+        },
+        {
+          "id": "box",
+          "type": "box",
+          "question": "Lokalisiere ausschließlich Button „Jetzt starten“."
+        }
+      ],
+      "transform": {
+        "source_viewport": [
+          1280,
+          800
+        ],
+        "crop_css_px": [
+          0,
+          0,
+          1280,
+          800
+        ],
+        "scale_xy": [
+          1,
+          1
+        ],
+        "padding_px": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "device_pixel_ratio": 1,
+        "orientation": "upright",
+        "box_convention": "normalized left/top/right/bottom in sent image; source CSS equals image pixels"
+      },
+      "reference": {
+        "origin": "synthetic source DOM and Chrome geometry; all 24 original PNGs manually inspected by T02 before any model request on 2026-11-10",
+        "dom_present": true,
+        "presence": true,
+        "visibility": "visible",
+        "missing": false,
+        "unclear": true,
+        "score": 2,
+        "text_value": "Jetzt starten",
+        "candidate_matches_source": null,
+        "box_source_css_px": [
+          154,
+          355,
+          171.8125,
+          62
+        ],
+        "box_normalized": {
+          "left": 0.1203125,
+          "top": 0.44375,
+          "right": 0.254541015625,
+          "bottom": 0.52125
+        },
+        "box_usable": true
+      },
+      "dom_evidence": {
+        "fixture": {
+          "id": "ui-learn-unclear-desktop",
+          "family": "ui",
+          "split": "learn",
+          "case_kind": "unclear",
+          "variant": "desktop"
+        },
+        "viewport": [
+          1280,
+          800
+        ],
+        "dpr": 1,
+        "body_text": "SYNTHETISCHE KARTENANSICHT • PROBE A\nAutomationen Staging\nDein E-Mail-Abo\n\nWichtige Nachrichten erkennen und Newsletter übersichtlich halten.\n\nKünstliches Angebot • keine Anmeldung • keine Bestellung\n\nJetzt starten\nDetails ansehen\nDeine Auswahl\n\nBeispielpaket ohne Produktwirkung.\n\nui • learn • desktop • Rein synthetische Lernfixture",
+        "target": {
+          "text": "Jetzt starten",
+          "role": "button",
+          "rect": [
+            154,
+            355,
+            171.8125,
+            62
+          ],
+          "center_topmost": true,
+          "background": "rgb(255, 113, 43)",
+          "color": "rgb(255, 255, 255)",
+          "font": "700 20px / 28px Nunito, Arial, sans-serif"
+        },
+        "covers": [],
+        "alternatives": [],
+        "overflow": false,
+        "buttons": [
+          {
+            "id": "target",
+            "label": "Jetzt starten",
+            "rect": [
+              154,
+              355,
+              171.8125,
+              62
+            ],
+            "background": "rgb(255, 113, 43)"
+          },
+          {
+            "id": "secondary",
+            "label": "Details ansehen",
+            "rect": [
+              341.8125,
+              355,
+              206.296875,
+              62
+            ],
+            "background": "rgb(255, 113, 43)"
+          }
+        ],
+        "hero_buttons": 0
+      }
+    },
+    {
+      "id": "ui-learn-unclear-mobile",
+      "asset_reference": "image-006",
+      "family": "ui",
+      "split": "learn",
+      "case_kind": "unclear",
+      "variant": "mobile",
+      "path": "fixtures/ui-learn-unclear-mobile.png",
+      "format": "png",
+      "sha256": "3df35d099facd39c88d7cb7888765f87d9250d11a04543a10bce5ab1fdd19cd0",
+      "byte_count": 64245,
+      "dimensions": [
+        430,
+        800
+      ],
+      "question_version": "m08-images-v1",
+      "target_description": "Button „Jetzt starten“",
+      "comparison_input": null,
+      "questions": [
+        {
+          "id": "presence",
+          "type": "noul",
+          "question": "Ist der Button „Jetzt starten“ vollständig sichtbar?"
+        },
+        {
+          "id": "score",
+          "type": "score",
+          "question": "Wie deutlich hebt sich der Button „Jetzt starten“ im sichtbaren Bereich gegenüber den übrigen interaktiven Elementen hervor?",
+          "rubric": [
+            {
+              "value": 0,
+              "description": "Nicht sichtbar oder verdeckt."
+            },
+            {
+              "value": 1,
+              "description": "Sichtbar, aber kaum von Nebenaktionen unterscheidbar."
+            },
+            {
+              "value": 2,
+              "description": "Erkennbar, aber mit ähnlich auffälliger konkurrierender Aktion."
+            },
+            {
+              "value": 3,
+              "description": "Eindeutig hervorgehobene Hauptaktion."
+            }
+          ]
+        },
+        {
+          "id": "box",
+          "type": "box",
+          "question": "Lokalisiere ausschließlich Button „Jetzt starten“."
+        }
+      ],
+      "transform": {
+        "source_viewport": [
+          430,
+          800
+        ],
+        "crop_css_px": [
+          0,
+          0,
+          430,
+          800
+        ],
+        "scale_xy": [
+          1,
+          1
+        ],
+        "padding_px": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "device_pixel_ratio": 1,
+        "orientation": "upright",
+        "box_convention": "normalized left/top/right/bottom in sent image; source CSS equals image pixels"
+      },
+      "reference": {
+        "origin": "synthetic source DOM and Chrome geometry; all 24 original PNGs manually inspected by T02 before any model request on 2026-11-10",
+        "dom_present": true,
+        "presence": true,
+        "visibility": "visible",
+        "missing": false,
+        "unclear": true,
+        "score": 2,
+        "text_value": "Jetzt starten",
+        "candidate_matches_source": null,
+        "box_source_css_px": [
+          40,
+          379,
+          161.8125,
+          62
+        ],
+        "box_normalized": {
+          "left": 0.09302325581395349,
+          "top": 0.47375,
+          "right": 0.4693313953488372,
+          "bottom": 0.55125
+        },
+        "box_usable": true
+      },
+      "dom_evidence": {
+        "fixture": {
+          "id": "ui-learn-unclear-mobile",
+          "family": "ui",
+          "split": "learn",
+          "case_kind": "unclear",
+          "variant": "mobile"
+        },
+        "viewport": [
+          430,
+          800
+        ],
+        "dpr": 1,
+        "body_text": "SYNTHETISCHE KARTENANSICHT • PROBE A\nAutomationen Staging\nDein E-Mail-Abo\n\nWichtige Nachrichten erkennen und Newsletter übersichtlich halten.\n\nKünstliches Angebot • keine Anmeldung • keine Bestellung\n\nJetzt starten\nDetails ansehen\nDeine Auswahl\n\nBeispielpaket ohne Produktwirkung.\n\nui • learn • mobile • Rein synthetische Lernfixture",
+        "target": {
+          "text": "Jetzt starten",
+          "role": "button",
+          "rect": [
+            40,
+            379,
+            161.8125,
+            62
+          ],
+          "center_topmost": true,
+          "background": "rgb(255, 113, 43)",
+          "color": "rgb(255, 255, 255)",
+          "font": "700 20px / 28px Nunito, Arial, sans-serif"
+        },
+        "covers": [],
+        "alternatives": [],
+        "overflow": false,
+        "buttons": [
+          {
+            "id": "target",
+            "label": "Jetzt starten",
+            "rect": [
+              40,
+              379,
+              161.8125,
+              62
+            ],
+            "background": "rgb(255, 113, 43)"
+          },
+          {
+            "id": "secondary",
+            "label": "Details ansehen",
+            "rect": [
+              40,
+              453,
+              196.296875,
+              62
+            ],
+            "background": "rgb(255, 113, 43)"
+          }
+        ],
+        "hero_buttons": 0
+      }
+    },
+    {
+      "id": "ui-test-positive-desktop",
+      "asset_reference": "image-007",
+      "family": "ui",
+      "split": "test",
+      "case_kind": "positive",
+      "variant": "desktop",
+      "path": "fixtures/ui-test-positive-desktop.png",
+      "format": "png",
+      "sha256": "eb3936dda75c9e95c5a2d21177dff00f5aaf18ae417c5752125a6e7d39a1475e",
+      "byte_count": 79998,
+      "dimensions": [
+        1280,
+        800
+      ],
+      "question_version": "m08-images-v1",
+      "target_description": "Button „Jetzt starten“",
+      "comparison_input": null,
+      "questions": [
+        {
+          "id": "presence",
+          "type": "noul",
+          "question": "Ist der Button „Jetzt starten“ vollständig sichtbar?"
+        },
+        {
+          "id": "score",
+          "type": "score",
+          "question": "Wie deutlich hebt sich der Button „Jetzt starten“ im sichtbaren Bereich gegenüber den übrigen interaktiven Elementen hervor?",
+          "rubric": [
+            {
+              "value": 0,
+              "description": "Nicht sichtbar oder verdeckt."
+            },
+            {
+              "value": 1,
+              "description": "Sichtbar, aber kaum von Nebenaktionen unterscheidbar."
+            },
+            {
+              "value": 2,
+              "description": "Erkennbar, aber mit ähnlich auffälliger konkurrierender Aktion."
+            },
+            {
+              "value": 3,
+              "description": "Eindeutig hervorgehobene Hauptaktion."
+            }
+          ]
+        },
+        {
+          "id": "box",
+          "type": "box",
+          "question": "Lokalisiere ausschließlich Button „Jetzt starten“."
+        }
+      ],
+      "transform": {
+        "source_viewport": [
+          1280,
+          800
+        ],
+        "crop_css_px": [
+          0,
+          0,
+          1280,
+          800
+        ],
+        "scale_xy": [
+          1,
+          1
+        ],
+        "padding_px": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "device_pixel_ratio": 1,
+        "orientation": "upright",
+        "box_convention": "normalized left/top/right/bottom in sent image; source CSS equals image pixels"
+      },
+      "reference": {
+        "origin": "synthetic source DOM and Chrome geometry; all 24 original PNGs manually inspected by T02 before any model request on 2026-11-10",
+        "dom_present": true,
+        "presence": true,
+        "visibility": "visible",
+        "missing": false,
+        "unclear": false,
+        "score": 3,
+        "text_value": "Jetzt starten",
+        "candidate_matches_source": null,
+        "box_source_css_px": [
+          229,
+          355,
+          171.8125,
+          62
+        ],
+        "box_normalized": {
+          "left": 0.17890625,
+          "top": 0.44375,
+          "right": 0.313134765625,
+          "bottom": 0.52125
+        },
+        "box_usable": true
+      },
+      "dom_evidence": {
+        "fixture": {
+          "id": "ui-test-positive-desktop",
+          "family": "ui",
+          "split": "test",
+          "case_kind": "positive",
+          "variant": "desktop"
+        },
+        "viewport": [
+          1280,
+          800
+        ],
+        "dpr": 1,
+        "body_text": "SYNTHETISCHE KARTENANSICHT • PROBE B\nAutomationen Staging\nDeine Nachrichten im Blick\n\nSortiere Mitteilungen in klar getrennte Themen.\n\nKünstliches Angebot • keine Anmeldung • keine Bestellung\n\nJetzt starten\nDetails ansehen\nSo funktioniert es\n\nVorschau ohne echte Kontodaten.\n\nui • test • desktop • Rein synthetische Lernfixture",
+        "target": {
+          "text": "Jetzt starten",
+          "role": "button",
+          "rect": [
+            229,
+            355,
+            171.8125,
+            62
+          ],
+          "center_topmost": true,
+          "background": "rgb(255, 113, 43)",
+          "color": "rgb(255, 255, 255)",
+          "font": "700 20px / 28px Nunito, Arial, sans-serif"
+        },
+        "covers": [],
+        "alternatives": [],
+        "overflow": false,
+        "buttons": [
+          {
+            "id": "target",
+            "label": "Jetzt starten",
+            "rect": [
+              229,
+              355,
+              171.8125,
+              62
+            ],
+            "background": "rgb(255, 113, 43)"
+          },
+          {
+            "id": "secondary",
+            "label": "Details ansehen",
+            "rect": [
+              416.8125,
+              355,
+              206.296875,
+              62
+            ],
+            "background": "rgb(255, 255, 255)"
+          }
+        ],
+        "hero_buttons": 0
+      }
+    },
+    {
+      "id": "ui-test-positive-mobile",
+      "asset_reference": "image-008",
+      "family": "ui",
+      "split": "test",
+      "case_kind": "positive",
+      "variant": "mobile",
+      "path": "fixtures/ui-test-positive-mobile.png",
+      "format": "png",
+      "sha256": "c2dd903797fc62434abfc59d8d0f93f34258d1c9dcc6430d6ecad6ed142a6692",
+      "byte_count": 64585,
+      "dimensions": [
+        430,
+        800
+      ],
+      "question_version": "m08-images-v1",
+      "target_description": "Button „Jetzt starten“",
+      "comparison_input": null,
+      "questions": [
+        {
+          "id": "presence",
+          "type": "noul",
+          "question": "Ist der Button „Jetzt starten“ vollständig sichtbar?"
+        },
+        {
+          "id": "score",
+          "type": "score",
+          "question": "Wie deutlich hebt sich der Button „Jetzt starten“ im sichtbaren Bereich gegenüber den übrigen interaktiven Elementen hervor?",
+          "rubric": [
+            {
+              "value": 0,
+              "description": "Nicht sichtbar oder verdeckt."
+            },
+            {
+              "value": 1,
+              "description": "Sichtbar, aber kaum von Nebenaktionen unterscheidbar."
+            },
+            {
+              "value": 2,
+              "description": "Erkennbar, aber mit ähnlich auffälliger konkurrierender Aktion."
+            },
+            {
+              "value": 3,
+              "description": "Eindeutig hervorgehobene Hauptaktion."
+            }
+          ]
+        },
+        {
+          "id": "box",
+          "type": "box",
+          "question": "Lokalisiere ausschließlich Button „Jetzt starten“."
+        }
+      ],
+      "transform": {
+        "source_viewport": [
+          430,
+          800
+        ],
+        "crop_css_px": [
+          0,
+          0,
+          430,
+          800
+        ],
+        "scale_xy": [
+          1,
+          1
+        ],
+        "padding_px": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "device_pixel_ratio": 1,
+        "orientation": "upright",
+        "box_convention": "normalized left/top/right/bottom in sent image; source CSS equals image pixels"
+      },
+      "reference": {
+        "origin": "synthetic source DOM and Chrome geometry; all 24 original PNGs manually inspected by T02 before any model request on 2026-11-10",
+        "dom_present": true,
+        "presence": true,
+        "visibility": "visible",
+        "missing": false,
+        "unclear": false,
+        "score": 3,
+        "text_value": "Jetzt starten",
+        "candidate_matches_source": null,
+        "box_source_css_px": [
+          40,
+          379,
+          161.8125,
+          62
+        ],
+        "box_normalized": {
+          "left": 0.09302325581395349,
+          "top": 0.47375,
+          "right": 0.4693313953488372,
+          "bottom": 0.55125
+        },
+        "box_usable": true
+      },
+      "dom_evidence": {
+        "fixture": {
+          "id": "ui-test-positive-mobile",
+          "family": "ui",
+          "split": "test",
+          "case_kind": "positive",
+          "variant": "mobile"
+        },
+        "viewport": [
+          430,
+          800
+        ],
+        "dpr": 1,
+        "body_text": "SYNTHETISCHE KARTENANSICHT • PROBE B\nAutomationen Staging\nDeine Nachrichten im Blick\n\nSortiere Mitteilungen in klar getrennte Themen.\n\nKünstliches Angebot • keine Anmeldung • keine Bestellung\n\nJetzt starten\nDetails ansehen\nSo funktioniert es\n\nVorschau ohne echte Kontodaten.\n\nui • test • mobile • Rein synthetische Lernfixture",
+        "target": {
+          "text": "Jetzt starten",
+          "role": "button",
+          "rect": [
+            40,
+            379,
+            161.8125,
+            62
+          ],
+          "center_topmost": true,
+          "background": "rgb(255, 113, 43)",
+          "color": "rgb(255, 255, 255)",
+          "font": "700 20px / 28px Nunito, Arial, sans-serif"
+        },
+        "covers": [],
+        "alternatives": [],
+        "overflow": false,
+        "buttons": [
+          {
+            "id": "target",
+            "label": "Jetzt starten",
+            "rect": [
+              40,
+              379,
+              161.8125,
+              62
+            ],
+            "background": "rgb(255, 113, 43)"
+          },
+          {
+            "id": "secondary",
+            "label": "Details ansehen",
+            "rect": [
+              40,
+              453,
+              196.296875,
+              62
+            ],
+            "background": "rgb(255, 255, 255)"
+          }
+        ],
+        "hero_buttons": 0
+      }
+    },
+    {
+      "id": "ui-test-negative-desktop",
+      "asset_reference": "image-009",
+      "family": "ui",
+      "split": "test",
+      "case_kind": "negative",
+      "variant": "desktop",
+      "path": "fixtures/ui-test-negative-desktop.png",
+      "format": "png",
+      "sha256": "7369d188d514196819625824b87fd17fb1d16453adf5612d4ef0e66a81ae1fef",
+      "byte_count": 77187,
+      "dimensions": [
+        1280,
+        800
+      ],
+      "question_version": "m08-images-v1",
+      "target_description": "Button „Jetzt starten“",
+      "comparison_input": null,
+      "questions": [
+        {
+          "id": "presence",
+          "type": "noul",
+          "question": "Ist der Button „Jetzt starten“ vollständig sichtbar?"
+        },
+        {
+          "id": "score",
+          "type": "score",
+          "question": "Wie deutlich hebt sich der Button „Jetzt starten“ im sichtbaren Bereich gegenüber den übrigen interaktiven Elementen hervor?",
+          "rubric": [
+            {
+              "value": 0,
+              "description": "Nicht sichtbar oder verdeckt."
+            },
+            {
+              "value": 1,
+              "description": "Sichtbar, aber kaum von Nebenaktionen unterscheidbar."
+            },
+            {
+              "value": 2,
+              "description": "Erkennbar, aber mit ähnlich auffälliger konkurrierender Aktion."
+            },
+            {
+              "value": 3,
+              "description": "Eindeutig hervorgehobene Hauptaktion."
+            }
+          ]
+        },
+        {
+          "id": "box",
+          "type": "box",
+          "question": "Lokalisiere ausschließlich Button „Jetzt starten“."
+        }
+      ],
+      "transform": {
+        "source_viewport": [
+          1280,
+          800
+        ],
+        "crop_css_px": [
+          0,
+          0,
+          1280,
+          800
+        ],
+        "scale_xy": [
+          1,
+          1
+        ],
+        "padding_px": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "device_pixel_ratio": 1,
+        "orientation": "upright",
+        "box_convention": "normalized left/top/right/bottom in sent image; source CSS equals image pixels"
+      },
+      "reference": {
+        "origin": "synthetic source DOM and Chrome geometry; all 24 original PNGs manually inspected by T02 before any model request on 2026-11-10",
+        "dom_present": false,
+        "presence": false,
+        "visibility": "absent",
+        "missing": true,
+        "unclear": false,
+        "score": 0,
+        "text_value": null,
+        "candidate_matches_source": null,
+        "box_source_css_px": null,
+        "box_normalized": null,
+        "box_usable": false
+      },
+      "dom_evidence": {
+        "fixture": {
+          "id": "ui-test-negative-desktop",
+          "family": "ui",
+          "split": "test",
+          "case_kind": "negative",
+          "variant": "desktop"
+        },
+        "viewport": [
+          1280,
+          800
+        ],
+        "dpr": 1,
+        "body_text": "SYNTHETISCHE KARTENANSICHT • PROBE B\nAutomationen Staging\nDeine Nachrichten im Blick\n\nSortiere Mitteilungen in klar getrennte Themen.\n\nKünstliches Angebot • keine Anmeldung • keine Bestellung\n\nDetails ansehen\nSo funktioniert es\n\nVorschau ohne echte Kontodaten.\n\nui • test • desktop • Rein synthetische Lernfixture",
+        "target": null,
+        "covers": [],
+        "alternatives": [],
+        "overflow": false,
+        "buttons": [
+          {
+            "id": "secondary",
+            "label": "Details ansehen",
+            "rect": [
+              229,
+              355,
+              206.296875,
+              62
+            ],
+            "background": "rgb(255, 255, 255)"
+          }
+        ],
+        "hero_buttons": 0
+      }
+    },
+    {
+      "id": "ui-test-negative-mobile",
+      "asset_reference": "image-010",
+      "family": "ui",
+      "split": "test",
+      "case_kind": "negative",
+      "variant": "mobile",
+      "path": "fixtures/ui-test-negative-mobile.png",
+      "format": "png",
+      "sha256": "08d6b1e8597d9324096fd51a0bd382470e63b98aba612810b7a1d481e27ade4a",
+      "byte_count": 64448,
+      "dimensions": [
+        430,
+        800
+      ],
+      "question_version": "m08-images-v1",
+      "target_description": "Button „Jetzt starten“",
+      "comparison_input": null,
+      "questions": [
+        {
+          "id": "presence",
+          "type": "noul",
+          "question": "Ist der Button „Jetzt starten“ vollständig sichtbar?"
+        },
+        {
+          "id": "score",
+          "type": "score",
+          "question": "Wie deutlich hebt sich der Button „Jetzt starten“ im sichtbaren Bereich gegenüber den übrigen interaktiven Elementen hervor?",
+          "rubric": [
+            {
+              "value": 0,
+              "description": "Nicht sichtbar oder verdeckt."
+            },
+            {
+              "value": 1,
+              "description": "Sichtbar, aber kaum von Nebenaktionen unterscheidbar."
+            },
+            {
+              "value": 2,
+              "description": "Erkennbar, aber mit ähnlich auffälliger konkurrierender Aktion."
+            },
+            {
+              "value": 3,
+              "description": "Eindeutig hervorgehobene Hauptaktion."
+            }
+          ]
+        },
+        {
+          "id": "box",
+          "type": "box",
+          "question": "Lokalisiere ausschließlich Button „Jetzt starten“."
+        }
+      ],
+      "transform": {
+        "source_viewport": [
+          430,
+          800
+        ],
+        "crop_css_px": [
+          0,
+          0,
+          430,
+          800
+        ],
+        "scale_xy": [
+          1,
+          1
+        ],
+        "padding_px": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "device_pixel_ratio": 1,
+        "orientation": "upright",
+        "box_convention": "normalized left/top/right/bottom in sent image; source CSS equals image pixels"
+      },
+      "reference": {
+        "origin": "synthetic source DOM and Chrome geometry; all 24 original PNGs manually inspected by T02 before any model request on 2026-11-10",
+        "dom_present": true,
+        "presence": false,
+        "visibility": "covered",
+        "missing": false,
+        "unclear": false,
+        "score": 0,
+        "text_value": "Jetzt starten",
+        "candidate_matches_source": null,
+        "box_source_css_px": [
+          40,
+          379,
+          161.8125,
+          62
+        ],
+        "box_normalized": {
+          "left": 0.09302325581395349,
+          "top": 0.47375,
+          "right": 0.4693313953488372,
+          "bottom": 0.55125
+        },
+        "box_usable": false
+      },
+      "dom_evidence": {
+        "fixture": {
+          "id": "ui-test-negative-mobile",
+          "family": "ui",
+          "split": "test",
+          "case_kind": "negative",
+          "variant": "mobile"
+        },
+        "viewport": [
+          430,
+          800
+        ],
+        "dpr": 1,
+        "body_text": "SYNTHETISCHE KARTENANSICHT • PROBE B\nAutomationen Staging\nDeine Nachrichten im Blick\n\nSortiere Mitteilungen in klar getrennte Themen.\n\nKünstliches Angebot • keine Anmeldung • keine Bestellung\n\nJetzt starten\nDetails ansehen\nSo funktioniert es\n\nVorschau ohne echte Kontodaten.\n\nui • test • mobile • Rein synthetische Lernfixture\n\nAnsicht gesperrt",
+        "target": {
+          "text": "Jetzt starten",
+          "role": "button",
+          "rect": [
+            40,
+            379,
+            161.8125,
+            62
+          ],
+          "center_topmost": false,
+          "background": "rgb(255, 113, 43)",
+          "color": "rgb(255, 255, 255)",
+          "font": "700 20px / 28px Nunito, Arial, sans-serif"
+        },
+        "covers": [
+          [
+            40,
+            379,
+            161.8125,
+            62
+          ]
+        ],
+        "alternatives": [],
+        "overflow": false,
+        "buttons": [
+          {
+            "id": "target",
+            "label": "Jetzt starten",
+            "rect": [
+              40,
+              379,
+              161.8125,
+              62
+            ],
+            "background": "rgb(255, 113, 43)"
+          },
+          {
+            "id": "secondary",
+            "label": "Details ansehen",
+            "rect": [
+              40,
+              453,
+              196.296875,
+              62
+            ],
+            "background": "rgb(255, 255, 255)"
+          }
+        ],
+        "hero_buttons": 0
+      }
+    },
+    {
+      "id": "ui-test-unclear-desktop",
+      "asset_reference": "image-011",
+      "family": "ui",
+      "split": "test",
+      "case_kind": "unclear",
+      "variant": "desktop",
+      "path": "fixtures/ui-test-unclear-desktop.png",
+      "format": "png",
+      "sha256": "8b773fbc482e7820baff9b413c2181e90701dea93cde6c30dacfde0043ce231b",
+      "byte_count": 78503,
+      "dimensions": [
+        1280,
+        800
+      ],
+      "question_version": "m08-images-v1",
+      "target_description": "Button „Jetzt starten“",
+      "comparison_input": null,
+      "questions": [
+        {
+          "id": "presence",
+          "type": "noul",
+          "question": "Ist der Button „Jetzt starten“ vollständig sichtbar?"
+        },
+        {
+          "id": "score",
+          "type": "score",
+          "question": "Wie deutlich hebt sich der Button „Jetzt starten“ im sichtbaren Bereich gegenüber den übrigen interaktiven Elementen hervor?",
+          "rubric": [
+            {
+              "value": 0,
+              "description": "Nicht sichtbar oder verdeckt."
+            },
+            {
+              "value": 1,
+              "description": "Sichtbar, aber kaum von Nebenaktionen unterscheidbar."
+            },
+            {
+              "value": 2,
+              "description": "Erkennbar, aber mit ähnlich auffälliger konkurrierender Aktion."
+            },
+            {
+              "value": 3,
+              "description": "Eindeutig hervorgehobene Hauptaktion."
+            }
+          ]
+        },
+        {
+          "id": "box",
+          "type": "box",
+          "question": "Lokalisiere ausschließlich Button „Jetzt starten“."
+        }
+      ],
+      "transform": {
+        "source_viewport": [
+          1280,
+          800
+        ],
+        "crop_css_px": [
+          0,
+          0,
+          1280,
+          800
+        ],
+        "scale_xy": [
+          1,
+          1
+        ],
+        "padding_px": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "device_pixel_ratio": 1,
+        "orientation": "upright",
+        "box_convention": "normalized left/top/right/bottom in sent image; source CSS equals image pixels"
+      },
+      "reference": {
+        "origin": "synthetic source DOM and Chrome geometry; all 24 original PNGs manually inspected by T02 before any model request on 2026-11-10",
+        "dom_present": true,
+        "presence": true,
+        "visibility": "visible",
+        "missing": false,
+        "unclear": true,
+        "score": 2,
+        "text_value": "Jetzt starten",
+        "candidate_matches_source": null,
+        "box_source_css_px": [
+          229,
+          355,
+          171.8125,
+          62
+        ],
+        "box_normalized": {
+          "left": 0.17890625,
+          "top": 0.44375,
+          "right": 0.313134765625,
+          "bottom": 0.52125
+        },
+        "box_usable": true
+      },
+      "dom_evidence": {
+        "fixture": {
+          "id": "ui-test-unclear-desktop",
+          "family": "ui",
+          "split": "test",
+          "case_kind": "unclear",
+          "variant": "desktop"
+        },
+        "viewport": [
+          1280,
+          800
+        ],
+        "dpr": 1,
+        "body_text": "SYNTHETISCHE KARTENANSICHT • PROBE B\nAutomationen Staging\nDeine Nachrichten im Blick\n\nSortiere Mitteilungen in klar getrennte Themen.\n\nKünstliches Angebot • keine Anmeldung • keine Bestellung\n\nJetzt starten\nDetails ansehen\nSo funktioniert es\n\nVorschau ohne echte Kontodaten.\n\nui • test • desktop • Rein synthetische Lernfixture",
+        "target": {
+          "text": "Jetzt starten",
+          "role": "button",
+          "rect": [
+            229,
+            355,
+            171.8125,
+            62
+          ],
+          "center_topmost": true,
+          "background": "rgb(255, 113, 43)",
+          "color": "rgb(255, 255, 255)",
+          "font": "700 20px / 28px Nunito, Arial, sans-serif"
+        },
+        "covers": [],
+        "alternatives": [],
+        "overflow": false,
+        "buttons": [
+          {
+            "id": "target",
+            "label": "Jetzt starten",
+            "rect": [
+              229,
+              355,
+              171.8125,
+              62
+            ],
+            "background": "rgb(255, 113, 43)"
+          },
+          {
+            "id": "secondary",
+            "label": "Details ansehen",
+            "rect": [
+              416.8125,
+              355,
+              206.296875,
+              62
+            ],
+            "background": "rgb(255, 113, 43)"
+          }
+        ],
+        "hero_buttons": 0
+      }
+    },
+    {
+      "id": "ui-test-unclear-mobile",
+      "asset_reference": "image-012",
+      "family": "ui",
+      "split": "test",
+      "case_kind": "unclear",
+      "variant": "mobile",
+      "path": "fixtures/ui-test-unclear-mobile.png",
+      "format": "png",
+      "sha256": "e99bd3cbb815f316ae2f3e43ab74321a37c2a1847234d08dce345321c9c774df",
+      "byte_count": 63722,
+      "dimensions": [
+        430,
+        800
+      ],
+      "question_version": "m08-images-v1",
+      "target_description": "Button „Jetzt starten“",
+      "comparison_input": null,
+      "questions": [
+        {
+          "id": "presence",
+          "type": "noul",
+          "question": "Ist der Button „Jetzt starten“ vollständig sichtbar?"
+        },
+        {
+          "id": "score",
+          "type": "score",
+          "question": "Wie deutlich hebt sich der Button „Jetzt starten“ im sichtbaren Bereich gegenüber den übrigen interaktiven Elementen hervor?",
+          "rubric": [
+            {
+              "value": 0,
+              "description": "Nicht sichtbar oder verdeckt."
+            },
+            {
+              "value": 1,
+              "description": "Sichtbar, aber kaum von Nebenaktionen unterscheidbar."
+            },
+            {
+              "value": 2,
+              "description": "Erkennbar, aber mit ähnlich auffälliger konkurrierender Aktion."
+            },
+            {
+              "value": 3,
+              "description": "Eindeutig hervorgehobene Hauptaktion."
+            }
+          ]
+        },
+        {
+          "id": "box",
+          "type": "box",
+          "question": "Lokalisiere ausschließlich Button „Jetzt starten“."
+        }
+      ],
+      "transform": {
+        "source_viewport": [
+          430,
+          800
+        ],
+        "crop_css_px": [
+          0,
+          0,
+          430,
+          800
+        ],
+        "scale_xy": [
+          1,
+          1
+        ],
+        "padding_px": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "device_pixel_ratio": 1,
+        "orientation": "upright",
+        "box_convention": "normalized left/top/right/bottom in sent image; source CSS equals image pixels"
+      },
+      "reference": {
+        "origin": "synthetic source DOM and Chrome geometry; all 24 original PNGs manually inspected by T02 before any model request on 2026-11-10",
+        "dom_present": true,
+        "presence": true,
+        "visibility": "visible",
+        "missing": false,
+        "unclear": true,
+        "score": 2,
+        "text_value": "Jetzt starten",
+        "candidate_matches_source": null,
+        "box_source_css_px": [
+          40,
+          379,
+          161.8125,
+          62
+        ],
+        "box_normalized": {
+          "left": 0.09302325581395349,
+          "top": 0.47375,
+          "right": 0.4693313953488372,
+          "bottom": 0.55125
+        },
+        "box_usable": true
+      },
+      "dom_evidence": {
+        "fixture": {
+          "id": "ui-test-unclear-mobile",
+          "family": "ui",
+          "split": "test",
+          "case_kind": "unclear",
+          "variant": "mobile"
+        },
+        "viewport": [
+          430,
+          800
+        ],
+        "dpr": 1,
+        "body_text": "SYNTHETISCHE KARTENANSICHT • PROBE B\nAutomationen Staging\nDeine Nachrichten im Blick\n\nSortiere Mitteilungen in klar getrennte Themen.\n\nKünstliches Angebot • keine Anmeldung • keine Bestellung\n\nJetzt starten\nDetails ansehen\nSo funktioniert es\n\nVorschau ohne echte Kontodaten.\n\nui • test • mobile • Rein synthetische Lernfixture",
+        "target": {
+          "text": "Jetzt starten",
+          "role": "button",
+          "rect": [
+            40,
+            379,
+            161.8125,
+            62
+          ],
+          "center_topmost": true,
+          "background": "rgb(255, 113, 43)",
+          "color": "rgb(255, 255, 255)",
+          "font": "700 20px / 28px Nunito, Arial, sans-serif"
+        },
+        "covers": [],
+        "alternatives": [],
+        "overflow": false,
+        "buttons": [
+          {
+            "id": "target",
+            "label": "Jetzt starten",
+            "rect": [
+              40,
+              379,
+              161.8125,
+              62
+            ],
+            "background": "rgb(255, 113, 43)"
+          },
+          {
+            "id": "secondary",
+            "label": "Details ansehen",
+            "rect": [
+              40,
+              453,
+              196.296875,
+              62
+            ],
+            "background": "rgb(255, 113, 43)"
+          }
+        ],
+        "hero_buttons": 0
+      }
+    },
+    {
+      "id": "document-learn-positive-a",
+      "asset_reference": "image-013",
+      "family": "document",
+      "split": "learn",
+      "case_kind": "positive",
+      "variant": "a",
+      "path": "fixtures/document-learn-positive-a.png",
+      "format": "png",
+      "sha256": "8e5987f173692a819fb530289627890496f752f1937255061650959c44412912",
+      "byte_count": 67889,
+      "dimensions": [
+        800,
+        1000
+      ],
+      "question_version": "m08-images-v1",
+      "target_description": "Betragswert unmittelbar unter „Gesamtbetrag“ (nicht die Positionszeile)",
+      "comparison_input": {
+        "field": "Gesamtbetrag",
+        "value": "128,40 EUR",
+        "origin": "manually supplied synthetic comparison input; not OCR output"
+      },
+      "questions": [
+        {
+          "id": "presence",
+          "type": "noul",
+          "question": "Ist unmittelbar unter „Gesamtbetrag“ genau ein eindeutig lesbarer Betragswert sichtbar?"
+        },
+        {
+          "id": "score",
+          "type": "score",
+          "question": "Wie verlässlich stimmt der vorgegebene Wert 128,40 EUR mit dem Betragsfeld unmittelbar unter „Gesamtbetrag“ überein?",
+          "rubric": [
+            {
+              "value": 0,
+              "description": "Sichtbarer Widerspruch zum vorgegebenen Wert oder fehlendes Feld."
+            },
+            {
+              "value": 1,
+              "description": "Mehrdeutig oder verdeckt; nicht verlässlich abgleichbar."
+            },
+            {
+              "value": 2,
+              "description": "Klar lesbare Übereinstimmung mit dem vorgegebenen Wert."
+            }
+          ]
+        },
+        {
+          "id": "box",
+          "type": "box",
+          "question": "Lokalisiere ausschließlich Betragswert unmittelbar unter „Gesamtbetrag“ (nicht die Positionszeile)."
+        }
+      ],
+      "transform": {
+        "source_viewport": [
+          800,
+          1000
+        ],
+        "crop_css_px": [
+          0,
+          0,
+          800,
+          1000
+        ],
+        "scale_xy": [
+          1,
+          1
+        ],
+        "padding_px": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "device_pixel_ratio": 1,
+        "orientation": "upright",
+        "box_convention": "normalized left/top/right/bottom in sent image; source CSS equals image pixels"
+      },
+      "reference": {
+        "origin": "synthetic source DOM and Chrome geometry; all 24 original PNGs manually inspected by T02 before any model request on 2026-11-10",
+        "dom_present": true,
+        "presence": true,
+        "visibility": "visible",
+        "missing": false,
+        "unclear": false,
+        "score": 2,
+        "text_value": "128,40 EUR",
+        "candidate_matches_source": true,
+        "box_source_css_px": [
+          434,
+          333,
+          152.546875,
+          42
+        ],
+        "box_normalized": {
+          "left": 0.5425,
+          "top": 0.333,
+          "right": 0.73318359375,
+          "bottom": 0.375
+        },
+        "box_usable": true
+      },
+      "dom_evidence": {
+        "fixture": {
+          "id": "document-learn-positive-a",
+          "family": "document",
+          "split": "learn",
+          "case_kind": "positive",
+          "variant": "a"
+        },
+        "viewport": [
+          800,
+          1000
+        ],
+        "dpr": 1,
+        "body_text": "KÜNSTLICHE RECHNUNG • NICHT ZAHLBAR\nRechnung A-14017\n\nMusterbüro West • Fiktive Dienstleistung\n\nLeistung\n\nEinrichtung einer künstlichen Sortierung\n\nDatum: 03.09.2026\n\nGesamtbetrag\n128,40 EUR\nPosition\nBetrag\nBeispielleistung\n128,40 EUR\n\nKein Konto, keine Adresse und keine Zahlungsanweisung.\n\ndocument • learn • a • Synthetische Originaltexte, kein OCR-Produkt",
+        "target": {
+          "text": "128,40 EUR",
+          "role": "span",
+          "rect": [
+            434,
+            333,
+            152.546875,
+            42
+          ],
+          "center_topmost": true,
+          "background": "rgba(0, 0, 0, 0)",
+          "color": "rgb(46, 54, 62)",
+          "font": "700 28px / 42px Arial, sans-serif"
+        },
+        "covers": [],
+        "alternatives": [],
+        "overflow": false,
+        "buttons": [],
+        "hero_buttons": 0
+      }
+    },
+    {
+      "id": "document-learn-positive-b",
+      "asset_reference": "image-014",
+      "family": "document",
+      "split": "learn",
+      "case_kind": "positive",
+      "variant": "b",
+      "path": "fixtures/document-learn-positive-b.png",
+      "format": "png",
+      "sha256": "e7eeca5ec17a5b42e9366443468ff6472d5a7a021b261bf03858714933a88799",
+      "byte_count": 68170,
+      "dimensions": [
+        800,
+        1000
+      ],
+      "question_version": "m08-images-v1",
+      "target_description": "Betragswert unmittelbar unter „Gesamtbetrag“ (nicht die Positionszeile)",
+      "comparison_input": {
+        "field": "Gesamtbetrag",
+        "value": "128,40 EUR",
+        "origin": "manually supplied synthetic comparison input; not OCR output"
+      },
+      "questions": [
+        {
+          "id": "presence",
+          "type": "noul",
+          "question": "Ist unmittelbar unter „Gesamtbetrag“ genau ein eindeutig lesbarer Betragswert sichtbar?"
+        },
+        {
+          "id": "score",
+          "type": "score",
+          "question": "Wie verlässlich stimmt der vorgegebene Wert 128,40 EUR mit dem Betragsfeld unmittelbar unter „Gesamtbetrag“ überein?",
+          "rubric": [
+            {
+              "value": 0,
+              "description": "Sichtbarer Widerspruch zum vorgegebenen Wert oder fehlendes Feld."
+            },
+            {
+              "value": 1,
+              "description": "Mehrdeutig oder verdeckt; nicht verlässlich abgleichbar."
+            },
+            {
+              "value": 2,
+              "description": "Klar lesbare Übereinstimmung mit dem vorgegebenen Wert."
+            }
+          ]
+        },
+        {
+          "id": "box",
+          "type": "box",
+          "question": "Lokalisiere ausschließlich Betragswert unmittelbar unter „Gesamtbetrag“ (nicht die Positionszeile)."
+        }
+      ],
+      "transform": {
+        "source_viewport": [
+          800,
+          1000
+        ],
+        "crop_css_px": [
+          0,
+          0,
+          800,
+          1000
+        ],
+        "scale_xy": [
+          1,
+          1
+        ],
+        "padding_px": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "device_pixel_ratio": 1,
+        "orientation": "upright",
+        "box_convention": "normalized left/top/right/bottom in sent image; source CSS equals image pixels"
+      },
+      "reference": {
+        "origin": "synthetic source DOM and Chrome geometry; all 24 original PNGs manually inspected by T02 before any model request on 2026-11-10",
+        "dom_present": true,
+        "presence": true,
+        "visibility": "visible",
+        "missing": false,
+        "unclear": false,
+        "score": 2,
+        "text_value": "128,40 EUR",
+        "candidate_matches_source": true,
+        "box_source_css_px": [
+          87,
+          333,
+          152.546875,
+          42
+        ],
+        "box_normalized": {
+          "left": 0.10875,
+          "top": 0.333,
+          "right": 0.29943359375,
+          "bottom": 0.375
+        },
+        "box_usable": true
+      },
+      "dom_evidence": {
+        "fixture": {
+          "id": "document-learn-positive-b",
+          "family": "document",
+          "split": "learn",
+          "case_kind": "positive",
+          "variant": "b"
+        },
+        "viewport": [
+          800,
+          1000
+        ],
+        "dpr": 1,
+        "body_text": "KÜNSTLICHE RECHNUNG • NICHT ZAHLBAR\nRechnung A-14017\n\nMusterbüro West • Fiktive Dienstleistung\n\nLeistung\n\nEinrichtung einer künstlichen Sortierung\n\nDatum: 03.09.2026\n\nGesamtbetrag\n128,40 EUR\nPosition\nBetrag\nBeispielleistung\n128,40 EUR\n\nKein Konto, keine Adresse und keine Zahlungsanweisung.\n\ndocument • learn • b • Synthetische Originaltexte, kein OCR-Produkt",
+        "target": {
+          "text": "128,40 EUR",
+          "role": "span",
+          "rect": [
+            87,
+            333,
+            152.546875,
+            42
+          ],
+          "center_topmost": true,
+          "background": "rgba(0, 0, 0, 0)",
+          "color": "rgb(46, 54, 62)",
+          "font": "700 28px / 42px Arial, sans-serif"
+        },
+        "covers": [],
+        "alternatives": [],
+        "overflow": false,
+        "buttons": [],
+        "hero_buttons": 0
+      }
+    },
+    {
+      "id": "document-learn-negative-a",
+      "asset_reference": "image-015",
+      "family": "document",
+      "split": "learn",
+      "case_kind": "negative",
+      "variant": "a",
+      "path": "fixtures/document-learn-negative-a.png",
+      "format": "png",
+      "sha256": "528748a594b69a059c3d773332f17e7956be1f99b7dced9003dbfa587e2049d2",
+      "byte_count": 67633,
+      "dimensions": [
+        800,
+        1000
+      ],
+      "question_version": "m08-images-v1",
+      "target_description": "Betragswert unmittelbar unter „Gesamtbetrag“ (nicht die Positionszeile)",
+      "comparison_input": {
+        "field": "Gesamtbetrag",
+        "value": "182,40 EUR",
+        "origin": "manually supplied synthetic comparison input; not OCR output"
+      },
+      "questions": [
+        {
+          "id": "presence",
+          "type": "noul",
+          "question": "Ist unmittelbar unter „Gesamtbetrag“ genau ein eindeutig lesbarer Betragswert sichtbar?"
+        },
+        {
+          "id": "score",
+          "type": "score",
+          "question": "Wie verlässlich stimmt der vorgegebene Wert 182,40 EUR mit dem Betragsfeld unmittelbar unter „Gesamtbetrag“ überein?",
+          "rubric": [
+            {
+              "value": 0,
+              "description": "Sichtbarer Widerspruch zum vorgegebenen Wert oder fehlendes Feld."
+            },
+            {
+              "value": 1,
+              "description": "Mehrdeutig oder verdeckt; nicht verlässlich abgleichbar."
+            },
+            {
+              "value": 2,
+              "description": "Klar lesbare Übereinstimmung mit dem vorgegebenen Wert."
+            }
+          ]
+        },
+        {
+          "id": "box",
+          "type": "box",
+          "question": "Lokalisiere ausschließlich Betragswert unmittelbar unter „Gesamtbetrag“ (nicht die Positionszeile)."
+        }
+      ],
+      "transform": {
+        "source_viewport": [
+          800,
+          1000
+        ],
+        "crop_css_px": [
+          0,
+          0,
+          800,
+          1000
+        ],
+        "scale_xy": [
+          1,
+          1
+        ],
+        "padding_px": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "device_pixel_ratio": 1,
+        "orientation": "upright",
+        "box_convention": "normalized left/top/right/bottom in sent image; source CSS equals image pixels"
+      },
+      "reference": {
+        "origin": "synthetic source DOM and Chrome geometry; all 24 original PNGs manually inspected by T02 before any model request on 2026-11-10",
+        "dom_present": true,
+        "presence": true,
+        "visibility": "visible",
+        "missing": false,
+        "unclear": false,
+        "score": 0,
+        "text_value": "128,40 EUR",
+        "candidate_matches_source": false,
+        "box_source_css_px": [
+          434,
+          333,
+          152.546875,
+          42
+        ],
+        "box_normalized": {
+          "left": 0.5425,
+          "top": 0.333,
+          "right": 0.73318359375,
+          "bottom": 0.375
+        },
+        "box_usable": true
+      },
+      "dom_evidence": {
+        "fixture": {
+          "id": "document-learn-negative-a",
+          "family": "document",
+          "split": "learn",
+          "case_kind": "negative",
+          "variant": "a"
+        },
+        "viewport": [
+          800,
+          1000
+        ],
+        "dpr": 1,
+        "body_text": "KÜNSTLICHE RECHNUNG • NICHT ZAHLBAR\nRechnung A-14014\n\nMusterbüro West • Fiktive Dienstleistung\n\nLeistung\n\nEinrichtung einer künstlichen Sortierung\n\nDatum: 03.09.2026\n\nGesamtbetrag\n128,40 EUR\nPosition\nBetrag\nBeispielleistung\n128,40 EUR\n\nKein Konto, keine Adresse und keine Zahlungsanweisung.\n\ndocument • learn • a • Synthetische Originaltexte, kein OCR-Produkt",
+        "target": {
+          "text": "128,40 EUR",
+          "role": "span",
+          "rect": [
+            434,
+            333,
+            152.546875,
+            42
+          ],
+          "center_topmost": true,
+          "background": "rgba(0, 0, 0, 0)",
+          "color": "rgb(46, 54, 62)",
+          "font": "700 28px / 42px Arial, sans-serif"
+        },
+        "covers": [],
+        "alternatives": [],
+        "overflow": false,
+        "buttons": [],
+        "hero_buttons": 0
+      }
+    },
+    {
+      "id": "document-learn-negative-b",
+      "asset_reference": "image-016",
+      "family": "document",
+      "split": "learn",
+      "case_kind": "negative",
+      "variant": "b",
+      "path": "fixtures/document-learn-negative-b.png",
+      "format": "png",
+      "sha256": "aab0330457ad4659589fa72e3eeb41530b1e08678300a0601cd9b83b942a6fc4",
+      "byte_count": 67229,
+      "dimensions": [
+        800,
+        1000
+      ],
+      "question_version": "m08-images-v1",
+      "target_description": "Betragswert unmittelbar unter „Gesamtbetrag“ (nicht die Positionszeile)",
+      "comparison_input": {
+        "field": "Gesamtbetrag",
+        "value": "128,40 EUR",
+        "origin": "manually supplied synthetic comparison input; not OCR output"
+      },
+      "questions": [
+        {
+          "id": "presence",
+          "type": "noul",
+          "question": "Ist unmittelbar unter „Gesamtbetrag“ genau ein eindeutig lesbarer Betragswert sichtbar?"
+        },
+        {
+          "id": "score",
+          "type": "score",
+          "question": "Wie verlässlich stimmt der vorgegebene Wert 128,40 EUR mit dem Betragsfeld unmittelbar unter „Gesamtbetrag“ überein?",
+          "rubric": [
+            {
+              "value": 0,
+              "description": "Sichtbarer Widerspruch zum vorgegebenen Wert oder fehlendes Feld."
+            },
+            {
+              "value": 1,
+              "description": "Mehrdeutig oder verdeckt; nicht verlässlich abgleichbar."
+            },
+            {
+              "value": 2,
+              "description": "Klar lesbare Übereinstimmung mit dem vorgegebenen Wert."
+            }
+          ]
+        },
+        {
+          "id": "box",
+          "type": "box",
+          "question": "Lokalisiere ausschließlich Betragswert unmittelbar unter „Gesamtbetrag“ (nicht die Positionszeile)."
+        }
+      ],
+      "transform": {
+        "source_viewport": [
+          800,
+          1000
+        ],
+        "crop_css_px": [
+          0,
+          0,
+          800,
+          1000
+        ],
+        "scale_xy": [
+          1,
+          1
+        ],
+        "padding_px": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "device_pixel_ratio": 1,
+        "orientation": "upright",
+        "box_convention": "normalized left/top/right/bottom in sent image; source CSS equals image pixels"
+      },
+      "reference": {
+        "origin": "synthetic source DOM and Chrome geometry; all 24 original PNGs manually inspected by T02 before any model request on 2026-11-10",
+        "dom_present": false,
+        "presence": false,
+        "visibility": "absent",
+        "missing": true,
+        "unclear": false,
+        "score": 0,
+        "text_value": null,
+        "candidate_matches_source": null,
+        "box_source_css_px": null,
+        "box_normalized": null,
+        "box_usable": false
+      },
+      "dom_evidence": {
+        "fixture": {
+          "id": "document-learn-negative-b",
+          "family": "document",
+          "split": "learn",
+          "case_kind": "negative",
+          "variant": "b"
+        },
+        "viewport": [
+          800,
+          1000
+        ],
+        "dpr": 1,
+        "body_text": "KÜNSTLICHE RECHNUNG • NICHT ZAHLBAR\nRechnung A-14014\n\nMusterbüro West • Fiktive Dienstleistung\n\nLeistung\n\nEinrichtung einer künstlichen Sortierung\n\nDatum: 03.09.2026\n\nGesamtbetrag\nNicht angegeben\nPosition\nBetrag\nBeispielleistung\n128,40 EUR\n\nKein Konto, keine Adresse und keine Zahlungsanweisung.\n\ndocument • learn • b • Synthetische Originaltexte, kein OCR-Produkt",
+        "target": null,
+        "covers": [],
+        "alternatives": [],
+        "overflow": false,
+        "buttons": [],
+        "hero_buttons": 0
+      }
+    },
+    {
+      "id": "document-learn-unclear-a",
+      "asset_reference": "image-017",
+      "family": "document",
+      "split": "learn",
+      "case_kind": "unclear",
+      "variant": "a",
+      "path": "fixtures/document-learn-unclear-a.png",
+      "format": "png",
+      "sha256": "57cadf0f1b515dd437ca9389f025424474bf695305c6ba6c6efb7bc07b8bb36c",
+      "byte_count": 66894,
+      "dimensions": [
+        800,
+        1000
+      ],
+      "question_version": "m08-images-v1",
+      "target_description": "Betragswert unmittelbar unter „Gesamtbetrag“ (nicht die Positionszeile)",
+      "comparison_input": {
+        "field": "Gesamtbetrag",
+        "value": "128,40 EUR",
+        "origin": "manually supplied synthetic comparison input; not OCR output"
+      },
+      "questions": [
+        {
+          "id": "presence",
+          "type": "noul",
+          "question": "Ist unmittelbar unter „Gesamtbetrag“ genau ein eindeutig lesbarer Betragswert sichtbar?"
+        },
+        {
+          "id": "score",
+          "type": "score",
+          "question": "Wie verlässlich stimmt der vorgegebene Wert 128,40 EUR mit dem Betragsfeld unmittelbar unter „Gesamtbetrag“ überein?",
+          "rubric": [
+            {
+              "value": 0,
+              "description": "Sichtbarer Widerspruch zum vorgegebenen Wert oder fehlendes Feld."
+            },
+            {
+              "value": 1,
+              "description": "Mehrdeutig oder verdeckt; nicht verlässlich abgleichbar."
+            },
+            {
+              "value": 2,
+              "description": "Klar lesbare Übereinstimmung mit dem vorgegebenen Wert."
+            }
+          ]
+        },
+        {
+          "id": "box",
+          "type": "box",
+          "question": "Lokalisiere ausschließlich Betragswert unmittelbar unter „Gesamtbetrag“ (nicht die Positionszeile)."
+        }
+      ],
+      "transform": {
+        "source_viewport": [
+          800,
+          1000
+        ],
+        "crop_css_px": [
+          0,
+          0,
+          800,
+          1000
+        ],
+        "scale_xy": [
+          1,
+          1
+        ],
+        "padding_px": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "device_pixel_ratio": 1,
+        "orientation": "upright",
+        "box_convention": "normalized left/top/right/bottom in sent image; source CSS equals image pixels"
+      },
+      "reference": {
+        "origin": "synthetic source DOM and Chrome geometry; all 24 original PNGs manually inspected by T02 before any model request on 2026-11-10",
+        "dom_present": true,
+        "presence": false,
+        "visibility": "covered",
+        "missing": false,
+        "unclear": true,
+        "score": 1,
+        "text_value": "128,40 EUR",
+        "candidate_matches_source": true,
+        "box_source_css_px": [
+          434,
+          333,
+          152.546875,
+          42
+        ],
+        "box_normalized": {
+          "left": 0.5425,
+          "top": 0.333,
+          "right": 0.73318359375,
+          "bottom": 0.375
+        },
+        "box_usable": false
+      },
+      "dom_evidence": {
+        "fixture": {
+          "id": "document-learn-unclear-a",
+          "family": "document",
+          "split": "learn",
+          "case_kind": "unclear",
+          "variant": "a"
+        },
+        "viewport": [
+          800,
+          1000
+        ],
+        "dpr": 1,
+        "body_text": "KÜNSTLICHE RECHNUNG • NICHT ZAHLBAR\nRechnung A-14019\n\nMusterbüro West • Fiktive Dienstleistung\n\nLeistung\n\nEinrichtung einer künstlichen Sortierung\n\nDatum: 03.09.2026\n\nGesamtbetrag\n128,40 EUR\nPosition\nBetrag\nBeispielleistung\n128,40 EUR\n\nKein Konto, keine Adresse und keine Zahlungsanweisung.\n\ndocument • learn • a • Synthetische Originaltexte, kein OCR-Produkt\n\nFeld verdeckt",
+        "target": {
+          "text": "128,40 EUR",
+          "role": "span",
+          "rect": [
+            434,
+            333,
+            152.546875,
+            42
+          ],
+          "center_topmost": false,
+          "background": "rgba(0, 0, 0, 0)",
+          "color": "rgb(46, 54, 62)",
+          "font": "700 28px / 42px Arial, sans-serif"
+        },
+        "covers": [
+          [
+            434,
+            333,
+            152.546875,
+            42
+          ]
+        ],
+        "alternatives": [],
+        "overflow": false,
+        "buttons": [],
+        "hero_buttons": 0
+      }
+    },
+    {
+      "id": "document-learn-unclear-b",
+      "asset_reference": "image-018",
+      "family": "document",
+      "split": "learn",
+      "case_kind": "unclear",
+      "variant": "b",
+      "path": "fixtures/document-learn-unclear-b.png",
+      "format": "png",
+      "sha256": "fa47ee28414c1719a46a85c3ee082ade7b75240f7a799e3832edca5b2b4b1d46",
+      "byte_count": 71467,
+      "dimensions": [
+        800,
+        1000
+      ],
+      "question_version": "m08-images-v1",
+      "target_description": "Betragswert unmittelbar unter „Gesamtbetrag“ (nicht die Positionszeile)",
+      "comparison_input": {
+        "field": "Gesamtbetrag",
+        "value": "128,40 EUR",
+        "origin": "manually supplied synthetic comparison input; not OCR output"
+      },
+      "questions": [
+        {
+          "id": "presence",
+          "type": "noul",
+          "question": "Ist unmittelbar unter „Gesamtbetrag“ genau ein eindeutig lesbarer Betragswert sichtbar?"
+        },
+        {
+          "id": "score",
+          "type": "score",
+          "question": "Wie verlässlich stimmt der vorgegebene Wert 128,40 EUR mit dem Betragsfeld unmittelbar unter „Gesamtbetrag“ überein?",
+          "rubric": [
+            {
+              "value": 0,
+              "description": "Sichtbarer Widerspruch zum vorgegebenen Wert oder fehlendes Feld."
+            },
+            {
+              "value": 1,
+              "description": "Mehrdeutig oder verdeckt; nicht verlässlich abgleichbar."
+            },
+            {
+              "value": 2,
+              "description": "Klar lesbare Übereinstimmung mit dem vorgegebenen Wert."
+            }
+          ]
+        },
+        {
+          "id": "box",
+          "type": "box",
+          "question": "Lokalisiere ausschließlich Betragswert unmittelbar unter „Gesamtbetrag“ (nicht die Positionszeile)."
+        }
+      ],
+      "transform": {
+        "source_viewport": [
+          800,
+          1000
+        ],
+        "crop_css_px": [
+          0,
+          0,
+          800,
+          1000
+        ],
+        "scale_xy": [
+          1,
+          1
+        ],
+        "padding_px": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "device_pixel_ratio": 1,
+        "orientation": "upright",
+        "box_convention": "normalized left/top/right/bottom in sent image; source CSS equals image pixels"
+      },
+      "reference": {
+        "origin": "synthetic source DOM and Chrome geometry; all 24 original PNGs manually inspected by T02 before any model request on 2026-11-10",
+        "dom_present": true,
+        "presence": null,
+        "visibility": "ambiguous",
+        "missing": false,
+        "unclear": true,
+        "score": 1,
+        "text_value": "128,40 EUR",
+        "candidate_matches_source": true,
+        "box_source_css_px": [
+          87,
+          333,
+          152.546875,
+          42
+        ],
+        "box_normalized": {
+          "left": 0.10875,
+          "top": 0.333,
+          "right": 0.29943359375,
+          "bottom": 0.375
+        },
+        "box_usable": false
+      },
+      "dom_evidence": {
+        "fixture": {
+          "id": "document-learn-unclear-b",
+          "family": "document",
+          "split": "learn",
+          "case_kind": "unclear",
+          "variant": "b"
+        },
+        "viewport": [
+          800,
+          1000
+        ],
+        "dpr": 1,
+        "body_text": "KÜNSTLICHE RECHNUNG • NICHT ZAHLBAR\nRechnung A-14019\n\nMusterbüro West • Fiktive Dienstleistung\n\nLeistung\n\nEinrichtung einer künstlichen Sortierung\n\nDatum: 03.09.2026\n\nGesamtbetrag\n128,40 EUR124,80 EUR\nPosition\nBetrag\nBeispielleistung\n128,40 EUR\n\nKein Konto, keine Adresse und keine Zahlungsanweisung.\n\ndocument • learn • b • Synthetische Originaltexte, kein OCR-Produkt",
+        "target": {
+          "text": "128,40 EUR",
+          "role": "span",
+          "rect": [
+            87,
+            333,
+            152.546875,
+            42
+          ],
+          "center_topmost": true,
+          "background": "rgba(0, 0, 0, 0)",
+          "color": "rgb(46, 54, 62)",
+          "font": "700 28px / 42px Arial, sans-serif"
+        },
+        "covers": [],
+        "alternatives": [
+          {
+            "text": "124,80 EUR",
+            "rect": [
+              263.546875,
+              338,
+              152.546875,
+              31
+            ]
+          }
+        ],
+        "overflow": false,
+        "buttons": [],
+        "hero_buttons": 0
+      }
+    },
+    {
+      "id": "document-test-positive-a",
+      "asset_reference": "image-019",
+      "family": "document",
+      "split": "test",
+      "case_kind": "positive",
+      "variant": "a",
+      "path": "fixtures/document-test-positive-a.png",
+      "format": "png",
+      "sha256": "f6a28da7ee1acc1bd659795209cb97588d3149da4256db870cbfcebfc0709ac4",
+      "byte_count": 69008,
+      "dimensions": [
+        800,
+        1000
+      ],
+      "question_version": "m08-images-v1",
+      "target_description": "Betragswert unmittelbar unter „Gesamtbetrag“ (nicht die Positionszeile)",
+      "comparison_input": {
+        "field": "Gesamtbetrag",
+        "value": "247,90 EUR",
+        "origin": "manually supplied synthetic comparison input; not OCR output"
+      },
+      "questions": [
+        {
+          "id": "presence",
+          "type": "noul",
+          "question": "Ist unmittelbar unter „Gesamtbetrag“ genau ein eindeutig lesbarer Betragswert sichtbar?"
+        },
+        {
+          "id": "score",
+          "type": "score",
+          "question": "Wie verlässlich stimmt der vorgegebene Wert 247,90 EUR mit dem Betragsfeld unmittelbar unter „Gesamtbetrag“ überein?",
+          "rubric": [
+            {
+              "value": 0,
+              "description": "Sichtbarer Widerspruch zum vorgegebenen Wert oder fehlendes Feld."
+            },
+            {
+              "value": 1,
+              "description": "Mehrdeutig oder verdeckt; nicht verlässlich abgleichbar."
+            },
+            {
+              "value": 2,
+              "description": "Klar lesbare Übereinstimmung mit dem vorgegebenen Wert."
+            }
+          ]
+        },
+        {
+          "id": "box",
+          "type": "box",
+          "question": "Lokalisiere ausschließlich Betragswert unmittelbar unter „Gesamtbetrag“ (nicht die Positionszeile)."
+        }
+      ],
+      "transform": {
+        "source_viewport": [
+          800,
+          1000
+        ],
+        "crop_css_px": [
+          0,
+          0,
+          800,
+          1000
+        ],
+        "scale_xy": [
+          1,
+          1
+        ],
+        "padding_px": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "device_pixel_ratio": 1,
+        "orientation": "upright",
+        "box_convention": "normalized left/top/right/bottom in sent image; source CSS equals image pixels"
+      },
+      "reference": {
+        "origin": "synthetic source DOM and Chrome geometry; all 24 original PNGs manually inspected by T02 before any model request on 2026-11-10",
+        "dom_present": true,
+        "presence": true,
+        "visibility": "visible",
+        "missing": false,
+        "unclear": false,
+        "score": 2,
+        "text_value": "247,90 EUR",
+        "candidate_matches_source": true,
+        "box_source_css_px": [
+          87,
+          512,
+          152.546875,
+          42
+        ],
+        "box_normalized": {
+          "left": 0.10875,
+          "top": 0.512,
+          "right": 0.29943359375,
+          "bottom": 0.554
+        },
+        "box_usable": true
+      },
+      "dom_evidence": {
+        "fixture": {
+          "id": "document-test-positive-a",
+          "family": "document",
+          "split": "test",
+          "case_kind": "positive",
+          "variant": "a"
+        },
+        "viewport": [
+          800,
+          1000
+        ],
+        "dpr": 1,
+        "body_text": "KÜNSTLICHE RECHNUNG • NICHT ZAHLBAR\nRechnung B-26027\n\nBeispielwerk Nord • Fiktive Dienstleistung\n\nLeistung\n\nDokumentation eines Beispielprozesses\n\nDatum: 12.10.2026\n\nGesamtbetrag\n247,90 EUR\nPosition\nBetrag\nBeispielleistung\n247,90 EUR\n\nKein Konto, keine Adresse und keine Zahlungsanweisung.\n\ndocument • test • a • Synthetische Originaltexte, kein OCR-Produkt",
+        "target": {
+          "text": "247,90 EUR",
+          "role": "span",
+          "rect": [
+            87,
+            512,
+            152.546875,
+            42
+          ],
+          "center_topmost": true,
+          "background": "rgba(0, 0, 0, 0)",
+          "color": "rgb(46, 54, 62)",
+          "font": "700 28px / 42px Arial, sans-serif"
+        },
+        "covers": [],
+        "alternatives": [],
+        "overflow": false,
+        "buttons": [],
+        "hero_buttons": 0
+      }
+    },
+    {
+      "id": "document-test-positive-b",
+      "asset_reference": "image-020",
+      "family": "document",
+      "split": "test",
+      "case_kind": "positive",
+      "variant": "b",
+      "path": "fixtures/document-test-positive-b.png",
+      "format": "png",
+      "sha256": "4f039b19dba974de8cf3915453ee3dce0ee352360e02991c31bb82cc4f9e0e38",
+      "byte_count": 68982,
+      "dimensions": [
+        800,
+        1000
+      ],
+      "question_version": "m08-images-v1",
+      "target_description": "Betragswert unmittelbar unter „Gesamtbetrag“ (nicht die Positionszeile)",
+      "comparison_input": {
+        "field": "Gesamtbetrag",
+        "value": "247,90 EUR",
+        "origin": "manually supplied synthetic comparison input; not OCR output"
+      },
+      "questions": [
+        {
+          "id": "presence",
+          "type": "noul",
+          "question": "Ist unmittelbar unter „Gesamtbetrag“ genau ein eindeutig lesbarer Betragswert sichtbar?"
+        },
+        {
+          "id": "score",
+          "type": "score",
+          "question": "Wie verlässlich stimmt der vorgegebene Wert 247,90 EUR mit dem Betragsfeld unmittelbar unter „Gesamtbetrag“ überein?",
+          "rubric": [
+            {
+              "value": 0,
+              "description": "Sichtbarer Widerspruch zum vorgegebenen Wert oder fehlendes Feld."
+            },
+            {
+              "value": 1,
+              "description": "Mehrdeutig oder verdeckt; nicht verlässlich abgleichbar."
+            },
+            {
+              "value": 2,
+              "description": "Klar lesbare Übereinstimmung mit dem vorgegebenen Wert."
+            }
+          ]
+        },
+        {
+          "id": "box",
+          "type": "box",
+          "question": "Lokalisiere ausschließlich Betragswert unmittelbar unter „Gesamtbetrag“ (nicht die Positionszeile)."
+        }
+      ],
+      "transform": {
+        "source_viewport": [
+          800,
+          1000
+        ],
+        "crop_css_px": [
+          0,
+          0,
+          800,
+          1000
+        ],
+        "scale_xy": [
+          1,
+          1
+        ],
+        "padding_px": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "device_pixel_ratio": 1,
+        "orientation": "upright",
+        "box_convention": "normalized left/top/right/bottom in sent image; source CSS equals image pixels"
+      },
+      "reference": {
+        "origin": "synthetic source DOM and Chrome geometry; all 24 original PNGs manually inspected by T02 before any model request on 2026-11-10",
+        "dom_present": true,
+        "presence": true,
+        "visibility": "visible",
+        "missing": false,
+        "unclear": false,
+        "score": 2,
+        "text_value": "247,90 EUR",
+        "candidate_matches_source": true,
+        "box_source_css_px": [
+          87,
+          344,
+          152.546875,
+          42
+        ],
+        "box_normalized": {
+          "left": 0.10875,
+          "top": 0.344,
+          "right": 0.29943359375,
+          "bottom": 0.386
+        },
+        "box_usable": true
+      },
+      "dom_evidence": {
+        "fixture": {
+          "id": "document-test-positive-b",
+          "family": "document",
+          "split": "test",
+          "case_kind": "positive",
+          "variant": "b"
+        },
+        "viewport": [
+          800,
+          1000
+        ],
+        "dpr": 1,
+        "body_text": "KÜNSTLICHE RECHNUNG • NICHT ZAHLBAR\nRechnung B-26027\n\nBeispielwerk Nord • Fiktive Dienstleistung\n\nLeistung\n\nDokumentation eines Beispielprozesses\n\nDatum: 12.10.2026\n\nGesamtbetrag\n247,90 EUR\nPosition\nBetrag\nBeispielleistung\n247,90 EUR\n\nKein Konto, keine Adresse und keine Zahlungsanweisung.\n\ndocument • test • b • Synthetische Originaltexte, kein OCR-Produkt",
+        "target": {
+          "text": "247,90 EUR",
+          "role": "span",
+          "rect": [
+            87,
+            344,
+            152.546875,
+            42
+          ],
+          "center_topmost": true,
+          "background": "rgba(0, 0, 0, 0)",
+          "color": "rgb(46, 54, 62)",
+          "font": "700 28px / 42px Arial, sans-serif"
+        },
+        "covers": [],
+        "alternatives": [],
+        "overflow": false,
+        "buttons": [],
+        "hero_buttons": 0
+      }
+    },
+    {
+      "id": "document-test-negative-a",
+      "asset_reference": "image-021",
+      "family": "document",
+      "split": "test",
+      "case_kind": "negative",
+      "variant": "a",
+      "path": "fixtures/document-test-negative-a.png",
+      "format": "png",
+      "sha256": "ba7a6d74349eb7fb0b646cab38885f0b38bfad4995f0d6c8e8321c3f8e1b2897",
+      "byte_count": 68948,
+      "dimensions": [
+        800,
+        1000
+      ],
+      "question_version": "m08-images-v1",
+      "target_description": "Betragswert unmittelbar unter „Gesamtbetrag“ (nicht die Positionszeile)",
+      "comparison_input": {
+        "field": "Gesamtbetrag",
+        "value": "274,90 EUR",
+        "origin": "manually supplied synthetic comparison input; not OCR output"
+      },
+      "questions": [
+        {
+          "id": "presence",
+          "type": "noul",
+          "question": "Ist unmittelbar unter „Gesamtbetrag“ genau ein eindeutig lesbarer Betragswert sichtbar?"
+        },
+        {
+          "id": "score",
+          "type": "score",
+          "question": "Wie verlässlich stimmt der vorgegebene Wert 274,90 EUR mit dem Betragsfeld unmittelbar unter „Gesamtbetrag“ überein?",
+          "rubric": [
+            {
+              "value": 0,
+              "description": "Sichtbarer Widerspruch zum vorgegebenen Wert oder fehlendes Feld."
+            },
+            {
+              "value": 1,
+              "description": "Mehrdeutig oder verdeckt; nicht verlässlich abgleichbar."
+            },
+            {
+              "value": 2,
+              "description": "Klar lesbare Übereinstimmung mit dem vorgegebenen Wert."
+            }
+          ]
+        },
+        {
+          "id": "box",
+          "type": "box",
+          "question": "Lokalisiere ausschließlich Betragswert unmittelbar unter „Gesamtbetrag“ (nicht die Positionszeile)."
+        }
+      ],
+      "transform": {
+        "source_viewport": [
+          800,
+          1000
+        ],
+        "crop_css_px": [
+          0,
+          0,
+          800,
+          1000
+        ],
+        "scale_xy": [
+          1,
+          1
+        ],
+        "padding_px": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "device_pixel_ratio": 1,
+        "orientation": "upright",
+        "box_convention": "normalized left/top/right/bottom in sent image; source CSS equals image pixels"
+      },
+      "reference": {
+        "origin": "synthetic source DOM and Chrome geometry; all 24 original PNGs manually inspected by T02 before any model request on 2026-11-10",
+        "dom_present": true,
+        "presence": true,
+        "visibility": "visible",
+        "missing": false,
+        "unclear": false,
+        "score": 0,
+        "text_value": "247,90 EUR",
+        "candidate_matches_source": false,
+        "box_source_css_px": [
+          87,
+          512,
+          152.546875,
+          42
+        ],
+        "box_normalized": {
+          "left": 0.10875,
+          "top": 0.512,
+          "right": 0.29943359375,
+          "bottom": 0.554
+        },
+        "box_usable": true
+      },
+      "dom_evidence": {
+        "fixture": {
+          "id": "document-test-negative-a",
+          "family": "document",
+          "split": "test",
+          "case_kind": "negative",
+          "variant": "a"
+        },
+        "viewport": [
+          800,
+          1000
+        ],
+        "dpr": 1,
+        "body_text": "KÜNSTLICHE RECHNUNG • NICHT ZAHLBAR\nRechnung B-26024\n\nBeispielwerk Nord • Fiktive Dienstleistung\n\nLeistung\n\nDokumentation eines Beispielprozesses\n\nDatum: 12.10.2026\n\nGesamtbetrag\n247,90 EUR\nPosition\nBetrag\nBeispielleistung\n247,90 EUR\n\nKein Konto, keine Adresse und keine Zahlungsanweisung.\n\ndocument • test • a • Synthetische Originaltexte, kein OCR-Produkt",
+        "target": {
+          "text": "247,90 EUR",
+          "role": "span",
+          "rect": [
+            87,
+            512,
+            152.546875,
+            42
+          ],
+          "center_topmost": true,
+          "background": "rgba(0, 0, 0, 0)",
+          "color": "rgb(46, 54, 62)",
+          "font": "700 28px / 42px Arial, sans-serif"
+        },
+        "covers": [],
+        "alternatives": [],
+        "overflow": false,
+        "buttons": [],
+        "hero_buttons": 0
+      }
+    },
+    {
+      "id": "document-test-negative-b",
+      "asset_reference": "image-022",
+      "family": "document",
+      "split": "test",
+      "case_kind": "negative",
+      "variant": "b",
+      "path": "fixtures/document-test-negative-b.png",
+      "format": "png",
+      "sha256": "bf99c5ec3b67a3e527a4140993598df7d3dc69e62101d44e43f540e808ac28f5",
+      "byte_count": 68186,
+      "dimensions": [
+        800,
+        1000
+      ],
+      "question_version": "m08-images-v1",
+      "target_description": "Betragswert unmittelbar unter „Gesamtbetrag“ (nicht die Positionszeile)",
+      "comparison_input": {
+        "field": "Gesamtbetrag",
+        "value": "247,90 EUR",
+        "origin": "manually supplied synthetic comparison input; not OCR output"
+      },
+      "questions": [
+        {
+          "id": "presence",
+          "type": "noul",
+          "question": "Ist unmittelbar unter „Gesamtbetrag“ genau ein eindeutig lesbarer Betragswert sichtbar?"
+        },
+        {
+          "id": "score",
+          "type": "score",
+          "question": "Wie verlässlich stimmt der vorgegebene Wert 247,90 EUR mit dem Betragsfeld unmittelbar unter „Gesamtbetrag“ überein?",
+          "rubric": [
+            {
+              "value": 0,
+              "description": "Sichtbarer Widerspruch zum vorgegebenen Wert oder fehlendes Feld."
+            },
+            {
+              "value": 1,
+              "description": "Mehrdeutig oder verdeckt; nicht verlässlich abgleichbar."
+            },
+            {
+              "value": 2,
+              "description": "Klar lesbare Übereinstimmung mit dem vorgegebenen Wert."
+            }
+          ]
+        },
+        {
+          "id": "box",
+          "type": "box",
+          "question": "Lokalisiere ausschließlich Betragswert unmittelbar unter „Gesamtbetrag“ (nicht die Positionszeile)."
+        }
+      ],
+      "transform": {
+        "source_viewport": [
+          800,
+          1000
+        ],
+        "crop_css_px": [
+          0,
+          0,
+          800,
+          1000
+        ],
+        "scale_xy": [
+          1,
+          1
+        ],
+        "padding_px": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "device_pixel_ratio": 1,
+        "orientation": "upright",
+        "box_convention": "normalized left/top/right/bottom in sent image; source CSS equals image pixels"
+      },
+      "reference": {
+        "origin": "synthetic source DOM and Chrome geometry; all 24 original PNGs manually inspected by T02 before any model request on 2026-11-10",
+        "dom_present": false,
+        "presence": false,
+        "visibility": "absent",
+        "missing": true,
+        "unclear": false,
+        "score": 0,
+        "text_value": null,
+        "candidate_matches_source": null,
+        "box_source_css_px": null,
+        "box_normalized": null,
+        "box_usable": false
+      },
+      "dom_evidence": {
+        "fixture": {
+          "id": "document-test-negative-b",
+          "family": "document",
+          "split": "test",
+          "case_kind": "negative",
+          "variant": "b"
+        },
+        "viewport": [
+          800,
+          1000
+        ],
+        "dpr": 1,
+        "body_text": "KÜNSTLICHE RECHNUNG • NICHT ZAHLBAR\nRechnung B-26024\n\nBeispielwerk Nord • Fiktive Dienstleistung\n\nLeistung\n\nDokumentation eines Beispielprozesses\n\nDatum: 12.10.2026\n\nGesamtbetrag\nNicht angegeben\nPosition\nBetrag\nBeispielleistung\n247,90 EUR\n\nKein Konto, keine Adresse und keine Zahlungsanweisung.\n\ndocument • test • b • Synthetische Originaltexte, kein OCR-Produkt",
+        "target": null,
+        "covers": [],
+        "alternatives": [],
+        "overflow": false,
+        "buttons": [],
+        "hero_buttons": 0
+      }
+    },
+    {
+      "id": "document-test-unclear-a",
+      "asset_reference": "image-023",
+      "family": "document",
+      "split": "test",
+      "case_kind": "unclear",
+      "variant": "a",
+      "path": "fixtures/document-test-unclear-a.png",
+      "format": "png",
+      "sha256": "fa56a7438285284bd3098655f0005a55f5e2d42aaeb39c272324c387dc161898",
+      "byte_count": 67879,
+      "dimensions": [
+        800,
+        1000
+      ],
+      "question_version": "m08-images-v1",
+      "target_description": "Betragswert unmittelbar unter „Gesamtbetrag“ (nicht die Positionszeile)",
+      "comparison_input": {
+        "field": "Gesamtbetrag",
+        "value": "247,90 EUR",
+        "origin": "manually supplied synthetic comparison input; not OCR output"
+      },
+      "questions": [
+        {
+          "id": "presence",
+          "type": "noul",
+          "question": "Ist unmittelbar unter „Gesamtbetrag“ genau ein eindeutig lesbarer Betragswert sichtbar?"
+        },
+        {
+          "id": "score",
+          "type": "score",
+          "question": "Wie verlässlich stimmt der vorgegebene Wert 247,90 EUR mit dem Betragsfeld unmittelbar unter „Gesamtbetrag“ überein?",
+          "rubric": [
+            {
+              "value": 0,
+              "description": "Sichtbarer Widerspruch zum vorgegebenen Wert oder fehlendes Feld."
+            },
+            {
+              "value": 1,
+              "description": "Mehrdeutig oder verdeckt; nicht verlässlich abgleichbar."
+            },
+            {
+              "value": 2,
+              "description": "Klar lesbare Übereinstimmung mit dem vorgegebenen Wert."
+            }
+          ]
+        },
+        {
+          "id": "box",
+          "type": "box",
+          "question": "Lokalisiere ausschließlich Betragswert unmittelbar unter „Gesamtbetrag“ (nicht die Positionszeile)."
+        }
+      ],
+      "transform": {
+        "source_viewport": [
+          800,
+          1000
+        ],
+        "crop_css_px": [
+          0,
+          0,
+          800,
+          1000
+        ],
+        "scale_xy": [
+          1,
+          1
+        ],
+        "padding_px": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "device_pixel_ratio": 1,
+        "orientation": "upright",
+        "box_convention": "normalized left/top/right/bottom in sent image; source CSS equals image pixels"
+      },
+      "reference": {
+        "origin": "synthetic source DOM and Chrome geometry; all 24 original PNGs manually inspected by T02 before any model request on 2026-11-10",
+        "dom_present": true,
+        "presence": false,
+        "visibility": "covered",
+        "missing": false,
+        "unclear": true,
+        "score": 1,
+        "text_value": "247,90 EUR",
+        "candidate_matches_source": true,
+        "box_source_css_px": [
+          87,
+          512,
+          152.546875,
+          42
+        ],
+        "box_normalized": {
+          "left": 0.10875,
+          "top": 0.512,
+          "right": 0.29943359375,
+          "bottom": 0.554
+        },
+        "box_usable": false
+      },
+      "dom_evidence": {
+        "fixture": {
+          "id": "document-test-unclear-a",
+          "family": "document",
+          "split": "test",
+          "case_kind": "unclear",
+          "variant": "a"
+        },
+        "viewport": [
+          800,
+          1000
+        ],
+        "dpr": 1,
+        "body_text": "KÜNSTLICHE RECHNUNG • NICHT ZAHLBAR\nRechnung B-26029\n\nBeispielwerk Nord • Fiktive Dienstleistung\n\nLeistung\n\nDokumentation eines Beispielprozesses\n\nDatum: 12.10.2026\n\nGesamtbetrag\n247,90 EUR\nPosition\nBetrag\nBeispielleistung\n247,90 EUR\n\nKein Konto, keine Adresse und keine Zahlungsanweisung.\n\ndocument • test • a • Synthetische Originaltexte, kein OCR-Produkt\n\nFeld verdeckt",
+        "target": {
+          "text": "247,90 EUR",
+          "role": "span",
+          "rect": [
+            87,
+            512,
+            152.546875,
+            42
+          ],
+          "center_topmost": false,
+          "background": "rgba(0, 0, 0, 0)",
+          "color": "rgb(46, 54, 62)",
+          "font": "700 28px / 42px Arial, sans-serif"
+        },
+        "covers": [
+          [
+            87,
+            512,
+            152.546875,
+            42
+          ]
+        ],
+        "alternatives": [],
+        "overflow": false,
+        "buttons": [],
+        "hero_buttons": 0
+      }
+    },
+    {
+      "id": "document-test-unclear-b",
+      "asset_reference": "image-024",
+      "family": "document",
+      "split": "test",
+      "case_kind": "unclear",
+      "variant": "b",
+      "path": "fixtures/document-test-unclear-b.png",
+      "format": "png",
+      "sha256": "ae6c6e44a24c5607012ba5226114b1f814e343d015129c56ffaf7e53dffe64c9",
+      "byte_count": 72356,
+      "dimensions": [
+        800,
+        1000
+      ],
+      "question_version": "m08-images-v1",
+      "target_description": "Betragswert unmittelbar unter „Gesamtbetrag“ (nicht die Positionszeile)",
+      "comparison_input": {
+        "field": "Gesamtbetrag",
+        "value": "247,90 EUR",
+        "origin": "manually supplied synthetic comparison input; not OCR output"
+      },
+      "questions": [
+        {
+          "id": "presence",
+          "type": "noul",
+          "question": "Ist unmittelbar unter „Gesamtbetrag“ genau ein eindeutig lesbarer Betragswert sichtbar?"
+        },
+        {
+          "id": "score",
+          "type": "score",
+          "question": "Wie verlässlich stimmt der vorgegebene Wert 247,90 EUR mit dem Betragsfeld unmittelbar unter „Gesamtbetrag“ überein?",
+          "rubric": [
+            {
+              "value": 0,
+              "description": "Sichtbarer Widerspruch zum vorgegebenen Wert oder fehlendes Feld."
+            },
+            {
+              "value": 1,
+              "description": "Mehrdeutig oder verdeckt; nicht verlässlich abgleichbar."
+            },
+            {
+              "value": 2,
+              "description": "Klar lesbare Übereinstimmung mit dem vorgegebenen Wert."
+            }
+          ]
+        },
+        {
+          "id": "box",
+          "type": "box",
+          "question": "Lokalisiere ausschließlich Betragswert unmittelbar unter „Gesamtbetrag“ (nicht die Positionszeile)."
+        }
+      ],
+      "transform": {
+        "source_viewport": [
+          800,
+          1000
+        ],
+        "crop_css_px": [
+          0,
+          0,
+          800,
+          1000
+        ],
+        "scale_xy": [
+          1,
+          1
+        ],
+        "padding_px": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "device_pixel_ratio": 1,
+        "orientation": "upright",
+        "box_convention": "normalized left/top/right/bottom in sent image; source CSS equals image pixels"
+      },
+      "reference": {
+        "origin": "synthetic source DOM and Chrome geometry; all 24 original PNGs manually inspected by T02 before any model request on 2026-11-10",
+        "dom_present": true,
+        "presence": null,
+        "visibility": "ambiguous",
+        "missing": false,
+        "unclear": true,
+        "score": 1,
+        "text_value": "247,90 EUR",
+        "candidate_matches_source": true,
+        "box_source_css_px": [
+          87,
+          344,
+          152.546875,
+          42
+        ],
+        "box_normalized": {
+          "left": 0.10875,
+          "top": 0.344,
+          "right": 0.29943359375,
+          "bottom": 0.386
+        },
+        "box_usable": false
+      },
+      "dom_evidence": {
+        "fixture": {
+          "id": "document-test-unclear-b",
+          "family": "document",
+          "split": "test",
+          "case_kind": "unclear",
+          "variant": "b"
+        },
+        "viewport": [
+          800,
+          1000
+        ],
+        "dpr": 1,
+        "body_text": "KÜNSTLICHE RECHNUNG • NICHT ZAHLBAR\nRechnung B-26029\n\nBeispielwerk Nord • Fiktive Dienstleistung\n\nLeistung\n\nDokumentation eines Beispielprozesses\n\nDatum: 12.10.2026\n\nGesamtbetrag\n247,90 EUR249,70 EUR\nPosition\nBetrag\nBeispielleistung\n247,90 EUR\n\nKein Konto, keine Adresse und keine Zahlungsanweisung.\n\ndocument • test • b • Synthetische Originaltexte, kein OCR-Produkt",
+        "target": {
+          "text": "247,90 EUR",
+          "role": "span",
+          "rect": [
+            87,
+            344,
+            152.546875,
+            42
+          ],
+          "center_topmost": true,
+          "background": "rgba(0, 0, 0, 0)",
+          "color": "rgb(46, 54, 62)",
+          "font": "700 28px / 42px Arial, sans-serif"
+        },
+        "covers": [],
+        "alternatives": [
+          {
+            "text": "249,70 EUR",
+            "rect": [
+              263.546875,
+              349,
+              152.546875,
+              31
+            ]
+          }
+        ],
+        "overflow": false,
+        "buttons": [],
+        "hero_buttons": 0
+      }
+    }
+  ]
+}

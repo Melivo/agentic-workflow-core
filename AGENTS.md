@@ -149,6 +149,8 @@ relevant child AGENTS.md
 - [Paketquelle](.apm/AGENTS.md) — kanonische Skills und native Fachagentenprofile.
 - [Werkzeuge](scripts/AGENTS.md) — Prüfungen, Toolchain, Paket- und Releasewerkzeuge.
 - [Tests](tests/AGENTS.md) — Vertrags-, Sicherheits- und Integrationstests.
+- [Betriebsreferenzen](docs/operations/AGENTS.md) — eng begrenzte Core-Betriebs- und Sammlungsreferenzen, ohne automatische Verbraucher- oder Hostfreigabe.
+- TypeSafe-Evaluationsartefakte entstehen nur bei ausdrücklich beauftragter Evaluation und vorhandenem Artefaktschreibrecht; ihre lokale gitignorierte Anleitung wird nicht vorausgesetzt. Portable Regeln stehen ausschließlich in der [versionierten Vorlage](.apm/skills/core-typesafe/assets/evaluation-directory-AGENTS.md).
 - [CI und Releases](.github/workflows/AGENTS.md) — Workflowauslöser, Rechte und
   Artefaktübergaben; fachliche Entscheidungen bleiben bei den Werkzeugen.
 <!-- DOX:END -->

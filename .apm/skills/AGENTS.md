@@ -20,9 +20,9 @@ Runtimeintegration ist eine interne Referenz von `core-init-project`. `core-exec
 
 - [core-shared](core-shared/SKILL.md) verlinkt die gemeinsamen Verträge; die
   verbindliche [Auswahlregel für ergänzende Fachmethoden](core-shared/references/tool-routing.md#fachmethoden-erganzend-auswahlen)
-  gilt für Fachagenten neben ihrem Eigentümer-Skill. Der TypeSafe-Vertrag ist nur
-  bei passenden Design-, Integrations- oder Evaluationsaufträgen relevant, keine
-  gegenwärtig aktive Pflichtphase.
+  gilt für Fachagenten neben ihrem Eigentümer-Skill. Der TypeSafe-Vertrag gilt bei jedem Core-Planreview für den regulären minimierten
+  Beobachtungsversuch sowie bei passenden Design-, Integrations- oder Evaluationsaufträgen;
+  offene Beobachtung blockiert weder normales Review noch Produktarbeit.
 - Verzeichnisname und Frontmatter-`name` eines Skills stimmen überein.
 - Kanonische Quellen nicht durch Änderungen installierter Harnesskopien ersetzen.
 - Herkunfts- und Lizenznachweise bei übernommenen Ressourcen erhalten.
@@ -61,5 +61,7 @@ Installierte Verbraucher führen diese Repositoryprüfungen nicht automatisch au
 - [core-shared](core-shared/AGENTS.md) — gemeinsame Verträge und Vorlagen.
 - [core-init-project](core-init-project/AGENTS.md) — Repository-Preflight,
   verwaltete Projektanweisungen und interne Providerintegration.
+- [core-typesafe](core-typesafe/AGENTS.md) — portable, beratende TypeSafe-Bewertung
+  mit drei Profilen; regulärer Planreview-Versuch bleibt daten- und kostenfreigabegebunden.
 - [Habit Feedback](core-devops/assets/opencode-habit-feedback/AGENTS.md) —
   eigenständiges OpenCode-Plugin mit Adapter, Hook und Mapper-Guides.

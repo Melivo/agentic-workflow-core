@@ -73,7 +73,16 @@ CORE_FILES = (
  '.apm/skills/core-shared/references/tool-routing.md',
  '.apm/skills/core-shared/references/typesafe-contract.md',
  '.apm/skills/core-shared/references/verification.md',
- '.apm/skills/core-shared/references/workflow-contract.md')
+ '.apm/skills/core-shared/references/workflow-contract.md',
+ '.apm/skills/core-typesafe/assets/evaluation-directory-AGENTS.md',
+ # Direct owner/collector links: static byte inventory, not executable snapshot runtime.
+ '.apm/skills/core-typesafe/scripts/typesafe_collection.py',
+ '.apm/skills/core-typesafe/scripts/typesafe_owner.py',
+ # Direct image-reference targets: static byte-bound context, not an executable bundle.
+ '.apm/skills/core-typesafe/examples/images/image_probe.py',
+ '.apm/skills/core-typesafe/examples/images/cases.json',
+ '.apm/skills/core-typesafe/references/images.md',
+ '.apm/skills/core-typesafe/references/images-evaluation.md')
 LINK = re.compile(r'(?<!!)\[[^\]]*\]\(([^)\s]+)\)')
 FORBIDDEN = {'.git', '.agentic-workflow', 'node_modules', '__pycache__', '.env',
              '.npmrc', 'opencode.json', 'opencode.jsonc', '.direnv', 'apm_modules'}
