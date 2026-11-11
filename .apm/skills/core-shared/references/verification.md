@@ -44,7 +44,7 @@ Ein Task ist `completed`, wenn alle Kriterien und Pflichtchecks aktuell belegt s
 5. Nach jeder Korrektur alle betroffenen Checks und die Reviewprüfung wiederholen.
 6. Evidenz nur wiederverwenden, wenn Eingaben, Abhängigkeiten und Repositorystand unverändert sind. Ein Task-Retry erzeugt einen neuen unveränderlichen Versuchspfad; Resume oder Review-Reparatur erzeugt dagegen keinen neuen Run und übernimmt keine ältere Taskevidenz ungeprüft. Bei Etappenabschluss deckt aktuelles Review-pass nur Plan/Run ab; `core-milestone` prüft zusätzlich die gepinnte Definition, bevor es deren Abschluss im Index verknüpft. Folgeetappen benötigen ausdrückliche Freigabe, Gesamtabschluss eigene Zielkriterien und Nachweise.
 
-Tests, Hooks oder Validierungen dürfen nicht deaktiviert, übersprungen oder abgeschwächt werden, um einen Lauf grün erscheinen zu lassen. Statische Checks und Fixtures belegen Vertragskonsistenz, keine künftige Modellbefolgung; fehlende Verhaltensevidenz bleibt sichtbar, und grüne Tests ersetzen keinen fachlichen Zielnachweis.
+Tests, Hooks oder Validierungen dürfen nicht deaktiviert, übersprungen oder abgeschwächt werden, um einen Lauf grün erscheinen zu lassen. Grüne Tests eines selbst erstellten Helpers belegen nur den Helper, nicht den fachlichen Fortschritt; diesen bewertet der [Zielabgleich](workflow-contract.md#zielbindung-und-funktionaler-scope). Statische Checks und Fixtures belegen Vertragskonsistenz, keine künftige Modellbefolgung; fehlende Verhaltensevidenz bleibt sichtbar, und grüne Tests ersetzen keinen fachlichen Zielnachweis.
 
 ## Unabhängiges Review
 

@@ -44,7 +44,13 @@ Die Workflowverkabelung bleibt unter
   einschließlich des verbleibenden Startprompts. Die öffentlichen Verbraucher
   README.md und DESIGN.md prüft sie ebenfalls, einschließlich
   widersprechender alter pauschaler Bestätigungsgates; situationsabhängige
-  Nutzerbestätigung bleibt zulässig. `DIRECT_SOURCES` bindet zusätzlich die
+  Nutzerbestätigung bleibt zulässig. `GOAL_SOURCES` bindet Zielbindung,
+  Taskgrenzen, Notwendigkeits-/Werkzeugwahl, Zielabgleich und Planreview an den
+  gemeinsamen Workflowvertrag sowie die jeweiligen Plan-, Execute-, Review- und
+  Debug-Verbraucher; `GOAL_LEGACY` weist widersprechende Altformulierungen zurück.
+  Die Szenariotypen `goal_binding`, `task_cut`, `tool_choice`, `goal_check` und
+  `plan_review` prüfen diese Zuordnung statisch, nicht tatsächliche
+  Agentenwirksamkeit. `DIRECT_SOURCES` bindet zusätzlich die
   Direktmodus-, Freigabevorrang- und Zusatzdelegationsklauseln an Execute,
   `direct-mode.md`, Review, Workflow-/Artefakt-/Benutzeranweisungsvertrag und
   Handoff, einschließlich der quellengebundenen Negativklausel, dass bloßes

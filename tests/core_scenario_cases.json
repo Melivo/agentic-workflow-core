@@ -39193,6 +39193,1285 @@
         "link_recheck": true,
         "execute_checks": true
       }
+    },
+    {
+      "id": "goal-binding-matching-stage",
+      "group": "workflows",
+      "source": ".apm/skills/core-shared/references/workflow-contract.md",
+      "input": {
+        "kind": "goal_binding",
+        "recursive_history": false,
+        "artifact_created": false,
+        "agent_selected": false,
+        "read_error": false,
+        "originals_checked": true,
+        "candidates": [
+          {
+            "matches": true,
+            "current": true,
+            "selected": true,
+            "confirmed": true
+          }
+        ],
+        "outcome": "bind"
+      },
+      "expected": "pass",
+      "observation": "Passende aktuelle ausgewählte bestätigte Etappe wird originalgeprüft gebunden"
+    },
+    {
+      "id": "goal-binding-none-ordinary",
+      "group": "workflows",
+      "source": ".apm/skills/core-shared/references/workflow-contract.md",
+      "input": {
+        "kind": "goal_binding",
+        "recursive_history": false,
+        "artifact_created": false,
+        "agent_selected": false,
+        "read_error": false,
+        "originals_checked": true,
+        "candidates": [],
+        "outcome": "ordinary"
+      },
+      "expected": "pass",
+      "observation": "Ohne Zielindex bleibt der Originalauftrag ausführbar"
+    },
+    {
+      "id": "goal-binding-unrelated-ordinary",
+      "group": "workflows",
+      "source": ".apm/skills/core-shared/references/workflow-contract.md",
+      "input": {
+        "kind": "goal_binding",
+        "recursive_history": false,
+        "artifact_created": false,
+        "agent_selected": false,
+        "read_error": false,
+        "originals_checked": true,
+        "candidates": [
+          {
+            "matches": false,
+            "current": true,
+            "selected": true,
+            "confirmed": true
+          }
+        ],
+        "outcome": "ordinary"
+      },
+      "expected": "pass",
+      "observation": "Sachfremder Meilenstein bindet nicht"
+    },
+    {
+      "id": "goal-binding-completed-ordinary",
+      "group": "workflows",
+      "source": ".apm/skills/core-shared/references/workflow-contract.md",
+      "input": {
+        "kind": "goal_binding",
+        "recursive_history": false,
+        "artifact_created": false,
+        "agent_selected": false,
+        "read_error": false,
+        "originals_checked": true,
+        "candidates": [
+          {
+            "matches": false,
+            "current": false,
+            "selected": true,
+            "confirmed": true
+          }
+        ],
+        "outcome": "ordinary"
+      },
+      "expected": "pass",
+      "observation": "Abgeschlossener Meilenstein bindet nicht"
+    },
+    {
+      "id": "goal-binding-ambiguous-clarify",
+      "group": "workflows",
+      "source": ".apm/skills/core-shared/references/workflow-contract.md",
+      "input": {
+        "kind": "goal_binding",
+        "recursive_history": false,
+        "artifact_created": false,
+        "agent_selected": false,
+        "read_error": false,
+        "originals_checked": true,
+        "candidates": [
+          {
+            "matches": true,
+            "current": true,
+            "selected": true,
+            "confirmed": true
+          },
+          {
+            "matches": true,
+            "current": true,
+            "selected": true,
+            "confirmed": true
+          }
+        ],
+        "outcome": "clarify"
+      },
+      "expected": "pass",
+      "observation": "Mehrere passende Kandidaten werden gezielt geklärt"
+    },
+    {
+      "id": "goal-binding-missing-blocks",
+      "group": "workflows",
+      "source": ".apm/skills/core-shared/references/workflow-contract.md",
+      "input": {
+        "kind": "goal_binding",
+        "recursive_history": false,
+        "artifact_created": false,
+        "agent_selected": false,
+        "read_error": false,
+        "originals_checked": true,
+        "candidates": [
+          {
+            "matches": false,
+            "current": true,
+            "selected": true,
+            "confirmed": true
+          }
+        ],
+        "outcome": "clarify"
+      },
+      "expected": "fail",
+      "observation": "fehlende/sachfremde Etappe blockiert normalen Auftrag"
+    },
+    {
+      "id": "goal-binding-ambiguous-highest",
+      "group": "workflows",
+      "source": ".apm/skills/core-shared/references/workflow-contract.md",
+      "input": {
+        "kind": "goal_binding",
+        "recursive_history": false,
+        "artifact_created": false,
+        "agent_selected": false,
+        "read_error": false,
+        "originals_checked": true,
+        "candidates": [
+          {
+            "matches": true,
+            "current": true,
+            "selected": true,
+            "confirmed": true
+          },
+          {
+            "matches": true,
+            "current": true,
+            "selected": true,
+            "confirmed": true
+          }
+        ],
+        "outcome": "bind"
+      },
+      "expected": "fail",
+      "observation": "mehrdeutige oder unbestätigte Bindung nicht geklärt"
+    },
+    {
+      "id": "goal-binding-ambiguous-as-none",
+      "group": "workflows",
+      "source": ".apm/skills/core-shared/references/workflow-contract.md",
+      "input": {
+        "kind": "goal_binding",
+        "recursive_history": false,
+        "artifact_created": false,
+        "agent_selected": false,
+        "read_error": false,
+        "originals_checked": true,
+        "candidates": [
+          {
+            "matches": true,
+            "current": true,
+            "selected": true,
+            "confirmed": true
+          },
+          {
+            "matches": true,
+            "current": true,
+            "selected": true,
+            "confirmed": true
+          }
+        ],
+        "outcome": "ordinary"
+      },
+      "expected": "fail",
+      "observation": "mehrdeutige oder unbestätigte Bindung nicht geklärt"
+    },
+    {
+      "id": "goal-binding-unconfirmed-bound",
+      "group": "workflows",
+      "source": ".apm/skills/core-shared/references/workflow-contract.md",
+      "input": {
+        "kind": "goal_binding",
+        "recursive_history": false,
+        "artifact_created": false,
+        "agent_selected": false,
+        "read_error": false,
+        "originals_checked": true,
+        "candidates": [
+          {
+            "matches": true,
+            "current": true,
+            "selected": true,
+            "confirmed": false
+          }
+        ],
+        "outcome": "bind"
+      },
+      "expected": "fail",
+      "observation": "mehrdeutige oder unbestätigte Bindung nicht geklärt"
+    },
+    {
+      "id": "goal-binding-parse-error-absence",
+      "group": "workflows",
+      "source": ".apm/skills/core-shared/references/workflow-contract.md",
+      "input": {
+        "kind": "goal_binding",
+        "recursive_history": false,
+        "artifact_created": false,
+        "agent_selected": false,
+        "read_error": true,
+        "originals_checked": true,
+        "candidates": [],
+        "outcome": "ordinary"
+      },
+      "expected": "fail",
+      "observation": "Lese-/Parsefehler als Abwesenheit gewertet"
+    },
+    {
+      "id": "goal-binding-agent-selects",
+      "group": "workflows",
+      "source": ".apm/skills/core-shared/references/workflow-contract.md",
+      "input": {
+        "kind": "goal_binding",
+        "recursive_history": false,
+        "artifact_created": false,
+        "agent_selected": true,
+        "read_error": false,
+        "originals_checked": true,
+        "candidates": [
+          {
+            "matches": true,
+            "current": true,
+            "selected": true,
+            "confirmed": true
+          }
+        ],
+        "outcome": "bind"
+      },
+      "expected": "fail",
+      "observation": "eigenmächtige Etappenauswahl"
+    },
+    {
+      "id": "goal-binding-matching-ignored",
+      "group": "workflows",
+      "source": ".apm/skills/core-shared/references/workflow-contract.md",
+      "input": {
+        "kind": "goal_binding",
+        "recursive_history": false,
+        "artifact_created": false,
+        "agent_selected": false,
+        "read_error": false,
+        "originals_checked": true,
+        "candidates": [
+          {
+            "matches": true,
+            "current": true,
+            "selected": true,
+            "confirmed": true
+          }
+        ],
+        "outcome": "ordinary"
+      },
+      "expected": "fail",
+      "observation": "passende Etappe nicht originalgeprüft gebunden"
+    },
+    {
+      "id": "goal-binding-without-originals",
+      "group": "workflows",
+      "source": ".apm/skills/core-shared/references/workflow-contract.md",
+      "input": {
+        "kind": "goal_binding",
+        "recursive_history": false,
+        "artifact_created": false,
+        "agent_selected": false,
+        "read_error": false,
+        "originals_checked": false,
+        "candidates": [
+          {
+            "matches": true,
+            "current": true,
+            "selected": true,
+            "confirmed": true
+          }
+        ],
+        "outcome": "bind"
+      },
+      "expected": "fail",
+      "observation": "passende Etappe nicht originalgeprüft gebunden"
+    },
+    {
+      "id": "goal-binding-stock-artifact",
+      "group": "workflows",
+      "source": ".apm/skills/core-shared/references/workflow-contract.md",
+      "input": {
+        "kind": "goal_binding",
+        "recursive_history": false,
+        "artifact_created": true,
+        "agent_selected": false,
+        "read_error": false,
+        "originals_checked": true,
+        "candidates": [],
+        "outcome": "ordinary"
+      },
+      "expected": "fail",
+      "observation": "Zielartefakt auf Vorrat"
+    },
+    {
+      "id": "goal-binding-recursive-history",
+      "group": "workflows",
+      "source": ".apm/skills/core-shared/references/workflow-contract.md",
+      "input": {
+        "kind": "goal_binding",
+        "recursive_history": true,
+        "artifact_created": false,
+        "agent_selected": false,
+        "read_error": false,
+        "originals_checked": true,
+        "candidates": [
+          {
+            "matches": true,
+            "current": true,
+            "selected": true,
+            "confirmed": true
+          }
+        ],
+        "outcome": "bind"
+      },
+      "expected": "fail",
+      "observation": "rekursive Historienlektüre statt begrenzter Sichtung"
+    },
+    {
+      "id": "task-cut-coherent-single",
+      "group": "workflows",
+      "source": ".apm/skills/core-plan/SKILL.md",
+      "input": {
+        "kind": "task_cut",
+        "independent_results": 1,
+        "effect_boundaries": 1,
+        "hidden_phases": false,
+        "atomic": false,
+        "split": false,
+        "split_per_tool_call": false,
+        "review_rejects": false,
+        "named_boundaries": false
+      },
+      "expected": "pass",
+      "observation": "Ein kohärentes abnehmbares Ergebnis bleibt ein Task"
+    },
+    {
+      "id": "task-cut-split-results",
+      "group": "workflows",
+      "source": ".apm/skills/core-plan/SKILL.md",
+      "input": {
+        "kind": "task_cut",
+        "independent_results": 2,
+        "effect_boundaries": 1,
+        "hidden_phases": false,
+        "atomic": false,
+        "split": true,
+        "split_per_tool_call": false,
+        "review_rejects": false,
+        "named_boundaries": false
+      },
+      "expected": "pass",
+      "observation": "Eigenständig abnehmbare Ergebnisse werden zerlegt"
+    },
+    {
+      "id": "task-cut-atomic-kept",
+      "group": "workflows",
+      "source": ".apm/skills/core-plan/SKILL.md",
+      "input": {
+        "kind": "task_cut",
+        "independent_results": 2,
+        "effect_boundaries": 1,
+        "hidden_phases": false,
+        "atomic": true,
+        "split": false,
+        "split_per_tool_call": false,
+        "review_rejects": false,
+        "named_boundaries": false
+      },
+      "expected": "pass",
+      "observation": "Notwendiger atomarer Vorgang bleibt zusammen"
+    },
+    {
+      "id": "task-cut-review-named",
+      "group": "workflows",
+      "source": ".apm/skills/core-plan/SKILL.md",
+      "input": {
+        "kind": "task_cut",
+        "independent_results": 1,
+        "effect_boundaries": 2,
+        "hidden_phases": false,
+        "atomic": false,
+        "split": true,
+        "split_per_tool_call": false,
+        "review_rejects": true,
+        "named_boundaries": true
+      },
+      "expected": "pass",
+      "observation": "Review-Zurückweisung mit benannter Grenze"
+    },
+    {
+      "id": "task-cut-oversized",
+      "group": "workflows",
+      "source": ".apm/skills/core-plan/SKILL.md",
+      "input": {
+        "kind": "task_cut",
+        "independent_results": 2,
+        "effect_boundaries": 1,
+        "hidden_phases": false,
+        "atomic": false,
+        "split": false,
+        "split_per_tool_call": false,
+        "review_rejects": false,
+        "named_boundaries": false
+      },
+      "expected": "fail",
+      "observation": "übergroßer Task nicht zerlegt"
+    },
+    {
+      "id": "task-cut-hidden-phases",
+      "group": "workflows",
+      "source": ".apm/skills/core-plan/SKILL.md",
+      "input": {
+        "kind": "task_cut",
+        "independent_results": 1,
+        "effect_boundaries": 1,
+        "hidden_phases": true,
+        "atomic": false,
+        "split": false,
+        "split_per_tool_call": false,
+        "review_rejects": false,
+        "named_boundaries": false
+      },
+      "expected": "fail",
+      "observation": "übergroßer Task nicht zerlegt"
+    },
+    {
+      "id": "task-cut-atomic-split",
+      "group": "workflows",
+      "source": ".apm/skills/core-plan/SKILL.md",
+      "input": {
+        "kind": "task_cut",
+        "independent_results": 1,
+        "effect_boundaries": 1,
+        "hidden_phases": false,
+        "atomic": true,
+        "split": true,
+        "split_per_tool_call": false,
+        "review_rejects": false,
+        "named_boundaries": false
+      },
+      "expected": "fail",
+      "observation": "notwendiger atomarer Vorgang zerlegt"
+    },
+    {
+      "id": "task-cut-per-tool-call",
+      "group": "workflows",
+      "source": ".apm/skills/core-plan/SKILL.md",
+      "input": {
+        "kind": "task_cut",
+        "independent_results": 1,
+        "effect_boundaries": 1,
+        "hidden_phases": false,
+        "atomic": false,
+        "split": true,
+        "split_per_tool_call": true,
+        "review_rejects": false,
+        "named_boundaries": false
+      },
+      "expected": "fail",
+      "observation": "Zerlegung pro Toolaufruf"
+    },
+    {
+      "id": "task-cut-bare-size-verdict",
+      "group": "workflows",
+      "source": ".apm/skills/core-plan/SKILL.md",
+      "input": {
+        "kind": "task_cut",
+        "independent_results": 1,
+        "effect_boundaries": 1,
+        "hidden_phases": false,
+        "atomic": false,
+        "split": false,
+        "split_per_tool_call": false,
+        "review_rejects": true,
+        "named_boundaries": false
+      },
+      "expected": "fail",
+      "observation": "Größenurteil ohne belegte Grenze"
+    },
+    {
+      "id": "tool-choice-omit",
+      "group": "workflows",
+      "source": ".apm/skills/core-shared/references/workflow-contract.md",
+      "input": {
+        "kind": "tool_choice",
+        "result_needed": false,
+        "existing_fits": false,
+        "choice": "omit",
+        "relevant_advantage": false,
+        "tool_risks_weighed": false,
+        "gap_named": true,
+        "smallest": true,
+        "installed": false,
+        "install_approved": false,
+        "gate_disabled": false,
+        "scope_decision": false,
+        "security_requirement_dropped": false
+      },
+      "expected": "pass",
+      "observation": "nicht benötigtes Ergebnis weggelassen"
+    },
+    {
+      "id": "tool-choice-existing",
+      "group": "workflows",
+      "source": ".apm/skills/core-shared/references/workflow-contract.md",
+      "input": {
+        "kind": "tool_choice",
+        "result_needed": true,
+        "existing_fits": true,
+        "choice": "existing",
+        "relevant_advantage": false,
+        "tool_risks_weighed": false,
+        "gap_named": true,
+        "smallest": true,
+        "installed": false,
+        "install_approved": false,
+        "gate_disabled": false,
+        "scope_decision": false,
+        "security_requirement_dropped": false
+      },
+      "expected": "pass",
+      "observation": "vorhandene Projektfunktion genutzt"
+    },
+    {
+      "id": "tool-choice-new-tool-approved",
+      "group": "workflows",
+      "source": ".apm/skills/core-shared/references/workflow-contract.md",
+      "input": {
+        "kind": "tool_choice",
+        "result_needed": true,
+        "existing_fits": false,
+        "choice": "new_tool",
+        "relevant_advantage": true,
+        "tool_risks_weighed": true,
+        "gap_named": true,
+        "smallest": true,
+        "installed": true,
+        "install_approved": true,
+        "gate_disabled": false,
+        "scope_decision": false,
+        "security_requirement_dropped": false
+      },
+      "expected": "pass",
+      "observation": "begründetes Werkzeug mit Abwägung und Freigabe"
+    },
+    {
+      "id": "tool-choice-small-own-code",
+      "group": "workflows",
+      "source": ".apm/skills/core-shared/references/workflow-contract.md",
+      "input": {
+        "kind": "tool_choice",
+        "result_needed": true,
+        "existing_fits": false,
+        "choice": "own_code",
+        "relevant_advantage": false,
+        "tool_risks_weighed": false,
+        "gap_named": true,
+        "smallest": true,
+        "installed": false,
+        "install_approved": false,
+        "gate_disabled": false,
+        "scope_decision": false,
+        "security_requirement_dropped": false
+      },
+      "expected": "pass",
+      "observation": "legitimer kleiner Eigenbau bei belegter Lücke"
+    },
+    {
+      "id": "tool-choice-compensating-repair",
+      "group": "workflows",
+      "source": ".apm/skills/core-shared/references/workflow-contract.md",
+      "input": {
+        "kind": "tool_choice",
+        "result_needed": false,
+        "existing_fits": false,
+        "choice": "own_code",
+        "relevant_advantage": false,
+        "tool_risks_weighed": false,
+        "gap_named": true,
+        "smallest": true,
+        "installed": false,
+        "install_approved": false,
+        "gate_disabled": false,
+        "scope_decision": false,
+        "security_requirement_dropped": false
+      },
+      "expected": "fail",
+      "observation": "nicht benötigtes Ergebnis gebaut oder repariert"
+    },
+    {
+      "id": "tool-choice-existing-ignored",
+      "group": "workflows",
+      "source": ".apm/skills/core-shared/references/workflow-contract.md",
+      "input": {
+        "kind": "tool_choice",
+        "result_needed": true,
+        "existing_fits": true,
+        "choice": "own_code",
+        "relevant_advantage": false,
+        "tool_risks_weighed": false,
+        "gap_named": true,
+        "smallest": true,
+        "installed": false,
+        "install_approved": false,
+        "gate_disabled": false,
+        "scope_decision": false,
+        "security_requirement_dropped": false
+      },
+      "expected": "fail",
+      "observation": "vorhandene Funktion übergangen"
+    },
+    {
+      "id": "tool-choice-package-unweighed",
+      "group": "workflows",
+      "source": ".apm/skills/core-shared/references/workflow-contract.md",
+      "input": {
+        "kind": "tool_choice",
+        "result_needed": true,
+        "existing_fits": false,
+        "choice": "new_tool",
+        "relevant_advantage": false,
+        "tool_risks_weighed": true,
+        "gap_named": true,
+        "smallest": true,
+        "installed": false,
+        "install_approved": false,
+        "gate_disabled": false,
+        "scope_decision": false,
+        "security_requirement_dropped": false
+      },
+      "expected": "fail",
+      "observation": "neues Werkzeug ohne Vorteil/Abwägung"
+    },
+    {
+      "id": "tool-choice-own-code-no-gap",
+      "group": "workflows",
+      "source": ".apm/skills/core-shared/references/workflow-contract.md",
+      "input": {
+        "kind": "tool_choice",
+        "result_needed": true,
+        "existing_fits": false,
+        "choice": "own_code",
+        "relevant_advantage": false,
+        "tool_risks_weighed": false,
+        "gap_named": false,
+        "smallest": true,
+        "installed": false,
+        "install_approved": false,
+        "gate_disabled": false,
+        "scope_decision": false,
+        "security_requirement_dropped": false
+      },
+      "expected": "fail",
+      "observation": "Eigenbau ohne belegte Lücke"
+    },
+    {
+      "id": "tool-choice-silent-install",
+      "group": "workflows",
+      "source": ".apm/skills/core-shared/references/workflow-contract.md",
+      "input": {
+        "kind": "tool_choice",
+        "result_needed": true,
+        "existing_fits": false,
+        "choice": "new_tool",
+        "relevant_advantage": true,
+        "tool_risks_weighed": true,
+        "gap_named": true,
+        "smallest": true,
+        "installed": true,
+        "install_approved": false,
+        "gate_disabled": false,
+        "scope_decision": false,
+        "security_requirement_dropped": false
+      },
+      "expected": "fail",
+      "observation": "Installation ohne Freigabe"
+    },
+    {
+      "id": "tool-choice-silent-gate-off",
+      "group": "workflows",
+      "source": ".apm/skills/core-shared/references/workflow-contract.md",
+      "input": {
+        "kind": "tool_choice",
+        "result_needed": true,
+        "existing_fits": false,
+        "choice": "own_code",
+        "relevant_advantage": false,
+        "tool_risks_weighed": false,
+        "gap_named": true,
+        "smallest": true,
+        "installed": false,
+        "install_approved": false,
+        "gate_disabled": true,
+        "scope_decision": false,
+        "security_requirement_dropped": false
+      },
+      "expected": "fail",
+      "observation": "Schutzgate still abgeschaltet"
+    },
+    {
+      "id": "tool-choice-security-dropped",
+      "group": "workflows",
+      "source": ".apm/skills/core-shared/references/workflow-contract.md",
+      "input": {
+        "kind": "tool_choice",
+        "result_needed": true,
+        "existing_fits": false,
+        "choice": "own_code",
+        "relevant_advantage": false,
+        "tool_risks_weighed": false,
+        "gap_named": true,
+        "smallest": true,
+        "installed": false,
+        "install_approved": false,
+        "gate_disabled": false,
+        "scope_decision": false,
+        "security_requirement_dropped": true
+      },
+      "expected": "fail",
+      "observation": "Sicherheitsanforderung mit Umsetzung entfernt"
+    },
+    {
+      "id": "goal-check-partial-result",
+      "group": "workflows",
+      "source": ".apm/skills/core-shared/references/workflow-contract.md",
+      "input": {
+        "kind": "goal_check",
+        "trigger": "result",
+        "goal_checked": true,
+        "new_status_or_field": false,
+        "mandatory_model_or_review": false,
+        "helper_effects": false,
+        "helper_effects_recorded": false,
+        "read_only_task": false,
+        "only_helper_tests_green": false,
+        "goal_progress": false,
+        "simplified_or_replanned": false,
+        "repeated_local_repair": false,
+        "whole_path_reviewed": false,
+        "decision": "continue_justified",
+        "fixed_limit_stop": false
+      },
+      "expected": "pass",
+      "observation": "partial ohne Fortschritt geprüft"
+    },
+    {
+      "id": "goal-check-resume",
+      "group": "workflows",
+      "source": ".apm/skills/core-shared/references/workflow-contract.md",
+      "input": {
+        "kind": "goal_check",
+        "trigger": "resume",
+        "goal_checked": true,
+        "new_status_or_field": false,
+        "mandatory_model_or_review": false,
+        "helper_effects": false,
+        "helper_effects_recorded": false,
+        "read_only_task": false,
+        "only_helper_tests_green": false,
+        "goal_progress": true,
+        "simplified_or_replanned": false,
+        "repeated_local_repair": false,
+        "whole_path_reviewed": false,
+        "decision": "continue_justified",
+        "fixed_limit_stop": false
+      },
+      "expected": "pass",
+      "observation": "Resume geprüft"
+    },
+    {
+      "id": "goal-check-recorded-helper",
+      "group": "workflows",
+      "source": ".apm/skills/core-shared/references/workflow-contract.md",
+      "input": {
+        "kind": "goal_check",
+        "trigger": "new_helper",
+        "goal_checked": true,
+        "new_status_or_field": false,
+        "mandatory_model_or_review": false,
+        "helper_effects": true,
+        "helper_effects_recorded": true,
+        "read_only_task": false,
+        "only_helper_tests_green": false,
+        "goal_progress": true,
+        "simplified_or_replanned": false,
+        "repeated_local_repair": false,
+        "whole_path_reviewed": false,
+        "decision": "continue_justified",
+        "fixed_limit_stop": false
+      },
+      "expected": "pass",
+      "observation": "externer Helper sichtbar"
+    },
+    {
+      "id": "goal-check-repeat-replan",
+      "group": "workflows",
+      "source": ".apm/skills/core-shared/references/workflow-contract.md",
+      "input": {
+        "kind": "goal_check",
+        "trigger": "own_blocker",
+        "goal_checked": true,
+        "new_status_or_field": false,
+        "mandatory_model_or_review": false,
+        "helper_effects": false,
+        "helper_effects_recorded": false,
+        "read_only_task": false,
+        "only_helper_tests_green": true,
+        "goal_progress": false,
+        "simplified_or_replanned": true,
+        "repeated_local_repair": true,
+        "whole_path_reviewed": true,
+        "decision": "replan",
+        "fixed_limit_stop": false
+      },
+      "expected": "pass",
+      "observation": "Gesamtweg geprüft, Ersatzplanung"
+    },
+    {
+      "id": "goal-check-repeat-continue",
+      "group": "workflows",
+      "source": ".apm/skills/core-shared/references/workflow-contract.md",
+      "input": {
+        "kind": "goal_check",
+        "trigger": "result",
+        "goal_checked": true,
+        "new_status_or_field": false,
+        "mandatory_model_or_review": false,
+        "helper_effects": false,
+        "helper_effects_recorded": false,
+        "read_only_task": false,
+        "only_helper_tests_green": false,
+        "goal_progress": false,
+        "simplified_or_replanned": false,
+        "repeated_local_repair": true,
+        "whole_path_reviewed": true,
+        "decision": "continue_justified",
+        "fixed_limit_stop": false
+      },
+      "expected": "pass",
+      "observation": "begründete Fortsetzung ohne starres Limit"
+    },
+    {
+      "id": "goal-check-skipped-blocked",
+      "group": "workflows",
+      "source": ".apm/skills/core-shared/references/workflow-contract.md",
+      "input": {
+        "kind": "goal_check",
+        "trigger": "result",
+        "goal_checked": false,
+        "new_status_or_field": false,
+        "mandatory_model_or_review": false,
+        "helper_effects": false,
+        "helper_effects_recorded": false,
+        "read_only_task": false,
+        "only_helper_tests_green": false,
+        "goal_progress": true,
+        "simplified_or_replanned": false,
+        "repeated_local_repair": false,
+        "whole_path_reviewed": false,
+        "decision": "continue_justified",
+        "fixed_limit_stop": false
+      },
+      "expected": "fail",
+      "observation": "Zielabgleich am Auslöser ausgelassen"
+    },
+    {
+      "id": "goal-check-new-field",
+      "group": "workflows",
+      "source": ".apm/skills/core-shared/references/workflow-contract.md",
+      "input": {
+        "kind": "goal_check",
+        "trigger": "result",
+        "goal_checked": true,
+        "new_status_or_field": true,
+        "mandatory_model_or_review": false,
+        "helper_effects": false,
+        "helper_effects_recorded": false,
+        "read_only_task": false,
+        "only_helper_tests_green": false,
+        "goal_progress": true,
+        "simplified_or_replanned": false,
+        "repeated_local_repair": false,
+        "whole_path_reviewed": false,
+        "decision": "continue_justified",
+        "fixed_limit_stop": false
+      },
+      "expected": "fail",
+      "observation": "Zielabgleich als neuer Status, Feld oder Pflichtaufruf"
+    },
+    {
+      "id": "goal-check-hidden-helper",
+      "group": "workflows",
+      "source": ".apm/skills/core-shared/references/workflow-contract.md",
+      "input": {
+        "kind": "goal_check",
+        "trigger": "result",
+        "goal_checked": true,
+        "new_status_or_field": false,
+        "mandatory_model_or_review": false,
+        "helper_effects": true,
+        "helper_effects_recorded": false,
+        "read_only_task": false,
+        "only_helper_tests_green": false,
+        "goal_progress": true,
+        "simplified_or_replanned": false,
+        "repeated_local_repair": false,
+        "whole_path_reviewed": false,
+        "decision": "continue_justified",
+        "fixed_limit_stop": false
+      },
+      "expected": "fail",
+      "observation": "privater/externer Helper unsichtbar"
+    },
+    {
+      "id": "goal-check-read-only-bypass",
+      "group": "workflows",
+      "source": ".apm/skills/core-shared/references/workflow-contract.md",
+      "input": {
+        "kind": "goal_check",
+        "trigger": "result",
+        "goal_checked": true,
+        "new_status_or_field": false,
+        "mandatory_model_or_review": false,
+        "helper_effects": true,
+        "helper_effects_recorded": true,
+        "read_only_task": true,
+        "only_helper_tests_green": false,
+        "goal_progress": true,
+        "simplified_or_replanned": false,
+        "repeated_local_repair": false,
+        "whole_path_reviewed": false,
+        "decision": "continue_justified",
+        "fixed_limit_stop": false
+      },
+      "expected": "fail",
+      "observation": "read-only Task durch Helper umgangen"
+    },
+    {
+      "id": "goal-check-green-helper-drift",
+      "group": "workflows",
+      "source": ".apm/skills/core-shared/references/workflow-contract.md",
+      "input": {
+        "kind": "goal_check",
+        "trigger": "result",
+        "goal_checked": true,
+        "new_status_or_field": false,
+        "mandatory_model_or_review": false,
+        "helper_effects": false,
+        "helper_effects_recorded": false,
+        "read_only_task": false,
+        "only_helper_tests_green": true,
+        "goal_progress": false,
+        "simplified_or_replanned": false,
+        "repeated_local_repair": false,
+        "whole_path_reviewed": false,
+        "decision": "continue_justified",
+        "fixed_limit_stop": false
+      },
+      "expected": "fail",
+      "observation": "grüne Helpertests ersetzen Zielfortschritt"
+    },
+    {
+      "id": "goal-check-local-script-only",
+      "group": "workflows",
+      "source": ".apm/skills/core-shared/references/workflow-contract.md",
+      "input": {
+        "kind": "goal_check",
+        "trigger": "own_blocker",
+        "goal_checked": true,
+        "new_status_or_field": false,
+        "mandatory_model_or_review": false,
+        "helper_effects": false,
+        "helper_effects_recorded": false,
+        "read_only_task": false,
+        "only_helper_tests_green": false,
+        "goal_progress": false,
+        "simplified_or_replanned": false,
+        "repeated_local_repair": true,
+        "whole_path_reviewed": false,
+        "decision": "continue_justified",
+        "fixed_limit_stop": false
+      },
+      "expected": "fail",
+      "observation": "wiederholte Reparatur ohne Gesamtwegprüfung"
+    },
+    {
+      "id": "goal-check-fixed-limit",
+      "group": "workflows",
+      "source": ".apm/skills/core-shared/references/workflow-contract.md",
+      "input": {
+        "kind": "goal_check",
+        "trigger": "result",
+        "goal_checked": true,
+        "new_status_or_field": false,
+        "mandatory_model_or_review": false,
+        "helper_effects": false,
+        "helper_effects_recorded": false,
+        "read_only_task": false,
+        "only_helper_tests_green": false,
+        "goal_progress": false,
+        "simplified_or_replanned": false,
+        "repeated_local_repair": true,
+        "whole_path_reviewed": true,
+        "decision": "continue_justified",
+        "fixed_limit_stop": true
+      },
+      "expected": "fail",
+      "observation": "starrer Retry-/Zeitstopp"
+    },
+    {
+      "id": "plan-review-lean-pass",
+      "group": "workflows",
+      "source": ".apm/skills/core-review/SKILL.md",
+      "input": {
+        "kind": "plan_review",
+        "verdict": "pass",
+        "fresh_context": true,
+        "extra_review_level": false,
+        "originals_anchor": true,
+        "whole_path_checked": true,
+        "unneeded_tasks": false,
+        "inherited_gate_unjustified": false,
+        "smaller_path_ignored": false,
+        "oversized_task": false,
+        "other_defect": false,
+        "named_decisions": true,
+        "split_demanded": false,
+        "named_boundaries": false
+      },
+      "expected": "pass",
+      "observation": "Schlanker Plan mit legitimer Schutzmaßnahme und atomarem Vorgang besteht"
+    },
+    {
+      "id": "plan-review-bloat-rejected",
+      "group": "workflows",
+      "source": ".apm/skills/core-review/SKILL.md",
+      "input": {
+        "kind": "plan_review",
+        "verdict": "changes_requested",
+        "fresh_context": true,
+        "extra_review_level": false,
+        "originals_anchor": true,
+        "whole_path_checked": true,
+        "unneeded_tasks": true,
+        "inherited_gate_unjustified": true,
+        "smaller_path_ignored": false,
+        "oversized_task": false,
+        "other_defect": false,
+        "named_decisions": true,
+        "split_demanded": false,
+        "named_boundaries": false
+      },
+      "expected": "pass",
+      "observation": "Aufgeblähter Plan mit geerbtem Gate wird konkret beanstandet"
+    },
+    {
+      "id": "plan-review-oversized-split-named",
+      "group": "workflows",
+      "source": ".apm/skills/core-review/SKILL.md",
+      "input": {
+        "kind": "plan_review",
+        "verdict": "changes_requested",
+        "fresh_context": true,
+        "extra_review_level": false,
+        "originals_anchor": true,
+        "whole_path_checked": true,
+        "unneeded_tasks": false,
+        "inherited_gate_unjustified": false,
+        "smaller_path_ignored": false,
+        "oversized_task": true,
+        "other_defect": false,
+        "named_decisions": true,
+        "split_demanded": true,
+        "named_boundaries": true
+      },
+      "expected": "pass",
+      "observation": "Übergroßer Task mit benannten Grenzen zurückgewiesen"
+    },
+    {
+      "id": "plan-review-formal-bloat-pass",
+      "group": "workflows",
+      "source": ".apm/skills/core-review/SKILL.md",
+      "input": {
+        "kind": "plan_review",
+        "verdict": "pass",
+        "fresh_context": true,
+        "extra_review_level": false,
+        "originals_anchor": true,
+        "whole_path_checked": true,
+        "unneeded_tasks": true,
+        "inherited_gate_unjustified": true,
+        "smaller_path_ignored": false,
+        "oversized_task": false,
+        "other_defect": false,
+        "named_decisions": true,
+        "split_demanded": false,
+        "named_boundaries": false
+      },
+      "expected": "fail",
+      "observation": "formal korrekter aufgeblähter Plan bestanden"
+    },
+    {
+      "id": "plan-review-details-only",
+      "group": "workflows",
+      "source": ".apm/skills/core-review/SKILL.md",
+      "input": {
+        "kind": "plan_review",
+        "verdict": "pass",
+        "fresh_context": true,
+        "extra_review_level": false,
+        "originals_anchor": true,
+        "whole_path_checked": false,
+        "unneeded_tasks": false,
+        "inherited_gate_unjustified": false,
+        "smaller_path_ignored": false,
+        "oversized_task": false,
+        "other_defect": false,
+        "named_decisions": true,
+        "split_demanded": false,
+        "named_boundaries": false
+      },
+      "expected": "fail",
+      "observation": "Detailkorrektheit ohne Gesamtwegprüfung"
+    },
+    {
+      "id": "plan-review-predecessor-anchor",
+      "group": "workflows",
+      "source": ".apm/skills/core-review/SKILL.md",
+      "input": {
+        "kind": "plan_review",
+        "verdict": "pass",
+        "fresh_context": true,
+        "extra_review_level": false,
+        "originals_anchor": false,
+        "whole_path_checked": true,
+        "unneeded_tasks": false,
+        "inherited_gate_unjustified": false,
+        "smaller_path_ignored": false,
+        "oversized_task": false,
+        "other_defect": false,
+        "named_decisions": true,
+        "split_demanded": false,
+        "named_boundaries": false
+      },
+      "expected": "fail",
+      "observation": "gewünschtes Urteil oder Vorgänger-pass als Anker"
+    },
+    {
+      "id": "plan-review-lean-rejected",
+      "group": "workflows",
+      "source": ".apm/skills/core-review/SKILL.md",
+      "input": {
+        "kind": "plan_review",
+        "verdict": "changes_requested",
+        "fresh_context": true,
+        "extra_review_level": false,
+        "originals_anchor": true,
+        "whole_path_checked": true,
+        "unneeded_tasks": false,
+        "inherited_gate_unjustified": false,
+        "smaller_path_ignored": false,
+        "oversized_task": false,
+        "other_defect": false,
+        "named_decisions": true,
+        "split_demanded": false,
+        "named_boundaries": false
+      },
+      "expected": "fail",
+      "observation": "legitime schlanke Arbeit zurückgewiesen"
+    },
+    {
+      "id": "plan-review-bare-size-verdict",
+      "group": "workflows",
+      "source": ".apm/skills/core-review/SKILL.md",
+      "input": {
+        "kind": "plan_review",
+        "verdict": "changes_requested",
+        "fresh_context": true,
+        "extra_review_level": false,
+        "originals_anchor": true,
+        "whole_path_checked": true,
+        "unneeded_tasks": false,
+        "inherited_gate_unjustified": false,
+        "smaller_path_ignored": false,
+        "oversized_task": true,
+        "other_defect": false,
+        "named_decisions": true,
+        "split_demanded": true,
+        "named_boundaries": false
+      },
+      "expected": "fail",
+      "observation": "Größenurteil ohne belegte Grenze"
+    },
+    {
+      "id": "plan-review-vague-verdict",
+      "group": "workflows",
+      "source": ".apm/skills/core-review/SKILL.md",
+      "input": {
+        "kind": "plan_review",
+        "verdict": "changes_requested",
+        "fresh_context": true,
+        "extra_review_level": false,
+        "originals_anchor": true,
+        "whole_path_checked": true,
+        "unneeded_tasks": true,
+        "inherited_gate_unjustified": false,
+        "smaller_path_ignored": false,
+        "oversized_task": false,
+        "other_defect": false,
+        "named_decisions": false,
+        "split_demanded": false,
+        "named_boundaries": false
+      },
+      "expected": "fail",
+      "observation": "Urteil ohne konkret geprüfte Entscheidung oder Lücke"
+    },
+    {
+      "id": "plan-review-extra-level",
+      "group": "workflows",
+      "source": ".apm/skills/core-review/SKILL.md",
+      "input": {
+        "kind": "plan_review",
+        "verdict": "pass",
+        "fresh_context": true,
+        "extra_review_level": true,
+        "originals_anchor": true,
+        "whole_path_checked": true,
+        "unneeded_tasks": false,
+        "inherited_gate_unjustified": false,
+        "smaller_path_ignored": false,
+        "oversized_task": false,
+        "other_defect": false,
+        "named_decisions": true,
+        "split_demanded": false,
+        "named_boundaries": false
+      },
+      "expected": "fail",
+      "observation": "Frischkontext oder Reviewebene verändert"
     }
   ],
   "coverage": {
@@ -39791,6 +41070,83 @@
         "handoff-stage-first-covered-without-review",
         "handoff-stage-first-covered-without-plan-link",
         "handoff-stage-first-quotes-handoff"
+      ]
+    },
+    "zielbindung-optional": {
+      "cases": [
+        "goal-binding-matching-stage",
+        "goal-binding-none-ordinary",
+        "goal-binding-unrelated-ordinary",
+        "goal-binding-completed-ordinary",
+        "goal-binding-ambiguous-clarify",
+        "goal-binding-missing-blocks",
+        "goal-binding-ambiguous-highest",
+        "goal-binding-ambiguous-as-none",
+        "goal-binding-unconfirmed-bound",
+        "goal-binding-parse-error-absence",
+        "goal-binding-agent-selects",
+        "goal-binding-matching-ignored",
+        "goal-binding-without-originals",
+        "goal-binding-stock-artifact",
+        "goal-binding-recursive-history"
+      ]
+    },
+    "taskgrenzen": {
+      "cases": [
+        "task-cut-coherent-single",
+        "task-cut-split-results",
+        "task-cut-atomic-kept",
+        "task-cut-review-named",
+        "task-cut-oversized",
+        "task-cut-hidden-phases",
+        "task-cut-atomic-split",
+        "task-cut-per-tool-call",
+        "task-cut-bare-size-verdict"
+      ]
+    },
+    "notwendigkeitsfolge": {
+      "cases": [
+        "tool-choice-omit",
+        "tool-choice-existing",
+        "tool-choice-new-tool-approved",
+        "tool-choice-small-own-code",
+        "tool-choice-compensating-repair",
+        "tool-choice-existing-ignored",
+        "tool-choice-package-unweighed",
+        "tool-choice-own-code-no-gap",
+        "tool-choice-silent-install",
+        "tool-choice-silent-gate-off",
+        "tool-choice-security-dropped"
+      ]
+    },
+    "zielabgleich": {
+      "cases": [
+        "goal-check-partial-result",
+        "goal-check-resume",
+        "goal-check-recorded-helper",
+        "goal-check-repeat-replan",
+        "goal-check-repeat-continue",
+        "goal-check-skipped-blocked",
+        "goal-check-new-field",
+        "goal-check-hidden-helper",
+        "goal-check-read-only-bypass",
+        "goal-check-green-helper-drift",
+        "goal-check-local-script-only",
+        "goal-check-fixed-limit"
+      ]
+    },
+    "planreview-gesamtweg": {
+      "cases": [
+        "plan-review-lean-pass",
+        "plan-review-bloat-rejected",
+        "plan-review-oversized-split-named",
+        "plan-review-formal-bloat-pass",
+        "plan-review-details-only",
+        "plan-review-predecessor-anchor",
+        "plan-review-lean-rejected",
+        "plan-review-bare-size-verdict",
+        "plan-review-vague-verdict",
+        "plan-review-extra-level"
       ]
     }
   }

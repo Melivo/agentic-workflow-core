@@ -16,7 +16,13 @@ unter [.apm/skills/](../.apm/skills/AGENTS.md), Prüf- und Paketwerkzeuge unter
 
 [ci_contract_targets.json](../scripts/ci_contract_targets.json) bestimmt die
 Vertragsgruppen; [mise.toml](../mise.toml) die gemeinsamen Prüfeinstiege.
-Szenariodaten liegen in `core_scenario_cases.json`; die Abdeckung
+Szenariodaten liegen in `core_scenario_cases.json`; die Szenariotypen
+`goal_binding`, `task_cut`, `tool_choice`, `goal_check` und `plan_review`
+prüfen die Zielbindung, Tasknotwendigkeit und -grenzen, Werkzeugwahl, laufenden
+Zielabgleich und Gesamtwegprüfung gegen den gemeinsamen Workflowvertrag und
+die jeweiligen Verbraucher. `GOAL_SOURCES` und `GOAL_LEGACY` in
+`check_core_contracts.py` sind die quellengebundene Prüfzuordnung; die Fälle
+belegen statische Konsistenz, keine reale Agentenwirksamkeit. Die Abdeckung
 `S-dox-projektdokumentation` und die `g04-*`-Abdeckungen (Autorisierungsrahmen,
 Aufwand/Geldkosten, Reparaturfortsetzung, Sicherheitsannahmen, Delegation,
 Katalog ohne starres Limit) verlangen Positiv- und Negativfälle ihrer Regeln,

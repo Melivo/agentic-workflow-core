@@ -63,10 +63,30 @@ class ContractTests(unittest.TestCase):
                     negative += 1
         print('FIXTURES:', positive, 'positive,', negative, 'gezielt verletzte; Namen/Version/Resume/Owner/Scope/Marker/Provider/Index/Prompt/Schreibfolge')
 
+    def test_tool_choice_needed_result_rejects_omit_and_unfit_existing(self):
+        cases = json.loads((ROOT / 'tests/core_scenario_cases.json').read_text())['cases']
+        data = next(c['input'] for c in cases if c['id'] == 'tool-choice-small-own-code')
+        for choice, message in (
+            ('omit', 'benötigtes Ergebnis weggelassen'),
+            ('existing', 'ungeeignete vorhandene Funktion gewählt'),
+        ):
+            with self.subTest(choice=choice), self.assertRaisesRegex(checker.ContractError, message):
+                checker.validate_scenario(dict(data, choice=choice))
+
+    def test_plan_review_other_defect_rejects_pass_only(self):
+        cases = json.loads((ROOT / 'tests/core_scenario_cases.json').read_text())['cases']
+        data = next(c['input'] for c in cases if c['id'] == 'plan-review-lean-pass')
+        checker.validate_scenario(data)
+        with self.assertRaisesRegex(checker.ContractError, 'Plan mit anderem Defekt bestanden'):
+            checker.validate_scenario(dict(data, other_defect=True))
+        for verdict in ('changes_requested', 'blocked'):
+            with self.subTest(verdict=verdict):
+                checker.validate_scenario(dict(data, other_defect=True, verdict=verdict))
+
     def test_no_success_defaults(self):
         with self.assertRaises(checker.ContractError):
             checker.validate_scenario({})
-        for kind in ('marker', 'handoff', 'result_owner', 'provider', 'version', 'completion', 'name', 'graph', 'progression', 'selection', 'prompt', 'write_sequence', 'goal_change', 'artifacts', 'docs', 'authorization', 'safety', 'delegation'):
+        for kind in ('marker', 'handoff', 'result_owner', 'provider', 'version', 'completion', 'name', 'graph', 'progression', 'selection', 'prompt', 'write_sequence', 'goal_change', 'artifacts', 'docs', 'authorization', 'safety', 'delegation', 'goal_binding', 'task_cut', 'tool_choice', 'goal_check', 'plan_review'):
             with self.subTest(kind=kind), self.assertRaises((KeyError, checker.ContractError)):
                 checker.validate_scenario({'kind': kind})
 
@@ -714,6 +734,38 @@ class ContractTests(unittest.TestCase):
                 self.assertEqual(count, 1, (path, pattern))
                 with self.subTest(path=path, clause=pattern), self.assertRaisesRegex(checker.ContractError, 'RV05 Ersatzplan-Ablaufklausel'):
                     checker.check_replacement_sources(dict(sources, **{path: mutated}))
+
+    def test_goal_binding_and_task_boundary_clauses(self):
+        sources = {p: (ROOT / p).read_text(encoding='utf-8') for p in checker.GOAL_SOURCES}
+        checker.check_goal_sources(sources)
+        # Every clause is necessary; removing one fails closed.
+        for path, patterns in checker.GOAL_SOURCES.items():
+            for pattern in patterns:
+                mutated, count = re.subn(pattern, '', sources[path], count=1)
+                self.assertEqual(count, 1, (path, pattern))
+                with self.subTest(path=path, clause=pattern), self.assertRaisesRegex(checker.ContractError, 'Zielbindungsklausel fehlt'):
+                    checker.check_goal_sources(dict(sources, **{path: mutated}))
+        # Redaction after output cannot replace the canonical pre-output boundary.
+        path = '.apm/skills/core-shared/references/artifact-contract.md'
+        mutated = sources[path].replace('vor jeder Toolausgabe', 'nach jeder Toolausgabe')
+        with self.assertRaisesRegex(checker.ContractError, 'Zielbindungsklausel fehlt'):
+            checker.check_goal_sources(dict(sources, **{path: mutated}))
+        # Selection by highest number, a mandatory milestone or parse error as absence regress.
+        path = '.apm/skills/core-plan/SKILL.md'
+        for regress in ('Wähle die höchste Etappe.', 'Jeder Plan benötigt einen Meilenstein.', 'Ein Parsefehler gilt als kein Index.', 'Eigenbau ist verboten.', 'Fehlt ein Tool, installiere es automatisch.', 'Schutzgate deaktivieren, um grün zu werden.', 'Der Zielabgleich gilt nur bei `completed`.', 'Nach jedem Taskresultat folgt ein Pflichtreview.', 'Es gibt höchstens 3 Reparaturen.', 'Ein Vorgänger-pass genügt.', 'Erlaubt sind höchstens 5 Tasks pro Plan.'):
+            with self.subTest(regress=regress), self.assertRaisesRegex(checker.ContractError, 'Pflichtmilestone-Regress'):
+                checker.check_goal_sources(dict(sources, **{path: sources[path] + '\n' + regress}))
+
+    def test_goal_index_yaml_and_json_spelling_are_equal(self):
+        # The existing parser reads JSON spelling as YAML; no text-pattern index reading.
+        index = examples_fixture()[2]
+        checker.check_index(index)
+        as_yaml = checker.load_yaml(checker.yaml.safe_dump(index, allow_unicode=True, sort_keys=False))
+        as_json = checker.load_yaml(json.dumps(index, ensure_ascii=False))
+        self.assertEqual(as_yaml, as_json)
+        checker.check_index(as_json)
+        with self.assertRaisesRegex(checker.ContractError, 'ungültiges/sicherheitswidriges YAML'):
+            checker.load_yaml(json.dumps(index)[:-1] + '}}')
 
     def test_handoff_first_plan_clauses_and_in_memory_mutations(self):
         sources = {p: (ROOT / p).read_text(encoding='utf-8') for p in checker.HANDOFF_SOURCES}

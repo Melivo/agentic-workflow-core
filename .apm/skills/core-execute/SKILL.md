@@ -58,7 +58,8 @@ Bei Resume:
 1. lade alle kanonischen Run-Artefakte und den Repositorystand neu,
 2. prüfe Pfade, Drift, integrierte Abhängigkeiten und Freshness jeder Evidenz,
 3. verwerfe veraltete Ergebnisse,
-4. leite das Ready Set erneut ausschließlich aus bereits integrierten Abhängigkeiten ab.
+4. leite das Ready Set erneut ausschließlich aus bereits integrierten Abhängigkeiten ab,
+5. führe den kurzen [Zielabgleich](../core-shared/references/workflow-contract.md#zielbindung-und-funktionaler-scope) für den nächsten Schritt aus.
 
 Ein Chatverlauf oder Provider-Memory ersetzt kein Run-Artefakt.
 
@@ -92,6 +93,7 @@ Verlange pro neuem Versuch die eigene, unveränderliche Datei `.agentic-workflow
 - jede Akzeptanz-ID samt beobachtbarer Evidenz, einschließlich des S00-Befunds für die betroffenen Strukturen und Verträge bei schreibenden strukturrelevanten Tasks,
 - bei schreibenden Änderungen die erforderliche Projektdokumentation im bestätigten Scope und die betroffenen Child-Indizes; bei keinem Guide-Edit die geprüften Pfade und den begründeten DOX-Pass,
 - jeden gepinnten Check mit unverändertem Kommando, `cwd`, Exitcode und fachlicher Beobachtung, einschließlich der vorhandenen S00-relevanten `acceptance`-/`checks`-Evidenz,
+- bei jedem Status den kurzen [Zielabgleich](../core-shared/references/workflow-contract.md#zielbindung-und-funktionaler-scope) aus Beitrag oder Erkenntnisgewinn, kumulierten Mechanismen und Nebenwirkungen sowie nächstem kleinsten Schritt; private oder externe Helper sind gemäß [Artefaktvertrag](../core-shared/references/artifact-contract.md#task-resultv1) sichtbar und im Scope; ist der nächste Schritt nicht mehr der kleinste sinnvolle Weg, vereinfache innerhalb bestehender Rechte oder folge der Ersatzplanung,
 - Einschränkungen und Blockierungsgründe in den vorhandenen Ergebnisfeldern; kein neues Schema und keine unabhängige Selbstreview. Bei Paket- oder Toolaustausch verlangt der S00-Befund zusätzlich die Restprüfung von Zustand, Daten, Konfiguration und Abhängigkeiten; eine Aussage „rückstandsfrei“ ohne diese Prüfung ist nicht zulässig.
 
 Ein Exitcode 0 oder eine Agentenbehauptung genügt nicht. Änderungen außerhalb des Scopes oder Mutationen durch read-only-Tasks werden nicht integriert. Fehlende aktuelle Pflichtcheckevidenz ergibt `partial` oder `blocked`, nicht `completed`.
