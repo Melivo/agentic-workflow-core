@@ -4,6 +4,13 @@
 
 - Ergänzt reproduzierbare lokale/CI-Prüfungen und eine standardmäßig deaktivierte, getrennte Release-PR- und Veröffentlichungskette. GitHub-Livebetrieb und App-Einrichtung sind nicht bestätigt.
 
+## [0.17.0](https://github.com/Melivo/agentic-workflow-core/compare/v0.16.0...v0.17.0) (2026-11-11)
+
+
+### Features
+
+* **core:** align plans with goals and detect workflow drift ([#32](https://github.com/Melivo/agentic-workflow-core/issues/32)) ([1993e4b](https://github.com/Melivo/agentic-workflow-core/commit/1993e4bd005409ed2d8e28df0b37fc21d30921bd))
+
 ## [0.16.0](https://github.com/Melivo/agentic-workflow-core/compare/v0.15.1...v0.16.0) (2026-11-10)
 
 
