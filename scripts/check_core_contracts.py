@@ -580,8 +580,95 @@ def validate_scenario(data):
         require(not data['next_started'] or data['next_authorized'], 'automatische Folgefreigabe')
         require(not data['milestone_mode'] or not data['next_started'], 'Etappenabschluss verlangt Handoff und Halt statt Folgestart')
         require(not data['goal_completed'] or data['goal_evidence'], 'Gesamterfolg unbelegt')
+    elif kind == 'goal_binding':
+        validate_goal_binding(data)
+    elif kind == 'task_cut':
+        validate_task_cut(data)
+    elif kind == 'tool_choice':
+        validate_tool_choice(data)
+    elif kind == 'goal_check':
+        validate_goal_check(data)
+    elif kind == 'plan_review':
+        validate_plan_review(data)
     else:
         raise ContractError('unbekannter Szenariotyp: ' + str(kind))
+
+
+def validate_goal_binding(data):
+    # Optional goal source: sighting is no selection authority; unclear stays unclear.
+    require(not data['recursive_history'], 'rekursive Historienlektüre statt begrenzter Sichtung')
+    require(not data['artifact_created'], 'Zielartefakt auf Vorrat')
+    require(not data['agent_selected'], 'eigenmächtige Etappenauswahl')
+    outcome = data['outcome']
+    require(outcome in ('bind', 'ordinary', 'clarify'), 'unbekanntes Bindungsergebnis')
+    if data['read_error']:
+        require(outcome == 'clarify', 'Lese-/Parsefehler als Abwesenheit gewertet')
+        return
+    relevant = [c for c in data['candidates'] if c['matches']]
+    if not relevant:
+        require(outcome == 'ordinary', 'fehlende/sachfremde Etappe blockiert normalen Auftrag')
+    elif len(relevant) == 1 and all(relevant[0][k] for k in ('current', 'selected', 'confirmed')):
+        require(outcome == 'bind' and data['originals_checked'], 'passende Etappe nicht originalgeprüft gebunden')
+    else:
+        require(outcome == 'clarify', 'mehrdeutige oder unbestätigte Bindung nicht geklärt')
+
+
+def validate_task_cut(data):
+    # Result boundaries decide the cut, not tool calls or a bare size verdict.
+    require(not data['split_per_tool_call'], 'Zerlegung pro Toolaufruf')
+    if data['atomic']:
+        require(not data['split'], 'notwendiger atomarer Vorgang zerlegt')
+    elif data['independent_results'] > 1 or data['effect_boundaries'] > 1 or data['hidden_phases']:
+        require(data['split'], 'übergroßer Task nicht zerlegt')
+    require(not data['review_rejects'] or data['named_boundaries'], 'Größenurteil ohne belegte Grenze')
+
+def validate_tool_choice(data):
+    # Necessity order: omit, existing means, justified tool, smallest own code; no silent effects.
+    choice = data['choice']
+    require(choice in ('omit', 'existing', 'new_tool', 'own_code'), 'unbekannte Werkzeugwahl')
+    require(not data['installed'] or data['install_approved'], 'Installation ohne Freigabe')
+    require(not data['gate_disabled'] or data['scope_decision'], 'Schutzgate still abgeschaltet')
+    require(not data['security_requirement_dropped'], 'Sicherheitsanforderung mit Umsetzung entfernt')
+    if not data['result_needed']:
+        require(choice == 'omit', 'nicht benötigtes Ergebnis gebaut oder repariert')
+        return
+    require(choice != 'omit', 'benötigtes Ergebnis weggelassen')
+    require(choice != 'existing' or data['existing_fits'], 'ungeeignete vorhandene Funktion gewählt')
+    if data['existing_fits']:
+        require(choice == 'existing', 'vorhandene Funktion übergangen')
+    elif choice == 'new_tool':
+        require(data['relevant_advantage'] and data['tool_risks_weighed'], 'neues Werkzeug ohne Vorteil/Abwägung')
+    elif choice == 'own_code':
+        require(data['gap_named'] and data['smallest'], 'Eigenbau ohne belegte Lücke oder nicht minimal')
+
+def validate_plan_review(data):
+    # Whole path before details; formally correct bloat is no pass, lean legitimate work is.
+    verdict = data['verdict']
+    require(verdict in ('pass', 'changes_requested', 'blocked'), 'unbekanntes Planreviewurteil')
+    require(data['fresh_context'] and not data['extra_review_level'], 'Frischkontext oder Reviewebene verändert')
+    require(data['originals_anchor'], 'gewünschtes Urteil oder Vorgänger-pass als Anker')
+    bloated = data['unneeded_tasks'] or data['inherited_gate_unjustified'] or data['smaller_path_ignored'] or data['oversized_task']
+    if verdict == 'pass':
+        require(data['whole_path_checked'], 'Detailkorrektheit ohne Gesamtwegprüfung')
+        require(not bloated, 'formal korrekter aufgeblähter Plan bestanden')
+        require(not data['other_defect'], 'Plan mit anderem Defekt bestanden')
+    else:
+        require(data['named_decisions'], 'Urteil ohne konkret geprüfte Entscheidung oder Lücke')
+        require(bloated or data['other_defect'], 'legitime schlanke Arbeit zurückgewiesen')
+        require(not data['split_demanded'] or data['named_boundaries'], 'Größenurteil ohne belegte Grenze')
+
+def validate_goal_check(data):
+    # Short goal check at every result/resume trigger, inside existing result fields only.
+    require(data['trigger'] in ('result', 'resume', 'new_helper', 'own_blocker'), 'unbekannter Zielabgleichsauslöser')
+    require(data['goal_checked'], 'Zielabgleich am Auslöser ausgelassen')
+    require(not data['new_status_or_field'] and not data['mandatory_model_or_review'], 'Zielabgleich als neuer Status, Feld oder Pflichtaufruf')
+    require(not data['helper_effects'] or data['helper_effects_recorded'], 'privater/externer Helper unsichtbar')
+    require(not data['read_only_task'] or not data['helper_effects'], 'read-only Task durch Helper umgangen')
+    require(not data['only_helper_tests_green'] or data['goal_progress'] or data['simplified_or_replanned'], 'grüne Helpertests ersetzen Zielfortschritt')
+    if data['repeated_local_repair'] and not data['goal_progress']:
+        require(data['whole_path_reviewed'], 'wiederholte Reparatur ohne Gesamtwegprüfung')
+        require(data['decision'] in ('continue_justified', 'simplify', 'replan', 'stop'), 'Gesamtwegprüfung ohne Folge')
+    require(not data['fixed_limit_stop'], 'starrer Retry-/Zeitstopp')
 
 def snapshot(paths):
     return {str(p): hashlib.sha256(p.read_bytes()).hexdigest() if p.is_file() else None for p in paths}
@@ -765,6 +852,7 @@ REQUIRED_COVERAGE = (
     'execute-direkt-eingang', 'execute-freigabevorrang', 'execute-zusatzdelegation',
     'handoff-planungsbefugnis', 'handoff-erstplan-halt', 'handoff-sichtbare-anzeige', 'handoff-gesamtdeckung',
     'initialer-rahmen-und-erhaltene-handoffdeckung',
+    'zielbindung-optional', 'taskgrenzen', 'notwendigkeitsfolge', 'zielabgleich', 'planreview-gesamtweg',
 )
 
 def check_coverage(fixture):
@@ -1257,6 +1345,92 @@ def check_replacement_sources(sources):
             require(re.search(pattern, text, re.I), 'RV05 Ersatzplan-Ablaufklausel fehlt: ' + path + ': ' + pattern)
 
 
+# Source-local goal-source and task-boundary clauses; static consistency only.
+GOAL_SOURCES = {
+    '.apm/skills/core-shared/references/workflow-contract.md': (
+        r'sichtet die Planung einmal begrenzt die Metadaten vorhandener Zielindizes, ohne rekursive Historienlektüre',
+        r'YAML einschließlich gültiger JSON-Schreibweise wird mit dem vorhandenen Parser strukturiert ausgewertet',
+        r'Lese- oder Parsefehler belegen keine Abwesenheit',
+        r'Die Sichtung ist keine Auswahlvollmacht[^.]*eindeutig passende aktuelle, ausgewählte und bestätigte Etappe[^.]*Originale gebunden',
+        r'Mehrere passende, widersprüchliche oder unbestätigte Kandidaten werden gezielt geklärt',
+        r'Ohne passende Etappe genügt der Originalauftrag[^.]*nicht auf Vorrat',
+        r'Der Wegfalltest fragt',
+        r'Ein notwendiger atomarer Vorgang bleibt zusammen; zerlegt wird nicht pro Toolaufruf',
+        r'Zerlegung vor der Bestätigung',
+        r'ein bloßes Größenurteil genügt nicht',
+        r'zuerst Weglassen oder eine kleinere Alternative[^.]*dann eine vorhandene Projektfunktion oder native API/CLI/MCP; dann ein etabliertes geeignetes Werkzeug',
+        r'Eigenentwicklung braucht eine belegte Lücke[^.]*kleiner Eigenbau ist legitim',
+        r'Triviale Details brauchen keine Marktstudie',
+        r'vorgeschlagenes Werkzeug ist keine Installationsfreigabe',
+        r'Sicherheitsanforderung wird von ihrer bisher gewählten Umsetzung getrennt',
+        r'vor einer kompensierenden Reparatur wird geprüft',
+        r'Bei jedem Taskresultat einschließlich `partial`, `blocked` und `failed` sowie bei Resume',
+        r'fachliche Beitrag oder tragende Erkenntnisgewinn[^?]*\?[^?]*kumuliert hinzu\?[^?]*kleinste sinnvolle Weg\?',
+        r'grüne Helpertests allein rechtfertigen keine weitere Helperarbeit',
+        r'bevor ein weiterer wesentlicher Helper entsteht oder ein selbst erzeugter Prüfblocker repariert wird',
+        r'keinen neuen Status, kein neues Feld, keinen Pflichtmodellaufruf und kein Review pro Task',
+        r'Private, temporäre und extern ausgeführte Helper sind nach Zweck und Wirkung Implementierung',
+        r'read-only Task \(`scope: \[\]`\) wird weder durch solche Helper noch durch Eigenbau des Coordinators umgangen',
+        r'prüft dieses Review zuerst den Gesamtweg gegen den Originalauftrag, nicht nur das zuletzt fehlerhafte Skript',
+        r'begründet fortsetzen, innerhalb bestehender Rechte vereinfachen, bei materieller Planänderung Ersatzplanung oder bei ungedeckter Wirkung sicher stoppen',
+        r'weder starre Retry- oder Zeitlimits noch eine Nutzerpause für jede operative Anpassung',
+        r'Zuerst wird der Gesamtweg geprüft: Originalziel, Wegfalltest je Task, geerbte Voraussetzungen und Gates, realistisch lieferbare Taskgrößen[^;]*kleinerer Alternativweg; danach technische Details und Checkabdeckung',
+        r'technisch korrekte Übernahme alter Gates genügt nicht',
+        r'Anker sind die Originale, nicht ein gewünschtes Urteil oder ein Vorgänger-pass',
+        r'Qualitätsurteil nennt konkret geprüfte problematische Entscheidungen oder offene Lücken',
+        r'Zerlegung wird nur mit benannten Ergebnis- oder Schnittstellengrenzen verlangt, legitime Schutzmaßnahmen, notwendige atomare Vorgänge und schlanke Aufträge werden akzeptiert',
+        r'keine weitere Reviewebene und keine neue Pauschalcheckliste',
+    ),
+    '.apm/skills/core-review/SKILL.md': (
+        r'Prüfe zuerst den Gesamtweg nach der \[Prüfreihenfolge\]\([^)]*#planreview\)',
+        r'formal korrekte Übernahme alter Gates oder ein Vorgänger-pass genügt nicht',
+        r'Verlange Zerlegung nur mit konkret benannten Ergebnis- oder Schnittstellengrenzen; akzeptiere legitime Schutzmaßnahmen, notwendige atomare Vorgänge und schlanke Aufträge',
+        r'Prüfe danach die Task-Kriterium-Zuordnung',
+        r'den geprüften problematischen Entscheidungen oder offenen Lücken',
+    ),
+    '.apm/skills/core-shared/references/artifact-contract.md': (
+        r'tatsächlichen Änderungen im Repository, einschließlich dort angelegter Helper',
+        r'exakten freigegebenen Pfaden und Existenz- oder Änderungsnachweis in der vorhandenen `acceptance\[\]\.evidence`, `checks\[\]\.evidence` und `limitations`',
+        r'ohne Secretinhalte, ohne globale Dateisysteminventur und ohne neues Feld',
+        r'Verwende Pfade und Metadaten statt Inhalte geheimnistragender Dateien',
+        r'Falls Struktur nötig ist, redigiere sie lokal vor jeder Toolausgabe',
+        r'Secretwerte gelangen weder in Toolargumente noch in Tooloutput, Evidenz oder Dispatch',
+        r'nachträgliches Redigieren eines bereits ausgegebenen Inhalts genügt nicht',
+    ),
+    '.apm/skills/core-shared/references/verification.md': (
+        r'Grüne Tests eines selbst erstellten Helpers belegen nur den Helper, nicht den fachlichen Fortschritt',
+    ),
+    '.apm/skills/core-execute/SKILL.md': (
+        r'führe den kurzen \[Zielabgleich\]\([^)]*\) für den nächsten Schritt aus',
+        r'bei jedem Status den kurzen \[Zielabgleich\]',
+        r'private oder externe Helper sind gemäß \[Artefaktvertrag\]\([^)]*\) sichtbar und im Scope',
+    ),
+    '.apm/skills/core-shared/references/tool-routing.md': (
+        r'installierbares Werkzeug bleibt eine begründete Option nach der \[Notwendigkeitsfolge\]',
+        r'mit eigener Freigabegrenze',
+    ),
+    '.apm/skills/core-debug/SKILL.md': (
+        r'prüfe vor einer kompensierenden Reparatur Weglassen oder die vorhandene einfachere Alternative',
+        r'Rückbau außerhalb des Scopes oder eines Schutzgates meldest du als Entscheidung an `core-execute`',
+    ),
+    '.apm/skills/core-plan/SKILL.md': (
+        r'Binde nur eine eindeutig passende aktuelle, ausgewählte und bestätigte Etappe nach Originalprüfung; wähle selbst keine Etappe aus',
+        r'Ohne passende Etappe plane den Originalauftrag ohne Pflichtmilestone; bei Mehrdeutigkeit oder Lese-/Parsefehler kläre gezielt',
+        r'Zerlege mehrere eigenständig abnehmbare Ergebnisse[^.]*vor der Bestätigung; halte einen notwendigen atomaren Vorgang zusammen',
+        r'Wegfalltest',
+    ),
+}
+GOAL_LEGACY = r'(?:wähle|nimm)[^.\n]*(?:höchste|neueste)[^.\n]*(?:Etappe|Meilenstein)|jeder Plan (?:benötigt|braucht) einen Meilenstein|Parsefehler[^.\n]*(?:gilt|gelten) als (?:kein|fehlend)|Eigenbau ist (?:stets |immer )?verboten|installiere[^.\n]*(?:automatisch|ohne Freigabe)|Schutzgate[^.\n]*(?:abschalten|deaktivieren), um|Zielabgleich[^.\n]*nur bei `completed`|nach (?:jedem|allen) (?:Task|Taskresultat)[^.\n]*(?:Pflichtreview|Pflichtmodellaufruf)|(?:höchstens|maximal) \d+ (?:Reparatur|Retry|Versuch)|Vorgänger-pass (?:genügt|reicht)(?! nicht)|(?:höchstens|maximal) \d+ Tasks pro Plan'
+
+
+def check_goal_sources(sources):
+    for path, patterns in GOAL_SOURCES.items():
+        text = sources[path]
+        require(not re.search(GOAL_LEGACY, text, re.I), 'Zielbindung: Auswahl-/Pflichtmilestone-Regress: ' + path)
+        for pattern in patterns:
+            require(re.search(pattern, text), 'Zielbindungsklausel fehlt: ' + path + ': ' + pattern)
+
+
 # Source-local TypeSafe consumer contracts, not a harness or an authorization engine.
 TYPESAFE_SOURCES = {
     '.apm/skills/core-plan/SKILL.md': (
@@ -1421,7 +1595,7 @@ def check_setup_source(front, text):
 def check_group(root, group, with_authoring=False, tool_root=None):
     paths = targets(root, group)
     if group == 'workflows':
-        paths = list(dict.fromkeys([*paths, *(root / p for p in (*REPLACEMENT_SOURCES, *DIRECT_SOURCES, *HANDOFF_SOURCES, *TYPESAFE_SOURCES))]))
+        paths = list(dict.fromkeys([*paths, *(root / p for p in (*REPLACEMENT_SOURCES, *DIRECT_SOURCES, *HANDOFF_SOURCES, *TYPESAFE_SOURCES, *GOAL_SOURCES))]))
     def action():
         # Missing inputs take precedence over content findings in earlier targets.
         for path in paths:
@@ -1458,6 +1632,7 @@ def check_group(root, group, with_authoring=False, tool_root=None):
             check_direct_sources(sources)
             check_handoff_sources(sources)
             check_typesafe_sources(sources)
+            check_goal_sources(sources)
         joined = '\n'.join(texts)
         for pattern, label in POLICIES[group]:
             require(re.search(pattern, joined, re.I), 'semantische Klausel nicht belegt: ' + label)
