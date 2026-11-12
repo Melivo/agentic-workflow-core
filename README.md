@@ -97,6 +97,8 @@ Du kannst Skills in normaler Sprache anfordern; die Auswahl- oder Aufrufoberflä
 
 Für einfache Vorhaben ist **keine zusätzliche Zielstruktur** nötig: Ein bestätigter Plan oder ein klarer Direktauftrag genügt. Nur bei ausdrücklich gewählter Etappenplanung verwaltet `core-milestone` Gesamtziel und Meilensteine; `core-handoff` erstellt den Übergabeprompt für eine neue Sitzung.
 
+Bei klaren Aufgaben prüft `core-plan` zuerst, ob eine passende aktuelle, bestätigte Etappe ausgewählt ist; ohne eine solche Etappe bleibt Planung ohne Milestone möglich. Es begründet nötige Mechanismen vor Eigenbau und `core-execute` gleicht Ergebnisse kurz mit dem Originalziel ab. Die Details stehen im [Workflowvertrag](.apm/skills/core-shared/references/workflow-contract.md#zielbindung-und-funktionaler-scope) und im [Planungsskill](.apm/skills/core-plan/SKILL.md#workflow).
+
 Definitionen sind versioniert und nach Bestätigung unveränderlich. Resume setzt vorhandene Plan- und Runarbeit mit derselben Run-ID fort, statt neu zu planen. Nach verifiziertem Etappenabschluss sind Handoff mit den exakten Originalartefakten und anschließender Halt verpflichtend; die nächste Etappe wird nicht automatisch geplant oder gestartet. Versionswechsel übernehmen weder alte Freigaben noch Abschlussnachweise automatisch. Details: [Workflowvertrag](.apm/skills/core-shared/references/workflow-contract.md#fresh-context-ubergaben) und [Artefaktvertrag](.apm/skills/core-shared/references/artifact-contract.md).
 
 ## Welche Skills sind enthalten?
