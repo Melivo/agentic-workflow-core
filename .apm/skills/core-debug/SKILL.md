@@ -56,11 +56,11 @@ Der `debug-investigator` startet **keinen Subagenten**. Fachagenten wählen kein
 ### 2. Ursache diagnostizieren
 
 1. Lokalisiere den Fehlerpunkt mit Repositoryevidenz.
-2. Formuliere wenige unterscheidbare Hypothesen und benenne für jede eine Beobachtung, die sie bestätigt oder widerlegt.
-3. Verfolge Aufrufer, Referenzen, Datenfluss und Zustandsübergänge rückwärts bis zur ersten fehlerhaften Annahme oder Mutation.
-4. Trenne Symptom, Ursache und begünstigende Bedingungen. Behandle Korrelation nicht als Ursache.
-5. Dokumentiere die bestätigte Ursache und die verworfenen materiellen Hypothesen knapp.
-6. Erst wenn diese lokale Hypothesen- und Repositoryanalyse ausgeschöpft ist und eine konkrete materielle Wissenslücke die nächste Diagnoseentscheidung blockiert, nutze `core-research` inline gemäß [Core Research](../core-research/SKILL.md). Formuliere eine enge Frage, das davon abhängige Diagnosekriterium und die Recherchegrenze. Überführe externe Befunde ausschließlich in überprüfbare Hypothesen; Ursache wird erst durch aktuelle lokale Evidenz bestätigt. Bleibt die Lücke offen oder ist die Recherchegrenze ausgeschöpft, melde `partial` oder `blocked` samt fehlender Evidenz an `core-execute`; recherchiere nicht weiter.
+2. Wenn die nächste Diagnoseentscheidung von unbekannter externer Semantik abhängt (etwa API-, Versions- oder Plattformverhalten), prüfe diese früh mit einer engen Frage über `core-research` gemäß [Core Research](../core-research/SKILL.md). Lokale Hypothesen müssen dafür nicht ausgeschöpft sein. Begrenze Suchraum und Kriterium; externe Befunde sind nur überprüfbare Hypothesen, deren lokale Wirkung anschließend geprüft wird. Bei einer passenden Entscheidung können Gegenargumente oder bekannte Probleme gezielt einbezogen werden. Bleibt die Lücke offen, melde `partial` oder `blocked` an `core-execute`; recherchiere nicht weiter.
+3. Formuliere wenige unterscheidbare Hypothesen und benenne für jede eine Beobachtung, die sie bestätigt oder widerlegt.
+4. Verfolge Aufrufer, Referenzen, Datenfluss und Zustandsübergänge rückwärts bis zur ersten fehlerhaften Annahme oder Mutation.
+5. Trenne Symptom, Ursache und begünstigende Bedingungen. Behandle Korrelation nicht als Ursache.
+6. Dokumentiere die bestätigte Ursache und die verworfenen materiellen Hypothesen knapp.
 
 Wiederholungen ohne neue Erkenntnis lösen eine Ursachen- und Vereinfachungsprüfung aus, keine endlose Fehlerverschleife. Liegt die Ursache in einem selbst erzeugten oder übernommenen Mechanismus, prüfe vor einer kompensierenden Reparatur Weglassen oder die vorhandene einfachere Alternative nach der [Notwendigkeitsfolge](../core-shared/references/workflow-contract.md#zielbindung-und-funktionaler-scope); Rückbau außerhalb des Scopes oder eines Schutzgates meldest du als Entscheidung an `core-execute`, statt ihn selbst vorzunehmen.
 

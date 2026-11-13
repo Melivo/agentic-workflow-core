@@ -48,7 +48,7 @@ Lade Detailregeln nur bei passendem Risiko:
 | Authentifizierung, Autorisierung, Session, Secret, Vertrauensgrenze, sensible Daten, externer Aufruf oder Datenbankzugriff | [Sicherheit](references/security.md) | rein interne, unveränderte Datenflüsse ohne neue Vertrauensgrenze |
 | Untrusted Input, Request-/Event-/Config-Payload, Serialisierung, Parsing, Größenlimit oder fachliche Eingabeprüfung | [Validierung](references/validation.md) | reine Umbenennung oder verhaltensneutrale Strukturarbeit |
 
-Lade beide Referenzen, wenn eine Eingabe eine Sicherheitsentscheidung steuert. Bei konkreten aktuellen Bibliotheks-, Framework-, SDK- oder API-Fragen darf Context7 gemäß Toolrouting genutzt werden; allgemeine Backendregeln oder Repositorybefunde benötigen es nicht.
+Lade beide Referenzen, wenn eine Eingabe eine Sicherheitsentscheidung steuert. Bei konkreten aktuellen Bibliotheks-, Framework-, SDK- oder API-Fragen darf Context7 gemäß Toolrouting genutzt werden; allgemeine Backendregeln oder Repositorybefunde benötigen es nicht. Wenn externe Authentifizierungs- oder API-Semantik (etwa Tokenvertrag) eine Entscheidung wesentlich trägt, nutze bei Bedarf [Core Research](../core-research/SKILL.md); Routineprüfung bleibt lokal.
 
 ## Workflow
 

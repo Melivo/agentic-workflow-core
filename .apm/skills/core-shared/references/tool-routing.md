@@ -4,11 +4,12 @@ Workflows beschreiben benötigte Fähigkeiten. Dieser Vertrag wählt den engsten
 
 ## Auswahlreihenfolge
 
-1. Verwende Repositorycode, Tests und lokale Verträge als primäre Evidenz.
-2. Wähle den Provider nach benötigter Fähigkeit, Projektgrenze, Freshness und Schreibberechtigung.
-3. Nutze einen Fallback nur, wenn der bevorzugte Provider die konkrete Operation nicht bedienen kann oder nicht bereit ist.
-4. Dokumentiere den Fallback und jede verbleibende Evidenzlücke im Ergebnis.
-5. Ein inaktiver Ref-, Commit- oder Fallback-View bleibt read-only.
+1. Für lokale Projektbehauptungen prüfe Code, Tests und lokale Verträge im passenden View; vertiefte Recherche bleibt auf den engsten relevanten Bereich begrenzt. Routinemäßige Projektprüfung ist normale Facharbeit, kein separater Research-Auftrag.
+2. Bei einer externen Frage wähle die Quellenart nach dem Belegbedarf: offizielle technische Dokumentation für API-/Versions-/Plattformverträge, belastbare Primärquellen für Standards und passend gekennzeichnete Experten-/Communityquellen für Orientierung oder Gegenargumente.
+3. Wähle den Provider getrennt davon nach Fähigkeit, Projektgrenze, Freshness und Schreibberechtigung. Toolpriorität bestimmt den Weg, nicht die inhaltliche Autorität; Quellenqualität bestimmt nicht die technische Zugriffsroute.
+4. Nutze einen Fallback nur, wenn der bevorzugte Provider die konkrete Operation nicht bedienen kann oder nicht bereit ist. Benenne Fallback und Evidenzlücken.
+5. Externe Dokumentation und Empfehlungen belegen keine lokale Implementierung, Fehlerursache, bestandene Tests oder Nutzeranforderung. Prüfe ihre lokale Anwendbarkeit dort, wo sie für die Entscheidung relevant ist.
+6. Ein inaktiver Ref-, Commit- oder Fallback-View bleibt read-only.
 
 Plan-Tasks nennen unter `required_mcps` nur Provider, deren Fehlen die Aufgabe blockiert. Nützliche, aber ersetzbare Provider stehen unter `optional_mcps`. Toolverfügbarkeit erweitert weder Scope noch Autorisierung.
 
@@ -68,7 +69,8 @@ Für jeden vollständigen Plan, der zur Freigabe vorgelegt wird oder als geprüf
 | --- | --- | --- |
 | Code lokalisieren, Symbole, Referenzen, Abhängigkeiten, Datenfluss und Call-Chains | Gortex | Projektspezifisches Serena bei nicht unterstützter oder nicht verfügbarer konkreter Operation; danach native Werkzeuge |
 | Impact und Verträge vor Mutation; sichere Edits und Refactorings; post-edit Detect, Guards, Tests und Contracts | Gortex | Kein Schreibfallback aus einem read-only View; fehlende sichere Mutation sichtbar blockieren |
-| Aktuelle Bibliotheks-, Framework-, SDK-, API-, CLI- oder Cloud-Dokumentation | Context7 | Offizielle Primärquelle nur bei dokumentierter Lücke; kein Einsatz für Repositoryreview oder Business-Logic-Debugging |
+| Aktuelle Bibliotheks-, Framework-, SDK-, API-, CLI- oder Cloud-Dokumentation | Context7 für offizielle Dokumentation | Bei belegter Dokumentationslücke oder ungeeigneter Context7-Abdeckung: passende offizielle Primärquelle über eine tatsächlich verfügbare Quellenfähigkeit; Fallback und Grenze benennen. Version, Autorität und Übertragbarkeit separat prüfen. Kein Einsatz für Repositoryreview oder lokale Kausalbehauptungen |
+| Begrenzte Onlineorientierung zu offenen Lösungsoptionen, Standards oder Gegenargumenten | Tatsächlich verfügbare, passende Quellenfähigkeit; keine feste Providerpflicht | Standards und technische Fakten vorrangig anhand passender Primärquellen, Experten-/Communitybeiträge als gekennzeichnete Orientierung. Quellenqualität unabhängig vom Providerweg prüfen; keine Provider erfinden oder installieren |
 | Bekannte relevante Videoquelle | YouTube Transcript | Kein allgemeiner Videosuchdienst; entscheidungsrelevante Aussagen gegen stärkere Quellen prüfen |
 | Projektbezogene Datei-, Text-, Symbol- oder Language-Server-Informationssuche | Serena | Nur ausdrücklich konfiguriertes Projekt; niemals Benutzer-Home oder Dateisystemroot |
 | Projekt vor Projektzuordnung ermitteln | native Pfad-/Namenssuche | Nur eng begrenzt; keine Inhalts-/Symbolsuche, keine Ausnahme für unbekannte Dateien im bekannten Projekt |

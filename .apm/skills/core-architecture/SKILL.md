@@ -15,7 +15,7 @@ Die fünf Softwaredesign-Prinzipien sind in [S00](references/design-baseline.md)
 
 Prüfe Wissenseigentum, versteckte Kopplung oder redundante Schichten mit [M01–M04](references/boundaries-and-abstractions.md); unnötige Aufruferentscheidungen oder Fehlerflächen mit [M05–M06](references/interface-and-errors.md). Bei materiellen Richtungsentscheidungen nutze [M10](references/alternatives.md).
 
-Wenn Tools benötigt werden, prüfe relevante aktuell verfügbare MCP-Fähigkeiten gemäß [Toolrouting](../core-shared/references/tool-routing.md); Verfügbarkeit erweitert weder Scope noch Autorisierung.
+Wenn Tools benötigt werden, prüfe relevante aktuell verfügbare MCP-Fähigkeiten gemäß [Toolrouting](../core-shared/references/tool-routing.md); Verfügbarkeit erweitert weder Scope noch Autorisierung. Bei wichtigen offenen Alternativen oder einer tragenden externen Annahme nutze bedingt die kanonische [Core-Research-Methode](../core-research/SKILL.md); lokale Strukturfragen bleiben bei der Architecture-Methode.
 
 ## Aktivierung und Grenzen
 

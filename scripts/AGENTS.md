@@ -73,6 +73,12 @@ Die Workflowverkabelung bleibt unter
   Freigaberahmen-Klauseln (Reichweite, Klärung vor dem Schreiben, Einschränkungen)
   und den Stopgrund `planning_only`; Mutationen weisen unzulässige Erweiterung
   und unbegründete Verengung zurück. Das bleibt statische Konsistenz.
+- `RESEARCH_SOURCES` und `check_research_sources` binden in der Gruppe
+  `workflows` beide Recherchemodi, Routinegrenzen, frühe externe Debugfragen,
+  Quellen-/Beleggrenzen und bedingte Verbraucher an ihre kanonischen Quellen.
+  Begrenzte Altregel-/Ausweitungsmuster weisen widersprechende Zusätze auch bei
+  erhaltener positiver Prosa zurück. Das ist statische Vertragskonsistenz,
+  kein Entscheidungsorakel oder Nachweis tatsächlicher Agentenbefolgung.
 - `check_completion_ref` akzeptiert sichere projektrelative Originalquellen und
   Vorgängerrun-Evidenz gemäß Indexvertrag. Plan-/Run-/Reviewbindung und
   Versionsrevalidierung bleiben getrennte Prüfungen; Pfadsyntax belegt weder

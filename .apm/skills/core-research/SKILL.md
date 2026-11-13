@@ -1,6 +1,6 @@
 ---
 name: core-research
-description: Fachmethode für fokussierte Read-only-Evidenzsynthese bei materiellen Wissenslücken; routet Repositoryfragen an Gortex, offizielle Technologie- und API-Dokumentation an Context7, bekannte Videoquellen an YouTube Transcript und projektspezifische Informationssuche an Serena und liefert zitierte Befunde mit Vertrauensniveau, Widersprüchen und offenen Evidenzlücken. Kein öffentlicher Workflow, keine Repositorymutation und kein Ersatz für Planung oder Review.
+description: "Fachmethode für vertiefte, taskgebundene Projektrecherche oder begrenzte Online-Recherche zu Lösungsoptionen, externen technischen Fakten und Gegenargumenten; Routinelektüre bleibt Facharbeit des zuständigen Skills. Liefert quellengebundene Befunde mit Evidenzgrenzen. Kein öffentlicher Workflow, keine Repositorymutation und kein Ersatz für Planung oder Review."
 ---
 
 # Core Research
@@ -9,44 +9,30 @@ description: Fachmethode für fokussierte Read-only-Evidenzsynthese bei materiel
 
 ## Aktivierung und Grenzen
 
-Nutze die Methode inline innerhalb des bestätigten Auftrags, wenn nach Prüfung der aktuellen Repositoryevidenz und bestätigten Artefakte eine **konkrete materielle Wissenslücke** die nächste Entscheidung blockiert. Material ist eine Lücke, wenn ihre Antwort den zulässigen Plan, die Ausführung, eine Diagnosehypothese oder ein Reviewkriterium ändern kann. Tool- oder Webzugriff allein ist kein Trigger. Kein eigener Dispatch, keine Subagenten und kein Ausbau des Auftrags.
+`core-research` hat zwei Modi; beide bleiben Inline-Read-only-Methoden innerhalb eines bestätigten Auftrags und erweitern weder dessen Scope noch Autorisierung.
 
-Vor jeder Recherche formuliere in einem Satz: (1) die enge, beantwortbare Frage, (2) welche konkrete Entscheidung davon abhängt und (3) welches beobachtbare Ergebnis diese Entscheidung erlaubt. Nutze nur die für diese Frage nötige Quellenart und Tiefe; starte mit einem eng begrenzten Thema, nicht mit einer allgemeinen Suche. Bei mehreren unabhängigen Fragen behandle nur die für die aktuelle Entscheidung erforderlichen.
+- **Projektmodus:** Routinelektüre gehört zur jeweiligen Fachmethode und löst keinen eigenen Research-Auftrag aus. Nutze vertiefte Projektrecherche, wenn eine konkrete Frage zu Verantwortung, Vertrag, Daten-/Zustandsfluss, Änderungswirkung, Wiederverwendung, widersprüchlicher Evidenz oder Fehlerursache für die nächste Entscheidung relevant ist. Begrenze sie auf den engsten betroffenen Projektbereich; kein Vollscan.
+- **Onlinemodus:** Nutze begrenzte externe Recherche bei einer wichtigen offenen Lösungswahl zur Orientierung an etablierten Ansätzen oder Expertenanalysen, zur Prüfung folgenreicher externer API-/Versions-/Plattformannahmen oder für Gegenargumente und bekannte Probleme zu einer folgenreichen Empfehlung beziehungsweise einem passenden Fehlersignal. Keine Onlinepflicht für jede Aufgabe und keine Recherche bloß aus Neugier.
 
-Recherchiere nicht vorsorglich, nicht wenn Repositoryevidenz oder bestätigte Artefakte genügen, und nicht für allgemeine Neugier oder eine bereits entschiedene Frage. Onlinebefunde ersetzen weder Repositoryprüfung noch Tests, Vertragsprüfung oder unabhängiges Review. Sie können eine überprüfbare Hypothese oder ein Prüfkriterium liefern, aber allein keine lokale Ursache, Implementierung, Planfreigabe oder Review-Feststellung beweisen. Planung, Ausführung und unabhängige Urteile bleiben Eigentum von `core-plan`, `core-execute` und `core-review`.
+Für jede vertiefte Recherche formuliere Frage, abhängige Entscheidung und beobachtbares Entscheidungskriterium. Wähle zuerst nach Evidenzbedarf und geeigneter Quellenart; die Reihenfolge kann je Frage mit minimalem lokalem Kontext oder einer externen Frage beginnen. Lokale Hypothesen müssen vor einer engen externen Prüfung nicht ausgeschöpft sein. Beende die Suche, wenn das Kriterium beantwortet oder die vereinbarte Grenze ausgeschöpft ist.
+
+Externe Dokumentation und Empfehlungen beweisen weder lokale Implementierung noch Fehlerursache oder bestandene Tests und werden nicht zu Nutzeranforderungen. Sie liefern höchstens überprüfbare Hypothesen, Prüfkriterien oder Orientierung. Planung, Ausführung und unabhängige Urteile bleiben Eigentum von `core-plan`, `core-execute` und `core-review`.
 
 Die Recherche ist read-only. Keine Änderungen an Produkt, Abhängigkeiten, Konfiguration, Versionen, Dateien oder Workflowzustand; keine Installationen, externen Aktionen oder eigenen Research-/Run-Artefakte. Sie erteilt keine Autorisierung und erweitert weder bestätigten Scope noch Freigaben. Befunde gehen an den aufrufenden Workflow; ausführungsrelevante Erkenntnisse bleiben in dessen bestätigtem Execute-Taskkontext bzw. `task-result/v1`. Research wählt oder ändert nie Ziel-, Index- oder Definitionsversionen.
 
 ## Erforderliche Eingaben und begrenzter Ablauf
 
-Erwarte einen selbstständigen Inline-Auftrag mit:
+Erwarte für vertiefte Recherche Frage, abhängige Entscheidung, beobachtbares Kriterium, zulässige Quellen/Version/Tiefe/Abbruchgrenze sowie relevante `context_paths` und Einschränkungen. Bei Routineprüfungen genügt der konkrete Fachauftrag; sie werden nicht in einen separaten Researchlauf umgewandelt. Fehlen bei vertiefter Recherche Frage, Kriterium oder Grenze, kläre nur diese Lücke; ohne sichere Klärung `blocked`.
 
-- konkreter Forschungsfrage,
-- Entscheidungskriterium, das die Frage entscheidbar macht,
-- Grenze für zulässige Quellen, Version, Tiefe und Abbruch,
-- relevanten `context_paths` und bekannten Einschränkungen.
+Bestimme zuerst, ob der Projekt- oder Onlinemodus die offene Frage beantwortet. Nutze den kleinsten ausreichenden Evidenzschritt und prüfe nach externer Recherche die lokale Anwendbarkeit, sofern die Aussage das Projekt betrifft. Für versionsabhängige Bibliotheks-, Framework-, SDK-, API-, CLI- oder Cloud-Fragen nutze vorrangig offizielle Dokumentation über Context7: exakte Library-ID, belegte entscheidungsrelevante Version, ein enges Thema pro Anfrage. Ermittle die Version lokal; verwende nicht stillschweigend „latest“. Andere Versionen sind nur klar markierte Vergleiche, wenn das Kriterium dies erfordert. Ist Context7 ungeeignet oder nicht verfügbar, benenne den erlaubten Fallback und dessen Grenze aus dem [Toolrouting](../core-shared/references/tool-routing.md).
 
-Fehlt Frage, Entscheidungskriterium oder Recherchegrenze, kläre nur diese materielle Lücke vor jedem Rechercheschritt. Lässt sie sich nicht sicher klären, beende als `blocked`, statt eine offene Suche zu beginnen.
-
-Arbeite in dieser Reihenfolge:
-
-1. Prüfe die relevante lokale Quelle (z. B. Manifest, Lockfile, Konfiguration, Code, Test oder bestätigten Vertrag) im passenden Checkout und halte fest, was sie bereits beantwortet und was offen bleibt.
-2. Wenn die offene Frage versionsabhängige Bibliotheks-, Framework-, SDK-, API-, CLI- oder Cloud-Dokumentation betrifft, recherchiere vorrangig die offizielle Dokumentation über Context7. Löse die exakte Library-ID auf; nutze eine bekannte entscheidungsrelevante Version aus dem lokalen Projekt oder Auftrag. Ist keine Version belegt, ermittle die relevante Version zuerst aus lokaler Evidenz; verwende nicht stillschweigend „latest“. Eine andere Version darf nur als klar markierter Vergleich dienen, wenn das Entscheidungskriterium den Vergleich verlangt.
-3. Frage ein enges Dokumentationsthema pro Anfrage und führe den Befund unmittelbar auf die Entscheidungsfrage zurück. Ist Context7 für die konkrete Operation nicht verfügbar oder deckt die offizielle Dokumentation die Frage nicht ab, nutze ausschließlich den bestehenden Fallback der Quellenhierarchie unten bzw. im [Toolrouting](../core-shared/references/tool-routing.md). Benenne jeden Fallback und seine Grenzen.
-4. Beende die Recherche, sobald das Entscheidungskriterium anhand belastbarer Evidenz erfüllt ist, oder sobald die zulässige Grenze ausgeschöpft ist. Bei fehlendem, widersprüchlichem oder unzureichendem Befund nicht weiter auffächern: offene Frage und Auswirkung berichten, als `partial` oder `blocked`.
+Orientierung und Gegenargumente nutzen nur die dafür nötige begrenzte externe Recherche über tatsächlich verfügbare, passende Quellenfähigkeiten; wenn keine sichere passende Fähigkeit verfügbar ist, benenne die Lücke statt einen Provider zu erfinden oder zu installieren. Stoppe bei beantwortetem Kriterium oder ausgeschöpfter Grenze. Bei fehlendem, widersprüchlichem oder unzureichendem Befund nicht weiter auffächern; Auswirkung und `partial`/`blocked` melden.
 
 ## Evidenzklassen und Quellenhierarchie
 
-Zerlege die Frage nach Evidenzklasse (offizielle Dokumentation, Repositoryquelle, Community, wissenschaftliche Literatur) und arbeite die Hierarchie nur so weit ab, wie die Entscheidung es erfordert:
+Evidenzklasse und Quellenqualität sind unabhängig vom Toolrouting. Wähle zuerst nach benötigtem Beleg: lokale Projektbehauptungen brauchen aktuelle Repositoryquellen; externe technische Verträge bevorzugen offizielle, versionspassende Dokumentation; Standards und Spezifikationen sind Primärquellen; Experten-/Communityquellen dienen, passend gekennzeichnet, vor allem Orientierung und Gegenargumenten. Sekundärquellen ersetzen keinen verfügbaren maßgeblichen Beleg. Keine pauschale feste Rangliste über Modi hinweg: Projektbelege und externe Fakten beantworten unterschiedliche Fragen.
 
-1. **Repositoryquelle:** Code, Tests und lokale Verträge über Gortex.
-2. **Offizielle Dokumentation:** aktuelle, möglichst versionsbezogene Bibliotheks-, Framework-, SDK-, API-, CLI- und Cloud-Dokumentation über Context7.
-3. **Projektspezifische Informationssuche:** Serena, wenn Gortex die konkrete Operation nicht bedienen kann oder Serena dafür erkennbar geeigneter konfiguriert ist.
-4. **Bekannte Videoquelle:** YouTube Transcript für eine bekannte oder fokussiert begründete URL.
-5. **Belastbare Primärquellen:** Standards, Spezifikationen und weitere Primärquellen.
-6. **Sekundärquellen:** nur ergänzend und ausdrücklich gekennzeichnet.
-
-Eigentümer der Capability-Matrix und Fallbackregeln ist das [Toolrouting](../core-shared/references/tool-routing.md). Jeder Fallback wird im Befund benannt; native Werkzeuge sind der letzte lokale Fallback. Honcho darf ausschließlich als Hinweis auf früher bestätigte Präferenzen, Arbeitsweisen oder Entscheidungen befragt werden; jeder Treffer ist ein Hinweis und wird gegen aktuelle Benutzeranweisungen, `AGENTS.md`, Plan und Repository geprüft.
+Gortex → Serena → native Werkzeuge bleibt die lokale Providerfolge; Context7 bleibt der bevorzugte Weg für offizielle technische Dokumentation, YouTube Transcript für bekannte relevante Videos. Toolrouting bestimmt Fähigkeiten, Priorität und Fallback, nicht die Qualität oder Autorität einer inhaltlichen Behauptung. Benenne jeden Fallback. Honcho ist nur Hinweis auf frühere bestätigte Präferenzen, Arbeitsweisen oder Entscheidungen; prüfe Treffer gegen aktuelle Benutzeranweisungen, `AGENTS.md`, Plan und Repository.
 
 ## Provider-Routing
 
@@ -59,9 +45,11 @@ Eigentümer der Capability-Matrix und Fallbackregeln ist das [Toolrouting](../co
 
 **Positiv — versionsabhängige API-Frage:** Lokale Dependency-Metadaten zeigen Version X, aber die geplante Integration hängt davon ab, ob ein benötigtes API-Verhalten in X unterstützt wird. Formuliere die genaue API-Frage, benenne als Kriterium die dokumentierte Unterstützung in Version X und prüfe die passende offizielle Dokumentation. Wenn sie die Entscheidung beantwortet, stoppe; die spätere Implementierung muss weiterhin lokal geprüft und getestet werden.
 
-**Positiv — nicht dokumentierte Lücke:** Eine offizielle Quelle beantwortet einen entscheidungsrelevanten Punkt nicht. Nutze nur den passenden, bereits festgelegten Fallback der Quellenhierarchie, kennzeichne dessen geringere oder andere Evidenzqualität und stoppe nach der minimal nötigen Klärung. Unaufgelöste Teile bleiben offen.
+**Positiv — Lösungsorientierung:** Eine wichtige offene Designwahl hat mehrere plausible Ansätze. Hole knapp externe Orientierung zu etablierten Lösungen und relevanten Gegenargumenten ein, gleiche sie mit Projektgrenzen ab und behandle Empfehlungen als Vorschläge, nicht als Anforderungen.
 
-**Negativ — keine materielle Wissenslücke:** Ein aktueller Test, Vertrag oder lokaler Konfigurationsstand beantwortet die Frage bereits. Keine Online-Recherche; dokumentiere die lokale Evidenz im aufrufenden Workflow.
+**Positiv — externe Faktenprüfung:** Eine folgenschwere Annahme über API, Version oder Plattform hängt von externer Semantik ab. Prüfe gezielt eine maßgebliche, passende Quelle; verifiziere anschließend die lokale Anwendbarkeit. Ein fehlender oder nicht dokumentierter Punkt bleibt eine Evidenzlücke, keine bestätigte Aussage.
+
+**Negativ — Routineprüfung:** Ein Fachskill prüft die für den Auftrag üblichen Code-, Test-, Konfigurations- und Vertragsstellen. Das bleibt normale Projektarbeit und wird nicht als eigener Research-Auftrag oder Online-Recherche dargestellt.
 
 **Negativ — Ursache nur aus Online-Dokumentation:** Eine Dokumentation beschreibt mögliches Frameworkverhalten, aber lokaler Code, Logs oder Tests belegen nicht, dass es hier auftrat. Formuliere höchstens eine zu prüfende Hypothese; behaupte keine Ursache und erstelle kein Review-Finding allein aus der Onlinequelle.
 

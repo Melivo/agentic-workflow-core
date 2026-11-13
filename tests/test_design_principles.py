@@ -83,7 +83,7 @@ def link_problems(text, source):
 
 def plan_problems(text, source):
     problems = []
-    research = section(text, '3. Research nur bei materieller Wissenslücke')
+    research = section(text, '3. Recherchemodi gezielt einsetzen')
     s00 = [p for p in paragraphs(research) if links_to_baseline(p, source)]
     if not s00:
         problems.append('plan: direct S00 link missing')
@@ -287,7 +287,7 @@ class DesignPrincipleTests(unittest.TestCase):
     def test_plan_negative_mutations(self):
         cases = {
             'link': ('](../core-architecture/references/design-baseline.md) bereits', '](missing.md) bereits'),
-            'solution': ('Lösungswahl', 'Umsetzung'),
+            'solution': ('bereits bei der Lösungswahl proportional auf den bestätigten Task', 'erst nach der Umsetzung proportional auf den bestätigten Task'),
             'small': ('auch bei kleinen Änderungen ohne Architektur-Trigger', ''),
             'producer_hardcode': ('der in Schritt 3 aufgelöste exakte S00-Lesepfad immer dazu, nie ein fest codierter Producer- oder Harness-Pfad', 'die kanonische S00-Referenz \x60' + BASELINE_PATH + '\x60 immer dazu'),
             'hardcode_added': ('nie ein fest codierter Producer- oder Harness-Pfad', 'nie ein fest codierter Pfad außer \x60' + BASELINE_PATH + '\x60'),

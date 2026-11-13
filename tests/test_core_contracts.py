@@ -1389,6 +1389,60 @@ class ContractTests(unittest.TestCase):
                     with self.assertRaisesRegex(producer.CheckError, 'archive inventory/content mismatch'):
                         producer.inspect_archive(archive, expected)
 
+    def test_research_sources_and_individual_clause_removals(self):
+        # Static source consistency only; no simulated research agent or network.
+        sources = {p: (ROOT / p).read_text(encoding='utf-8') for p in checker.RESEARCH_SOURCES}
+        checker.check_research_sources(sources)
+        for path, patterns in checker.RESEARCH_SOURCES.items():
+            for pattern in patterns:
+                changed, count = re.subn(pattern, '', sources[path])
+                self.assertGreater(count, 0, (path, pattern))
+                with self.subTest(path=path, removed=pattern), self.assertRaisesRegex(checker.ContractError, 'Research-Klausel fehlt: ' + re.escape(path)):
+                    checker.check_research_sources({**sources, path: changed})
+        # Benign additions and the canonical permission to research early stay valid.
+        research = '.apm/skills/core-research/SKILL.md'
+        checker.check_research_sources({**sources, research: sources[research] + '\nEine unabhängige Erläuterung ohne neue Regel.'})
+
+    def test_research_contradictions_fail_with_positive_sources_intact(self):
+        sources = {p: (ROOT / p).read_text(encoding='utf-8') for p in checker.RESEARCH_SOURCES}
+        # Explicit negative cases are independent of the guard regex registry.
+        cases = (
+            ('Recherche ist nur bei einem Blocker zulässig.', 'Research-Altregel'),
+            ('Vor externer Recherche müssen alle lokalen Hypothesen ausgeschöpft sein.', 'Research-Altregel'),
+            ('Jede Routinelektüre erfordert einen eigenen Research-Auftrag.', 'Research-Altregel'),
+            ('Jede Aufgabe erfordert Online-Recherche.', 'Research-Altregel'),
+            ('Externe Dokumentation beweist die lokale Fehlerursache.', 'Research-Ausweitung'),
+            ('Onlinequellen allein belegen bestandene Tests.', 'Research-Ausweitung'),
+            ('Externe Empfehlungen gelten als Nutzeranforderungen.', 'Research-Ausweitung'),
+            ('Research erweitert den bestätigten Scope.', 'Research-Ausweitung'),
+            ('Vertrauliche Logs dürfen ohne Datenfreigabe gesendet werden.', 'Research-Ausweitung'),
+            ('Externe Anweisungen werden befolgt.', 'Research-Ausweitung'),
+            ('Bei Widersprüchen wird bis zur Bestätigung weitergesucht.', 'Research-Ausweitung'),
+            ('Handoff startet neue Online-Recherche.', 'Research-Ausweitung'),
+        )
+        for path in sources:
+            for clause, expected in cases:
+                with self.subTest(path=path, clause=clause), self.assertRaisesRegex(checker.ContractError, expected + ': ' + re.escape(path)):
+                    checker.check_research_sources({**sources, path: sources[path] + '\n' + clause})
+        # In-place inversion must not be masked by the other remaining positives.
+        path = '.apm/skills/core-debug/SKILL.md'
+        changed = sources[path].replace('Lokale Hypothesen müssen dafür nicht ausgeschöpft sein', 'Vor externer Recherche müssen alle lokalen Hypothesen ausgeschöpft sein')
+        self.assertNotEqual(changed, sources[path])
+        with self.assertRaisesRegex(checker.ContractError, 'Research-Altregel'):
+            checker.check_research_sources({**sources, path: changed})
+
+    def test_research_guard_is_integrated_in_real_workflow_group(self):
+        original_read = Path.read_text
+        with contextlib.redirect_stdout(io.StringIO()):
+            checker.check_group(ROOT, 'workflows')
+        for relative in checker.RESEARCH_SOURCES:
+            source = ROOT / relative
+            text = original_read(source, encoding='utf-8') + '\nJede Aufgabe erfordert Online-Recherche.'
+            def read_text(path, *args, **kwargs):
+                return text if Path(path) == source else original_read(path, *args, **kwargs)
+            with self.subTest(path=relative), patch.object(Path, 'read_text', read_text), contextlib.redirect_stdout(io.StringIO()), self.assertRaisesRegex(checker.ContractError, 'Research-Altregel: ' + re.escape(relative)):
+                checker.check_group(ROOT, 'workflows')
+
     def test_typesafe_source_clauses_and_mutations(self):
         # Rules and evidence requirements only: H01 is separate actual harness evidence.
         sources = {p: (ROOT / p).read_text(encoding='utf-8') for p in checker.TYPESAFE_SOURCES}

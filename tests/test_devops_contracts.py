@@ -238,9 +238,8 @@ class Fixture:
         baseline = 'core-architecture/references/design-baseline.md'
         (skills / baseline).parent.mkdir(parents=True)
         shutil.copy2(SKILLS / baseline, skills / baseline)
-        # habit-feedback.md links four workflow skill sources; copy those real
-        # files so link checks stay effective, not whole skills.
-        for name in ('core-plan', 'core-execute', 'core-refactor', 'core-review'):
+        # Copy direct workflow and research targets as real files, not whole skills.
+        for name in ('core-plan', 'core-execute', 'core-refactor', 'core-review', 'core-research'):
             target = skills / name / 'SKILL.md'
             target.parent.mkdir(parents=True, exist_ok=True)
             shutil.copy2(SKILLS / name / 'SKILL.md', target)
@@ -489,6 +488,11 @@ class Mutations(unittest.TestCase):
         with Fixture() as fx:
             (fx.dir.parent / 'core-plan' / 'SKILL.md').unlink()
             self.assertIn(('habit-feedback.md', '../../core-plan/SKILL.md'), broken_links(fx.dir))
+
+    def test_removed_research_target_breaks_fixture_links(self):
+        with Fixture() as fx:
+            (fx.dir.parent / 'core-research' / 'SKILL.md').unlink()
+            self.assertIn(('SKILL.md', '../core-research/SKILL.md'), broken_links(fx.dir))
 
     def test_unrelated_edit_keeps_rules_green(self):
         with Fixture() as fx:
