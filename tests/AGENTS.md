@@ -102,6 +102,15 @@ ohne sichtbaren Rahmen) ergänzen positive Szenarien und In-Memory-Mutationen au
 denselben Szenariodaten; sie belegen statische Konsistenz, keine reale
 Agentenbefolgung.
 
+Die Research-Tests in `test_core_contracts.py` prüfen beide Modi und deren
+Verbraucher einschließlich Domänen, Architecture und Milestone: kanonische
+Klauseln einzeln entfernen, Debugreihenfolge umkehren und widersprechende
+Alt-/Ausweitungsregeln bei erhaltener positiver Prosa anhängen. Die echte
+`workflows`-Gruppe wird mit im Speicher ersetztem `Path.read_text` geprüft.
+Das belegt statische Quellenkonsistenz, keine automatische Rechercheentscheidung
+oder reale Agentenbefolgung. Der S00-Planmutationstest verändert gezielt die
+Lösungswahlklausel im S00-Absatz, nicht gleichlautende Research-Prosa.
+
 Die M04-Auswahltests sichern den gemeinsamen Zusatzmethodenvertrag mit
 Positiv-/Negativklauseln und In-Memory-Mutationen sowie alle zwölf Profilowner,
 Shared-Einstiege und lokale Link-/Ankerziele über vorhandene Prüfhelpers ab.

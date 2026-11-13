@@ -39,7 +39,7 @@ Fachagenten wählen keine Ziel-/Milestone-Version und ändern weder Ziel, Defini
 | React Native | [React Native](references/react-native.md) |
 | native iOS mit Swift/SwiftUI | [Swift iOS](references/swift-ios.md) |
 
-Lade keine andere Plattformreferenz vorsorglich. Bei einem ausdrücklich bestätigten, stackübergreifenden Task darf jede tatsächlich betroffene Referenz geladen werden; dokumentiere dann die getrennten Plattformwirkungen. Für Kotlin-native oder Jetpack Compose enthält dieses Bundle keine Referenz: stoppe bei fehlender zuständiger Methode, statt Flutter- oder React-Native-Regeln zu übertragen.
+Lade keine andere Plattformreferenz vorsorglich. Bei einem ausdrücklich bestätigten, stackübergreifenden Task darf jede tatsächlich betroffene Referenz geladen werden; dokumentiere dann die getrennten Plattformwirkungen. Für Kotlin-native oder Jetpack Compose enthält dieses Bundle keine Referenz: stoppe bei fehlender zuständiger Methode, statt Flutter- oder React-Native-Regeln zu übertragen. Wenn eine wesentliche Entscheidung von aktueller Lifecycle-, Berechtigungs- oder OS-Semantik abhängt, nutze bedingt [Core Research](../core-research/SKILL.md); Routineprüfung der belegten Plattform bleibt lokal.
 
 ## Plattformübergreifende Invarianten
 

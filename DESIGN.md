@@ -275,7 +275,7 @@ Eine Regel gehört nur dann in `core-shared`, wenn sie von mindestens zwei Workf
 
 - Gortex erkundet bei Brownfield-Entscheidungen den bestehenden Systemkontext.
 - `architecture-reviewer` wird nur bei Architekturfolgen eingesetzt.
-- `research-explorer` wird nur bei einer externen Wissenslücke read-only eingesetzt.
+- `research-explorer` erledigt Routineprüfungen nicht als eigenen Researchlauf; vertiefte Projektfragen und begrenzte Online-Orientierung, Faktenprüfung oder Gegenargumente bleiben read-only und taskgebunden.
 - Context7 und YouTube Transcript werden nicht vorsorglich geladen.
 - Honcho darf bestätigte Nutzerpräferenzen beisteuern, aber keine Entscheidung ersetzen.
 
@@ -511,7 +511,7 @@ Workflows besitzen den Lebenszyklus; Fachagenten besitzen Rollen. **Während der
 | `pm-planner` | bestätigungsfähiger Taskgraph | keine Implementierung |
 | `qa-reviewer` | unabhängiges evidenzbasiertes Review | keine Fixes, keine Schleifensteuerung |
 | `refactor-engineer` | verhaltensbewahrende Strukturänderung | keine Features oder Bugfixes |
-| `research-explorer` | fokussierte read-only Evidenzsynthese | keine Repositorymutation |
+| `research-explorer` | Routineprojektprüfung bleibt Facharbeit; vertiefte Projektfragen oder begrenzte Online-Recherche bei wichtiger Lösungswahl, externen Fakten oder Gegenargumenten | keine Repositorymutation; externe Befunde beweisen keine lokale Eigenschaft oder Anforderung |
 | `tf-infra-engineer` | Terraform, IAM, Netzwerk und State | kein Apply oder Destroy ohne Autorisierung |
 
 Fachmethodik liegt in Skills und bedingt geladenen Referenzen und wird bei Bedarf inline verwendet; sie ist kein Agenten-Dispatch. Während der Ausführung startet ausschließlich `core-execute` Fachagenten, je einen registrierten Agenten pro Task; kein Agent startet weitere Agenten. Die einzige enge Ausnahme außerhalb der Ausführung: `core-plan` darf für das Planreview einen `qa-reviewer` mit `core-review` in frischem Kontext beauftragen. Agentendefinitionen bleiben kurz und verweisen auf ihren Eigentümer-Skill. Die QA-Methode liegt im `core-review`-Skill; ein paralleler öffentlicher `qa`-Workflow oder zweiter QA-Lebenszyklus entfällt.

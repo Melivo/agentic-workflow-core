@@ -45,7 +45,7 @@ Lade genau die Referenz, deren Stack im aktuellen Projekt belegt ist:
 | Angular | [Angular](references/angular.md) |
 | anderer oder nicht eindeutig belegter Web-Stack | keine dieser Referenzen; folge Repositorycode und offiziellen Projektverträgen |
 
-Lade keine Frameworkreferenz vorsorglich und übertrage keine Konvention zwischen Stacks. Nutze Context7 nur bei einer konkreten, aktuellen Bibliotheks-, Framework-, SDK- oder API-Frage; Repositorybefunde und allgemeine UI-Grundsätze benötigen es nicht.
+Lade keine Frameworkreferenz vorsorglich und übertrage keine Konvention zwischen Stacks. Nutze Context7 nur bei einer konkreten, aktuellen Bibliotheks-, Framework-, SDK- oder API-Frage; Repositorybefunde und allgemeine UI-Grundsätze benötigen es nicht. Wenn aktuelle Framework- oder Browsersemantik das wesentliche Verhalten bestimmt, nutze bedingt [Core Research](../core-research/SKILL.md) und prüfe die lokale Anwendbarkeit.
 
 ## UI-Invarianten
 

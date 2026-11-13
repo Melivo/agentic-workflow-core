@@ -50,6 +50,7 @@ Lade nur die für den konkreten Task erforderlichen Details; mehrere Referenzen 
 | Schema-, Daten-, Index- oder Partitionierungsänderung, Backfill, Re-Embedding, Rollback oder Migrationsfork | [Migrationen](references/migrations.md) |
 | Neues oder geändertes Datenmodell, Constraints, Schlüssel, Wertebereiche, Lebenszyklusregeln oder Datenstandard | [Integrität und Datenstandards](references/integrity.md) |
 
+Wenn eine wesentliche Entscheidung von externer Engine-Semantik oder garantierten Sperr-, Transaktions-, Isolations- oder Migrationsverhalten abhängt, nutze bedingt [Core Research](../core-research/SKILL.md) für die aktuelle maßgebliche Quelle; lokale Schema-, Query- und Testprüfung bleibt Routinearbeit.
 ## Autorisierungsgrenzen für Datenbankaktionen
 
 Dateien für Schema, Migration, Query oder Index dürfen nur im bestätigten Schreibscope erzeugt oder geändert werden. Das Erstellen einer Migrationsdatei autorisiert ihre Ausführung nicht. Zusätzlicher Arbeitsaufwand oder beherrschbare gedeckte Produktionswirkungen begründen allein keine erneute Rückfrage; materiell unklare oder ungedeckte Wirkung stoppt, und zusätzliche monetäre Kosten brauchen vorherige Zustimmung.

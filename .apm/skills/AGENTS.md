@@ -20,7 +20,9 @@ Runtimeintegration ist eine interne Referenz von `core-init-project`. `core-exec
 
 - [core-shared](core-shared/SKILL.md) verlinkt die gemeinsamen Verträge; die
   verbindliche [Auswahlregel für ergänzende Fachmethoden](core-shared/references/tool-routing.md#fachmethoden-erganzend-auswahlen)
-  gilt für Fachagenten neben ihrem Eigentümer-Skill. Der TypeSafe-Vertrag gilt bei jedem Core-Planreview für den regulären minimierten
+  gilt für Fachagenten neben ihrem Eigentümer-Skill. [Core Research](core-research/SKILL.md)
+  besitzt die Grenze zwischen Routinelektüre und vertiefter Projekt- beziehungsweise
+  begrenzter Online-Recherche; die Fachskills setzen ihre Domänentrigger. Der TypeSafe-Vertrag gilt bei jedem Core-Planreview für den regulären minimierten
   Beobachtungsversuch sowie bei passenden Design-, Integrations- oder Evaluationsaufträgen;
   offene Beobachtung blockiert weder normales Review noch Produktarbeit.
 - Verzeichnisname und Frontmatter-`name` eines Skills stimmen überein.

@@ -16,7 +16,9 @@ Fachmethodik bleiben bei den konsumierenden Skills.
 - [Artefaktvertrag](references/artifact-contract.md): Formate und Eigentümer, einschließlich request.md und unterscheidbarer Run-Eingangsreferenzen.
 - [Toolrouting](references/tool-routing.md): Provider- und
   Fallbackgrenzen sowie die gemeinsame Auswahlregel für ergänzende
-  Fachmethoden.
+  Fachmethoden. [Core Research](../core-research/SKILL.md) besitzt die beiden
+  Recherchemodi; Toolrouting wählt Fähigkeit und Provider getrennt von der
+  Quellenqualität.
 - [Verifikation](references/verification.md): Nachweise, Reviewgrenzen und bedarfsabhängige
   Messvergleich-Klarstellung.
 - [TypeSafe-Vertrag](references/typesafe-contract.md): Bewertungs-, Planvergleichs- und Datenprotokollgrenzen; regulärer minimierter Beobachtungsversuch bei jedem Core-Planreview, ohne Produktblockade bei offener Beobachtung. Der optionale Harness-MCP-Weg ist eine bedingte Fähigkeit, keine globale Setup-Pflicht.

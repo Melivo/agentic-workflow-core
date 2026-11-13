@@ -101,7 +101,7 @@ Die Tabelle ist eine Entscheidungshilfe, kein pauschaler Toolkatalog. Führe wed
 
 Werkzeuge liefern Hinweise. Melde einen Defekt erst, wenn Quellstelle, Auslöseweg und Auswirkung mit aktueller Evidenz bestätigt sind. Unbestätigte Hypothesen bleiben Prüf- oder Evidenzlücken und werden nicht als Finding ausgegeben.
 
-Prüfe API-, Versions- und Vertragsannahmen unabhängig anhand aktueller maßgeblicher Quellen, wenn sie für das Urteil wesentlich sind und lokale Evidenz sie nicht entscheidet. Nutze dafür inline die kanonische [Core Research](../core-research/SKILL.md); sie bestimmt Recherchefrage, zulässige Quellen und Abbruch, nicht aber das Reviewurteil. Dokumentationsaussagen oder Researchbefunde allein begründen kein Finding: bestätige es anhand des aktuellen Diffs, lokalen Vertrags, Tests oder anderer lokaler Evidenz. Bleibt eine wesentliche Annahme unaufgelöst, dokumentiere die Evidenzlücke und urteile `blocked`, statt sie als Defekt auszugeben.
+Prüfe wesentliche externe API-, Versions- oder Plattformannahmen unabhängig, wenn lokale Evidenz sie nicht entscheidet; nutze dafür inline [Core Research](../core-research/SKILL.md) mit enger Frage und Grenze. Bei folgenreicher Empfehlung oder passendem Fehlersignal prüfe nötige Gegenargumente. Projektmodus bleibt auf den konkreten Diff und seine Verträge begrenzt, keine Repository-Vollsuche. Quelle und Provider wählst du getrennt: maßgebliche aktuelle Quellen für externe Fakten; Core Research legt Frage und Abbruch fest, nicht das Reviewurteil. Externe Aussagen allein begründen kein Finding; bestätige lokale Wirkung anhand Diff, Vertrag, Tests oder anderer lokaler Evidenz. Unaufgelöste wesentliche Annahmen bleiben als Evidenzlücke sichtbar und können `blocked` bedeuten.
 
 ### 4. Findings formulieren
 

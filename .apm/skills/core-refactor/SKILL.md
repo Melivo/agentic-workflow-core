@@ -13,7 +13,7 @@ Vor der ersten Codeänderung bei jeder Coding-Arbeit lade [S00 – SWE-Basis und
 
 Wähle bei unklarer Komplexität, gekoppelten Änderungen oder redundanten Schichten [M01–M04](../core-architecture/references/boundaries-and-abstractions.md); bei Interface-/Fehlerlast [M05–M06](../core-architecture/references/interface-and-errors.md); bei Sonderfällen, Wiederholung oder Verständlichkeitsproblemen [M07–M09](../core-architecture/references/evolution-and-clarity.md). Safety Net, getrennte Charakterisierung und unverändertes Verhalten haben Vorrang.
 
-Wenn Tools benötigt werden, prüfe relevante aktuell verfügbare MCP-Fähigkeiten gemäß [Toolrouting](../core-shared/references/tool-routing.md); Verfügbarkeit erweitert weder Scope noch Autorisierung.
+Wenn Tools benötigt werden, prüfe relevante aktuell verfügbare MCP-Fähigkeiten gemäß [Toolrouting](../core-shared/references/tool-routing.md); Verfügbarkeit erweitert weder Scope noch Autorisierung. Refactoring bleibt überwiegend lokale Verhaltenserhaltung; nutze [Core Research](../core-research/SKILL.md) nur, wenn relevante externe Semantik die behauptete Verhaltensäquivalenz wesentlich beeinflusst.
 
 ## Bedingte Habit-Feedback-Referenz
 
