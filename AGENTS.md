@@ -38,6 +38,18 @@ Pläne und Laufartefakte liegen unter `.agentic-workflow/`. Nutze für Fachagent
 
 Kein Build, Compile, Bundle, Packaging, keine Installation, SCM-Operation oder Veröffentlichung ohne ausdrückliche Freigabe. Schreibe verständlich auf Deutsch und erkläre notwendige Fachbegriffe kurz auf CS50-Einstiegsniveau.
 
+## Nachpflege nach Releases
+
+- Nach jedem Release prüfe mit passenden `core-*`-Skills die Root- und
+  Fachdokumentation gegen Release-Diff und autoritative Verträge; repariere nur
+  belegte Lücken im freigegebenen Dokumentationsscope. Sichere eigene Änderungen
+  gezielt durch Staging und Commit, prüfe zugehörige PRs und merge sie erst nach
+  erfolgreichen Pflichtchecks. Prüfe zugehörige Branches und Worktrees; schließe
+  oder lösche nur abgeschlossene, nachweislich übernommene Arbeit und bewahre
+  ungesicherte oder fremde Änderungen. Beende die Nachpflege auf sauberem
+  `main`, mit dem Remote synchron, falls vorhanden. Die Nachpflege autorisiert
+  keine neue Veröffentlichung oder Installation.
+
 <!-- DOX:START -->
 ## DOX framework
 
