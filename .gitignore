@@ -11,3 +11,10 @@ reference/source-material/
 
 # Generated Python bytecode caches
 __pycache__/
+
+# Local OpenCode session exports are private working notes, not repository docs.
+session-ses_*.md
+
+# Local TypeSafe host acceptance stays operator-bound and unversioned.
+/scripts/check_typesafe_collection_runtime.py
+/tests/test_typesafe_collection_runtime.py

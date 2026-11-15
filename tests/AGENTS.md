@@ -28,7 +28,7 @@ Aufwand/Geldkosten, Reparaturfortsetzung, Sicherheitsannahmen, Delegation,
 Katalog ohne starres Limit) verlangen Positiv- und Negativfälle ihrer Regeln,
 Mutationstests entfernen die kanonischen DOX-Sätze nur im Speicher
 und führen dort die früheren Drift-only-Klauseln von core-docs wieder ein.
-Paket- und Hosttests benötigen ihre dokumentierte isolierte Toolchain.
+Pakettests und ausdrücklich vorgesehene CI-Prüfungen benötigen ihre dokumentierte isolierte Toolchain; die optionale hostgebundene TypeSafe-Abnahme ist eine lokale Betreiberprüfung und keine CI-Pflicht.
 `test_ci_portability.py` prüft mise als numerische stabile Mindestversion
 (gleich/neuer, älter, ungültig, Vorabversion, fehlgeschlagene/fehlende Abfrage),
 die Konsistenz mit `mise.toml` und weiterhin exakte übrige Pins.
@@ -119,7 +119,7 @@ Methodenverfügbarkeit noch Modellbefolgung oder M05-Praxisabnahme folgen daraus
 
 `test_typesafe_pilot.py` prüft offline die Bundlekopie, feste pseudonyme Core-IDs, explizite Policy ohne Wildcard, Legacydefault, gepufferte Zwei-Projektzustellung, sichere Config, SSH-Bindungsdrift und Monatsende in Europe/Berlin einschließlich Schaltjahr/DST. Das aktiviert weder normale Planreviews noch einen Scheduler und belegt keinen Modell- oder Hostbetrieb.
 
-Die Tests `test_typesafe_collection*.py` prüfen lokale Speicherung, Outbox und Transportgrenzen mit synthetischen Daten und temporären Ressourcen. Sie belegen keinen Pi-Betrieb; die Owner-Schnittstelle steht in der [Operationsreferenz](../docs/operations/typesafe-collection.md).
+Die portablen Tests `test_typesafe_collection.py` und `test_typesafe_collection_transport.py` prüfen Sammlung, Outbox und Transportgrenzen mit synthetischen Daten, temporären Ressourcen und gefälschten SSH-Kindprozessen; `test_typesafe_comparison.py` prüft den Vergleich. Sie sind keine Hostabnahme. Owner-Schnittstelle und Evaluationszweck stehen in der [Operationsreferenz](../docs/operations/typesafe-collection.md).
 
 `test_typesafe_integration.py` prüft zusätzlich die versionierten Bildreferenzen und ihre direkten Links mit vorhandenen Link-/Quellenhelpers; Negativmutationen entfernen erforderliche Kanten im Speicher. Das bleibt eine statische Quellenregression und wertet keine Modellantworten. `test_typesafe_eval.py` prüft das portable `core-typesafe`-Bundle offline: Netzwerk
 blockiert und protokolliert, synthetische Antworten, Uhren und Secret-Sentinels, Lauf

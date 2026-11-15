@@ -1,6 +1,10 @@
 # TypeSafe-Collection: Aufnehmen, zustellen und wiederherstellen
 
-Dieses Runbook beschreibt die optionale, explizit bediente Sammlung minimierter Planvergleichsereignisse. Der reguläre Planreview-Versuch gehört `core-plan`, nicht diesem Runbook; ein Ereignis ist kein Modellurteil oder Freigabe. Core besitzt Projektion, lokale SQLite-Sammlung, Outbox und CLI; automation-infra besitzt Pi-Erstinstallation, Unit und Allowlist. Ein erfolgreicher lokaler Aufruf beweist keinen Pi-Betrieb.
+Dieses Runbook beschreibt die optionale, explizit bediente Sammlung minimierter Planvergleichsereignisse. Der reguläre Planreview-Versuch gehört `core-plan`, nicht diesem Runbook; ein Ereignis ist kein Modellurteil oder Freigabe. Core besitzt Projektion, lokale SQLite-Sammlung, Outbox und CLI; die Betreiberseite verwaltet Installation, Units und Allowlist der ausdrücklich konfigurierten Gegenstelle. Ein erfolgreicher lokaler Aufruf beweist keinen Gegenstellenbetrieb.
+
+## Evaluationszweck
+
+Die zeitlich begrenzte Collection-Evaluation soll empirisch klären, ob TypeSafe das Planungsreview langfristig teilweise oder vollständig ersetzen könnte. Das ist eine offene Frage, weder ein Beschluss noch eine Freigabe: Der geltende unabhängige Planreview-Vertrag und seine Freigabegrenzen bleiben maßgeblich ([Workflowvertrag](../../.apm/skills/core-shared/references/workflow-contract.md#planreview)).
 
 ## Datenstandard und Eigentum
 
@@ -29,7 +33,7 @@ CLI-Receipt-Texte und Rückgabecodes beschreiben jeweils nur den lokalen Schritt
 - Transport hat keine automatische Endlosschleife. Ein Netzwerk-/Pi-/Socketausfall lässt nicht bestätigte Daten lokal stehen. Dateisystem-, SQLite- oder Hardwarefehler können Dauerhaftigkeit verhindern und müssen als Persistenzfehler sichtbar bleiben.
 - Fristen begrenzen die implementierten I/O-Pfade, garantieren aber keine Echtzeit gegen blockiertes Dateisystem oder nicht unterbrechbaren Kernel-I/O.
 
-Die SSH-Variante nutzt einen bereits konfigurierten Operatoralias und die feste Remoteaktion des Infra-Runbooks. Sie öffnet keinen Listener, Port oder Tunnel und ändert weder SSH, sudoers, Tailnet noch Firewall. Vorhandene Adminrechte können naturgemäß administrieren; dies ist keine Isolation gegen Admin/root.
+Die SSH-Variante nutzt einen bereits konfigurierten Operatoralias und ausschließlich die vom Betreiber ausdrücklich freigegebene feste Remoteaktion der konfigurierten Gegenstelle. Sie öffnet keinen Listener, Port oder Tunnel und ändert weder SSH, sudoers, Tailnet noch Firewall. Vorhandene Adminrechte können naturgemäß administrieren; dies ist keine Isolation gegen Admin/root.
 
 ## Sicherung und isolierte Wiederherstellung
 
@@ -37,21 +41,16 @@ Nutze die SQLite-Backup-API über `python3 scripts/typesafe_collection.py snapsh
 
 Der Snapshot dokumentiert seinen Aufnahmezeitpunkt. Ohne gesonderte Sicherungsfrequenz gibt es kein RPO-Versprechen; diese Schnittstelle belegt weder Borg/Offsite noch Datenträgerausfall, RTO oder allgemeinen Pi-Betrieb.
 
-### Datierte synthetische Pi-Beobachtungen
-
-Die einmalige T05-Abnahme dokumentierte am 2026-11-10T01:53:14.685543+00:00 insgesamt 16 synthetische Ereignisse. Der vollständige CK08-Nachweis einschließlich Quell-/Unitbindung steht im Original unter `.agentic-workflow/runs/run-G06-M04-v2-p01-r01/tasks/T05/attempt-01.yaml`; dessen kanonischer Ereignisbestand hatte SHA256 `898da84fd4ebe3594a80943c9d04ea3c29dcb701d99399f20030a2e324d65f21`.
-
-Eine spätere einmalige Coordinator-Abnahme führte denselben gepinnten CK08-Aufruf am 2026-11-10T02:30:26.152689+00:00 aus: Baseline 16 erhalten, genau 8 neue synthetische Ereignisse aufgenommen, insgesamt 24; Unit enabled/active und ACK-loss-Replay, Ausfall/Reopen sowie UID-/Projekt-/Payload-Abweisungen bestätigt. Sicherung und isolierter Restore meldeten `integrity ok` und `complete_values_equal`; der kanonische Ereignisbestand hatte SHA256 `77940097d55e35289f9a0e44137acf796f6ae1050eb368708557180ad2fa232e`. Pi-Drill: `/var/lib/automation/state/typesafe-collection/drill-95cd750baf3a4f2d9bf7197dd4e08978`; lokale, danach leere Outbox: `/tmp/opencode/typesafe-collection-T05-1u4ethre/outbox.sqlite`. Receipt, Identität, Ressourcen-Inodes sowie Core-Quell- und Unit-Hash blieben gegenüber dem T05-Original unverändert.
-
-Das sind zwei zeitgebundene synthetische Beobachtungen, keine fortlaufende Zustandsprüfung, allgemeine Verfügbarkeitszusage oder reguläre Pilotabnahme. Sie belegen keine Offsite-/Borg-Sicherung, automatische Sicherungsfrequenz, RPO/RTO, Datenträger-/Hardwareausfall, Pi-Reboot oder Modellgüte. Wiederholung des Hostchecks, Neuinstallation oder ein Servicezyklus sind aus diesen Dokumentationsbelegen nicht abgeleitet.
+Zeitgebundene Host- und Integrationsnachweise bleiben bei ihren geschützten Run-Artefakten. Dieses Runbook beschreibt Quellverhalten und Betriebsgrenzen; es ist kein aktueller Live-Nachweis.
 
 ## Quellchecks
 
-Aus Core-Repositorywurzel, mit vorhandener Toolchain und ohne Setup:
+Aus Core-Repositorywurzel, mit vorhandener Toolchain und ohne Setup. Diese Befehle decken ausschließlich versionierte portable Tests mit synthetischen Daten ab; eine lokale Hostabnahme ist keine Voraussetzung für Verbraucher oder CI.
 
 ~~~sh
-python3 -B -m unittest discover -s tests -p 'test_typesafe_collection*.py' -v
+python3 -B -m unittest discover -s tests -p test_typesafe_collection.py -v
+python3 -B -m unittest discover -s tests -p test_typesafe_collection_transport.py -v
 python3 -B -m unittest discover -s tests -p test_typesafe_comparison.py -v
 ~~~
 
-Diese lokalen synthetischen Tests belegen Quellverhalten, keine Pi-Installation oder Livezustellung. Sie prüfen auch die portable Bundlequelle, ändern aber weder Workflowstatus noch eine Hostinstallation.
+Diese Tests belegen Quellverhalten, keine Gegenstelleninstallation oder Livezustellung. Sie prüfen die portable Bundlequelle, ändern weder Workflowstatus noch eine Hostinstallation und setzen keine lokal erhaltenen Dateien voraus.

@@ -10,7 +10,7 @@ Dieser Bereich besitzt versionsbezogene Betriebsreferenzen zu Core-eigenen Samml
 
 ## Local Contracts
 
-- [TypeSafe-Collection](typesafe-collection.md) ist die fachliche Quelle für Datenstandard, Owner-Ablauf, CLI-Grenzen sowie Sicherungs- und Restoreaussagen.
+- [TypeSafe-Collection](typesafe-collection.md) ist die fachliche Quelle für Datenstandard, Owner-Ablauf, CLI-Grenzen, Sicherungs-/Restoreaussagen und den zeitlich begrenzten Evaluationszweck; die Evaluation ändert weder den Planreview-Vertrag noch seine Freigabegrenzen.
 - Diese Referenz verbindet keine Funktion automatisch mit .apm-Verbrauchern und erteilt keine Pi-Hostfreigabe.
 
 ## Work Guidance

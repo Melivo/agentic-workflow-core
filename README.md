@@ -5,210 +5,75 @@
 
 **Planen, kontrolliert umsetzen, unabhängig prüfen.**
 
-Agentic Workflow Core ist ein portables Paket aus Agent-Skills für KI-gestützte Softwareentwicklung mit OpenCode und Codex. Ein unabhängiges Planreview prüft den statisch validierten Entwurf grundsätzlich vor dem kanonischen Schreiben; nur beim Erstplan einer Etappe mit Gesamtfreigabe oder aus einem Handoff entsteht vorher genau eine Draft-Datei. Nach der Umsetzung prüft ein getrenntes Umsetzungsreview die integrierte Änderung. Entscheidungen, Fortschritt und Nachweise bleiben in nachvollziehbaren Dateien erhalten – nicht ausschließlich im Chatverlauf.
+Agentic Workflow Core ist ein portables Paket aus Agent-Skills für KI-gestützte Softwareentwicklung mit OpenCode und Codex. Es nutzt die Fähigkeiten des jeweiligen Agent-Harnesses; es ist keine zusätzliche Orchestrierungs-CLI und kein autonomer Releasebot. Pläne, Aufträge, Ergebnisse und Reviews bleiben als nachvollziehbare Dateien erhalten.
 
-Core ist keine zusätzliche Orchestrierungs-CLI und kein autonomer Releasebot. Es nutzt die Fähigkeiten des jeweiligen Agent-Harnesses, also der Umgebung, in der der KI-Agent arbeitet. Du entscheidest über Ziel, Umfang und freizugebende Aktionen.
-
-[Installation](#installation) · [Erste Verwendung](#erste-verwendung) · [Skills](#welche-skills-sind-enthalten) · [Qualitätsfeedback](#optionales-qualitätsfeedback) · [Entwicklung](#entwicklung-und-prüfungen)
-
-## Was Core bietet
-
-- **Zwei Ausführungswege:** Für größere oder unklare Vorhaben ein Planablauf: optionales Brainstorming, Planreview (regulär vor dem Schreiben; beim Erstplan einer Etappe mit Gesamtfreigabe oder aus einem Handoff nach genau einer Draft-Datei), ausdrückliche oder belegte abgeleitete Planfreigabe, Umsetzung und unabhängiges Umsetzungsreview. Für eine klare, eng umrissene und ausdrücklich freigegebene Änderung der Direktmodus ohne Plan: `core-execute` arbeitet mit einer unveränderlichen Auftragsgrundlage und lässt die Umsetzung ebenfalls unabhängig prüfen.
-- **Passende Fachmethoden:** Architektur, Backend, Frontend, Mobile, Datenbanken, Terraform, Debugging und Refactoring.
-- **Überprüfbare Übergaben:** Pläne, Task-Ergebnisse und Reviews mit festen Formaten. Für freigegebene Etappen gehen Neuanlage, erster Start und ausdrücklich beauftragter Folge-Handoff intern aus den Originalartefakten an `core-plan`; ein Handoff selbst erteilt keine Autorität. Nach unabhängigem Qualitäts- und Deckungsreview, vollständiger Anzeige, `Confirmed` und korrekter Indexbindung geht gedeckte Arbeit ohne zusätzliche Nutzerantwort an `core-execute`. Die vollständigen Übergabe-, Freigabe- und Stopgrenzen stehen im [Workflowvertrag](.apm/skills/core-shared/references/workflow-contract.md#handoff-abgeleitete-planungsbefugnis-und-erstplanfreigabe).
-- **Wiederaufnahme:** Arbeit anhand ihrer Artefakte in einer neuen Sitzung fortsetzen.
-- **Klare Grenzen:** keine ungeplanten Umbauten, stillen Installationen oder automatisch freigegebenen Veröffentlichungen.
-- **Gemeinsame Skills:** einmal installieren statt unnötiger Kopien für jedes Repository oder Harness.
-
-Die kanonische Paketquelle liegt unter `.apm/` und enthält **23 Core-Bundles**. Die Provider-/Runtimeintegration gehört intern zu `core-init-project`; es gibt keinen zusätzlichen öffentlichen Provider-Skill. Es gibt **keine externe APM-Skillabhängigkeit und keinen erforderlichen Zugriff auf eine private Skillsammlung**.
+[Installation](#installation) · [Erste Verwendung](#erste-verwendung) · [Skills](#skills) · [Grenzen](#grenzen) · [Entwicklung](docs/development.md)
 
 ## Installation
 
-### Voraussetzungen
+Voraussetzungen: [Microsoft Agent Package Manager (APM)](https://microsoft.github.io/apm/getting-started/installation/) und ein Harness mit Unterstützung für gemeinsame Agent-Skills, etwa OpenCode oder Codex. Die Skill-Installation richtet MCP-Server, Modellanbieter oder native Fachagenten nicht automatisch ein.
 
-- [Microsoft Agent Package Manager (APM)](https://microsoft.github.io/apm/getting-started/installation/).
-- Ein Harness, das gemeinsame Agent-Skills erkennt, etwa OpenCode oder Codex.
-- Für die Repositoryarbeit: Gortex als primäre Code-Intelligence und bei Bedarf ein ausdrücklich eingerichteter, **projektspezifischer** Serena-Fallback.
-
-MCP-Server, Modellanbieter und native Fachagenten sind getrennte Voraussetzungen. Die Skill-Installation richtet sie nicht automatisch ein.
-
-### Global installieren
-
-Installiere Core einmal im gemeinsamen Verzeichnis `~/.agents/skills/`:
+Core global im gemeinsamen Verzeichnis `~/.agents/skills/` installieren:
 
 ```bash
 apm install Melivo/agentic-workflow-core --global --target agent-skills --only apm
 ```
 
-Vorab zeigt derselbe Befehl mit zusätzlichem `--dry-run` die geplanten Änderungen.
-
-**Aktualisieren:**
-
-```bash
-apm install Melivo/agentic-workflow-core --global --target agent-skills --only apm --update
-```
-
-| Option | Wirkung |
-| --- | --- |
-| `--global` | Benutzerbereich statt des aktuellen Repositorys |
-| `--target agent-skills` | gemeinsames Skill-Verzeichnis statt zusätzlicher Harness-Kopien |
-| `--only apm` | APM-Pakete installieren; MCP-Konfiguration getrennt halten |
-
-Setze auch im globalen Verbrauchsmanifest `~/.apm/apm.yml` `targets: [agent-skills]`, damit spätere Installationen bei diesem Ziel bleiben. APM hält aufgelöste Paketstände in `apm.lock.yaml` fest. Für reproduzierbare Stände kannst du die Quelle mit `#<commit-sha>` pinnen; ein Update überspringt einen solchen Pin nicht automatisch.
-
-Unter APM 0.31 verwendet dieses Beispiel `install --update`, weil `apm update` keinen entsprechenden `--only apm`-Filter anbietet. Ein vorhandenes Release-Tag enthält nicht automatisch neuere Änderungen auf `main`.
-
-### Optional: projektbezogene Harness-Integration
-
-Für bewusst ausgewählte OpenCode-/Codex-Ziele im aktuellen Projekt:
+Für bewusste Integration in OpenCode-/Codex-Ziele des aktuellen Projekts:
 
 ```bash
 apm install Melivo/agentic-workflow-core --target opencode,codex
 ```
 
-Dieser Modus integriert auch die vorgesehenen Agentendefinitionen und kann Harness-Konfiguration erzeugen. Er ist kein notwendiger Zusatz zur globalen Skill-Installation. Generierte `.agents/`, `.opencode/` und `.codex/` werden nicht von Hand gepflegt.
+Diese Integration kann Harness-Konfiguration erzeugen; sie ist für die globale Skill-Nutzung nicht erforderlich. Details zu Aktualisierung, Pins und APM-Zielen: [Entwicklungsleitfaden – Paketinstallation](docs/development.md#paketinstallation).
 
 ## Erste Verwendung
 
-Die beiden Ablaufwege:
+Wähle einen der beiden Wege:
 
-```text
-Planmodus:   core-brainstorm? → core-plan → Planreview → ausdrückliche/abgeleitete Planfreigabe + Ausführungsauftrag → core-execute ↔ Umsetzungsreview → Abschluss
-Direktmodus: klarer, eng umrissener, ausdrücklich freigegebener Auftrag → core-execute (request.md statt Plan) ↔ Umsetzungsreview → Abschluss
-```
+- **Plan:** Für größere, zerlegbare oder noch unklare Vorhaben erstellt `core-plan` einen Planentwurf. Nach statischer Validierung prüft `core-review` ihn unabhängig vor dem kanonischen Schreiben und einer noch erforderlichen Nutzerbestätigung. Eine belegte abgeleitete Freigabe heißt: eine neue Nutzerbestätigung entfällt. Ohne bestätigten Rahmen, bei neuen eigenständigen Zielen, Meilensteinänderungen, ausdrücklichen Ausschlüssen, materiell offenen Entscheidungen, unklaren oder ungedeckten Wirkungen oder ungedeckten Geldkosten ist die Nutzerentscheidung vor Schreiben und Ausführung erforderlich. Die Umsetzung setzt stets eine ausdrückliche oder belegte abgeleitete Planfreigabe und einen bestehenden Ausführungsauftrag voraus. Beim Erstplan mit Gesamtfreigabe oder Handoff gilt die [besondere Reihenfolge](.apm/skills/core-shared/references/workflow-contract.md#handoff-abgeleitete-planungsbefugnis-und-erstplanfreigabe). Danach folgen freigegebenes `core-execute` und unabhängiges Umsetzungsreview.
+- **Direkt:** Für eine klare, enge Änderung mit ausdrücklicher Umsetzungsfreigabe: `core-execute` arbeitet direkt aus `request.md` und übergibt das integrierte Ergebnis an `core-review`.
 
-Der Direktmodus ist für kleine, klare Änderungen ohne nötige Zerlegung oder materielle Entscheidung gedacht. Verlangt die Arbeit mehr, stoppt Execute Produktmutationen und übergibt an `core-plan`.
+Beispiele:
 
-1. **Projekt prüfen:** `core-init-project` prüft Repository und Code-Intelligence-Bereitschaft. Änderungen an Providerkonfiguration oder `AGENTS.md` brauchen ihre eigene Freigabe.
-2. **Ziel beschreiben:** gewünschtes Verhalten, betroffene Bereiche und Grenzen nennen. Bei materiellen Unklarheiten hilft `core-brainstorm`.
-3. **Planreview und Freigabe:** `core-plan` erstellt einen `plan/v1` mit Aufgaben, Abhängigkeiten, Akzeptanzkriterien und Checks. Bei regulären Plänen erfolgt nach statischer Validierung die unabhängige Prüfung durch `core-review` vor dem kanonischen Schreiben und einer noch erforderlichen Nutzerbestätigung. Beim Erstplan einer freigegebenen Etappe entsteht genau eine Draft-Datei vor dem Review. Nach Qualitäts- und Deckungsreview wird der vollständige Plan tatsächlich angezeigt. Ist die Gesamtdeckung belegt, wird dieselbe Datei `Confirmed` und nach korrekter Indexbindung intern an `core-execute` übergeben – ohne zusätzliche Nutzerantwort. Fehlt Deckung oder bleibt eine wesentliche Entscheidung offen, bleibt der Plan Draft, unverknüpft und nicht ausführbar, bis die konkrete Nutzerentscheidung vorliegt. Bei einem gedeckten technischen Ersatzplan genügt die im Plantext belegte abgeleitete Freigabe; neue Nutzerbestätigung entfällt bei bestehendem Ausführungsauftrag. Ohne bestätigten Rahmen sowie bei neuen eigenständigen Zielen, Meilensteinänderungen, ausdrücklichen Ausschlüssen, materiell offenen Entscheidungen, unklaren oder ungedeckten Wirkungen oder zusätzlichen ungedeckten Geldkosten ist die Nutzerentscheidung vor Schreiben und Ausführung erforderlich. Umsetzung setzt stets eine ausdrückliche oder belegte abgeleitete Planfreigabe und einen bestehenden Ausführungsauftrag voraus. Details zu Folge-Handoffs, unveränderter Gesamtdeckung und Stopgrenzen stehen im [zentralen Erstplanvertrag](.apm/skills/core-shared/references/workflow-contract.md#handoff-abgeleitete-planungsbefugnis-und-erstplanfreigabe); Direktaufträge folgen ihren eigenen Regeln.
-4. **Umsetzen:** `core-execute` arbeitet den eindeutig identifizierten, bestätigten Plan ab – im Direktmodus den ausdrücklich freigegebenen Auftrag aus `request.md` – und koordiniert passende Fachagenten. Execute kann innerhalb eines Tasks eng begrenzte Zusatzunterstützung delegieren; der Taskowner bleibt verantwortlich, Unterstützer delegieren nicht weiter.
-5. **Unabhängig prüfen:** Danach bewertet `core-review` in frischem Kontext die integrierte Gesamtänderung. Reviewbasis ist der bestätigte Plan (`plan_path`) oder im Direktmodus die unveränderliche `request.md` (`request_path`). Das Umsetzungsreview bleibt read-only; Korrekturen gehören zurück in die Umsetzung, nicht in das Review.
+> Nutze core-plan für diese Aufgabe. Erstelle zunächst nur den Plan und implementiere noch nichts.
 
-Du kannst Skills in normaler Sprache anfordern; die Auswahl- oder Aufrufoberfläche hängt vom Harness ab. Beispiele:
+> Der Plan unter dem genannten Pfad ist bestätigt. Nutze core-execute innerhalb seines Scopes.
 
-> Nutze core-plan für die beschriebene Fehlerkorrektur. Erstelle zunächst nur den Plan und implementiere noch nichts.
-> Der Plan unter dem genannten Pfad ist bestätigt. Nutze core-execute, um ihn innerhalb seines Scopes auszuführen.
-> Nutze core-review für eine unabhängige Prüfung. Implementiere dabei keine Korrekturen.
+> Nutze core-review für eine unabhängige Prüfung. Implementiere keine Korrekturen.
 
-**Scope und Freigabe:** Ein erlaubter Dateipfad ist keine Freigabe für beliebige zusätzliche Funktionen. Plan und Umsetzung bleiben am ursprünglichen Ziel und dessen Kriterien; Folgearbeit berücksichtigt den kumulativen Umfang. Bevorzugt wird die kleinste hinreichende Lösung. Build, Compile, Bundle, Packaging, Installation, Commit, Push, Tag, Release, Deployment und destruktive Aktionen benötigen jeweils eine passende ausdrückliche Autorisierung. Fachagenten arbeiten innerhalb ihres Taskscopes und starten keine eigenen Subagenten. Eine aktuelle, eindeutige auftragsbezogene Nutzeranweisung kann separate Bestätigungsgates aus Skills oder AGENTS.md ersetzen; Vorschau, Scopeprüfung und Schutz fremder Inhalte bleiben bestehen.
+Für die Projekteinrichtung prüft `core-init-project` Repository und Code-Intelligence-Bereitschaft. Gortex ist primär; ein Serena-Fallback muss für das konkrete Projekt ausdrücklich eingerichtet sein. Änderungen an Providerkonfiguration oder `AGENTS.md` brauchen ihre eigene Freigabe.
 
-### Größere Vorhaben und Sitzungswechsel
-
-Für einfache Vorhaben ist **keine zusätzliche Zielstruktur** nötig: Ein bestätigter Plan oder ein klarer Direktauftrag genügt. Nur bei ausdrücklich gewählter Etappenplanung verwaltet `core-milestone` Gesamtziel und Meilensteine; `core-handoff` erstellt den Übergabeprompt für eine neue Sitzung.
-
-Bei klaren Aufgaben prüft `core-plan` zuerst, ob eine passende aktuelle, bestätigte Etappe ausgewählt ist; ohne eine solche Etappe bleibt Planung ohne Milestone möglich. Es begründet nötige Mechanismen vor Eigenbau und `core-execute` gleicht Ergebnisse kurz mit dem Originalziel ab. Die Details stehen im [Workflowvertrag](.apm/skills/core-shared/references/workflow-contract.md#zielbindung-und-funktionaler-scope) und im [Planungsskill](.apm/skills/core-plan/SKILL.md#workflow).
-
-Definitionen sind versioniert und nach Bestätigung unveränderlich. Resume setzt vorhandene Plan- und Runarbeit mit derselben Run-ID fort, statt neu zu planen. Nach verifiziertem Etappenabschluss sind Handoff mit den exakten Originalartefakten und anschließender Halt verpflichtend; die nächste Etappe wird nicht automatisch geplant oder gestartet. Versionswechsel übernehmen weder alte Freigaben noch Abschlussnachweise automatisch. Details: [Workflowvertrag](.apm/skills/core-shared/references/workflow-contract.md#fresh-context-ubergaben) und [Artefaktvertrag](.apm/skills/core-shared/references/artifact-contract.md).
-
-## Welche Skills sind enthalten?
+## Skills
 
 | Bereich | Skills |
 | --- | --- |
 | Kernworkflow | [core-brainstorm](.apm/skills/core-brainstorm/SKILL.md), [core-plan](.apm/skills/core-plan/SKILL.md), [core-execute](.apm/skills/core-execute/SKILL.md), [core-review](.apm/skills/core-review/SKILL.md) |
-| Fachliche Umsetzung | [Architektur](.apm/skills/core-architecture/SKILL.md), [Backend](.apm/skills/core-backend/SKILL.md), [Frontend](.apm/skills/core-frontend/SKILL.md), [Mobile](.apm/skills/core-mobile/SKILL.md), [Datenbanken](.apm/skills/core-database/SKILL.md), [Terraform](.apm/skills/core-tf-infra/SKILL.md) |
-| Untersuchung und Pflege | [Research](.apm/skills/core-research/SKILL.md), [Debugging](.apm/skills/core-debug/SKILL.md), [Refactoring](.apm/skills/core-refactor/SKILL.md), [Repo-Audit](.apm/skills/core-repo-audit/SKILL.md), [Dokumentation](.apm/skills/core-docs/SKILL.md), [DevOps/SCM](.apm/skills/core-devops/SKILL.md) |
-| Einrichtung | [core-init-project](.apm/skills/core-init-project/SKILL.md) (inklusive interner Providerintegration), [core-init-mcps](.apm/skills/core-init-mcps/SKILL.md), [core-user2agent-instructions](.apm/skills/core-user2agent-instructions/SKILL.md) |
+| Umsetzung | [Architektur](.apm/skills/core-architecture/SKILL.md), [Backend](.apm/skills/core-backend/SKILL.md), [Frontend](.apm/skills/core-frontend/SKILL.md), [Mobile](.apm/skills/core-mobile/SKILL.md), [Datenbanken](.apm/skills/core-database/SKILL.md), [Terraform](.apm/skills/core-tf-infra/SKILL.md) |
+| Untersuchung und Pflege | [Research](.apm/skills/core-research/SKILL.md), [Debugging](.apm/skills/core-debug/SKILL.md), [Refactoring](.apm/skills/core-refactor/SKILL.md), [Repo-Audit](.apm/skills/core-repo-audit/SKILL.md), [Dokumentation](.apm/skills/core-docs/SKILL.md), [DevOps](.apm/skills/core-devops/SKILL.md) |
+| Einrichtung | [core-init-project](.apm/skills/core-init-project/SKILL.md), [core-init-mcps](.apm/skills/core-init-mcps/SKILL.md), [core-user2agent-instructions](.apm/skills/core-user2agent-instructions/SKILL.md) |
 | Etappen und Übergaben | [core-milestone](.apm/skills/core-milestone/SKILL.md), [core-handoff](.apm/skills/core-handoff/SKILL.md) |
-| Beratende Bewertung | [core-typesafe](.apm/skills/core-typesafe/SKILL.md): drei TypeSafe-Profile für den regulären minimierten Versuch bei jedem Core-Planreview; blindes Ersturteil, danach getrennte Adjudikation derselben Session; Collection nur bei erlaubter lokaler Config, offene Beobachtung blockiert keine Produktarbeit |
-| Gemeinsame Verträge | [core-shared](.apm/skills/core-shared/SKILL.md): interner Vertragsindex, kein zusätzlicher öffentlicher Workflow |
+| Beratende Bewertung | [core-typesafe](.apm/skills/core-typesafe/SKILL.md) |
+| Gemeinsame Verträge | [core-shared](.apm/skills/core-shared/SKILL.md) – interner Vertragsindex, kein zusätzlicher Workflow |
 
-Die Provider-/Runtime-Methodik wird bei Bedarf aus der internen [Provider- und Laufzeitreferenz](.apm/skills/core-init-project/references/provider-setup.md) geladen. Ein globaler Serena-MCP wird nicht eingerichtet. Herkunft, Anforderungen und Lizenz der integrierten Quellen sind im [Provenienznachweis](.apm/skills/core-init-project/PROVENANCE.md), den [Requirements](.apm/skills/core-init-project/REQUIREMENTS.md) und der [MIT-Lizenz](.apm/skills/core-init-project/LICENSE) dokumentiert.
+Die kanonische Paketquelle liegt unter `.apm/` und enthält 23 Core-Bundles. Die Provider-/Runtimeintegration gehört intern zu `core-init-project`; es gibt keine externe APM-Skillabhängigkeit und keinen erforderlichen Zugriff auf eine private Skillsammlung.
 
-Die [SWE-Basis](.apm/skills/core-architecture/references/design-baseline.md) beschreibt den verbindlichen Sollzustand für Softwaredesign: klare Verantwortlichkeiten, hohe Kohäsion, Abstraktion und Information Hiding, stabile Verträge und begründete Kopplung. Die [Hintergrundreferenz](.apm/skills/core-architecture/references/principles-background.md) erläutert Herkunft und Grenzen. Vorhandene Projektarchitektur und begründete Ausnahmen bleiben maßgeblich; Core verlangt weder künstliche Abstraktionen noch ungeplante Umbauten.
+## Grenzen
+
+Du entscheidest über Ziel, Umfang und freizugebende Aktionen. Ein erlaubter Dateipfad ist keine Freigabe für beliebige zusätzliche Funktionen. Build, Compile, Bundle, Packaging, Installation, Commit, Push, Tag, Release, Deployment und destruktive Aktionen brauchen jeweils eine passende ausdrückliche Autorisierung. Unabhängige Reviews bleiben read-only; Toolausgaben autorisieren keine Folgearbeit.
+
+Die ausführlichen Regeln stehen in den [Workflow-](.apm/skills/core-shared/references/workflow-contract.md), [Artefakt-](.apm/skills/core-shared/references/artifact-contract.md), [Toolrouting-](.apm/skills/core-shared/references/tool-routing.md) und [Verifikationsverträgen](.apm/skills/core-shared/references/verification.md). Architektur, Paketquellen, Prüfungen und Betrieb stehen im [Entwicklungsleitfaden](docs/development.md).
+
+[Design und Architektur](DESIGN.md) · [Versionshistorie](CHANGELOG.md) · [Lizenz](LICENSE)
 
 ## Optionales Qualitätsfeedback
 
-[opencode-habit-feedback@0.1.0](https://www.npmjs.com/package/opencode-habit-feedback) ist als separates npm-Paket veröffentlicht. Es verbindet OpenCode V2 mit den **Original-Sensoren und dem Original-Mapper von Habit Hooks**. Für andere Core-Verbraucher ist das Plugin optional; die APM-Skill-Installation aktiviert es nicht automatisch.
+[opencode-habit-feedback@0.1.0](https://www.npmjs.com/package/opencode-habit-feedback) ist ein separates, optionales OpenCode-V2-Plugin. Die Core-Skill-Installation aktiviert oder installiert es nicht. Hinweise in unterstützten Tool-Ergebnissen sind keine Benutzeranweisungen oder Freigaben. [Technische Details und Grenzen](.apm/skills/core-devops/references/habit-feedback.md).
 
-Bei unterstützten Dateiänderungen hängt es passende Core-Coaching-Anweisungen an das Tool-Ergebnis an. Das Modell erhält diese Hinweise dort, nicht als zusätzliche Benutzernachricht. Installation, Werkzeugbindung und Registrierung als OpenCode-V2-Eintrag `{package, options}` im `plugins`-Array sind eigene Einrichtungsschritte. Bestehende Plugins bleiben erhalten; der Laufzeit-Hook installiert nichts.
+## Dokumentationswerkzeuge
 
-**Grenzen:**
-
-- Qualifiziert ist der Linux-Einzeldatei-Pfad mit Python-/generischen Sensoren und Ruff; Versionen stehen in [VERSIONS.md](.apm/skills/core-devops/assets/opencode-habit-feedback/VERSIONS.md).
-- Repositoryweite Sensoren wie jscpd und deptry werden im automatischen Dateihook vor dem Start ausgeschlossen.
-- Nicht unterstützte Toolformen, deaktivierte Sensoren und nicht qualifizierte Sensor-Scopes erscheinen als `not_scanned`, nicht als falsches „alles sauber“.
-- Tool-Ausgaben sind keine Benutzeranweisungen und autorisieren weder neue Tasks noch zusätzliche Wirkungen.
-- Statische Checks und kontrollierte Hosttests belegen keine zuverlässige Befolgung durch ein Sprachmodell und keinen allgemeinen Qualitätsgewinn.
-
-[Technische Optionen, Sicherheitsgrenzen und Prüfkommandos](.apm/skills/core-devops/references/habit-feedback.md).
-
-## Entwicklung und Prüfungen
-
-```text
-.apm/skills/       Kanonische Skills, Methoden, Verträge und Ressourcen
-.apm/agents/       Native Fachagentenprofile
-scripts/          Prüfungen, Toolchain und Paket-/Releasewerkzeuge
-tests/            Vertrags-, Sicherheits- und Integrationstests
-.github/workflows/ CI und getrennte Releasekette
-DESIGN.md         Detaillierte Architektur und Workflowverträge
-```
-
-Core-Skills liegen unter `.apm/skills/core-<name>/`; `core-init-project` führt die Providerintegration als interne Komponente mit. Ordnername und Frontmatter-`name` stimmen überein. `.agentic-workflow/` enthält lokale Pläne und Run-Artefakte und wird in diesem Repository von Git ignoriert. Bestätigte Pläne werden nicht mit Laufstatus überschrieben.
-
-### Lokale Prüfungen und Paketabnahme
-
-Die lokalen und CI-Aufgaben benötigen `mise` **mindestens 2026.10.19** und Python **exakt 3.13.14**. Die zentrale Mindestversion in der Toolchain muss mit `min_version` in `mise.toml` übereinstimmen. Stabile neuere mise-Versionen aus Systemupdates bleiben zulässig; ein RPM-verwaltetes mise wird weder vom Core-Bootstrap ersetzt noch heruntergestuft. Die Versionsabfrage muss erfolgreich sein; ältere, ungültige und Vorabversionen werden abgewiesen. Bootstrap protokolliert die beobachtete mise-Version und das Minimum als `RUNTIME`, die übrigen Werkzeugversionen als `TOOLS` beziehungsweise Setupausgabe. CI lässt `version` und `sha256` bei der vorhandenen SHA-gepinnten mise-action weg: Deren stabile Standardauswahl prüft Downloads gegen Minisign-signierte Prüfsummen (geprüfter Action-Commit `2d8d4cafcbd33be2ea37d2b6f5ad595363d1f1ca`), statt eine veraltete feste Binärchecksumme zu verlangen. Weitere Versionen und Integritätswerte: [ci_toolchain.json](scripts/ci_toolchain.json), [requirements-ci.txt](scripts/requirements-ci.txt) und [Habit-Testtoolchain](scripts/habit-ci/package.json).
-
-```bash
-# Ausdrücklich freizugebendes Setup im isolierten Arbeitsbereich; bei Bedarf erneut ausführen
-mise run tools:setup
-
-# Prüfungen ohne automatische Installation
-mise run check
-mise run version:check
-mise run release:test
-mise run workflows:check
-mise run docs:check
-```
-
-`tools:setup` lädt und installiert gepinnte Werkzeuge ausschließlich in den isolierten Arbeitsbereich; es ist nicht zwingend nur einmal nötig. Die Prüftasks installieren nichts automatisch. Die vorbereitete Habit-Paketinstallation bindet ihren Quellstand ein und wird nach relevanten Core-Quelländerungen als veraltet abgewiesen. Mit vorhandenem SDK lässt sie sich gezielt und offline im Scratchbereich erneuern, zum Beispiel aus dem Standard-CI-Arbeitsbereich:
-
-```bash
-AWC_CI_WORKSPACE=/tmp/opencode/agentic-workflow-core-ci AWC_HABIT_SDK=/tmp/opencode/agentic-workflow-core-ci/habit-sdk python3 -B scripts/check_habit_feedback.py setup
-```
-
-`AWC_CI_WORKSPACE` kann auf einen anderen isolierten Arbeitsbereich zeigen; dessen SDK-Pfad ist dann `<Arbeitsbereich>/habit-sdk` und kann mit `AWC_HABIT_SDK` ausdrücklich gesetzt werden. Fehlt das SDK, blockiert der Setupbefehl statt es automatisch zu installieren. `setup` baut das Habit-Paket und installiert es offline in den Scratch-Testbereich; dafür ist eine ausdrückliche Setup-/Installationsfreigabe erforderlich. Die qualifizierte Entwicklungs- und CI-Laufzeit ist Linux x64; daraus folgt keine universelle Betriebssystemfreigabe.
-
-Die vollständige Abnahme `mise run acceptance` führt diese Prüfungen zusammen und baut zusätzlich ein Paket, das sie in einem frischen Scratch-Verbraucher installiert und kontrolliert. Sie hat daher ausdrückliche Paket- und Installationswirkung. Geprüft werden Quellen, Lizenzhinweise, alle Core-Bundles, der vollständige Konfigurator und relative Links. Ein Exitcode allein genügt nicht; temporäre Reports ersetzen keine dauerhaft gesicherten Ausführungsnachweise.
-
-### Installierbares Bundle erzeugen
-
-Nutze nach freigegebenem Werkzeugsetup den geprüften Producer aus einem sauberen Checkout dieses Repositories:
-
-```bash
-python3 -B scripts/build_core_package.py verify --output /tmp/opencode/core-package
-```
-
-Der Befehl baut und prüft ein ZIP isoliert und installiert es zur Abnahme in einem frischen Verbraucher. Nicht aus einem Verbrauchsprojekt mit dessen `apm_modules`-Cache packen: Sonst können nicht portable Cache-Verweise im Bundle bleiben.
-
-Ein geprüftes lokales ZIP lässt sich anschließend separat installieren:
-
-```bash
-apm install /path/to/agentic-workflow-core-X.Y.Z.zip --global --target agent-skills
-```
-
-Bei lokalen Bundles ist `--only apm` nicht erlaubt. Für manuelles Packen mit APM 0.31/0.33 bleibt `--target agent-skills` ausdrücklich gesetzt: Das Standardziel `minimal` kann dort eine nicht installierbare Ausgabe erzeugen. Der Producer verwendet das geprüfte Plugin-Bundle-Format, nicht `--format apm`.
-
-### GitHub-CI und Releasefreigabe
-
-[CI](.github/workflows/ci.yaml) prüft Pull Requests und Pushes auf `main` über dieselben Tasks wie lokal. Sie braucht keine private Skill-Abhängigkeit, erhält nur lesende Repositoryrechte und keine Veröffentlichungssecrets.
-
-Die getrennte [Releasekette](.github/workflows/release.yaml) ist standardmäßig deaktiviert: `RELEASE_PR_AUTOMATION_ENABLED` und `RELEASE_PUBLICATION_ENABLED` müssen für ihre jeweiligen Wirkungen exakt `true` sein. Release Please darf einen Release-PR vorschlagen; es gibt kein automatisches Merge. Veröffentlichung setzt einen bewusst gemergten, geprüften Release-PR und die Bedingungen in [release_guard.py](scripts/release_guard.py) voraus. Ein normaler Push ist keine Releasefreigabe.
-
-Versionsregel für 0.x: Fehlerkorrektur → Patch; neue Funktion oder inkompatible Änderung → Minor. Der Wechsel auf `1.0.0` braucht eine gesonderte Entscheidung. Fehlgeschlagene, fehlende oder laufende Checks blockieren die Veröffentlichung; bestehende Tags und Assets werden nicht beiläufig überschrieben. App-Authentifizierung und Branchschutz sind vom Betreiber separat einzurichten.
-
-## Weiterführende Dokumentation
-
-- [Design und Architektur](DESIGN.md)
-- [Workflowvertrag: Autorisierung, Scope und Übergaben](.apm/skills/core-shared/references/workflow-contract.md)
-- [Artefaktvertrag: Pläne, Runs, Reviews und Resume](.apm/skills/core-shared/references/artifact-contract.md)
-- [Toolrouting: Providerreihenfolge und Fallbacks](.apm/skills/core-shared/references/tool-routing.md)
-- [Verifikation: Nachweise und unabhängiges Review](.apm/skills/core-shared/references/verification.md)
-- [Versionshistorie](CHANGELOG.md)
-
-`skill-creator` ist ein Werkzeug für die Paketentwicklung. `context-debloater` ist eine separat bereitzustellende Inhaltsprüfmethode, die auch die Init-Ausgabe für erstellte oder inhaltlich bearbeitete Dateien verlangt; sie ist keine neue APM-Paketabhängigkeit und wird nicht automatisch installiert. Fehlt die Methode, meldet der bestehende Skillverfügbarkeitscheck die konkrete Prüflücke statt sie als installiert zu behaupten. Direkte Dateieingaben und automatische Skripte unterstützen nur Markdown; übrigen zugänglichen Text nach der geladenen Rubrik manuell beurteilen und Format-/Extraktionslücken ausdrücklich melden. Das ist keine universelle Formatgarantie; das Audit bleibt report-only. Native Fachagenten werden über die Profile des Harnesses genutzt; eine zusätzliche Orchestrierungs-CLI ist nicht vorgesehen.
+`skill-creator` ist ein Werkzeug für die Paketentwicklung. `context-debloater` ist eine separat bereitzustellende Inhaltsprüfmethode, die auch die Init-Ausgabe für erstellte oder inhaltlich bearbeitete Dateien verlangt; sie ist keine neue APM-Paketabhängigkeit und wird nicht automatisch installiert. Fehlt die Methode, meldet der bestehende Skillverfügbarkeitscheck die konkrete Prüflücke statt sie als installiert zu behaupten. Direkte Dateieingaben und automatische Skripte unterstützen nur Markdown; übrigen zugänglichen Text nach der geladenen Rubrik manuell beurteilen und Format-/Extraktionslücken ausdrücklich melden. Das ist keine universelle Formatgarantie; das Audit bleibt report-only.
 
 ## Lizenz
 
-[MIT](LICENSE). Die integrierte Providerkomponente enthält ihren [MIT-Lizenznachweis](.apm/skills/core-init-project/LICENSE) und ihre [Herkunftsdokumentation](.apm/skills/core-init-project/PROVENANCE.md). Hinweise auf adaptierte Architekturmethoden stehen in [THIRD_PARTY_NOTICES.md](.apm/skills/core-architecture/THIRD_PARTY_NOTICES.md).
+[MIT](LICENSE). Integrierte Komponenten enthalten ihre Herkunfts- und Lizenznachweise in den jeweiligen Paketquellen.

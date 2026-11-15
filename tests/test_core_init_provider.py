@@ -146,8 +146,41 @@ class RoutingAndReadinessContract(unittest.TestCase):
             with self.subTest(path=path):
                 text = (ROOT/path).read_text()
                 self.assert_contract(text, required, forbidden)
-                self.assertNotIn('/home/visimeos/', text)
-                self.assertNotIn('C:\\Users\\', text)
+                self.assert_portable(text, self.home_prefix())
+
+    @staticmethod
+    def home_prefix():
+        try:
+            home = Path.home()
+        except RuntimeError:
+            return None
+        if not home.is_absolute() or home == Path(home.anchor):
+            return None
+        return home.as_posix().rstrip('/') + '/'
+
+    def assert_portable(self, text, prefix):
+        if prefix:
+            self.assertNotIn(prefix, text)
+        self.assertNotIn('C:\\Users\\', text)
+
+    def test_home_prefix_portability_guard(self):
+        from unittest import mock
+        text = (ROOT/'AGENTS.md').read_text()
+        with mock.patch.object(Path, 'home', return_value=Path('/srv/example-home')):
+            prefix = self.home_prefix()
+        self.assertEqual(prefix, '/srv/example-home/')
+        self.assert_portable(text, prefix)
+        with self.assertRaises(AssertionError):
+            self.assert_portable(text + '\n/srv/example-home/notes', prefix)
+        for fake in (Path('/'), Path('relative-home'), RuntimeError('no home')):
+            with self.subTest(home=str(fake)):
+                kwargs = {'side_effect': fake} if isinstance(fake, Exception) else {'return_value': fake}
+                with mock.patch.object(Path, 'home', **kwargs):
+                    prefix = self.home_prefix()
+                self.assertIsNone(prefix)
+                self.assert_portable(text + '\n/usr/share/x', prefix)
+                with self.assertRaises(AssertionError):
+                    self.assert_portable(text + '\nC:\\Users\\x', prefix)
 
     def test_in_memory_mutations_reject_lost_guards_and_old_instructions(self):
         for path, (required, forbidden) in self.CONTRACTS.items():

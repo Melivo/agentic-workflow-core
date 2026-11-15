@@ -156,8 +156,8 @@ relevant child AGENTS.md
 
 ### Child DOX Index
 
-- [Arbeitskontext](docs/AGENTS.md) — aufbewahrte Vorschläge und
-  Diskussionsgrundlagen; keine geltenden Skillverträge.
+- [Dokumentation](docs/AGENTS.md) — Entwicklungsleitfaden, aufbewahrte Vorschläge und
+  Betriebsreferenzen; keine geltenden Skillverträge.
 - [Paketquelle](.apm/AGENTS.md) — kanonische Skills und native Fachagentenprofile.
 - [Werkzeuge](scripts/AGENTS.md) — Prüfungen, Toolchain, Paket- und Releasewerkzeuge.
 - [Tests](tests/AGENTS.md) — Vertrags-, Sicherheits- und Integrationstests.
