@@ -47,7 +47,8 @@ im selben Bundle; Core-Routing und Serena/Gortex-Playbook bleiben bei ihren
 Eigentümern und werden nicht dupliziert.
 
 Bei Releaseautomation gilt in `core-devops` die
-[Bestandsaufnahme vor Rückfragen](core-devops/references/ci-and-releases.md#releasebestand-zuerst-ermitteln);
+[Bestandsaufnahme vor Rückfragen](core-devops/references/ci-and-releases.md#releasebestand-zuerst-ermitteln)
+und die [Hostklärung, Werkzeugwahl und Migrationssicherung](core-devops/references/ci-and-releases.md#releasewerkzeug-auswahl-und-migration);
 belegte Releasekonventionen werden nicht erneut abgefragt.
 
 ## Verification
