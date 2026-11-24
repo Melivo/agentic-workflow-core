@@ -13,6 +13,22 @@ Bei einem Auftrag wie „Release-Automation einrichten“ führe zuerst diese re
 
 Die Bestandsaufnahme autorisiert keine Installation, Konfigurationsänderung, Workflowauslösung, Tag-/Pushoperation oder Veröffentlichung; die bestehenden Freigabegrenzen bleiben bestehen.
 
+## Releasewerkzeug-Auswahl und Migration
+
+Bei neuer Releaseautomation oder einer ausdrücklich gewünschten Migration kläre nach der [Bestandsaufnahme](#releasebestand-zuerst-ermitteln) das Zielsystem. Ist der Zielhost aus Auftrag, zugeordnetem Remote und Projektkonfiguration nicht eindeutig, frage gezielt nach GitHub, Forgejo, Gitea oder dem anderen gewünschten Host. Ein fehlendes Remote erfordert nur dann eine Rückfrage, wenn das Ziel nicht anderweitig feststeht; ein eigener Hostname oder das Paketveröffentlichungsziel belegt die Plattform nicht. Stelle anschließend alle fünf Optionen zur aktiven Wahl:
+
+- **Release Please** — prüfbarer Release-PR über die GitHub-API; keine offizielle Forgejo-/Gitea-Integration.
+- **Knope** — Release-PR und getrennte Vorbereitung auf GitHub und über den [Gitea-Adapter](https://knope.tech/reference/config-file/gitea/) auch für Gitea und Forgejo (Codeberg als dokumentiertes Beispiel); Anhänge brauchen laut [Release-Dokumentation](https://knope.tech/reference/config-file/steps/release/#release-assets) einen separaten Upload.
+- **semantic-release** — direkte Veröffentlichung aus der CI ohne eigenen Release-PR im Standardablauf; für Forgejo/Gitea ein [Community-Plugin](https://github.com/derryx/forgejo-semantic-release) prüfen.
+- **Changesets** — mehrere npm-Pakete und explizite Änderungsnotizen; die CLI ist Git-Host-unabhängig, automatische PRs brauchen für Forgejo/Gitea eine gesonderte Integration (siehe [Upstream-RFC](https://github.com/changesets/action/issues/723)).
+- **release-it** — bewusst ausgelöste Releases mit eigenen Befehlen; für Gitea das [Community-Plugin](https://github.com/lib-pack/release-it-gitea) prüfen, Forgejo-Kompatibilität nicht voraussetzen.
+
+Empfiehl für GitHub zunächst Release Please und für Forgejo/Gitea zunächst Knope, wenn ein Release-PR gewünscht ist und die Anforderungen erfüllt werden. Begründe Abweichungen anhand von Freigabepunkt, Versionsregeln, Paketökosystem, Artefakten und Aufwand. Prüfe die aktuelle offizielle Tooldokumentation, bei Erweiterungen auch Herkunft, Wartung und Kompatibilität. Kennzeichne ungeeignete oder nicht belegte Optionen. Passt keines der fünf Tools, sage das statt eine Auswahl zu erzwingen. Empfehlung und Hostkompatibilität sind Entscheidungshilfe, keine automatische Auswahl: frage nach dem gewählten Werkzeug. Bei vorhandener funktionierender Automation biete ausdrücklich **Beibehalten** oder **Migration** an.
+
+Für eine Migration prüfe vor dem Wechsel die Ziel-Forge- und Plugin-/Action-Kompatibilität sowie Versionierungsregel, Branch-/Tagmuster, Changelog, Veröffentlichungsziele, Assets, Rechte und Freigabepunkte. Halte als Baseline den letzten freigegebenen Versions-/Tag-/Commitstand, Releaseinhalt und die bisherige Konfiguration fest. Führe einen Trockenlauf mit repräsentativen Änderungen aus und vergleiche Versionsvorschlag, Changelog, Tags und Artefakte mit der Baseline. Schalte genau einen veröffentlichenden Weg um: verhindere parallele Trigger der alten und neuen Automation und prüfe, dass kein Tag, Release oder Upload doppelt entsteht. Bewahre den Rückweg zur alten Konfiguration. Bei Abweichung oder Fehlschlag stoppe und prüfe den bereits eingetretenen Zustand; stelle den alten Weg nur nach belegter Freigabe wieder her. Vorhandene Tags und Releases nicht umschreiben oder löschen.
+
+Die Werkzeugwahl autorisiert weder Einrichtung, Installation, Konfigurationsänderung noch Auslösung oder Veröffentlichung; diese Wirkungen brauchen getrennte Freigabe. Bei einem Auftrag, der nur ein bestehendes Release ausführt oder prüft, verwende den belegten vorhandenen Weg und frage nicht erneut nach einer Werkzeugauswahl.
+
 ## CI-Grenze
 
 Lies vorhandene CI-Konfigurationen, Trigger, Branch-/Tagfilter, Permissions, erforderliche Checks und Release-Skripte. Plattform-YAML darf plattformspezifisch bleiben; die eigentliche Projektprüfung soll möglichst vorhandene Taskdefinitionen aufrufen. Unterscheide Setup/Änderung der CI von deren Auslösung. Keine Workflowdatei ändern, starten oder remote veröffentlichen ohne jeweilige Freigabe.
